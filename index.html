@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PMNO — Predictive Mapping New Order</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3eKxXq4Q8w0z8nXjX3w3V1Y6s7VxM=" crossorigin="" />
+  <style>
+:root{--bg:#07111f;--panel:#0b1728;--panel2:#0e1d31;--line:#20334b;--text:#e8f0f7;--muted:#8294a8;--cyan:#35c8ff;--green:#45e0a1;--amber:#f4bf5f;--red:#ff6b7a;--shadow:0 16px 40px rgba(0,0,0,.28)}
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+body{min-height:100dvh}.app-shell{height:100dvh;display:flex;flex-direction:column;min-height:0}
+.topbar{height:78px;flex:0 0 78px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:#081422;z-index:20}.eyebrow,.section-label{font-size:10px;letter-spacing:1.8px;color:#6f849a;font-weight:800}.topbar h1{margin:4px 0 0;font-size:22px;letter-spacing:-.5px}.topbar h1 span{color:var(--cyan)}.status{font-size:10px;font-weight:800;letter-spacing:1px;color:#9fb1c3;display:flex;align-items:center;gap:8px}.status i{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #45e0a1}.status small{border:1px solid #29415a;border-radius:20px;padding:4px 7px;color:#657d94}
+.workspace{flex:1;min-height:0;min-width:0;display:grid;grid-template-columns:240px minmax(0,1fr) 410px;overflow:hidden}.control-panel,.detail-panel{background:var(--panel);padding:22px;border-right:1px solid var(--line);overflow:auto;min-width:0}.detail-panel{border-right:0;border-left:1px solid var(--line)}
+label{display:block;color:#7f94aa;font-size:10px;font-weight:700;letter-spacing:1px;margin:15px 0 0}input,select{display:block;width:100%;margin-top:7px;background:#071220;color:var(--text);border:1px solid #263b53;border-radius:8px;padding:10px;font-size:13px;outline:none;min-height:40px}input:focus,select:focus{border-color:#35c8ff;box-shadow:0 0 0 3px rgba(53,200,255,.08)}button{width:100%;margin-top:20px;min-height:42px;padding:12px;border:0;border-radius:8px;background:var(--cyan);color:#03101b;font-weight:900;letter-spacing:.7px;cursor:pointer}button span{float:right}.rule-box{margin-top:18px;padding:13px;border:1px solid #29445f;background:#0c1c2e;border-radius:8px}.rule-box strong{font-size:11px;color:var(--cyan)}.rule-box p{font-size:11px;line-height:1.5;color:#8fa1b2;margin:7px 0 0}.legend{margin-top:22px;display:grid;gap:11px;color:#91a4b8;font-size:11px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}.order{background:#fff}.nearest{background:#8194a7}.collo{background:var(--cyan)}.recommended{background:var(--green);box-shadow:0 0 10px #45e0a1}
+.map-stage{position:relative;min-width:0;min-height:0;height:100%;width:100%;background:#0b1a28;overflow:hidden}.map-toolbar{position:absolute;z-index:1000;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;background:rgba(7,17,31,.9);border:1px solid #263b53;border-radius:9px;padding:9px 12px;font-size:10px;letter-spacing:1px;color:#7890a5;pointer-events:none;box-shadow:var(--shadow)}
+.map{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#0b1a28}.map-caption{position:absolute;z-index:1000;bottom:12px;left:16px;right:16px;color:#647d92;font-size:10px;pointer-events:none;text-shadow:0 1px 2px #000}.map-caption b{color:#91a7b8}
+.decision-head{display:flex;justify-content:space-between;align-items:flex-start}.decision-head h2{margin:4px 0 0;font-size:28px;color:var(--green)}.decision-pill{font-size:9px;color:var(--cyan);border:1px solid #27516a;padding:6px 8px;border-radius:20px;font-weight:800}.site-name{font-size:11px;color:#8ba0b2;margin:8px 0 17px}.score-row{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line)}.big-score{font-size:39px;font-weight:900;letter-spacing:-2px;color:#f4f8fb}.score-row strong{font-size:12px}.score-row p{margin:3px 0;color:#687f94;font-size:10px}.metrics{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}.metrics>div{padding:13px 8px 12px 0}.metrics>div:nth-child(2n){padding-left:10px;border-left:1px solid var(--line)}.metrics span{display:block;color:#647c92;font-size:9px;font-weight:800;letter-spacing:1px}.metrics strong{display:block;margin-top:4px;font-size:17px}.metrics small{font-size:9px;color:#63788c}.bar-section{padding-top:13px}.bar-section>div:first-child{display:flex;justify-content:space-between;font-size:10px;color:#91a3b4}.bar{height:5px;background:#182a3c;border-radius:5px;margin-top:7px;overflow:hidden}.bar i{display:block;height:100%;background:var(--cyan);border-radius:5px}.challenge{margin-top:16px;padding:12px;border:1px solid #5b4650;background:#211c26;border-radius:7px}.challenge strong{font-size:11px;color:var(--amber);display:block;margin-top:5px}.challenge p{font-size:10px;color:#8d8190;line-height:1.45;margin:5px 0 0}.rank-title{display:flex;justify-content:space-between;align-items:end;margin:18px 0 8px}.rank-title span{font-size:10px;letter-spacing:1px;font-weight:800}.rank-title small{font-size:9px;color:#687e92}.candidate-list{display:grid;gap:6px}.candidate{display:grid;grid-template-columns:27px 1fr auto;gap:8px;align-items:center;padding:9px;border:1px solid #1e3349;background:#0c1a2b;border-radius:7px;cursor:pointer}.candidate.active{border-color:#2d6b82;background:#0d2234}.rank{font-size:11px;color:#6e8498;font-weight:900}.candidate strong{font-size:10px}.candidate small{display:block;color:#627a90;font-size:9px;margin-top:3px}.candidate .right{text-align:right}.candidate .right b{font-size:12px;color:var(--cyan)}.candidate .right small{color:#7f93a5}.fallback{margin-top:12px;border:1px dashed #38506a;border-radius:7px;padding:11px}.fallback strong{font-size:11px}.fallback-grid{display:flex;justify-content:space-between;margin-top:9px;color:#687f93;font-size:9px}.fallback-grid b{color:#a9bac8;margin-left:3px}
+.leaflet-container{font:inherit;background:#0b1a28}.leaflet-control-zoom a{background:#0b1728!important;color:#dce7ef!important;border-color:#29415a!important}.leaflet-control-attribution{background:rgba(7,17,31,.8)!important;color:#71869a!important}.leaflet-control-attribution a{color:#8da8bd!important}.pm-marker{display:grid;place-items:center;border-radius:50%;font-weight:900}.nearest-marker{width:20px;height:20px;background:#8194a7;border:2px solid #0a1420;color:#0a1420;font-size:14px}.collo-marker{width:28px;height:28px;background:#35c8ff;border:2px solid #07111f;color:#07111f;box-shadow:0 0 0 5px rgba(53,200,255,.14),0 0 18px rgba(53,200,255,.35);font-size:10px}.recommended-marker{width:34px;height:34px;background:#45e0a1;border:3px solid #07111f;color:#07111f;box-shadow:0 0 0 7px rgba(69,224,161,.18),0 0 26px rgba(69,224,161,.55);font-size:17px}.new-order-pin{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#172536;border:3px solid #fff;color:#fff;font-size:20px;font-weight:900;box-shadow:0 0 0 8px rgba(255,255,255,.10),0 0 28px rgba(255,255,255,.32)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1728;color:#e8f0f7;border:1px solid #29415a}.leaflet-tooltip{background:#0b1728;color:#e8f0f7;border:1px solid #29415a;box-shadow:0 5px 18px rgba(0,0,0,.35);font-size:10px}.leaflet-tooltip-top:before{border-top-color:#29415a}.leaflet-tile{filter:brightness(.62) saturate(.72) contrast(1.08)}
+
+/* Tablet / landscape: map stays dominant, intelligence remains accessible. */
+@media (max-width:1100px) and (min-width:701px){.workspace{grid-template-columns:190px minmax(0,1fr) 320px}.control-panel,.detail-panel{padding:16px}.topbar{height:70px;flex-basis:70px;padding:0 18px}.topbar h1{font-size:19px}.map-toolbar{top:10px;left:10px;right:10px}}
+
+/* Portrait phone: real mobile flow instead of hiding the decision panel. */
+@media (max-width:700px){
+  html,body{overflow:auto;background:#07111f}.app-shell{height:auto;min-height:100dvh;overflow:visible}.topbar{height:auto;min-height:72px;flex:0 0 auto;padding:12px 16px;gap:12px}.eyebrow{font-size:8px;letter-spacing:1.4px}.topbar h1{font-size:19px;line-height:1.08;margin-top:3px;max-width:245px}.status{font-size:0;flex:0 0 auto}.status i{width:8px;height:8px}.status small{display:none}
+  .workspace{display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(330px,52dvh) auto;min-height:0;overflow:visible}
+  .control-panel{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding:12px 14px;background:#091626;border-right:0;border-bottom:1px solid var(--line);overflow:visible}
+  .control-panel .section-label{grid-column:1/-1}.control-panel label{margin:0;font-size:8px}.control-panel label:nth-of-type(3){grid-column:1}.control-panel label:nth-of-type(4){grid-column:2}.control-panel button{grid-column:1/-1;margin:2px 0 0;min-height:42px}.control-panel .rule-box,.control-panel .legend{display:none}
+  input,select{min-height:38px;margin-top:5px;padding:8px;font-size:12px}.map-stage{height:100%;min-height:330px}.map-toolbar{top:10px;left:10px;right:10px;padding:8px 10px;font-size:9px}.map-caption{bottom:8px;left:10px;right:10px;font-size:8px}
+  .detail-panel{display:block;border-left:0;border-right:0;border-top:1px solid var(--line);padding:16px 14px 28px;overflow:visible}.decision-head h2{font-size:25px}.site-name{margin-bottom:12px}.score-row{padding-bottom:12px}.big-score{font-size:34px}.metrics>div{padding-top:10px;padding-bottom:10px}.metrics strong{font-size:15px}.challenge{margin-top:12px}.rank-title{margin-top:15px}.candidate{min-height:54px;padding:8px}.fallback{margin-top:10px}
+}
+
+/* Very short portrait screens. */
+@media (max-width:700px) and (max-height:700px){.workspace{grid-template-rows:auto minmax(280px,45dvh) auto}.topbar{min-height:64px}.control-panel{padding:9px 12px}.detail-panel{padding-top:13px}}
+
+</style>
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">MITRATEL · ASSET INTELLIGENCE</div>
+        <h1>Predictive Mapping <span>New Order</span></h1>
+      </div>
+      <div class="status"><i></i> PMNO ENGINE ONLINE <small>DEMO DATA</small></div>
+    </header>
+
+    <main class="workspace">
+      <aside class="control-panel">
+        <div class="section-label">NEW ORDER INPUT</div>
+        <label>Latitude<input id="lat" value="-6.9818" /></label>
+        <label>Longitude<input id="lon" value="110.4093" /></label>
+        <label>Target Tenant<select id="tenant"><option>IOH</option><option>TSEL</option><option>XLS</option><option>SFN</option></select></label>
+        <label>Search Radius<select id="radius"><option value="3000">3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></label>
+        <button id="analyze">ANALYZE NEW ORDER <span>→</span></button>
+        <div class="rule-box"><strong>COLLO FIRST</strong><p>Existing tower opportunities are evaluated before predictive New Site / B2S.</p></div>
+        <div class="legend">
+          <div><b class="dot order"></b> New Order</div>
+          <div><b class="dot nearest"></b> Nearest Towers</div>
+          <div><b class="dot collo"></b> Top 5 COLLO</div>
+          <div><b class="dot recommended"></b> Recommended #1</div>
+        </div>
+      </aside>
+
+      <section class="map-stage">
+        <div class="map-toolbar"><span>SEMarang · CENTRAL JAVA</span><span>Radius <b id="radiusText">3 km</b></span></div>
+        <div id="map" class="map"></div>
+        <div class="map-caption"><b>Map intelligence</b> — nearest tower visibility is independent from recommendation ranking.</div>
+      </section>
+
+      <aside class="detail-panel">
+        <div class="decision-head"><div><div class="section-label">RECOMMENDED DECISION</div><h2 id="decision">COLLO</h2></div><div class="decision-pill">COLLO FIRST</div></div>
+        <div class="site-name" id="siteName">PMNO-018138 · PMNO Semarang 18138</div>
+        <div class="score-row"><div class="big-score" id="score">75.3</div><div><strong>COLLO Opportunity Score</strong><p>Composite viability score</p></div></div>
+
+        <div class="metrics">
+          <div><span>IRR</span><strong id="irr">16.30%</strong><small>Target 10.73%</small></div>
+          <div><span>CAPEX</span><strong id="capex">Rp 1.16 B</strong><small>COLLO case</small></div>
+          <div><span>DISTANCE</span><strong id="distance">1.37 km</strong><small>from New Order</small></div>
+          <div><span>SIGNAL</span><strong id="signal">90 / 100</strong><small>Kualitas Signal</small></div>
+        </div>
+
+        <div class="bar-section"><div><span>Engineering</span><b id="eng">50</b></div><div class="bar"><i id="engBar" style="width:50%"></i></div></div>
+        <div class="bar-section"><div><span>Tenant Network Fit</span><b id="network">84</b></div><div class="bar"><i id="networkBar" style="width:84%"></i></div></div>
+
+        <div class="challenge"><div class="section-label">KEY CHALLENGE</div><strong id="challenge">ENGINEERING / STRUCTURAL</strong><p id="challengeText">Structural capacity requires further validation before final COLLO execution.</p></div>
+
+        <div class="rank-title"><span>TOP 5 COLLO OPPORTUNITIES</span><small>Ranked by Opportunity Score</small></div>
+        <div id="candidateList" class="candidate-list"></div>
+
+        <div id="fallback" class="fallback"><div class="section-label">IF NO COLLO IS VIABLE</div><strong>PREDICTIVE NEW SITE / B2S</strong><div class="fallback-grid"><span>Height <b>32 m</b></span><span>Land <b>401 m²</b></span><span>IRR <b>8.3%</b></span></div></div>
+      </aside>
+    </main>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script>
+const origin = { latitude: -6.9818, longitude: 110.4093 };
+const targetIrr = 10.73;
+
+// Deterministic demo rows mirror the PMNO decision-engine output; coordinates are geographic
+// so the map behaves like a real New Order analysis before live RPC wiring is enabled.
+const candidates = [
+  {site_id:'PMNO-018138',site_name:'PMNO Semarang 18138',latitude:-6.96948,longitude:110.40102,distance_m:1369,opportunity_score:75.3,irr:16.30,capex:'Rp 1.16 B',signal_fit:90,engineering_score:50,network_score:84,tower_type:'ROOFTOP',height:22,challenge:'ENGINEERING / STRUCTURAL'},
+  {site_id:'PMNO-023413',site_name:'PMNO Semarang 23413',latitude:-6.97355,longitude:110.41748,distance_m:975,opportunity_score:74.8,irr:20.85,capex:'Rp 827 M',signal_fit:90,engineering_score:50,network_score:88,tower_type:'ROOFTOP',height:26,challenge:'ENGINEERING / STRUCTURAL'},
+  {site_id:'PMNO-020943',site_name:'PMNO Semarang 20943',latitude:-6.97225,longitude:110.42305,distance_m:1555,opportunity_score:74.3,irr:12.65,capex:'Rp 1.28 B',signal_fit:90,engineering_score:50,network_score:79,tower_type:'SST',height:33,challenge:'ENGINEERING / STRUCTURAL'},
+  {site_id:'PMNO-021221',site_name:'PMNO Semarang 21221',latitude:-6.99205,longitude:110.40425,distance_m:1392,opportunity_score:73.9,irr:11.30,capex:'Rp 1.09 B',signal_fit:90,engineering_score:50,network_score:76,tower_type:'MONOPOLE',height:23,challenge:'ENGINEERING / STRUCTURAL'},
+  {site_id:'PMNO-017905',site_name:'PMNO Semarang 17905',latitude:-6.99485,longitude:110.42140,distance_m:1465,opportunity_score:73.6,irr:14.85,capex:'Rp 1.21 B',signal_fit:90,engineering_score:50,network_score:82,tower_type:'SST',height:36,challenge:'ENGINEERING / STRUCTURAL'},
+  {site_id:'PMNO-010112',site_name:'PMNO Semarang 10112',latitude:-6.97230,longitude:110.39340,distance_m:1900,opportunity_score:68.2,irr:9.40,capex:'Rp 1.48 B',signal_fit:84,engineering_score:45,network_score:70,tower_type:'SST',height:40,challenge:'IRR BELOW TARGET'}
+];
+
+const nearest = [...candidates].sort((a,b)=>a.distance_m-b.distance_m);
+const top5 = [...candidates].sort((a,b)=>b.opportunity_score-a.opportunity_score).slice(0,5);
+let selected = top5.find(c => c.irr >= targetIrr) || top5[0];
+let map;
+let radiusCircle;
+const towerLayers = new Map();
+
+function markerIcon(type, rank){
+  const cls = type === 'recommended' ? 'pm-marker recommended-marker' : type === 'collo' ? 'pm-marker collo-marker' : 'pm-marker nearest-marker';
+  return L.divIcon({className:'', html:`<div class="${cls}">${type === 'recommended' ? '★' : type === 'collo' ? `<b>${rank}</b>` : '•'}</div>`, iconSize:type==='recommended'?[34,34]:type==='collo'?[28,28]:[20,20], iconAnchor:type==='recommended'?[17,17]:type==='collo'?[14,14]:[10,10]});
+}
+
+function initMap(){
+  map = L.map('map', { zoomControl:false, attributionControl:true }).setView([origin.latitude, origin.longitude], 13.5);
+  L.control.zoom({position:'bottomright'}).addTo(map);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap contributors'}).addTo(map);
+  radiusCircle = L.circle([origin.latitude,origin.longitude], {radius:3000, className:'pm-radius', color:'#35c8ff', weight:1, fillOpacity:.035}).addTo(map);
+  L.marker([origin.latitude,origin.longitude], {icon:L.divIcon({className:'',html:'<div class="new-order-pin">+</div>',iconSize:[38,38],iconAnchor:[19,19]})})
+    .addTo(map).bindPopup('<b>NEW ORDER</b><br>Target: IOH');
+  renderMarkers();
+}
+
+function renderMarkers(){
+  towerLayers.forEach(layer=>layer.remove());
+  towerLayers.clear();
+  nearest.forEach(c=>{
+    const rank = top5.findIndex(x=>x.site_id===c.site_id)+1;
+    const isTop = rank>0;
+    const isRec = c.site_id===selected.site_id;
+    const type = isRec ? 'recommended' : isTop ? 'collo' : 'nearest';
+    const layer=L.marker([c.latitude,c.longitude], {icon:markerIcon(type,rank)}).addTo(map);
+    layer.bindTooltip(`${isRec?'★ Recommended COLLO':'Tower'} · ${c.site_id}`, {direction:'top', offset:[0,-10]});
+    layer.on('click',()=>selectCandidate(c));
+    towerLayers.set(c.site_id,layer);
+  });
+}
+
+function selectCandidate(c){selected=c;updateDetail();renderList();renderMarkers();const layer=towerLayers.get(c.site_id);if(layer){map.flyTo([c.latitude,c.longitude],15,{duration:.5});layer.openTooltip();}}
+
+function updateDetail(){
+  const viable=selected.irr>=targetIrr;
+  const decision=document.getElementById('decision');
+  decision.textContent=viable?'COLLO':'NEW SITE';
+  decision.style.color=viable?'var(--green)':'var(--amber)';
+  document.getElementById('siteName').textContent=selected.site_id+' · '+selected.site_name;
+  document.getElementById('score').textContent=selected.opportunity_score.toFixed(1);
+  document.getElementById('irr').textContent=selected.irr.toFixed(2)+'%';
+  document.getElementById('capex').textContent=selected.capex;
+  document.getElementById('distance').textContent=(selected.distance_m/1000).toFixed(2)+' km';
+  document.getElementById('signal').textContent=selected.signal_fit+' / 100';
+  document.getElementById('eng').textContent=selected.engineering_score;
+  document.getElementById('engBar').style.width=selected.engineering_score+'%';
+  document.getElementById('network').textContent=selected.network_score;
+  document.getElementById('networkBar').style.width=selected.network_score+'%';
+  document.getElementById('challenge').textContent=selected.challenge;
+  document.getElementById('challengeText').textContent=selected.challenge==='IRR BELOW TARGET'?'Economics does not clear the 10.73% target IRR.':'Structural capacity requires further validation before final COLLO execution.';
+}
+
+function renderList(){
+  document.getElementById('candidateList').innerHTML=top5.map((c,i)=>`<div class="candidate ${c.site_id===selected.site_id?'active':''}" data-id="${c.site_id}"><div class="rank">#${i+1}</div><div><strong>${c.site_id}</strong><small>${(c.distance_m/1000).toFixed(2)} km · ${c.tower_type} · ${c.height} m</small></div><div class="right"><b>${c.opportunity_score.toFixed(1)}</b><small>${c.irr.toFixed(2)}% IRR</small></div></div>`).join('');
+  document.querySelectorAll('.candidate').forEach(el=>el.onclick=()=>selectCandidate(top5.find(c=>c.site_id===el.dataset.id)));
+}
+
+function updateRadius(){const km=+document.getElementById('radius').value/1000;document.getElementById('radiusText').textContent=km+' km';if(radiusCircle)radiusCircle.setRadius(km*1000);}
+document.getElementById('radius').onchange=updateRadius;
+document.getElementById('analyze').onclick=()=>{const lat=Number(document.getElementById('lat').value),lon=Number(document.getElementById('lon').value),tenant=document.getElementById('tenant').value;if(!Number.isFinite(lat)||!Number.isFinite(lon))return;map.flyTo([lat,lon],13.5,{duration:.6});radiusCircle.setLatLng([lat,lon]);map.eachLayer(layer=>{if(layer.getPopup && layer.getPopup() && layer.getPopup().getContent()?.includes('NEW ORDER')) layer.setLatLng([lat,lon]);});document.getElementById('siteName').textContent='ANALYZING · '+tenant+' · '+lat.toFixed(5)+', '+lon.toFixed(5);setTimeout(()=>{selected=top5.find(c=>c.irr>=targetIrr)||top5[0];renderList();updateDetail();renderMarkers()},300)};
+
+function refreshMapSize(){ if(map){ map.invalidateSize({animate:false}); } }
+
+initMap();renderList();updateDetail();updateRadius();
+window.addEventListener('resize',()=>setTimeout(refreshMapSize,120));
+window.addEventListener('orientationchange',()=>setTimeout(refreshMapSize,220));
+setTimeout(refreshMapSize,150);
+
+</script>
+</body>
+</html>
