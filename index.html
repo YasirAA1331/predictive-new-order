@@ -13,11 +13,18 @@ body{min-height:100dvh}.app-shell{height:100dvh;display:flex;flex-direction:colu
 .topbar{height:78px;flex:0 0 78px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;background:#081422;z-index:20}.eyebrow,.section-label{font-size:10px;letter-spacing:1.8px;color:#6f849a;font-weight:800}.topbar h1{margin:4px 0 0;font-size:22px;letter-spacing:-.5px}.topbar h1 span{color:var(--cyan)}.status{font-size:10px;font-weight:800;letter-spacing:1px;color:#9fb1c3;display:flex;align-items:center;gap:8px}.status i{width:7px;height:7px;background:var(--green);border-radius:50%;box-shadow:0 0 12px #45e0a1}.status small{border:1px solid #29415a;border-radius:20px;padding:4px 7px;color:#657d94}
 .workspace{flex:1;min-height:0;min-width:0;display:grid;grid-template-columns:240px minmax(0,1fr) 410px;overflow:hidden}.control-panel,.detail-panel{background:var(--panel);padding:22px;border-right:1px solid var(--line);overflow:auto;min-width:0}.detail-panel{border-right:0;border-left:1px solid var(--line)}
 label{display:block;color:#7f94aa;font-size:10px;font-weight:700;letter-spacing:1px;margin:15px 0 0}input,select{display:block;width:100%;margin-top:7px;background:#071220;color:var(--text);border:1px solid #263b53;border-radius:8px;padding:10px;font-size:13px;outline:none;min-height:40px}input:focus,select:focus{border-color:#35c8ff;box-shadow:0 0 0 3px rgba(53,200,255,.08)}button{width:100%;margin-top:20px;min-height:42px;padding:12px;border:0;border-radius:8px;background:var(--cyan);color:#03101b;font-weight:900;letter-spacing:.7px;cursor:pointer}button span{float:right}.rule-box{margin-top:18px;padding:13px;border:1px solid #29445f;background:#0c1c2e;border-radius:8px}.rule-box strong{font-size:11px;color:var(--cyan)}.rule-box p{font-size:11px;line-height:1.5;color:#8fa1b2;margin:7px 0 0}.legend{margin-top:22px;display:grid;gap:11px;color:#91a4b8;font-size:11px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:8px}.order{background:#fff}.nearest{background:#8194a7}.collo{background:var(--cyan)}.recommended{background:var(--green);box-shadow:0 0 10px #45e0a1}
-.map-stage{position:relative;min-width:0;min-height:0;height:100%;width:100%;background:#0b1a28;overflow:hidden}.map-toolbar{position:absolute;z-index:1000;top:14px;left:16px;right:16px;display:flex;justify-content:space-between;background:rgba(7,17,31,.9);border:1px solid #263b53;border-radius:9px;padding:9px 12px;font-size:10px;letter-spacing:1px;color:#7890a5;pointer-events:none;box-shadow:var(--shadow)}
-.map{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#0b1a28}.map-caption{position:absolute;z-index:1000;bottom:12px;left:16px;right:16px;color:#647d92;font-size:10px;pointer-events:none;text-shadow:0 1px 2px #000}.map-caption b{color:#91a7b8}
+.map-stage{position:relative;min-width:0;min-height:0;height:100%;width:100%;background:#071421;overflow:hidden;border-left:1px solid rgba(255,255,255,.025);border-right:1px solid rgba(255,255,255,.025)}
+.map-toolbar{position:absolute;z-index:1200;top:14px;left:14px;right:14px;display:flex;justify-content:space-between;align-items:center;gap:12px;background:rgba(5,15,27,.88);backdrop-filter:blur(10px);border:1px solid rgba(148,183,210,.22);border-radius:10px;padding:9px 11px;font-size:10px;letter-spacing:1px;color:#a5b8ca;pointer-events:none;box-shadow:0 12px 28px rgba(0,0,0,.32)}
+.map-context{display:flex;align-items:center;gap:8px;min-width:0}.map-context strong{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.context-dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);box-shadow:0 0 14px rgba(53,200,255,.9)}
+.map-tools{display:flex;align-items:center;gap:9px;pointer-events:auto;white-space:nowrap}.map-tools button{width:auto;margin:0;min-height:0;padding:6px 9px;border:1px solid #2d6a85;border-radius:7px;background:#0a2032;color:var(--cyan);font-size:9px;letter-spacing:1px}.map-tools button:hover{background:#10324a}.map-tools span{color:#8fa4b7}.map-tools b{color:#e5eff7}
+.map{position:absolute;inset:0;width:100%;height:100%;overflow:hidden;background:#0b1a28}.map-overlay{position:absolute;z-index:1100;background:rgba(5,15,27,.9);backdrop-filter:blur(9px);border:1px solid rgba(148,183,210,.24);border-radius:9px;box-shadow:0 14px 34px rgba(0,0,0,.34)}
+.map-legend{left:16px;bottom:34px;width:190px;padding:12px}.overlay-title{font-size:9px;font-weight:900;letter-spacing:1.4px;color:#d8e6f1;margin-bottom:9px}.map-legend>div:not(.overlay-title){display:flex;align-items:center;gap:8px;color:#b1c0ce;font-size:9px;margin-top:7px}.legend-dot{width:9px;height:9px;border-radius:50%;display:inline-block;border:1px solid rgba(255,255,255,.55);box-shadow:0 0 7px rgba(255,255,255,.1)}.order-dot{background:#ff5368}.recommended-dot{background:#45e0a1;box-shadow:0 0 10px rgba(69,224,161,.7)}.collo-dot{background:#35c8ff;box-shadow:0 0 8px rgba(53,200,255,.5)}.existing-dot{background:#a6b5c3}.risk-dot{background:#f4bf5f}
+.map-summary{right:16px;bottom:34px;padding:11px 13px;min-width:178px}.summary-kicker{font-size:8px;letter-spacing:1.4px;font-weight:800;color:#7790a6}.map-summary>strong{display:block;font-size:22px;line-height:1;margin-top:4px;color:#fff;letter-spacing:-.5px}.summary-meta{font-size:8px;color:#7f95a9;margin-top:7px;white-space:nowrap}.summary-meta span{color:var(--cyan);font-weight:900}.summary-meta b{color:#4e667c;margin:0 3px}
+.map-caption{position:absolute;z-index:1100;bottom:8px;left:16px;right:16px;color:#8da3b6;font-size:9px;pointer-events:none;text-shadow:0 1px 4px #000}.map-caption b{color:#d0dce5}
 .decision-head{display:flex;justify-content:space-between;align-items:flex-start}.decision-head h2{margin:4px 0 0;font-size:28px;color:var(--green)}.decision-pill{font-size:9px;color:var(--cyan);border:1px solid #27516a;padding:6px 8px;border-radius:20px;font-weight:800}.site-name{font-size:11px;color:#8ba0b2;margin:8px 0 17px}.score-row{display:flex;align-items:center;gap:12px;padding-bottom:16px;border-bottom:1px solid var(--line)}.big-score{font-size:39px;font-weight:900;letter-spacing:-2px;color:#f4f8fb}.score-row strong{font-size:12px}.score-row p{margin:3px 0;color:#687f94;font-size:10px}.metrics{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}.metrics>div{padding:13px 8px 12px 0}.metrics>div:nth-child(2n){padding-left:10px;border-left:1px solid var(--line)}.metrics span{display:block;color:#647c92;font-size:9px;font-weight:800;letter-spacing:1px}.metrics strong{display:block;margin-top:4px;font-size:17px}.metrics small{font-size:9px;color:#63788c}.bar-section{padding-top:13px}.bar-section>div:first-child{display:flex;justify-content:space-between;font-size:10px;color:#91a3b4}.bar{height:5px;background:#182a3c;border-radius:5px;margin-top:7px;overflow:hidden}.bar i{display:block;height:100%;background:var(--cyan);border-radius:5px}.challenge{margin-top:16px;padding:12px;border:1px solid #5b4650;background:#211c26;border-radius:7px}.challenge strong{font-size:11px;color:var(--amber);display:block;margin-top:5px}.challenge p{font-size:10px;color:#8d8190;line-height:1.45;margin:5px 0 0}.rank-title{display:flex;justify-content:space-between;align-items:end;margin:18px 0 8px}.rank-title span{font-size:10px;letter-spacing:1px;font-weight:800}.rank-title small{font-size:9px;color:#687e92}.candidate-list{display:grid;gap:6px}.candidate{display:grid;grid-template-columns:27px 1fr auto;gap:8px;align-items:center;padding:9px;border:1px solid #1e3349;background:#0c1a2b;border-radius:7px;cursor:pointer}.candidate.active{border-color:#2d6b82;background:#0d2234}.rank{font-size:11px;color:#6e8498;font-weight:900}.candidate strong{font-size:10px}.candidate small{display:block;color:#627a90;font-size:9px;margin-top:3px}.candidate .right{text-align:right}.candidate .right b{font-size:12px;color:var(--cyan)}.candidate .right small{color:#7f93a5}.fallback{margin-top:12px;border:1px dashed #38506a;border-radius:7px;padding:11px}.fallback strong{font-size:11px}.fallback-grid{display:flex;justify-content:space-between;margin-top:9px;color:#687f93;font-size:9px}.fallback-grid b{color:#a9bac8;margin-left:3px}
-.leaflet-container{font:inherit;background:#0b1a28}.leaflet-control-zoom a{background:#0b1728!important;color:#dce7ef!important;border-color:#29415a!important}.leaflet-control-attribution{background:rgba(7,17,31,.8)!important;color:#71869a!important}.leaflet-control-attribution a{color:#8da8bd!important}.pm-marker{display:grid;place-items:center;border-radius:50%;font-weight:900}.nearest-marker{width:20px;height:20px;background:#8194a7;border:2px solid #0a1420;color:#0a1420;font-size:14px}.collo-marker{width:28px;height:28px;background:#35c8ff;border:2px solid #07111f;color:#07111f;box-shadow:0 0 0 5px rgba(53,200,255,.14),0 0 18px rgba(53,200,255,.35);font-size:10px}.recommended-marker{width:34px;height:34px;background:#45e0a1;border:3px solid #07111f;color:#07111f;box-shadow:0 0 0 7px rgba(69,224,161,.18),0 0 26px rgba(69,224,161,.55);font-size:17px}.new-order-pin{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#172536;border:3px solid #fff;color:#fff;font-size:20px;font-weight:900;box-shadow:0 0 0 8px rgba(255,255,255,.10),0 0 28px rgba(255,255,255,.32)}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#0b1728;color:#e8f0f7;border:1px solid #29415a}.leaflet-tooltip{background:#0b1728;color:#e8f0f7;border:1px solid #29415a;box-shadow:0 5px 18px rgba(0,0,0,.35);font-size:10px}.leaflet-tooltip-top:before{border-top-color:#29415a}.leaflet-tile{filter:brightness(.62) saturate(.72) contrast(1.08)}
-
+.leaflet-container{font:inherit;background:#071421}.leaflet-control-zoom{margin-right:12px!important;margin-bottom:18px!important}.leaflet-control-zoom a{width:34px!important;height:34px!important;line-height:34px!important;background:#081626!important;color:#eef6ff!important;border:1px solid #29445e!important}.leaflet-control-zoom a:first-child{border-radius:8px 8px 0 0}.leaflet-control-zoom a:last-child{border-radius:0 0 8px 8px}.leaflet-control-attribution{background:rgba(5,15,27,.78)!important;color:#8ca0b1!important;font-size:8px!important}.leaflet-control-attribution a{color:#a8bfd1!important}.leaflet-tile{filter:saturate(.88) contrast(1.04) brightness(.78)}
+.pm-marker{position:relative;display:grid;place-items:center;border-radius:50%;filter:drop-shadow(0 8px 16px rgba(0,0,0,.42))}.pm-marker svg{display:block}.nearest-marker{width:30px;height:30px}.nearest-marker svg{opacity:.9}.collo-marker{width:42px;height:42px}.collo-marker span{position:absolute;z-index:2;right:-2px;top:-2px;width:17px;height:17px;border-radius:50%;display:grid;place-items:center;background:#35c8ff;color:#03101b;border:2px solid #07111f;font-size:8px;font-weight:1000;box-shadow:0 0 12px rgba(53,200,255,.55)}.recommended-marker{width:52px;height:52px}.recommended-marker:before{content:"";position:absolute;inset:-8px;border:2px solid rgba(69,224,161,.62);border-radius:50%;box-shadow:0 0 0 7px rgba(69,224,161,.11),0 0 26px rgba(69,224,161,.4);animation:pmPulse 2.2s ease-out infinite}.new-order-pin{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;background:#ef334f;border:3px solid #fff;color:#fff;box-shadow:0 0 0 9px rgba(239,51,79,.16),0 0 28px rgba(239,51,79,.55);position:relative}.new-order-pin:after{content:"";position:absolute;inset:6px;border:1px solid rgba(255,255,255,.48);border-radius:50%}.new-order-pin span{font-size:25px;font-weight:300;line-height:1;z-index:1}.recommendation-callout{width:220px;min-height:88px;padding:10px 12px;background:linear-gradient(180deg,rgba(5,22,36,.97),rgba(5,15,27,.96));border:1px solid rgba(53,200,255,.72);border-radius:9px;box-shadow:0 16px 34px rgba(0,0,0,.45),0 0 24px rgba(53,200,255,.12);position:relative;color:#eef7fb}.recommendation-callout:after{content:"";position:absolute;left:50%;bottom:-10px;transform:translateX(-50%);border:10px solid transparent;border-top-color:rgba(53,200,255,.72);border-bottom:0}.callout-kicker{font-size:8px;letter-spacing:1.2px;color:#35c8ff;font-weight:900}.recommendation-callout>strong{display:block;font-size:13px;margin-top:3px}.recommendation-callout>span{display:block;font-size:8px;color:#8ca5b8;margin-top:2px}.callout-metrics{display:grid;grid-template-columns:auto 1fr auto 1fr;align-items:end;gap:4px;margin-top:7px;padding-top:6px;border-top:1px solid rgba(148,183,210,.15)}.callout-metrics b{font-size:12px;color:#45e0a1}.callout-metrics small{font-size:7px;color:#748da2}.origin-callout{width:150px;padding:7px 10px;background:rgba(67,10,20,.94);border:1px solid rgba(255,83,104,.75);border-radius:8px;color:#fff;box-shadow:0 12px 28px rgba(0,0,0,.42)}.origin-callout:after{content:"";position:absolute;left:50%;bottom:-8px;transform:translateX(-50%);border:8px solid transparent;border-top-color:rgba(255,83,104,.75);border-bottom:0}.origin-callout div{font-size:8px;letter-spacing:1px;color:#ff9cab;font-weight:900}.origin-callout strong{font-size:10px;display:block;margin-top:2px}.recommendation-line{filter:drop-shadow(0 0 4px rgba(46,169,255,.45))}.leaflet-marker-icon:has(.recommendation-callout),.leaflet-marker-icon:has(.origin-callout){overflow:visible}
+.distance-label{display:inline-flex;align-items:center;white-space:nowrap;background:rgba(4,14,25,.92);border:1px solid rgba(156,184,204,.28);border-radius:5px;padding:4px 6px;color:#e8f2f8;font-size:9px;font-weight:800;box-shadow:0 5px 14px rgba(0,0,0,.32)}.collo-label{border-color:rgba(53,200,255,.5);color:#d9f5ff}.recommended-label{border-color:rgba(69,224,161,.58);color:#b9f7de}.leaflet-tooltip.pm-tooltip{background:rgba(5,15,27,.95);border:1px solid rgba(53,200,255,.5);color:#edf6fb;border-radius:8px;padding:8px 10px;box-shadow:0 12px 28px rgba(0,0,0,.4)}.leaflet-tooltip.pm-tooltip:before{border-top-color:rgba(53,200,255,.5)}.site-tooltip{display:grid;gap:2px;min-width:120px}.site-tooltip strong{font-size:8px;letter-spacing:1px;color:#35c8ff}.site-tooltip span{font-size:10px;font-weight:900}.site-tooltip small{font-size:8px;color:#8298ab}.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:#091727;color:#e8f0f7;border:1px solid #29415a}.popup-card{display:grid;gap:4px;min-width:145px}.popup-card .popup-kicker{font-size:8px;letter-spacing:1px;color:#ff6b7a;font-weight:900}.popup-card strong{font-size:11px}.popup-card span{font-size:9px;color:#8499ac}@keyframes pmPulse{0%{transform:scale(.92);opacity:.85}70%{transform:scale(1.1);opacity:.2}100%{transform:scale(1.12);opacity:0}}
 /* Tablet / landscape: map stays dominant, intelligence remains accessible. */
 @media (max-width:1100px) and (min-width:701px){.workspace{grid-template-columns:190px minmax(0,1fr) 320px}.control-panel,.detail-panel{padding:16px}.topbar{height:70px;flex-basis:70px;padding:0 18px}.topbar h1{font-size:19px}.map-toolbar{top:10px;left:10px;right:10px}}
 
@@ -27,7 +34,7 @@ label{display:block;color:#7f94aa;font-size:10px;font-weight:700;letter-spacing:
   .workspace{display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(330px,52dvh) auto;min-height:0;overflow:visible}
   .control-panel{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;padding:12px 14px;background:#091626;border-right:0;border-bottom:1px solid var(--line);overflow:visible}
   .control-panel .section-label{grid-column:1/-1}.control-panel label{margin:0;font-size:8px}.control-panel label:nth-of-type(3){grid-column:1}.control-panel label:nth-of-type(4){grid-column:2}.control-panel button{grid-column:1/-1;margin:2px 0 0;min-height:42px}.control-panel .rule-box,.control-panel .legend{display:none}
-  input,select{min-height:38px;margin-top:5px;padding:8px;font-size:12px}.map-stage{height:100%;min-height:330px}.map-toolbar{top:10px;left:10px;right:10px;padding:8px 10px;font-size:9px}.map-caption{bottom:8px;left:10px;right:10px;font-size:8px}
+  input,select{min-height:38px;margin-top:5px;padding:8px;font-size:12px}.map-stage{height:100%;min-height:330px;width:100%;overflow:hidden}.map{width:100vw;min-width:100vw}.map-toolbar{top:10px;left:10px;right:10px;padding:8px 10px;font-size:9px}.map-caption{bottom:8px;left:10px;right:10px;font-size:8px}.map-legend{left:10px;bottom:30px;width:164px;padding:9px}.map-summary{right:10px;bottom:30px;min-width:145px;padding:9px 10px}.summary-meta{font-size:7px}.map-summary>strong{font-size:18px}
   .detail-panel{display:block;border-left:0;border-right:0;border-top:1px solid var(--line);padding:16px 14px 28px;overflow:visible}.decision-head h2{font-size:25px}.site-name{margin-bottom:12px}.score-row{padding-bottom:12px}.big-score{font-size:34px}.metrics>div{padding-top:10px;padding-bottom:10px}.metrics strong{font-size:15px}.challenge{margin-top:12px}.rank-title{margin-top:15px}.candidate{min-height:54px;padding:8px}.fallback{margin-top:10px}
 }
 
@@ -64,9 +71,25 @@ label{display:block;color:#7f94aa;font-size:10px;font-weight:700;letter-spacing:
       </aside>
 
       <section class="map-stage">
-        <div class="map-toolbar"><span>SEMarang · CENTRAL JAVA</span><span>Radius <b id="radiusText">3 km</b></span></div>
+        <div class="map-toolbar">
+          <div class="map-context"><span class="context-dot"></span><strong>SEMarang · CENTRAL JAVA</strong></div>
+          <div class="map-tools"><button id="baseMapToggle" type="button">SATELLITE</button><span>Radius <b id="radiusText">3 km</b></span></div>
+        </div>
         <div id="map" class="map"></div>
-        <div class="map-caption"><b>Map intelligence</b> — nearest tower visibility is independent from recommendation ranking.</div>
+        <div id="mapLegend" class="map-overlay map-legend">
+          <div class="overlay-title">MAP LEGEND</div>
+          <div><i class="legend-dot order-dot"></i><span>New Order</span></div>
+          <div><i class="legend-dot recommended-dot"></i><span>Recommended COLLO</span></div>
+          <div><i class="legend-dot collo-dot"></i><span>COLLO Candidate</span></div>
+          <div><i class="legend-dot existing-dot"></i><span>Existing Site</span></div>
+          <div><i class="legend-dot risk-dot"></i><span>Risk / Redzone</span></div>
+        </div>
+        <div id="mapSummary" class="map-overlay map-summary">
+          <div class="summary-kicker">SEARCH RADIUS</div>
+          <strong id="summaryRadius">3 KM</strong>
+          <div class="summary-meta"><span id="summarySites">6</span> EXISTING SITES <b>·</b> <span id="summaryCollo">5</span> TOP COLLO</div>
+        </div>
+        <div class="map-caption"><b>Map intelligence</b> — opportunity ranking is independent from nearest-site distance.</div>
       </section>
 
       <aside class="detail-panel">
@@ -114,39 +137,129 @@ const top5 = [...candidates].sort((a,b)=>b.opportunity_score-a.opportunity_score
 let selected = top5.find(c => c.irr >= targetIrr) || top5[0];
 let map;
 let radiusCircle;
+let newOrderLayer;
+let recommendationLine;
+let recommendationCallout;
+let originCallout;
+let satelliteLayer;
+let streetLayer;
+let satelliteMode = true;
 const towerLayers = new Map();
 
+function towerSvg(fill='#35c8ff', size=30){
+  return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><circle cx="20" cy="20" r="18" fill="${fill}" fill-opacity=".16" stroke="${fill}" stroke-width="1.5"/><path d="M12 31h16M15 28l5-19 5 19M17 21h6M16 25h8M20 9v-3M17 10l-4-3M23 10l4-3" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+}
+
 function markerIcon(type, rank){
-  const cls = type === 'recommended' ? 'pm-marker recommended-marker' : type === 'collo' ? 'pm-marker collo-marker' : 'pm-marker nearest-marker';
-  return L.divIcon({className:'', html:`<div class="${cls}">${type === 'recommended' ? '★' : type === 'collo' ? `<b>${rank}</b>` : '•'}</div>`, iconSize:type==='recommended'?[34,34]:type==='collo'?[28,28]:[20,20], iconAnchor:type==='recommended'?[17,17]:type==='collo'?[14,14]:[10,10]});
+  if(type === 'recommended') return L.divIcon({className:'',html:`<div class="pm-marker recommended-marker">${towerSvg('#45e0a1',48)}</div>`,iconSize:[52,52],iconAnchor:[26,26]});
+  if(type === 'collo') return L.divIcon({className:'',html:`<div class="pm-marker collo-marker"><span>${rank}</span>${towerSvg('#35c8ff',38)}</div>`,iconSize:[42,42],iconAnchor:[21,21]});
+  return L.divIcon({className:'',html:`<div class="pm-marker nearest-marker">${towerSvg('#a6b5c3',28)}</div>`,iconSize:[30,30],iconAnchor:[15,15]});
+}
+
+function orderIcon(){
+  return L.divIcon({className:'',html:`<div class="new-order-pin"><span>+</span></div>`,iconSize:[48,48],iconAnchor:[24,24]});
+}
+
+function calloutIcon(c){
+  return L.divIcon({className:'', iconSize:[220,88], iconAnchor:[110,86], html:`<div class="recommendation-callout"><div class="callout-kicker">TOP COLLO OPPORTUNITY</div><strong>${c.site_name}</strong><span>${c.site_id} · ${(c.distance_m/1000).toFixed(2)} km</span><div class="callout-metrics"><b>${c.opportunity_score.toFixed(1)}</b><small>Opportunity</small><b>${c.irr.toFixed(2)}%</b><small>IRR</small></div></div>`});
+}
+
+function originCalloutIcon(){
+  return L.divIcon({className:'',iconSize:[150,58],iconAnchor:[75,56],html:`<div class="origin-callout"><div>NEW ORDER</div><strong>Target · IOH</strong></div>`});
+}
+
+function distanceLabel(c, kind){
+  const rank = top5.findIndex(x=>x.site_id===c.site_id)+1;
+  const cls = kind === 'recommended' ? 'distance-label recommended-label' : kind === 'collo' ? 'distance-label collo-label' : 'distance-label';
+  return L.marker([c.latitude,c.longitude], {interactive:false, icon:L.divIcon({className:'',html:`<div class="${cls}">${kind==='recommended'?'★ TOP COLLO · ':''}${(c.distance_m/1000).toFixed(2)} km</div>`,iconSize:null,iconAnchor:[0,0]})});
 }
 
 function initMap(){
-  map = L.map('map', { zoomControl:false, attributionControl:true }).setView([origin.latitude, origin.longitude], 13.5);
+  map = L.map('map', { zoomControl:false, attributionControl:true, preferCanvas:true }).setView([origin.latitude, origin.longitude], 13.5);
   L.control.zoom({position:'bottomright'}).addTo(map);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom:19, attribution:'© OpenStreetMap contributors'}).addTo(map);
-  radiusCircle = L.circle([origin.latitude,origin.longitude], {radius:3000, className:'pm-radius', color:'#35c8ff', weight:1, fillOpacity:.035}).addTo(map);
-  L.marker([origin.latitude,origin.longitude], {icon:L.divIcon({className:'',html:'<div class="new-order-pin">+</div>',iconSize:[38,38],iconAnchor:[19,19]})})
-    .addTo(map).bindPopup('<b>NEW ORDER</b><br>Target: IOH');
+
+  satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+    maxZoom:19, maxNativeZoom:19, detectRetina:true,
+    attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
+  });
+  streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    maxZoom:19, detectRetina:true, attribution:'© OpenStreetMap contributors'
+  });
+  satelliteLayer.addTo(map);
+
+  radiusCircle = L.circle([origin.latitude,origin.longitude], {radius:3000, className:'pm-radius', color:'#35c8ff', weight:2, dashArray:'8 7', fillColor:'#35c8ff', fillOpacity:.055}).addTo(map);
+  newOrderLayer = L.marker([origin.latitude,origin.longitude], {icon:orderIcon(), zIndexOffset:1000})
+    .addTo(map).bindPopup('<div class="popup-card"><div class="popup-kicker">NEW ORDER</div><strong>Target Tenant: IOH</strong><span>Decision starts with COLLO FIRST</span></div>');
   renderMarkers();
+  updateRecommendationLine();
+  updateRecommendationCallout();
+  updateMapSummary();
+
+  const toggle = document.getElementById('baseMapToggle');
+  toggle.onclick = toggleBasemap;
+}
+
+function toggleBasemap(){
+  if(satelliteMode){
+    map.removeLayer(satelliteLayer); streetLayer.addTo(map); satelliteMode=false;
+    document.getElementById('baseMapToggle').textContent='MAP';
+  }else{
+    map.removeLayer(streetLayer); satelliteLayer.addTo(map); satelliteMode=true;
+    document.getElementById('baseMapToggle').textContent='SATELLITE';
+  }
 }
 
 function renderMarkers(){
-  towerLayers.forEach(layer=>layer.remove());
+  towerLayers.forEach(layer=>{layer.marker?.remove();layer.label?.remove();});
   towerLayers.clear();
   nearest.forEach(c=>{
     const rank = top5.findIndex(x=>x.site_id===c.site_id)+1;
     const isTop = rank>0;
     const isRec = c.site_id===selected.site_id;
     const type = isRec ? 'recommended' : isTop ? 'collo' : 'nearest';
-    const layer=L.marker([c.latitude,c.longitude], {icon:markerIcon(type,rank)}).addTo(map);
-    layer.bindTooltip(`${isRec?'★ Recommended COLLO':'Tower'} · ${c.site_id}`, {direction:'top', offset:[0,-10]});
+    const layer=L.marker([c.latitude,c.longitude], {icon:markerIcon(type,rank), zIndexOffset:isRec?900:isTop?500:100}).addTo(map);
+    const labelLayer = distanceLabel(c,type);
+    labelLayer.addTo(map);
+    layer.bindTooltip(`<div class="site-tooltip"><strong>${isRec?'TOP COLLO':'EXISTING SITE'}</strong><span>${c.site_id}</span><small>${(c.distance_m/1000).toFixed(2)} km · IRR ${c.irr.toFixed(2)}%</small></div>`, {direction:'top', offset:[0,-18], className:'pm-tooltip', opacity:1});
     layer.on('click',()=>selectCandidate(c));
-    towerLayers.set(c.site_id,layer);
+    towerLayers.set(c.site_id,{marker:layer,label:labelLayer});
   });
+  updateRecommendationCallout();
 }
 
-function selectCandidate(c){selected=c;updateDetail();renderList();renderMarkers();const layer=towerLayers.get(c.site_id);if(layer){map.flyTo([c.latitude,c.longitude],15,{duration:.5});layer.openTooltip();}}
+function updateRecommendationCallout(){
+  if(!map) return;
+  if(recommendationCallout) recommendationCallout.remove();
+  if(originCallout) originCallout.remove();
+  recommendationCallout=L.marker([selected.latitude,selected.longitude], {icon:calloutIcon(selected), interactive:false, zIndexOffset:1500}).addTo(map);
+  originCallout=L.marker([origin.latitude,origin.longitude], {icon:originCalloutIcon(), interactive:false, zIndexOffset:1400}).addTo(map);
+}
+
+function selectCandidate(c){
+  selected=c;
+  updateDetail();
+  renderList();
+  renderMarkers();
+  updateRecommendationLine();
+  updateRecommendationCallout();
+  const layer=towerLayers.get(c.site_id)?.marker;
+  if(layer){map.flyTo([c.latitude,c.longitude],15,{duration:.5});layer.openTooltip();}
+}
+
+function updateRecommendationLine(){
+  if(!map) return;
+  if(recommendationLine) recommendationLine.remove();
+  recommendationLine = L.polyline([[origin.latitude,origin.longitude],[selected.latitude,selected.longitude]], {
+    color:'#2ea9ff', weight:4, opacity:.92, dashArray:'10 8', lineCap:'round', className:'recommendation-line'
+  }).addTo(map);
+}
+
+function updateMapSummary(){
+  const km=+document.getElementById('radius').value/1000;
+  document.getElementById('summaryRadius').textContent=km+' KM';
+  document.getElementById('summarySites').textContent=nearest.length;
+  document.getElementById('summaryCollo').textContent=top5.length;
+}
 
 function updateDetail(){
   const viable=selected.irr>=targetIrr;
@@ -172,16 +285,31 @@ function renderList(){
   document.querySelectorAll('.candidate').forEach(el=>el.onclick=()=>selectCandidate(top5.find(c=>c.site_id===el.dataset.id)));
 }
 
-function updateRadius(){const km=+document.getElementById('radius').value/1000;document.getElementById('radiusText').textContent=km+' km';if(radiusCircle)radiusCircle.setRadius(km*1000);}
-document.getElementById('radius').onchange=updateRadius;
-document.getElementById('analyze').onclick=()=>{const lat=Number(document.getElementById('lat').value),lon=Number(document.getElementById('lon').value),tenant=document.getElementById('tenant').value;if(!Number.isFinite(lat)||!Number.isFinite(lon))return;map.flyTo([lat,lon],13.5,{duration:.6});radiusCircle.setLatLng([lat,lon]);map.eachLayer(layer=>{if(layer.getPopup && layer.getPopup() && layer.getPopup().getContent()?.includes('NEW ORDER')) layer.setLatLng([lat,lon]);});document.getElementById('siteName').textContent='ANALYZING · '+tenant+' · '+lat.toFixed(5)+', '+lon.toFixed(5);setTimeout(()=>{selected=top5.find(c=>c.irr>=targetIrr)||top5[0];renderList();updateDetail();renderMarkers()},300)};
+function updateRadius(){
+  const km=+document.getElementById('radius').value/1000;
+  document.getElementById('radiusText').textContent=km+' km';
+  if(radiusCircle)radiusCircle.setRadius(km*1000);
+  updateMapSummary();
+}
 
-function refreshMapSize(){ if(map){ map.invalidateSize({animate:false}); } }
+document.getElementById('radius').onchange=updateRadius;
+document.getElementById('analyze').onclick=()=>{
+  const lat=Number(document.getElementById('lat').value),lon=Number(document.getElementById('lon').value),tenant=document.getElementById('tenant').value;
+  if(!Number.isFinite(lat)||!Number.isFinite(lon))return;
+  map.flyTo([lat,lon],13.5,{duration:.6});
+  radiusCircle.setLatLng([lat,lon]);
+  newOrderLayer.setLatLng([lat,lon]);
+  document.getElementById('siteName').textContent='ANALYZING · '+tenant+' · '+lat.toFixed(5)+', '+lon.toFixed(5);
+  setTimeout(()=>{selected=top5.find(c=>c.irr>=targetIrr)||top5[0];renderList();updateDetail();renderMarkers();updateRecommendationLine();updateRecommendationCallout()},300);
+};
+
+function refreshMapSize(){ if(map){ map.invalidateSize({animate:false}); map.fitBounds(radiusCircle.getBounds(),{padding:[34,34],maxZoom:14}); } }
 
 initMap();renderList();updateDetail();updateRadius();
 window.addEventListener('resize',()=>setTimeout(refreshMapSize,120));
 window.addEventListener('orientationchange',()=>setTimeout(refreshMapSize,220));
-setTimeout(refreshMapSize,150);
+window.addEventListener('pageshow',()=>setTimeout(refreshMapSize,220));
+setTimeout(refreshMapSize,180);
 
 </script>
 </body>
