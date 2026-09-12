@@ -1,0 +1,70 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>PMNO — Predictive Mapping New Order</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIINfQ3eKxXq4Q8w0z8nXjX3w3V1Y6s7VxM=" crossorigin="" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div>
+        <div class="eyebrow">MITRATEL · ASSET INTELLIGENCE</div>
+        <h1>Predictive Mapping <span>New Order</span></h1>
+      </div>
+      <div class="status"><i></i> PMNO ENGINE ONLINE <small>DEMO DATA</small></div>
+    </header>
+
+    <main class="workspace">
+      <aside class="control-panel">
+        <div class="section-label">NEW ORDER INPUT</div>
+        <label>Latitude<input id="lat" value="-6.9818" /></label>
+        <label>Longitude<input id="lon" value="110.4093" /></label>
+        <label>Target Tenant<select id="tenant"><option>IOH</option><option>TSEL</option><option>XLS</option><option>SFN</option></select></label>
+        <label>Search Radius<select id="radius"><option value="3000">3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></label>
+        <button id="analyze">ANALYZE NEW ORDER <span>→</span></button>
+        <div class="rule-box"><strong>COLLO FIRST</strong><p>Existing tower opportunities are evaluated before predictive New Site / B2S.</p></div>
+        <div class="legend">
+          <div><b class="dot order"></b> New Order</div>
+          <div><b class="dot nearest"></b> Nearest Towers</div>
+          <div><b class="dot collo"></b> Top 5 COLLO</div>
+          <div><b class="dot recommended"></b> Recommended #1</div>
+        </div>
+      </aside>
+
+      <section class="map-stage">
+        <div class="map-toolbar"><span>SEMarang · CENTRAL JAVA</span><span>Radius <b id="radiusText">3 km</b></span></div>
+        <div id="map" class="map"></div>
+        <div class="map-caption"><b>Map intelligence</b> — nearest tower visibility is independent from recommendation ranking.</div>
+      </section>
+
+      <aside class="detail-panel">
+        <div class="decision-head"><div><div class="section-label">RECOMMENDED DECISION</div><h2 id="decision">COLLO</h2></div><div class="decision-pill">COLLO FIRST</div></div>
+        <div class="site-name" id="siteName">PMNO-018138 · PMNO Semarang 18138</div>
+        <div class="score-row"><div class="big-score" id="score">75.3</div><div><strong>COLLO Opportunity Score</strong><p>Composite viability score</p></div></div>
+
+        <div class="metrics">
+          <div><span>IRR</span><strong id="irr">16.30%</strong><small>Target 10.73%</small></div>
+          <div><span>CAPEX</span><strong id="capex">Rp 1.16 B</strong><small>COLLO case</small></div>
+          <div><span>DISTANCE</span><strong id="distance">1.37 km</strong><small>from New Order</small></div>
+          <div><span>SIGNAL</span><strong id="signal">90 / 100</strong><small>Kualitas Signal</small></div>
+        </div>
+
+        <div class="bar-section"><div><span>Engineering</span><b id="eng">50</b></div><div class="bar"><i id="engBar" style="width:50%"></i></div></div>
+        <div class="bar-section"><div><span>Tenant Network Fit</span><b id="network">84</b></div><div class="bar"><i id="networkBar" style="width:84%"></i></div></div>
+
+        <div class="challenge"><div class="section-label">KEY CHALLENGE</div><strong id="challenge">ENGINEERING / STRUCTURAL</strong><p id="challengeText">Structural capacity requires further validation before final COLLO execution.</p></div>
+
+        <div class="rank-title"><span>TOP 5 COLLO OPPORTUNITIES</span><small>Ranked by Opportunity Score</small></div>
+        <div id="candidateList" class="candidate-list"></div>
+
+        <div id="fallback" class="fallback"><div class="section-label">IF NO COLLO IS VIABLE</div><strong>PREDICTIVE NEW SITE / B2S</strong><div class="fallback-grid"><span>Height <b>32 m</b></span><span>Land <b>401 m²</b></span><span>IRR <b>8.3%</b></span></div></div>
+      </aside>
+    </main>
+  </div>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <script src="app.js"></script>
+</body>
+</html>
