@@ -178,14 +178,13 @@ function initMap(){
   map = L.map('map', { zoomControl:false, attributionControl:true, preferCanvas:true }).setView([origin.latitude, origin.longitude], 13.5);
   L.control.zoom({position:'bottomright'}).addTo(map);
 
-  satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-    maxZoom:19, maxNativeZoom:19, detectRetina:true, updateWhenIdle:true, updateWhenZooming:false, keepBuffer:2,
-    attribution:'Tiles © Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community'
-  });
-  streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom:19, detectRetina:true, updateWhenIdle:true, updateWhenZooming:false, keepBuffer:2, attribution:'© OpenStreetMap contributors'
-  });
+  // Use a single responsive ArcGIS export image instead of a Leaflet tile grid.
+  // This avoids mobile Safari tile-gap/partial-grid rendering while preserving
+  // pan/zoom and all PMNO markers/overlays.
+  satelliteLayer = L.imageOverlay('', map.getBounds(), {opacity:1, interactive:false, className:'pm-base-imagery'});
+  streetLayer = L.imageOverlay('', map.getBounds(), {opacity:1, interactive:false, className:'pm-base-imagery'});
   satelliteLayer.addTo(map);
+  refreshSatelliteImage();
 
   radiusCircle = L.circle([origin.latitude,origin.longitude], {radius:3000, className:'pm-radius', color:'#35c8ff', weight:2, dashArray:'8 7', fillColor:'#35c8ff', fillOpacity:.055}).addTo(map);
   newOrderLayer = L.marker([origin.latitude,origin.longitude], {icon:orderIcon(), zIndexOffset:1000})
@@ -203,11 +202,11 @@ function toggleBasemap(){
   if(satelliteMode){
     map.removeLayer(satelliteLayer); streetLayer.addTo(map); satelliteMode=false;
     document.getElementById('baseMapToggle').textContent='MAP';
-    queueMapRefresh(40);
+    refreshSatelliteImage(); queueMapRefresh(80);
   }else{
     map.removeLayer(streetLayer); satelliteLayer.addTo(map); satelliteMode=true;
     document.getElementById('baseMapToggle').textContent='SATELLITE';
-    queueMapRefresh(40);
+    refreshSatelliteImage(); queueMapRefresh(80);
   }
 }
 
@@ -308,15 +307,33 @@ document.getElementById('analyze').onclick=()=>{
 let refreshTimer;
 let mapResizeObserver;
 
-function redrawMapTiles(){
-  const activeLayer = satelliteMode ? satelliteLayer : streetLayer;
-  if(activeLayer && typeof activeLayer.redraw === 'function') activeLayer.redraw();
+function refreshSatelliteImage(){
+  if(!map) return;
+  const bounds = map.getBounds();
+  const sw = bounds.getSouthWest(), ne = bounds.getNorthEast();
+  const size = map.getSize();
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const width = Math.max(600, Math.min(1600, Math.round(size.x * dpr)));
+  const height = Math.max(500, Math.min(1600, Math.round(size.y * dpr)));
+  const service = satelliteMode
+    ? 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/export'
+    : 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/export';
+  const url = service + '?' + new URLSearchParams({
+    bbox: [sw.lng, sw.lat, ne.lng, ne.lat].join(','),
+    bboxSR: '4326', imageSR: '4326', size: `${width},${height}`,
+    format: 'jpg', f: 'image', transparent: 'false'
+  }).toString();
+  const layer = satelliteMode ? satelliteLayer : streetLayer;
+  if(layer){
+    layer.setBounds(bounds);
+    layer.setUrl(url);
+  }
 }
 
 function refreshMapSize(){
   if(!map) return;
   map.invalidateSize({animate:false, pan:false, debounceMoveend:true});
-  redrawMapTiles();
+  refreshSatelliteImage();
 }
 
 function stabilizeMapLayout(){
@@ -342,6 +359,7 @@ function installMapResizeObserver(){
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize',()=>queueMapRefresh(80),{passive:true});
   }
+  map.on('moveend zoomend',()=>refreshSatelliteImage());
 }
 
 initMap();renderList();updateDetail();updateRadius();
