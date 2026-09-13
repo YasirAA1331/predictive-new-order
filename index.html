@@ -258,6 +258,8 @@ async function loadB2SIntelligence(){
       network_gap_score:b2sResult?.network_gap_score
     };
     const bd=b2sResult?.breakdown||{};
+    const b2sItems=Array.isArray(b2sResult?.capex_items)?b2sResult.capex_items:[];
+    const sumCode=(code)=>b2sItems.filter(x=>String(x?.item_code||'').toUpperCase()===String(code).toUpperCase()).reduce((a,x)=>a+num(x?.total_cost,0),0);
     const detail={
       engineering:b2sResult?.engineering||{},
       investment:{
@@ -266,14 +268,15 @@ async function loadB2SIntelligence(){
         decision:b2sResult?.investment_decision,
         b2s_initial_lease_years:b2sResult?.b2s_initial_lease_years,
         b2s_initial_land_lease_annual:b2sResult?.b2s_initial_land_lease_annual,
-        b2s_land_type:b2sResult?.area_type
+        b2s_land_type:b2sResult?.b2s_land_type||b2sResult?.area_type
       },
       cost:{
-        survey:{sis:num(bd.sis,0),ses:0,rerunning_sda:0},
-        sitac_1:{sewa_lahan:b2sResult?.b2s_initial_land_lease_annual!=null&&b2sResult?.b2s_initial_lease_years!=null?num(b2sResult.b2s_initial_land_lease_annual)*num(b2sResult.b2s_initial_lease_years):num(bd.land,0),izin_warga:0,rekom_lurah:0,rekom_camat:0,jasa_sitac:num(bd.sitac_non_land,0)},
-        sitac_2:{pbg:0,slf:0,retribusi:0,pbb:0,jasa_pengurusan_perizinan:0}
+        survey:{sis:sumCode('SIS-SURVEY'),ses:sumCode('SES-ENG'),rerunning_sda:sumCode('RERUN')},
+        sitac_1:{sewa_lahan:sumCode('SITAC-LAND'),izin_warga:sumCode('SITAC-RES'),rekom_lurah:sumCode('SITAC-REK-LURAH'),rekom_camat:sumCode('SITAC-REK-CAMAT'),jasa_sitac:sumCode('SITAC-JASA')},
+        sitac_2:{pbg:sumCode('SITAC-PBG'),slf:sumCode('SITAC-SLF'),retribusi:sumCode('SITAC-RETRIBUSI'),pbb:sumCode('SITAC-PBB'),jasa_pengurusan_perizinan:sumCode('SITAC-PERMIT-SERVICE')},
+        construction:{material:b2sItems.filter(x=>String(x?.bucket||'').toUpperCase()==='MATERIAL').reduce((a,x)=>a+num(x?.total_cost,0),0),delivery:b2sItems.filter(x=>String(x?.bucket||'').toUpperCase()==='DELIVERY').reduce((a,x)=>a+num(x?.total_cost,0),0),cme:b2sItems.filter(x=>String(x?.bucket||'').toUpperCase()==='CME').reduce((a,x)=>a+num(x?.total_cost,0),0)}
       },
-      site:{roadhead_distance_m:null},capex_items:[]
+      site:{roadhead_distance_m:null},capex_items:b2sItems
     };
     const eng=detail.engineering||{};
     const capexItems=finalizeCapexItems(detail.capex_items,'B2S');
@@ -831,14 +834,42 @@ function bulkSingleSiteMetrics(r){
     cme_str_material:strMaterial,cme_foundation_tower:foundation,cme_foundation_rbs:rbsMaterial,cme_rbs_apd:rbsApd,cme_grounding:grounding,cme_electrical:electrical,cme_transformer:transformer,cme_pln:pln,cme_jasa_cme:jasaCme,cme_erection:erection
   };
   if(isB2S){
-    const bd=r.raw?.b2s_scenario?.breakdown||{};
-    costBreakdown.survey_sis=bulkNum(bd.sis,0); costBreakdown.survey_ses=0; costBreakdown.survey_rerunning_sda=0;
-    costBreakdown.sitac1_sewa_lahan=inv.b2s_initial_land_lease_annual!=null&&inv.b2s_initial_lease_years!=null?bulkNum(inv.b2s_initial_land_lease_annual)*bulkNum(inv.b2s_initial_lease_years):bulkNum(bd.land,0);
-    costBreakdown.sitac1_izin_warga=0; costBreakdown.sitac1_rekom_lurah=0; costBreakdown.sitac1_rekom_camat=0; costBreakdown.sitac1_jasa_sitac=bulkNum(bd.sitac_non_land,0);
-    costBreakdown.sitac2_pbg=0; costBreakdown.sitac2_slf=0; costBreakdown.sitac2_retribusi=0; costBreakdown.sitac2_pbb=0; costBreakdown.sitac2_jasa_perizinan=0;
-    costBreakdown.material_tower=bulkNum(bd.tower,0); costBreakdown.material_fence=bulkNum(bd.fence_yard,0); costBreakdown.material_mounting=bulkNum(bd.mounting,0);
-    costBreakdown.delivery_factory_port=0; costBreakdown.delivery_langsir=0; costBreakdown.delivery_port_site=bulkNum(bd.delivery,0);
-    costBreakdown.cme_str_material='—'; costBreakdown.cme_foundation_tower=bulkNum(bd.foundation,0); costBreakdown.cme_foundation_rbs=bulkNum(bd.rbs,0); costBreakdown.cme_rbs_apd=0; costBreakdown.cme_grounding=0; costBreakdown.cme_electrical=bulkNum(bd.mechanical_electrical,0); costBreakdown.cme_transformer=bulkNum(bd.transformer,0); costBreakdown.cme_pln=bulkNum(bd.pln,0); costBreakdown.cme_jasa_cme=bulkNum(bd.cme_service,0); costBreakdown.cme_erection=bulkNum(bd.erection,0);
+    // B2S must use the same capex shopping-list source as Single Site.
+    // Do not reconstruct costs from the aggregate point-scenario breakdown.
+    const items=Array.isArray(r.raw?.b2s_scenario?.capex_items)?r.raw.b2s_scenario.capex_items:[];
+    const sumCodes=(codes)=>items.filter(x=>codes.includes(String(x?.item_code||'').toUpperCase())).reduce((a,x)=>a+bulkNum(x?.total_cost,0),0);
+    const sumBucket=(bucket)=>items.filter(x=>String(x?.bucket||'').toUpperCase()===bucket).reduce((a,x)=>a+bulkNum(x?.total_cost,0),0);
+    costBreakdown.survey_sis=sumCodes(['SIS-SURVEY']);
+    costBreakdown.survey_ses=sumCodes(['SES-ENG']);
+    costBreakdown.survey_rerunning_sda=sumCodes(['RERUN']);
+    costBreakdown.sitac1_sewa_lahan=sumCodes(['SITAC-LAND']);
+    costBreakdown.sitac1_izin_warga=sumCodes(['SITAC-RES']);
+    costBreakdown.sitac1_rekom_lurah=sumCodes(['SITAC-REK-LURAH']);
+    costBreakdown.sitac1_rekom_camat=sumCodes(['SITAC-REK-CAMAT']);
+    costBreakdown.sitac1_jasa_sitac=sumCodes(['SITAC-JASA']);
+    costBreakdown.sitac2_pbg=sumCodes(['SITAC-PBG']);
+    costBreakdown.sitac2_slf=sumCodes(['SITAC-SLF']);
+    costBreakdown.sitac2_retribusi=sumCodes(['SITAC-RETRIBUSI']);
+    costBreakdown.sitac2_pbb=sumCodes(['SITAC-PBB']);
+    costBreakdown.sitac2_jasa_perizinan=sumCodes(['SITAC-PERMIT-SERVICE']);
+    costBreakdown.material_tower=sumCodes(['MAT-TWR-SST']);
+    costBreakdown.material_fence=sumCodes(['FENCE-YARD-FENCE','FENCE-YARD-GATE','FENCE-YARD-YARD']);
+    costBreakdown.material_mounting=sumCodes(['MNT-ANT']);
+    costBreakdown.delivery_factory_port=sumCodes(['DEL-FP']);
+    costBreakdown.delivery_langsir=sumCodes(['DEL-LS']);
+    costBreakdown.delivery_port_site=sumCodes(['DEL-PS']);
+    costBreakdown.cme_str_material=sumCodes(['STR-MAT']);
+    costBreakdown.cme_foundation_tower=sumCodes(['FOUND-ANCHOR']);
+    costBreakdown.cme_foundation_rbs=sumCodes(['RBS-MAT']);
+    costBreakdown.cme_rbs_apd=sumCodes(['RBS-APD']);
+    costBreakdown.cme_grounding=sumCodes(['ME-GROUNDING']);
+    costBreakdown.cme_electrical=sumCodes(['ME-PANEL']);
+    costBreakdown.cme_transformer=sumCodes(['TRF-UNIT']);
+    costBreakdown.cme_pln=sumCodes(['PLN-CONNECTION']);
+    costBreakdown.cme_jasa_cme=sumCodes(['JASA-CME-B2S','JASA-CME']);
+    costBreakdown.cme_erection=sumCodes(['ERECT-JASA']);
+    // Defensive fallback for future catalog aliases: if an item exists in the bucket but is not mapped above,
+    // it remains part of total CAPEX from the DB investment engine and is visible through capex_items.
   }
   const totalCost=isB2S&&r.raw?.b2s_scenario?.capex_total!=null?bulkNum(r.raw.b2s_scenario.capex_total):Object.values(costBreakdown).reduce((a,v)=>a+(typeof v==='number'?v:0),0);
   const existingNbv=isB2S?null:(rec.existing_nbv??rec.nbv_existing??rec.nbv??inv.existing_nbv??null);
