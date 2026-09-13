@@ -668,8 +668,8 @@ function updateDetail(d){const rec=d?.recommended;const finalDecision=d?.raw?.fi
 const site=rec.detail?.site||{};const invProfile=rec.detail?.investment||{};const design=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};const isB2SProfile=!rec.site_id;const tenants=Array.isArray(site.tenants)&&site.tenants.length?site.tenants.join(' · '):(Array.isArray(rec.tenants)&&rec.tenants.length?rec.tenants.join(' · '):`${num(site.tenant_count??rec.tenant_count)} tenant${num(site.tenant_count??rec.tenant_count)===1?'':'s'}`);const signals=signalRows(rec);if(isB2SProfile){const b2sLand=invProfile.b2s_land_type||rec.b2s_land_type||design.land_type||design.density_class||'—';const b2sHeight=design.recommended_height_m??rec.tower_height_m;const b2sTower=design.tower_type||rec.tower_type||'—';const b2sArea=design.recommended_land_area_m2;const b2sLocation=`${state.lat.toFixed(5)}, ${state.lon.toFixed(5)}`;$('profileGrid').innerHTML=[infoCell('SITE TYPE','PREDICTIVE NEW SITE'),infoCell('TARGET TENANT',state.tenant||'—','new tenant opportunity'),infoCell('LOCATION',b2sLocation,'New Order location'),infoCell('LAND TYPE',b2sLand),infoCell('LAND AREA',b2sArea!=null?num(b2sArea).toFixed(0)+' m²':'—'),infoCell('TOWER TYPE',b2sTower),infoCell('TOWER HEIGHT',b2sHeight!=null?num(b2sHeight).toFixed(0)+' m':'—'),infoCell('EXISTING TENANTS','—'),infoCell('TENANT LIST','—'),infoCell('DISTANCE','0.00 km','from New Order')].join('')}else{$('profileGrid').innerHTML=[infoCell('TOWER HEIGHT',(site.tower_height_m??rec.tower_height_m)!=null?num(site.tower_height_m??rec.tower_height_m).toFixed(0)+' m':'—'),infoCell('TOWER TYPE',site.tower_type||rec.tower_type||'—'),infoCell('EXISTING TENANTS',String(site.tenant_count??rec.tenant_count??0)),infoCell('TENANT LIST',tenants),infoCell('DISTANCE',(num(rec.distance_m)/1000).toFixed(2)+' km','from New Order'),infoCell('TARGET TENANT',state.tenant||'—','not existing on candidate')].join('')}$('signalDetail').innerHTML=signals.length?signals.map(x=>`<div><strong>${x.technology} · ${x.rsrp.toFixed(1)} dBm</strong><span>${esc(x.quality)}</span></div>`).join(''):'<div class="no-data">No signal data available</div>';
 const detail=rec.detail||{};const detailSite=detail.site||{};const eng=detail.engineering||{};const cost=detail.cost||{};const inv=detail.investment||{};
 const pick=(...vals)=>vals.find(v=>v!==undefined&&v!==null&&v!=='');
-const isB2S=!isCollo;
-const needStr=isB2S?'—':(pick(eng.need_str,rec.need_str,strStatus(rec))||'—');
+const b2sMode=!isCollo;
+const needStr=b2sMode?'—':(pick(eng.need_str,rec.need_str,strStatus(rec))||'—');
 const reinforcement=pick(eng.reinforcement_expected_ton,rec.reinforcement_expected_ton,rec.reinforcement_ton);
 const accessLevel=pick(eng.access_level,detailSite.access_level,rec.last_mile_access_level,rec.access_level);
 const access=accessLevel!=null?(num(accessLevel)<=1?'EASY':num(accessLevel)<=2?'MEDIUM':'DIFFICULT'):pick(rec.access_class,rec.last_mile_access_class,'—');
@@ -682,29 +682,29 @@ const sesType=pick(eng.ses_work_type,rec.ses_work_type);
 const sesCost=pick(eng.ses_work_cost,rec.ses_work_cost);
 const roadhead=pick(detailSite.roadhead_distance_m,rec.roadhead_distance_m);
 const onAir=days!=null?`${num(days).toFixed(1)} days`:'—';
-const sdaText=isB2S?'—':(sdaAvailable==null?'—':(sdaAvailable===true||String(sdaAvailable).toLowerCase()==='true'?'YES':'NO'));
-const engineeringNA=isB2S?'—':null;
+const sdaText=b2sMode?'—':(sdaAvailable==null?'—':(sdaAvailable===true||String(sdaAvailable).toLowerCase()==='true'?'YES':'NO'));
+const engineeringNA=b2sMode?'—':null;
 $('engineeringGrid').innerHTML=[
-  infoCell('NEED STR',isB2S?'—':needStr),
-  infoCell('EST. REINFORCEMENT',isB2S?'—':(needStr==='NO'?'NOT REQUIRED':reinforcement!=null?num(reinforcement).toFixed(2)+' Ton':'—')),
+  infoCell('NEED STR',b2sMode?'—':needStr),
+  infoCell('EST. REINFORCEMENT',b2sMode?'—':(needStr==='NO'?'NOT REQUIRED':reinforcement!=null?num(reinforcement).toFixed(2)+' Ton':'—')),
   infoCell('SDA AVAILABLE',sdaText),
-  infoCell('SES / DELIVERY',isB2S?'—':(sesType||'—'),!isB2S&&sesCost!=null?formatMoney(sesCost):''),
-  infoCell('COMCASE HISTORY',isB2S?'—':(comCount!=null?String(comCount):'—')),
-  infoCell('RED ZONE',isB2S?'—':redzone),
+  infoCell('SES / DELIVERY',b2sMode?'—':(sesType||'—'),!b2sMode&&sesCost!=null?formatMoney(sesCost):''),
+  infoCell('COMCASE HISTORY',b2sMode?'—':(comCount!=null?String(comCount):'—')),
+  infoCell('RED ZONE',b2sMode?'—':redzone),
   infoCell('ACCESS DIFFICULTY',access,accessLevel!=null?`Level ${accessLevel}`:''),
   infoCell('ROADHEAD DISTANCE',roadhead!=null?num(roadhead).toFixed(0)+' m':'—'),
   infoCell('EST. TO ON AIR',onAir),
-  infoCell('REINFORCEMENT PROB.',isB2S?'—':(eng.reinforcement_probability!=null?num(eng.reinforcement_probability).toFixed(1)+'%':'—')),
-  infoCell('STRUCTURAL UTILIZATION',isB2S?'—':(eng.structural_utilization_proxy!=null?num(eng.structural_utilization_proxy).toFixed(1)+'%':'—')),
-  infoCell('PHYSICAL SES PROB.',isB2S?'—':(eng.physical_ses_probability!=null?num(eng.physical_ses_probability).toFixed(1)+'%':'—'))
+  infoCell('REINFORCEMENT PROB.',b2sMode?'—':(eng.reinforcement_probability!=null?num(eng.reinforcement_probability).toFixed(1)+'%':'—')),
+  infoCell('STRUCTURAL UTILIZATION',b2sMode?'—':(eng.structural_utilization_proxy!=null?num(eng.structural_utilization_proxy).toFixed(1)+'%':'—')),
+  infoCell('PHYSICAL SES PROB.',b2sMode?'—':(eng.physical_ses_probability!=null?num(eng.physical_ses_probability).toFixed(1)+'%':'—'))
 ].join('');
-$('challenge').textContent=isB2S?'NEW SITE / B2S':(needStr==='YES'?'ENGINEERING / STRUCTURAL':(redzone==='YES'?'COMMUNITY / RED ZONE':'TECHNICAL REVIEW'));
-$('challengeText').textContent=isB2S
+$('challenge').textContent=b2sMode?'NEW SITE / B2S':(needStr==='YES'?'ENGINEERING / STRUCTURAL':(redzone==='YES'?'COMMUNITY / RED ZONE':'TECHNICAL REVIEW'));
+$('challengeText').textContent=b2sMode
   ?'New site candidate — existing-site engineering and SDA history are not applicable.'
   :(needStr==='YES'
     ?`Structural reinforcement probability ${eng.reinforcement_probability!=null?num(eng.reinforcement_probability).toFixed(1)+'%':'—'} · expected ${reinforcement!=null?num(reinforcement).toFixed(2)+' Ton':'—'}.`
     :(redzone==='YES'?'Historical community risk requires focused SITAC planning.':'Candidate requires engineering validation before final design.'));
-const sda=Array.isArray(detail.sda_documents)&&!isB2S?detail.sda_documents:[];$('sdaLink').innerHTML=isB2S?'':(sda.length?sda.slice(0,3).map(d=>`<a href="${esc(d.document_url)}" target="_blank" rel="noopener noreferrer">↗ VIEW SDA DOCUMENT</a><span class="sda-meta">${esc(d.document_name||'SDA')} · ${esc(d.document_status||'VALID')}</span>`).join(''):'<span class="sda-meta">SDA document link not available</span>');
+const sda=Array.isArray(detail.sda_documents)&&!b2sMode?detail.sda_documents:[];$('sdaLink').innerHTML=b2sMode?'':(sda.length?sda.slice(0,3).map(d=>`<a href="${esc(d.document_url)}" target="_blank" rel="noopener noreferrer">↗ VIEW SDA DOCUMENT</a><span class="sda-meta">${esc(d.document_name||'SDA')} · ${esc(d.document_status||'VALID')}</span>`).join(''):'<span class="sda-meta">SDA document link not available</span>');
 const scenarioOptionEarly=String(inv.option??rec.option??'COLLO').toUpperCase();
 const b2sInitialLeaseYears=inv.b2s_initial_lease_years??rec.b2s_initial_lease_years??null;
 const b2sInitialLandLeaseAnnual=inv.b2s_initial_land_lease_annual??rec.b2s_initial_land_lease_annual??null;
