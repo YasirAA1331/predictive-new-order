@@ -752,146 +752,132 @@ async function analyzeOne(x){
       total:capex}};
 }
 function pill(v){const s=String(v||'—').toUpperCase();const cls=s.includes('FEAS')||s==='COLLO CANDIDATE'?'ok':s.includes('B2S')||s.includes('BORDER')?'warn':s.includes('NOT')||s.includes('FAIL')?'bad':'neutral';return `<span class="status-pill ${cls}">${bulkEsc(v||'—')}</span>`}
+function bulkSingleSiteMetrics(r){
+  const rec=r.candidate||r.raw?.collo?.recommended||{};
+  const detail=r.detail||{};
+  const detailSite=detail.site||{};
+  const eng=detail.engineering||{};
+  const inv=detail.investment||{};
+  const cost=detail.cost||{};
+  const design=r.b2s_design||r.raw?.predictive_design||r.raw?.new_site?.design||{};
+  const isB2S=!!r.b2s;
+  const pick=(...vals)=>vals.find(v=>v!==undefined&&v!==null&&v!=='');
+  const accessLevel=pick(eng.access_level,detailSite.access_level,rec.last_mile_access_level,rec.access_level);
+  const access=accessLevel!=null?(bulkNum(accessLevel)<=1?'EASY':bulkNum(accessLevel)<=2?'MEDIUM':'DIFFICULT'):pick(rec.access_class,rec.last_mile_access_class,'—');
+  const comCount=pick(eng.community_case_count,detailSite.community_case_count,rec.community_case_count,rec.comcase_count);
+  const redRaw=pick(eng.red_zone,detailSite.red_zone,rec.red_zone);
+  const redzone=redRaw!=null?(redRaw===true||String(redRaw).toLowerCase()==='true'?'YES':'NO'):((String(detailSite.community_risk_level||rec.community_risk_level||'').toUpperCase()==='HIGH')?'YES':'—');
+  const days=pick(eng.estimated_to_on_air_days,rec.estimated_days,rec.total_days);
+  const sdaAvailable=pick(eng.sda_available,rec.sda_available);
+  const sesType=pick(eng.ses_work_type,rec.ses_work_type);
+  const roadhead=pick(detailSite.roadhead_distance_m,rec.roadhead_distance_m);
+  const needStr=pick(eng.need_str,rec.need_str,strStatus(rec))||'—';
+  const reinforcement=pick(eng.reinforcement_expected_ton,rec.reinforcement_expected_ton,rec.reinforcement_ton);
+  const tenants=Array.isArray(detailSite.tenants)&&detailSite.tenants.length?detailSite.tenants.join(' · '):(Array.isArray(rec.tenants)&&rec.tenants.length?rec.tenants.join(' · '):`${bulkNum(detailSite.tenant_count??rec.tenant_count)} tenant${bulkNum(detailSite.tenant_count??rec.tenant_count)===1?'':'s'}`);
+  const tower=pick(detailSite.tower_type,rec.tower_type,r.tower_type,'—');
+  const height=pick(detailSite.tower_height_m,rec.tower_height_m,r.tower_height_m,design.recommended_height_m);
+  const distance=isB2S?'0.00 km':(rec.distance_m!=null?(bulkNum(rec.distance_m)/1000).toFixed(2)+' km':r.distance_m!=null?(bulkNum(r.distance_m)/1000).toFixed(2)+' km':'—');
+  const signal=isB2S?'—':(rec.signal_rsrp_avg_dbm!=null?bulkNum(rec.signal_rsrp_avg_dbm).toFixed(1)+' dBm':r.signal!=null?bulkNum(r.signal).toFixed(1)+' dBm':'—');
+  const sda=isB2S?'—':(sdaAvailable==null?'—':(sdaAvailable===true||String(sdaAvailable).toLowerCase()==='true'?'YES':'NO'));
+  const capexItems=Array.isArray(rec.capex_items)?rec.capex_items:(Array.isArray(detail.capex_items)?detail.capex_items:[]);
+  const code=x=>String(x?.item_code||'').toUpperCase();
+  const group=x=>String(x?.driver?.boq_group||'').toUpperCase();
+  const sumCodes=codes=>capexItems.filter(x=>codes.includes(code(x))).reduce((a,x)=>a+bulkNum(x.total_cost,0),0);
+  const sumGroups=groups=>capexItems.filter(x=>groups.includes(group(x))).reduce((a,x)=>a+bulkNum(x.total_cost,0),0);
+  const materialTower=sumCodes(['MAT-TOWER','TWR-MAT','TOWER-MAT','MAT-TWR-SST']);
+  const materialFence=sumCodes(['FENCE-YARD-FENCE','FENCE-YARD-GATE','FENCE-YARD-YARD']);
+  const mounting=sumCodes(['MNT-ANT','MNT-AAU','MNT-RRU','MNT-MW','MAT-MNT']);
+  const deliveryFP=sumCodes(['DEL-FP','DEL-FAC']);
+  const deliveryLangsir=sumCodes(['DEL-LS','DEL-LANG']);
+  const deliveryPS=sumCodes(['DEL-PS','DEL-SITE']);
+  const grounding=sumCodes(['ME-GROUNDING','MAT-GND']);
+  const electrical=sumCodes(['ME-CABLE','ME-PANEL','ME-PROTECTION']);
+  const strMaterial=isB2S?'—':sumCodes(['STR-MAT','STR-MATERIAL','STR-001']);
+  const rbsMaterial=sumCodes(['RBS-MAT','RBS-MATERIAL','RBS-001']);
+  const rbsApd=sumCodes(['RBS-APD','RBS-APD-MATERIAL','RBS-APD-001']);
+  const foundation=sumGroups(['FOUND']);
+  const transformer=sumCodes(['TRF-UNIT','TRANSFORMATOR','TRANSFORMER-MATERIAL','TRF-MAT'])||sumGroups(['TRANSFORMER']);
+  const pln=sumGroups(['PLN']);
+  const jasaCme=sumCodes(['JASA-CME-COLLO','JASA-CME-B2S','JASA-CME']);
+  const erection=sumCodes(['ERECT-JASA']);
+  const survey={sis:bulkNum(cost.survey?.sis,0),ses:bulkNum(cost.survey?.ses,0),rerunning_sda:bulkNum(cost.survey?.rerunning_sda,0)};
+  const sitac1={sewa_lahan:bulkNum(cost.sitac_1?.sewa_lahan,0),izin_warga:bulkNum(cost.sitac_1?.izin_warga,0),rekom_lurah:bulkNum(cost.sitac_1?.rekom_lurah,0),rekom_camat:bulkNum(cost.sitac_1?.rekom_camat,0),jasa_sitac:bulkNum(cost.sitac_1?.jasa_sitac,0)};
+  const sitac2={pbg:bulkNum(cost.sitac_2?.pbg,0),slf:bulkNum(cost.sitac_2?.slf,0),retribusi:bulkNum(cost.sitac_2?.retribusi,0),pbb:bulkNum(cost.sitac_2?.pbb,0),jasa_perizinan:bulkNum(cost.sitac_2?.jasa_pengurusan_perizinan??cost.sitac_2?.jasa_perizinan,0)};
+  const b2sInitialLeaseYears=inv.b2s_initial_lease_years??rec.b2s_initial_lease_years??null;
+  const b2sInitialLandLeaseAnnual=inv.b2s_initial_land_lease_annual??rec.b2s_initial_land_lease_annual??null;
+  if(isB2S && b2sInitialLeaseYears!=null && b2sInitialLandLeaseAnnual!=null) sitac1.sewa_lahan=bulkNum(b2sInitialLeaseYears)*bulkNum(b2sInitialLandLeaseAnnual);
+  const costBreakdown={
+    survey_sis:survey.sis,survey_ses:survey.ses,survey_rerunning_sda:survey.rerunning_sda,
+    sitac1_sewa_lahan:sitac1.sewa_lahan,sitac1_izin_warga:sitac1.izin_warga,sitac1_rekom_lurah:sitac1.rekom_lurah,sitac1_rekom_camat:sitac1.rekom_camat,sitac1_jasa_sitac:sitac1.jasa_sitac,
+    sitac2_pbg:sitac2.pbg,sitac2_slf:sitac2.slf,sitac2_retribusi:sitac2.retribusi,sitac2_pbb:sitac2.pbb,sitac2_jasa_perizinan:sitac2.jasa_perizinan,
+    material_tower:materialTower,material_fence:materialFence,material_mounting:mounting,
+    delivery_factory_port:deliveryFP,delivery_langsir:deliveryLangsir,delivery_port_site:deliveryPS,
+    cme_str_material:strMaterial,cme_foundation_tower:foundation,cme_foundation_rbs:rbsMaterial,cme_rbs_apd:rbsApd,cme_grounding:grounding,cme_electrical:electrical,cme_transformer:transformer,cme_pln:pln,cme_jasa_cme:jasaCme,cme_erection:erection
+  };
+  const totalCost=Object.values(costBreakdown).reduce((a,v)=>a+(typeof v==='number'?v:0),0);
+  const existingNbv=isB2S?null:(rec.existing_nbv??rec.nbv_existing??rec.nbv??inv.existing_nbv??null);
+  const existingIrr=isB2S?null:(inv.existing_irr!=null?bulkNum(inv.existing_irr):null);
+  const estCapex=inv.capex_total??rec.capex_total??(capexItems.length?capexItems.reduce((a,x)=>a+bulkNum(x?.total_cost,0),0):null);
+  const backendIrr=inv.estimated_irr??rec.estimated_irr??r.estimated_irr??null;
+  const estIrr=backendIrr==null?null:(Math.abs(bulkNum(backendIrr))>1?bulkNum(backendIrr)/100:bulkNum(backendIrr));
+  const estNbv=isB2S?(estCapex!=null?bulkNum(estCapex):null):(existingNbv!=null&&estCapex!=null?bulkNum(existingNbv)+bulkNum(estCapex):null);
+  const invStatus=inv.decision??rec.investment_decision??rec.decision??r.investment_decision??r.decision;
+  return {isB2S,rec,detail,eng,inv,design,tower,height,distance,signal,tenants,needStr,
+    reinforcement:isB2S?'—':(needStr==='NO'?'NOT REQUIRED':reinforcement!=null?bulkNum(reinforcement).toFixed(2)+' Ton':'—'),
+    sda,ses:isB2S?'—':(sesType||'—'),comcase:isB2S?'—':(comCount!=null?String(comCount):'—'),red:isB2S?'—':redzone,
+    access:isB2S?'—':access,road:isB2S?'—':(roadhead!=null?bulkNum(roadhead).toFixed(0)+' m':'—'),days:isB2S?'—':(days!=null?bulkNum(days).toFixed(1)+' days':'—'),
+    reinfProb:isB2S?'—':(eng.reinforcement_probability!=null?bulkNum(eng.reinforcement_probability).toFixed(1)+'%':'—'),
+    structural:isB2S?'—':(eng.structural_utilization_proxy!=null?bulkNum(eng.structural_utilization_proxy).toFixed(1)+'%':'—'),
+    physical:isB2S?'—':(eng.physical_ses_probability!=null?bulkNum(eng.physical_ses_probability).toFixed(1)+'%':'—'),
+    costBreakdown,totalCost,existingNbv,existingIrr,estCapex,estIrr,estNbv,invStatus
+  };
+}
 function render(){
   const rows=bulkState.results;
   const wrap=bulk$('bulk-table-wrap');
   if(!rows.length){wrap.innerHTML='<div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div>';updateKpi();return;}
   const cell=(v,cls='')=>`<td class="${cls}">${bulkEsc(v==null||v===''?'—':v)}</td>`;
-  const pct=v=>v==null?'—':(Math.abs(bulkNum(v))>1?bulkNum(v):bulkNum(v)*100).toFixed(2)+'%';
   const money=v=>bulkMoney(v);
-  const fmt=(v,suf='')=>v==null?'—':bulkNum(v).toFixed(1)+suf;
-  const na=r=>r.b2s?'N/A':'—';
   wrap.innerHTML=`<table class="bulk-table"><thead>
-    <tr>
-      <th rowspan="2" class="sticky-1"> </th>
-      <th colspan="3" class="sticky-2">SITE / CANDIDATE</th>
-      <th colspan="5">CANDIDATE PROFILE</th>
-      <th colspan="12">ENGINEERING &amp; DELIVERY</th>
-      <th colspan="3">SURVEY</th><th colspan="5">SITAC 1</th><th colspan="5">SITAC 2</th><th colspan="3">MATERIAL</th><th colspan="3">DELIVERY</th><th colspan="10">CME</th><th>TOTAL CAPEX</th>
-      <th colspan="6">INVESTMENT</th>
-    </tr>
-    <tr>
-      <th class="sticky-2">SITE</th><th class="sticky-3">TARGET TENANT</th><th>CANDIDATE</th>
-      <th>DISTANCE</th><th>TOWER TYPE</th><th>HEIGHT</th><th>EXISTING TENANTS</th>
-      <th>TARGET TENANT SIGNAL</th><th>NEED STR</th><th>EST. REINFORCEMENT</th><th>SDA AVAILABLE</th><th>SES / DELIVERY</th><th>COMCASE HISTORY</th><th>RED ZONE</th><th>ACCESS DIFFICULTY</th><th>ROADHEAD DISTANCE</th><th>EST. TO ON AIR</th><th>REINFORCEMENT PROB.</th><th>STRUCTURAL UTILIZATION</th><th>PHYSICAL SES PROB.</th>
-      <th>SIS</th><th>SES</th><th>RERUNNING SDA</th><th>SEWA LAHAN</th><th>IZIN WARGA</th><th>REKOM LURAH</th><th>REKOM CAMAT</th><th>JASA SITAC</th><th>PBG</th><th>SLF</th><th>RETRIBUSI</th><th>PBB</th><th>JASA PERIZINAN</th><th>TOWER</th><th>FENCE &amp; YARD</th><th>MOUNTING</th><th>FACTORY → PORT</th><th>LANGSIR / LOCAL HAULAGE</th><th>PORT → SITE</th><th>STR · MATERIAL STR</th><th>PONDASI TOWER · MATERIAL</th><th>PONDASI RBS · MATERIAL</th><th>APD PONDASI RBS</th><th>GROUNDING</th><th>ELECTRICAL</th><th>TRANSFORMER</th><th>PLN CONNECTION</th><th>JASA CME</th><th>JASA ERECTION</th><th>TOTAL CAPEX</th>
-      <th>EXISTING NBV</th><th>EXISTING IRR</th><th>ESTIMATED CAPEX</th><th>ESTIMATED IRR · EXISTING + COLLO</th><th>NPV</th><th>INVESTMENT DECISION</th>
-    </tr></thead><tbody>`+
+    <tr><th rowspan="2" class="sticky-1"> </th><th rowspan="2" class="sticky-2">SITE</th><th rowspan="2" class="sticky-3">TARGET TENANT</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th colspan="3">SURVEY</th><th colspan="5">SITAC 1</th><th colspan="5">SITAC 2</th><th colspan="3">MATERIAL</th><th colspan="3">DELIVERY</th><th colspan="10">CME</th><th rowspan="2">TOTAL CAPEX</th><th colspan="5">INVESTMENT</th></tr>
+    <tr><th>DISTANCE</th><th>TOWER TYPE</th><th>HEIGHT</th><th>EXISTING TENANTS</th><th>TARGET TENANT SIGNAL</th><th>NEED STR</th><th>EST. REINFORCEMENT</th><th>SDA AVAILABLE</th><th>SES / DELIVERY</th><th>COMCASE HISTORY</th><th>RED ZONE</th><th>ACCESS DIFFICULTY</th><th>ROADHEAD DISTANCE</th><th>EST. TO ON AIR</th><th>REINFORCEMENT PROB.</th><th>STRUCTURAL UTILIZATION</th><th>PHYSICAL SES PROB.</th><th>SIS</th><th>SES</th><th>RERUNNING SDA</th><th>SEWA LAHAN</th><th>IZIN WARGA</th><th>REKOM LURAH</th><th>REKOM CAMAT</th><th>JASA SITAC</th><th>PBG</th><th>SLF</th><th>RETRIBUSI</th><th>PBB</th><th>JASA PERIZINAN</th><th>TOWER</th><th>FENCE &amp; YARD</th><th>MOUNTING</th><th>FACTORY → PORT</th><th>LANGSIR / LOCAL HAULAGE</th><th>PORT → SITE</th><th>STR · MATERIAL STR</th><th>PONDASI TOWER · MATERIAL</th><th>PONDASI RBS · MATERIAL</th><th>APD PONDASI RBS</th><th>GROUNDING</th><th>ELECTRICAL</th><th>TRANSFORMER</th><th>PLN CONNECTION</th><th>JASA CME</th><th>JASA ERECTION</th><th>EXISTING NBV</th><th>EXISTING IRR</th><th>ESTIMATED CAPEX</th><th>ESTIMATED IRR · EXISTING + COLLO</th><th>INVESTMENT BASE</th></tr></thead><tbody>`+
     rows.map((r,i)=>{
-      const d=r.detail||{},eng=d.engineering||{},inv=d.investment||{},ns=r.raw?.new_site||{};
-      const isB2S=!!r.b2s;
-      const distance=isB2S?'N/A':(r.distance_m!=null?(bulkNum(r.distance_m)/1000).toFixed(2)+' km':'—');
-      const tower=r.tower_type||'—';
-      const height=r.tower_height_m!=null?bulkNum(r.tower_height_m).toFixed(0)+' m':'—';
-      const tenants=isB2S?'N/A':(r.tenant_count!=null?String(r.tenant_count):'—');
-      const signal=isB2S?'N/A':(r.signal!=null?bulkNum(r.signal).toFixed(1)+' dBm':'—');
-      const needStr=isB2S?'N/A':(eng.need_str||r.need_str||'—');
-      const reinforcement=isB2S?'N/A':(r.reinforcement!=null?bulkNum(r.reinforcement).toFixed(2)+' Ton':'—');
-      const sda=isB2S?'N/A':(d.sda_status||'—');
-      const ses=isB2S?'N/A':(eng.ses_work_type||'—');
-      const comcase=isB2S?'N/A':(eng.community_case_count!=null?String(eng.community_case_count):'—');
-      const red=isB2S?'N/A':(eng.red_zone!=null?(eng.red_zone?'YES':'NO'):'—');
-      const access=isB2S?'N/A':(eng.access_level??'—');
-      const road=isB2S?'N/A':(eng.roadhead_distance_m!=null?bulkNum(eng.roadhead_distance_m).toFixed(0)+' m':'—');
-      const days=isB2S?'N/A':(eng.estimated_to_on_air_days!=null?bulkNum(eng.estimated_to_on_air_days).toFixed(0)+' days':'—');
-      const reinfProb=isB2S?'N/A':pct(eng.reinforcement_probability);
-      const structural=isB2S?'N/A':pct(eng.structural_utilization_proxy);
-      const physical=isB2S?'N/A':pct(eng.physical_ses_probability);
-      const c=r.cost||{},cb=c.breakdown||{};
-      const capex=r.capex??inv.capex_total??inv.estimated_capex??ns.capex_total??ns.estimated_capex;
-      const irr=r.estimated_irr??inv.estimated_irr??ns.irr??ns.estimated_irr;
-      const npv=r.npv??inv.npv??ns.npv;
-      const decision=r.investment_decision??inv.decision??ns.investment_decision??ns.decision??r.decision;
-      const irrLabel=isB2S?'B2S STANDALONE IRR':'ESTIMATED IRR · EXISTING + COLLO';
-      const existingNbv=isB2S?'N/A':(inv.existing_nbv??r.existing_nbv);
-      const existingIrr=isB2S?'N/A':pct(r.existing_irr);
-      const costVal=k=>isB2S&&k==='cme_str_material'?'N/A':money(cb[k]);
-      const candidate=isB2S?'PREDICTIVE NEW SITE':(r.candidate_id||'—');
-      if(String(r.decision||'').toUpperCase()==='ERROR'){
-        return `<tr class="error-row"><td class="expand-cell sticky-1">—</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell" colspan="53"><span class="status-pill bad">ERROR</span> <span>${bulkEsc(r.error||'Analysis failed')}</span></td></tr>`;
-      }
-      return `<tr>
-        <td class="expand-cell sticky-1"><button class="expand" data-i="${i}" aria-expanded="false">DETAIL</button></td>
-        <td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td>
-        <td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell">${bulkEsc(candidate)}</td>
-        ${cell(distance)}${cell(tower)}${cell(height,'num')}${cell(tenants,'center')}${cell(signal,'num')}
-        ${cell(needStr,'center')}${cell(reinforcement,'num')}${cell(sda,'center')}${cell(ses)}${cell(comcase,'center')}${cell(red,'center')}${cell(access)}${cell(road,'num')}${cell(days)}${cell(reinfProb,'num')}${cell(structural,'num')}${cell(physical,'num')}
-        ${cell(costVal('survey_sis'))}${cell(costVal('survey_ses'))}${cell(costVal('survey_rerunning_sda'))}${cell(costVal('sitac1_sewa_lahan'))}${cell(costVal('sitac1_izin_warga'))}${cell(costVal('sitac1_rekom_lurah'))}${cell(costVal('sitac1_rekom_camat'))}${cell(costVal('sitac1_jasa_sitac'))}${cell(costVal('sitac2_pbg'))}${cell(costVal('sitac2_slf'))}${cell(costVal('sitac2_retribusi'))}${cell(costVal('sitac2_pbb'))}${cell(costVal('sitac2_jasa_perizinan'))}${cell(costVal('material_tower'))}${cell(costVal('material_fence'))}${cell(costVal('material_mounting'))}${cell(costVal('delivery_factory_port'))}${cell(costVal('delivery_langsir'))}${cell(costVal('delivery_port_site'))}${cell(costVal('cme_str_material'))}${cell(costVal('cme_foundation_tower'))}${cell(costVal('cme_foundation_rbs'))}${cell(costVal('cme_rbs_apd'))}${cell(costVal('cme_grounding'))}${cell(costVal('cme_electrical'))}${cell(costVal('cme_transformer'))}${cell(costVal('cme_pln'))}${cell(costVal('cme_jasa_cme'))}${cell(costVal('cme_erection'))}${cell(money(capex))}
-        ${cell(existingNbv)}${cell(existingIrr,'num')}${cell(money(capex))}${cell(irrLabel,'num')}${cell(money(npv))}<td class="decision-cell">${pill(decision)}</td>
-      </tr><tr class="detail-row"><td colspan="57" style="padding:0;border-right:0"> <div class="bulk-detail" id="detail-${i}" hidden>${detailHtml(r)}</div></td></tr>`;
+      if(String(r.decision||'').toUpperCase()==='ERROR')return `<tr class="error-row"><td class="expand-cell sticky-1">—</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell" colspan="53"><span class="status-pill bad">ERROR</span> <span>${bulkEsc(r.error||'Analysis failed')}</span></td></tr>`;
+      const m=bulkSingleSiteMetrics(r),c=m.costBreakdown;
+      const candidate=m.isB2S?'PREDICTIVE NEW SITE':(r.candidate_id||m.rec.site_id||'—');
+      const invIrr=m.isB2S?'—':(m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—');
+      const b2sIrr=m.isB2S?(m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—'):invIrr;
+      const costVal=k=>c[k]==='—'?'—':money(c[k]);
+      return `<tr><td class="expand-cell sticky-1"><button class="expand" data-i="${i}" aria-expanded="false">DETAIL</button></td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell">${bulkEsc(candidate)}</td>
+      ${cell(m.distance)}${cell(m.tower)}${cell(m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—','num')}${cell(m.isB2S?'—':m.tenants,'center')}${cell(m.signal,'num')}
+      ${cell(m.needStr,'center')}${cell(m.reinforcement,'num')}${cell(m.sda,'center')}${cell(m.ses)}${cell(m.comcase,'center')}${cell(m.red,'center')}${cell(m.access)}${cell(m.road,'num')}${cell(m.days)}${cell(m.reinfProb,'num')}${cell(m.structural,'num')}${cell(m.physical,'num')}
+      ${cell(costVal('survey_sis'))}${cell(costVal('survey_ses'))}${cell(costVal('survey_rerunning_sda'))}${cell(costVal('sitac1_sewa_lahan'))}${cell(costVal('sitac1_izin_warga'))}${cell(costVal('sitac1_rekom_lurah'))}${cell(costVal('sitac1_rekom_camat'))}${cell(costVal('sitac1_jasa_sitac'))}${cell(costVal('sitac2_pbg'))}${cell(costVal('sitac2_slf'))}${cell(costVal('sitac2_retribusi'))}${cell(costVal('sitac2_pbb'))}${cell(costVal('sitac2_jasa_perizinan'))}${cell(costVal('material_tower'))}${cell(costVal('material_fence'))}${cell(costVal('material_mounting'))}${cell(costVal('delivery_factory_port'))}${cell(costVal('delivery_langsir'))}${cell(costVal('delivery_port_site'))}${cell(costVal('cme_str_material'))}${cell(costVal('cme_foundation_tower'))}${cell(costVal('cme_foundation_rbs'))}${cell(costVal('cme_rbs_apd'))}${cell(costVal('cme_grounding'))}${cell(costVal('cme_electrical'))}${cell(costVal('cme_transformer'))}${cell(costVal('cme_pln'))}${cell(costVal('cme_jasa_cme'))}${cell(costVal('cme_erection'))}
+      ${cell(money(m.totalCost))}${cell(m.existingNbv!=null?money(m.existingNbv):'—')}${cell(m.existingIrr!=null?m.existingIrr.toFixed(2)+'%':'—','num')}${cell(money(m.estCapex))}${cell(b2sIrr,'num')}${cell(m.isB2S?'—':(m.estNbv!=null?money(m.estNbv):'—'))}
+      </tr><tr class="detail-row"><td colspan="57" style="padding:0;border-right:0"><div class="bulk-detail" id="detail-${i}" hidden>${detailHtml(r)}</div></td></tr>`;
     }).join('')+'</tbody></table>';
-  wrap.querySelectorAll('.expand').forEach(btn=>btn.onclick=()=>{
-    const detail=bulk$('detail-'+btn.dataset.i); const open=!detail.hidden; detail.hidden=open;
-    btn.setAttribute('aria-expanded',String(!open)); btn.textContent=open?'DETAIL':'CLOSE';
-  });
+  wrap.querySelectorAll('.expand').forEach(btn=>btn.onclick=()=>{const detail=bulk$('detail-'+btn.dataset.i);const open=!detail.hidden;detail.hidden=open;btn.setAttribute('aria-expanded',String(!open));btn.textContent=open?'DETAIL':'CLOSE';});
   updateKpi();
 }
 function detailHtml(r){
-  const d=r.detail||{}, eng=d.engineering||{}, inv=d.investment||{};
-  const design=r.b2s_design||r.raw?.predictive_design||r.raw?.new_site?.design||{};
-  const ns=r.raw?.new_site||{};
-  const isB2S=!!r.b2s;
-  const pick=(...v)=>v.find(x=>x!==undefined&&x!==null&&x!=='');
-  const fmtIrr=v=>v==null?'—':(Math.abs(bulkNum(v))>1?bulkNum(v):bulkNum(v)*100).toFixed(2)+'%';
-  const candidateId=isB2S?'PREDICTIVE NEW SITE':(r.candidate_id||'—');
-  const candidateName=isB2S?'PREDICTIVE NEW SITE':(r.candidate_name||'—');
-  const distance=isB2S?'N/A':(r.distance_m!=null?(bulkNum(r.distance_m)/1000).toFixed(2)+' km':'—');
-  const tower=pick(r.tower_type,design.tower_type,'—');
-  const height=pick(r.tower_height_m,design.recommended_height_m);
-  const tenants=isB2S?'N/A':(r.tenant_count!=null?String(r.tenant_count):'—');
-  const signal=isB2S?'N/A':(r.signal!=null?bulkNum(r.signal).toFixed(1)+' dBm':'—');
-  const needStr=isB2S?'N/A':(eng.need_str||r.need_str||'—');
-  const reinforcement=isB2S?'N/A':(r.reinforcement!=null?bulkNum(r.reinforcement).toFixed(2)+' Ton':'—');
-  const sda=isB2S?'N/A':(d.sda_status||'—');
-  const access=isB2S?'N/A':(eng.access_level??'—');
-  const days=isB2S?'N/A':(eng.estimated_to_on_air_days!=null?bulkNum(eng.estimated_to_on_air_days).toFixed(0)+' days':'—');
-  const structural=isB2S?'N/A':(eng.structural_utilization_proxy!=null?bulkNum(eng.structural_utilization_proxy).toFixed(1)+'%':'—');
-  const reinfProb=isB2S?'N/A':(eng.reinforcement_probability!=null?bulkNum(eng.reinforcement_probability).toFixed(1)+'%':'—');
-  const roadhead=isB2S?'N/A':(eng.roadhead_distance_m!=null?bulkNum(eng.roadhead_distance_m).toFixed(0)+' m':'—');
-  const irr=r.estimated_irr??inv.estimated_irr??ns.irr??ns.estimated_irr;
-  const capex=r.capex??inv.capex_total??inv.estimated_capex??ns.capex_total??ns.estimated_capex;
-  const npv=r.npv??inv.npv??ns.npv;
-  const invDecision=r.investment_decision??inv.decision??ns.investment_decision??ns.decision??r.decision;
-  const c=r.cost||{};
-  const costGroups=[['SURVEY',c.survey],['SITAC 1',c.sitac1],['SITAC 2',c.sitac2],['MATERIAL',c.material],['DELIVERY',c.delivery],['CME',c.cme]];
-  const totalCost=c.total??capex;
-  const costHtml=costGroups.map(g=>`<div class="cost-group"><div class="cost-group-head"><strong>${bulkEsc(g[0])}</strong><b>${bulkMoney(g[1])}</b></div></div>`).join('')+`<div class="cost-group"><div class="cost-group-head"><strong>TOTAL SELECTED CASE</strong><b>${bulkMoney(totalCost)}</b></div></div>`;
-  const profile=isB2S
-    ? [
-      ['SITE TYPE','PREDICTIVE NEW SITE'],['TARGET TENANT',r.tenant||'—'],
-      ['LOCATION',`${r.lat!=null?bulkNum(r.lat).toFixed(5):'—'}, ${r.lon!=null?bulkNum(r.lon).toFixed(5):'—'}`],
-      ['LAND TYPE',pick(r.b2s_land_type,design.land_type,design.density_class,'—')],
-      ['LAND AREA',design.recommended_land_area_m2!=null?bulkNum(design.recommended_land_area_m2).toFixed(0)+' m²':'—'],
-      ['TOWER TYPE',tower],['TOWER HEIGHT',height!=null?bulkNum(height).toFixed(0)+' m':'—'],
-      ['EXISTING TENANTS','—'],['TENANT LIST','—'],['DISTANCE','N/A']
-    ]
-    : [
-      ['TOWER HEIGHT',height!=null?bulkNum(height).toFixed(0)+' m':'—'],['TOWER TYPE',tower],
-      ['EXISTING TENANTS',tenants],['TENANT LIST',r.tenant_list||'—'],['DISTANCE',distance],
-      ['TARGET TENANT',r.tenant||'—']
-    ];
+  const m=bulkSingleSiteMetrics(r),rec=m.rec,eng=m.eng,inv=m.inv;
+  const profile=m.isB2S
+    ? [['SITE TYPE','PREDICTIVE NEW SITE'],['TARGET TENANT',r.tenant||'—'],['LOCATION',`${r.lat!=null?bulkNum(r.lat).toFixed(5):'—'}, ${r.lon!=null?bulkNum(r.lon).toFixed(5):'—'}`],['LAND TYPE',m.design.land_type||m.design.density_class||r.b2s_land_type||'—'],['LAND AREA',m.design.recommended_land_area_m2!=null?bulkNum(m.design.recommended_land_area_m2).toFixed(0)+' m²':'—'],['TOWER TYPE',m.tower],['TOWER HEIGHT',m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—'],['EXISTING TENANTS','—'],['TENANT LIST','—'],['DISTANCE','0.00 km']]
+    : [['TOWER HEIGHT',m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—'],['TOWER TYPE',m.tower],['EXISTING TENANTS',String(rec?.detail?.site?.tenant_count??rec?.tenant_count??0)],['TENANT LIST',Array.isArray(rec?.detail?.site?.tenants)&&rec.detail.site.tenants.length?rec.detail.site.tenants.join(' · '):Array.isArray(rec?.tenants)&&rec.tenants.length?rec.tenants.join(' · '):`${bulkNum(rec?.detail?.site?.tenant_count??rec?.tenant_count)} tenant${bulkNum(rec?.detail?.site?.tenant_count??rec?.tenant_count)===1?'':'s'}`],['DISTANCE',m.distance],['TARGET TENANT',r.tenant||'—']];
   const profileHtml=profile.map(x=>`<div class="info-cell"><span>${bulkEsc(x[0])}</span><b class="${x[1]==='—'?'no-data':''}">${bulkEsc(x[1])}</b></div>`).join('');
-  const engineering=[
-    ['NEED STR',needStr],['EST. REINFORCEMENT',reinforcement],['SDA AVAILABLE',sda],
-    ['SES / DELIVERY',isB2S?'N/A':(eng.ses_work_type||'—')],['COMCASE HISTORY',isB2S?'N/A':(eng.community_case_count!=null?String(eng.community_case_count):'—')],
-    ['RED ZONE',isB2S?'N/A':(eng.red_zone!=null?(eng.red_zone?'YES':'NO'):'—')],['ACCESS DIFFICULTY',access],
-    ['ROADHEAD DISTANCE',roadhead],['EST. TO ON AIR',days],['REINFORCEMENT PROB.',reinfProb],
-    ['STRUCTURAL UTILIZATION',structural],['PHYSICAL SES PROB.',isB2S?'N/A':(eng.physical_ses_probability!=null?bulkNum(eng.physical_ses_probability).toFixed(1)+'%':'—')]
-  ];
+  const engineering=[['NEED STR',m.needStr],['EST. REINFORCEMENT',m.reinforcement],['SDA AVAILABLE',m.sda],['SES / DELIVERY',m.ses],['COMCASE HISTORY',m.comcase],['RED ZONE',m.red],['ACCESS DIFFICULTY',m.access],['ROADHEAD DISTANCE',m.road],['EST. TO ON AIR',m.days],['REINFORCEMENT PROB.',m.reinfProb],['STRUCTURAL UTILIZATION',m.structural],['PHYSICAL SES PROB.',m.physical]];
   const engineeringHtml=engineering.map(x=>`<div class="info-cell"><span>${bulkEsc(x[0])}</span><b class="${x[1]==='—'?'no-data':''}">${bulkEsc(x[1])}</b></div>`).join('');
-  const investmentHtml=isB2S
-    ? `<div class="investment-row"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${bulkMoney(capex)}</b><small>Standalone B2S CAPEX</small></div><div class="investment-cell"><span>B2S STANDALONE IRR</span><b>${fmtIrr(irr)}</b><small>Standalone New Build economics</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>NPV</span><b>${bulkMoney(npv)}</b><small>Standalone B2S economics</small></div><div class="investment-cell"><span>INVESTMENT DECISION</span><b>${bulkEsc(invDecision||'—')}</b><small>Hurdle 10.73%</small></div></div>`
-    : `<div class="investment-row"><div class="investment-cell"><span>EXISTING NBV</span><b>${bulkMoney(inv.existing_nbv??r.existing_nbv)}</b><small>Existing asset baseline</small></div><div class="investment-cell"><span>EXISTING IRR</span><b>${fmtIrr(r.existing_irr)}</b><small>Economic engine</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${bulkMoney(capex)}</b><small>Incremental COLLO CAPEX</small></div><div class="investment-cell"><span>ESTIMATED IRR · EXISTING + COLLO</span><b>${fmtIrr(irr)}</b><small>Existing asset + incremental COLLO economics</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>NPV</span><b>${bulkMoney(npv)}</b><small>Scenario economics</small></div><div class="investment-cell"><span>INVESTMENT DECISION</span><b>${bulkEsc(invDecision||'—')}</b><small>Hurdle 10.73%</small></div></div>`;
-  const candidateRows=isB2S
-    ? `<div class="candidate-row active" style="cursor:default"><div class="candidate-rank">#B2S</div><div><strong>PREDICTIVE NEW SITE</strong><small>New Order · ${bulkEsc(r.tenant||'—')} · ${bulkEsc(tower)} · ${height!=null?bulkNum(height).toFixed(0)+' m':'—'}</small></div><div class="candidate-right"><b>N/A</b><small>N/A</small></div></div>`
-    : `<div class="candidate-row active" style="cursor:default"><div class="candidate-rank">#1</div><div><strong>${bulkEsc(candidateId)}</strong><small>${bulkEsc(candidateName)} · ${bulkEsc(distance)} · ${bulkEsc(tower)} · ${height!=null?bulkNum(height).toFixed(0)+' m':'—'} · ${bulkEsc(tenants)} tenant${tenants==='1'?'':'s'}</small></div><div class="candidate-right"><b>${bulkEsc(distance)}</b><small>${bulkEsc(signal)}</small></div></div>`;
-  return `<div class="single-site-result bulk-single-site-result">
-    <div class="section-block"><div class="section-title"><span>01</span><strong>TOP 5 CANDIDATES</strong><small>Technical priority</small></div><div class="candidate-list">${candidateRows}</div></div>
-    <div class="section-block"><div class="section-title"><span>02</span><strong>CANDIDATE PROFILE</strong></div><div class="info-grid">${profileHtml}</div><div class="signal-card"><div class="mini-label">TARGET TENANT SIGNAL · INFORMATION</div><div class="signal-detail"><div><strong>${bulkEsc(signal)}</strong><span>${isB2S?'N/A — NEW BUILD':'Candidate signal'}</span></div></div></div></div>
-    <div class="section-block"><div class="section-title"><span>03</span><strong>ENGINEERING &amp; DELIVERY</strong></div><div class="info-grid">${engineeringHtml}</div><div class="challenge compact"><div class="decision-label">KEY ENGINEERING FLAG</div><strong>${bulkEsc(isB2S?'NEW SITE / B2S':(needStr==='YES'?'ENGINEERING / STRUCTURAL':'TECHNICAL REVIEW'))}</strong><p>${bulkEsc(isB2S?'New site candidate — existing-site engineering and SDA history are not applicable.':(needStr==='YES'?'Structural reinforcement required / under review.':'Candidate requires engineering validation before final design.'))}</p></div></div>
-    <div class="section-block"><div class="section-title"><span>04</span><strong>COST BUILD-UP</strong></div><div class="cost-stack">${costHtml}</div></div>
-    <div class="section-block"><div class="section-title"><span>05</span><strong>INVESTMENT</strong><small>Economics only</small></div><div class="investment-card">${investmentHtml}</div></div>
-  </div>`;
+  const c=m.costBreakdown,money=v=>v==='—'?'—':bulkMoney(v),cv=k=>money(c[k]);
+  const groups=[['SURVEY',[['SIS',cv('survey_sis')],['SES',cv('survey_ses')],['Rerunning SDA',cv('survey_rerunning_sda')]]],['SITAC 1',[['Sewa Lahan',cv('sitac1_sewa_lahan')],['Izin Warga',cv('sitac1_izin_warga')],['Rekom Lurah',cv('sitac1_rekom_lurah')],['Rekom Camat',cv('sitac1_rekom_camat')],['Jasa SITAC',cv('sitac1_jasa_sitac')]]],['SITAC 2',[['PBG',cv('sitac2_pbg')],['SLF',cv('sitac2_slf')],['Retribusi',cv('sitac2_retribusi')],['PBB',cv('sitac2_pbb')],['Jasa Pengurusan Perizinan',cv('sitac2_jasa_perizinan')]]],['MATERIAL',[['Tower',cv('material_tower')],['Fence & Yard',cv('material_fence')],['Mounting · Material',cv('material_mounting')]]],['DELIVERY',[['Factory → Port',cv('delivery_factory_port')],['Langsir / Local Haulage',cv('delivery_langsir')],['Port → Site',cv('delivery_port_site')]]],['CME',[['STR · Material STR',cv('cme_str_material')],['Pondasi Tower · Material',cv('cme_foundation_tower')],['Pondasi RBS · Material',cv('cme_foundation_rbs')],['APD Pondasi RBS',cv('cme_rbs_apd')],['Grounding',cv('cme_grounding')],['Electrical',cv('cme_electrical')],['Transformer',cv('cme_transformer')],['PLN Connection',cv('cme_pln')],['Jasa CME',cv('cme_jasa_cme')],['Jasa Erection',cv('cme_erection')]]]];
+  const costHtml=groups.map(g=>`<div class="cost-group"><div class="cost-group-head"><strong>${bulkEsc(g[0])}</strong><b>${bulkMoney(g[1].reduce((a,x)=>a+(x[1]==='—'?0:bulkNum(String(x[1]).replace(/[^0-9.-]/g,''),0)),0))}</b></div><div class="cost-items">${g[1].map(x=>`<div class="cost-item"><span>${bulkEsc(x[0])}</span><b>${bulkEsc(x[1])}</b></div>`).join('')}</div></div>`).join('')+`<div class="cost-group"><div class="cost-group-head"><strong>TOTAL SELECTED CASE</strong><b>${bulkMoney(m.totalCost)}</b></div></div>`;
+  const investment=m.isB2S
+    ? `<div class="investment-row"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${bulkMoney(m.estCapex)}</b><small>Standalone B2S CAPEX</small></div><div class="investment-cell"><span>B2S STANDALONE IRR</span><b>${m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—'}</b><small>Standalone New Build economics</small></div></div><div class="investment-result"><span>INVESTMENT DECISION · HURDLE 10.73%</span><b>${bulkEsc(m.invStatus||'—')}</b></div>`
+    : `<div class="investment-row"><div class="investment-cell"><span>EXISTING NBV</span><b>${bulkMoney(m.existingNbv)}</b><small>Existing asset baseline</small></div><div class="investment-cell"><span>EXISTING IRR</span><b>${m.existingIrr!=null?m.existingIrr.toFixed(2)+'%':'—'}</b><small>${m.existingIrr==null?'Economic engine · data required':'Economic engine'}</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${bulkMoney(m.estCapex)}</b><small>Incremental COLLO CAPEX</small></div><div class="investment-cell"><span>ESTIMATED IRR · EXISTING + COLLO</span><b>${m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—'}</b><small>Existing asset + incremental COLLO economics</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>INVESTMENT BASE</span><b>${bulkMoney(m.estNbv)}</b><small>Existing NBV + incremental COLLO CAPEX</small></div></div><div class="investment-result"><span>INVESTMENT DECISION · HURDLE 10.73%</span><b>${bulkEsc(m.invStatus||'—')}</b></div>`;
+  const top=r.raw?.collo?.top_5||[];
+  const candidateRows=m.isB2S
+    ? top.map((x,i)=>`<div class="candidate-row" style="cursor:default"><div class="candidate-rank">#${i+1}</div><div><strong>${bulkEsc(x.site_id||'—')}</strong><small>${x.distance_m!=null?(bulkNum(x.distance_m)/1000).toFixed(2)+' km':'—'} · ${bulkEsc(x.tower_type||'—')} · ${x.tower_height_m!=null?bulkNum(x.tower_height_m).toFixed(0)+' m':'—'} · ${bulkNum(x.tenant_count)} tenant${bulkNum(x.tenant_count)===1?'':'s'}</small></div><div class="candidate-right"><b>${x.distance_m!=null?bulkNum(x.distance_m).toFixed(0)+' m':'—'}</b><small>${x.signal_rsrp_avg_dbm!=null?bulkNum(x.signal_rsrp_avg_dbm).toFixed(1)+' dBm':'Signal —'}</small></div></div>`).join('')+`<div class="candidate-row active" style="cursor:default"><div class="candidate-rank">#6</div><div><strong>PREDICTIVE NEW SITE / B2S</strong><small>Technical fallback · New Order location</small></div><div class="candidate-right"><b>${m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—'}</b><small>— · IRR ${m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—'}</small></div></div>`
+    : top.map((x,i)=>`<div class="candidate-row ${x.site_id===rec?.site_id?'active':''}" style="cursor:default"><div class="candidate-rank">#${i+1}</div><div><strong>${bulkEsc(x.site_id||'—')}</strong><small>${x.distance_m!=null?(bulkNum(x.distance_m)/1000).toFixed(2)+' km':'—'} · ${bulkEsc(x.tower_type||'—')} · ${x.tower_height_m!=null?bulkNum(x.tower_height_m).toFixed(0)+' m':'—'} · ${bulkNum(x.tenant_count)} tenant${bulkNum(x.tenant_count)===1?'':'s'}</small></div><div class="candidate-right"><b>${x.distance_m!=null?bulkNum(x.distance_m).toFixed(0)+' m':'—'}</b><small>${x.signal_rsrp_avg_dbm!=null?bulkNum(x.signal_rsrp_avg_dbm).toFixed(1)+' dBm':'Signal —'}</small></div></div>`).join('')+`<div class="candidate-row" style="cursor:default"><div class="candidate-rank">#6</div><div><strong>PREDICTIVE NEW SITE / B2S</strong><small>Technical fallback · only if COLLO #1–#5 are not selected</small></div><div class="candidate-right"><b>—</b><small>— · IRR —</small></div></div>`;
+  const signalInfo=m.isB2S?'—':m.signal;
+  return `<div class="single-site-result bulk-single-site-result"><div class="section-block"><div class="section-title"><span>01</span><strong>TOP 5 CANDIDATES</strong><small>Technical priority</small></div><div class="candidate-list">${candidateRows||'<div class="no-data">No technically eligible COLLO candidate.</div>'}</div></div><div class="section-block"><div class="section-title"><span>02</span><strong>CANDIDATE PROFILE</strong></div><div class="info-grid">${profileHtml}</div><div class="signal-card"><div class="mini-label">TARGET TENANT SIGNAL · INFORMATION</div><div class="signal-detail">${m.isB2S?'<div class="no-data">No signal data available</div>':`<div><strong>${bulkEsc(signalInfo)}</strong><span>Candidate signal</span></div>`}</div></div></div><div class="section-block"><div class="section-title"><span>03</span><strong>ENGINEERING &amp; DELIVERY</strong></div><div class="info-grid">${engineeringHtml}</div><div class="challenge compact"><div class="decision-label">KEY ENGINEERING FLAG</div><strong>${bulkEsc(m.isB2S?'NEW SITE / B2S':(m.needStr==='YES'?'ENGINEERING / STRUCTURAL':(m.red==='YES'?'COMMUNITY / RED ZONE':'TECHNICAL REVIEW')))}</strong><p>${bulkEsc(m.isB2S?'New site candidate — existing-site engineering and SDA history are not applicable.':(m.needStr==='YES'?`Structural reinforcement probability ${eng.reinforcement_probability!=null?bulkNum(eng.reinforcement_probability).toFixed(1)+'%':'—'} · expected ${m.reinforcement}.`:(m.red==='YES'?'Historical community risk requires focused SITAC planning.':'Candidate requires engineering validation before final design.')))}</p></div></div><div class="section-block"><div class="section-title"><span>04</span><strong>COST BUILD-UP</strong></div><div class="cost-stack">${costHtml}</div></div><div class="section-block"><div class="section-title"><span>05</span><strong>INVESTMENT</strong><small>Economics only</small></div><div class="investment-card">${investment}</div></div></div>`;
 }
 function updateKpi(){const a=bulkState.results.filter(x=>x.candidate||x.b2s).length,c=bulkState.results.filter(x=>!x.b2s).length,b=bulkState.results.filter(x=>x.b2s).length,f=bulkState.results.filter(x=>String(x.investment_decision||'').toUpperCase().includes('FEAS')).length;bulk$('bulk-kInput').textContent=bulkState.inputs.length;bulk$('bulk-kAnalyzed').textContent=a;bulk$('bulk-kCollo').textContent=c;bulk$('bulk-kB2s').textContent=b;bulk$('bulk-kFeasible').textContent=f}
 function parseFile(file){return new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],json=XLSX.utils.sheet_to_json(ws,{defval:''});resolve(json)}catch(err){reject(err)}};rd.onerror=reject;rd.readAsArrayBuffer(file)})}
