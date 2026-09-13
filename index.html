@@ -345,7 +345,20 @@ body.bulk-page .mobile-nav{
 
 </aside>
 </main>
-<section id="bulkView" class="bulk-view" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input id="bulk-file" class="file" type="file" accept=".xlsx,.xls,.csv"></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" id="bulk-analyze" disabled>RUN BULK ANALYSIS →</button><button class="btn" id="bulk-export" disabled>EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div id="bulk-meeting-context" style="display:none;margin:10px 0;padding:9px 12px;border:1px solid #28516c;border-radius:9px;background:#0a2033;color:#a9dfff;font-size:10px;font-weight:800;letter-spacing:.6px"></div><div id="bulk-error" class="error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
+<section id="bulkView" class="bulk-view" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input id="bulk-file" class="file" type="file" accept=".xlsx,.xls,.csv"></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" id="bulk-analyze" disabled>RUN BULK ANALYSIS →</button><button class="btn" id="bulk-export" disabled>EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div id="bulk-meeting-context" style="display:none;margin:10px 0;padding:9px 12px;border:1px solid #28516c;border-radius:9px;background:#0a2033;color:#a9dfff;font-size:10px;font-weight:800;letter-spacing:.6px"></div>
+<div id="pmnoMeetingBulkContext" style="display:none;margin:8px 0 12px;padding:10px 12px;border:1px solid #29445c;border-radius:10px;background:#0b1b2b">
+  <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+    <div><div id="pmnoMeetingBulkTitle" style="font-size:11px;font-weight:900;letter-spacing:.7px"></div>
+      <div id="pmnoMeetingBulkMeta" style="font-size:9px;color:#91a4bd;margin-top:3px"></div></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="pmno-review-btn" onclick="pmnoBulkReviewFilter('ALL')">ALL</button>
+      <button class="pmno-review-btn" onclick="pmnoBulkReviewFilter('NOT REVIEWED')">NOT REVIEWED</button>
+      <button class="pmno-review-btn" onclick="pmnoBulkReviewFilter('FOLLOW UP')">FOLLOW UP</button>
+      <button class="pmno-review-btn" onclick="pmnoBulkReviewFilter('APPROVED')">APPROVED</button>
+      <button class="pmno-review-btn approve" onclick="pmnoBulkSaveMeetingState()">SAVE REVIEW</button>
+    </div>
+  </div>
+</div><div id="bulk-error" class="error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
 <nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button></nav>
 </div>
 </div>
@@ -1086,6 +1099,41 @@ window.pmnoMsAddCarryOver=async function(projectSiteId){
   }catch(e){console.error(e);alert('Gagal menambahkan carry-over: '+(e?.message||e));}
 };
 
+
+/* PMNO TASK 8 — END-TO-END MEETING/BULK UX */
+window.pmnoBulkReviewFilter=function(filter){
+  bulkState.reviewFilter=filter||'ALL';
+  const ctx=document.getElementById('pmnoMeetingBulkContext');
+  if(ctx)ctx.dataset.filter=bulkState.reviewFilter;
+  render();
+};
+window.pmnoBulkSaveMeetingState=async function(){
+  const ctx=bulkState.meetingContext;
+  if(!ctx?.meetingId){alert('Bulk belum terhubung ke Meeting.');return;}
+  try{
+    for(const r of (bulkState.results||[])){
+      if(!r.project_site_id)continue;
+      const status=r.review_status||'NOT REVIEWED';
+      const candidate=r.selectedCandidateId||r.candidate_id||null;
+      if(status==='APPROVED'){
+        const snapshot=pmnoBulkBuildFullSnapshot(r);
+        await window.pmnoPersistence.siteReviewSave(r.project_site_id,ctx.meetingId,status,{
+          candidate_id:candidate,note:r.review_note||null,snapshot
+        });
+        await window.pmnoPersistence.approvedSnapshotCreate(r.project_site_id,ctx.meetingId,candidate,snapshot,null);
+      }else if(status==='FOLLOW UP'){
+        await window.pmnoPersistence.siteReviewSave(r.project_site_id,ctx.meetingId,status,{
+          candidate_id:candidate,note:r.review_note||null,snapshot:null
+        });
+      }
+    }
+    alert('Review meeting berhasil disimpan.');
+    render();
+  }catch(e){console.error(e);alert('Gagal menyimpan review meeting: '+(e?.message||e));}
+};
+
+window.pmnoMsRunBulk=window.pmnoMsRunBulk||async function(){};
+
 async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
 async function loadTenants(){try{const data=await rpc('pmno_tenants',{});if(Array.isArray(data)){const sel=$('tenant');const current=state.tenant;sel.innerHTML=data.map(t=>`<option value="${esc(t.code)}">${esc(t.name||t.code)}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===current)?current:(sel.options[0]?.value||'IOH');state.tenant=sel.value}}catch(e){/* keep fallback tenant list */}}
 function showError(msg){$('error').textContent=msg;$('error').style.display='block'}function clearError(){$('error').style.display='none'}
@@ -1471,7 +1519,7 @@ loadTenants().then(pmnoLoadRouteContext);
 const BULK_SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
 const BULK_SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
 const BULK_H={'apikey':BULK_SUPABASE_KEY,'Authorization':'Bearer '+BULK_SUPABASE_KEY,'Content-Type':'application/json'};
-const bulkState={inputs:[],results:[],meetingContext:null}; const bulk$=id=>document.getElementById(id);
+const bulkState={inputs:[],results:[],meetingContext:null,reviewFilter:"ALL"}; const bulk$=id=>document.getElementById(id);
 function bulkNum(v,d=null){const n=Number(v);return Number.isFinite(n)?n:d} function bulkEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function bulkMoney(v){const n=bulkNum(v,null);if(n===null)return '—';if(n===0)return '-';if(n>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' B';if(n>=1e6)return 'Rp '+(n/1e6).toFixed(0)+' M';return 'Rp '+Math.round(n).toLocaleString('id-ID')}
 async function bulkRpc(name,body){const r=await fetch(`${BULK_SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:BULK_H,body:JSON.stringify(body)});if(!r.ok)throw new Error(`${name} HTTP ${r.status}: ${(await r.text()).slice(0,180)}`);return r.json()}
@@ -1786,7 +1834,7 @@ function bulkSingleSiteMetrics(r){
 }
 
 function render(){
-  const rows=bulkState.results;
+  const rows=(bulkState.reviewFilter==="ALL"?bulkState.results:bulkState.results.filter(r=>(r.review_status||"NOT REVIEWED")===bulkState.reviewFilter));
   const wrap=bulk$('bulk-table-wrap');
   if(!rows.length){wrap.innerHTML='<div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div>';updateKpi();return;}
   const cell=(v,cls='')=>`<td class="${cls}">${bulkEsc(v==null||v===''?'—':v)}</td>`;
@@ -1849,8 +1897,14 @@ window.pmnoMsRunBulk=async function(){
       const p=x.project_site||{};
       return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id};
     }).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
-    bulkState.results=[];
+    bulkState.results=[];bulkState.reviewFilter='ALL';
     bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId:m.id,meeting:m};
+    const meetingBox=document.getElementById('pmnoMeetingBulkContext');
+    const meetingTitle=document.getElementById('pmnoMeetingBulkTitle');
+    const meetingMeta=document.getElementById('pmnoMeetingBulkMeta');
+    if(meetingBox)meetingBox.style.display='block';
+    if(meetingTitle)meetingTitle.textContent=`MEETING #${m.meeting_no} · ${m.meeting_title||''}`;
+    if(meetingMeta)meetingMeta.textContent=`${m.meeting_date||'—'} · ${bulkState.inputs.length} SITES`;
     const ctx=bulk$('bulk-meeting-context');
     if(ctx){ctx.style.display='block';ctx.textContent=`MEETING #${m.meeting_no} · ${m.meeting_title||''} · ${bulkState.inputs.length} SITES`;}
     bulk$('bulk-analyze').disabled=!bulkState.inputs.length;
