@@ -183,6 +183,57 @@ html.pmno-preload-bulk #bulkView{display:block !important}
 }
 </style>
 
+
+<style id="pmno-bulk-scroll-universal">
+/* PMNO Bulk — universal document scrolling, independent of viewport width */
+html.pmno-preload-bulk,
+html:has(body.bulk-page){
+  height:auto !important;
+  min-height:100% !important;
+}
+html.pmno-preload-bulk body,
+body.bulk-page{
+  height:auto !important;
+  min-height:100dvh !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+html.pmno-preload-bulk .app,
+body.bulk-page .app{
+  display:block !important;
+  height:auto !important;
+  min-height:100dvh !important;
+  overflow:visible !important;
+}
+html.pmno-preload-bulk #bulkView,
+body.bulk-page #bulkView{
+  display:block !important;
+  position:relative !important;
+  width:100% !important;
+  height:auto !important;
+  min-height:calc(100dvh - 72px) !important;
+  overflow:visible !important;
+}
+html.pmno-preload-bulk #bulkView .wrap,
+body.bulk-page #bulkView .wrap{
+  min-height:max-content !important;
+  padding-bottom:72px !important;
+}
+html.pmno-preload-bulk #bulkView .table-wrap,
+body.bulk-page #bulkView .table-wrap{
+  width:100% !important;
+  max-width:100% !important;
+  overflow-x:auto !important;
+  overflow-y:visible !important;
+  -webkit-overflow-scrolling:touch;
+  touch-action:pan-x;
+}
+html.pmno-preload-bulk #bulkView .table,
+body.bulk-page #bulkView .table{
+  min-width:1450px;
+}
+</style>
+
 </head>
 <body>
 <div class="app">
