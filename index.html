@@ -53,56 +53,7 @@
 .candidate-row[data-option="B2S"] .candidate-right b{color:var(--amber)}
 .candidate-row[data-option="B2S"]:hover{border-color:#52718a;background:#0d2132}
 </style>
-<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js">
-function normalizeB2SShared(raw, input){
-  const r=raw||{};
-  const design=r.predictive_design||r.new_site?.design||{};
-  const b=r.breakdown||{};
-  const eng=r.engineering||{};
-  const inv={
-    capex_total:r.capex_total??r.estimated_capex??null,
-    estimated_irr:r.estimated_irr??r.irr??null,
-    npv:r.npv??null,
-    decision:r.investment_decision??r.decision??null,
-    b2s_land_type:r.b2s_land_type??design.land_type??design.area_type??design.density_class??null,
-    b2s_initial_land_lease_annual:r.b2s_initial_land_lease_annual??null,
-    b2s_initial_lease_years:r.b2s_initial_lease_years??null,
-    b2s_renewal_cost_annual:r.b2s_renewal_cost_annual??null,
-    b2s_renewal_increase_pct:r.b2s_renewal_increase_pct??null
-  };
-  return {
-    option:'B2S',
-    b2s:true,
-    candidate_id:'PREDICTIVE NEW SITE',
-    candidate_name:'PREDICTIVE NEW SITE',
-    decision:'B2S',
-    final_decision:'B2S',
-    distance_m:0,
-    tenant_count:null,
-    signal:null,
-    tower_type:design.tower_type??r.tower_type??null,
-    tower_height_m:design.recommended_height_m??r.tower_height_m??null,
-    land_type:inv.b2s_land_type,
-    land_area_m2:design.recommended_land_area_m2??r.land_area_m2??null,
-    location:input?`${Number(input.lat).toFixed(5)}, ${Number(input.lon).toFixed(5)}`:null,
-    predictive_design:design,
-    engineering:{
-      need_str:'N/A',
-      reinforcement_probability:null,
-      reinforcement_expected_ton:null,
-      structural_utilization_proxy:null,
-      note:eng.note||'B2S is predictive new build; existing-tower reinforcement is not applicable.'
-    },
-    investment:inv,
-    cost:{
-      breakdown:b,
-      total:inv.capex_total
-    },
-    raw:r
-  };
-}
-
-</script><style>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script><style>
 
 :root{--bg:#06111f;--panel:#0a1727;--panel2:#0d1d31;--line:#20364f;--text:#edf5fb;--muted:#7e93a8;--cyan:#35c8ff;--green:#43e0a0;--red:#ff5570;--amber:#f5bf5c}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:13px}.app{min-height:100vh}.top{height:72px;padding:0 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#071321}.kicker{font-size:9px;letter-spacing:2px;color:#70869c;font-weight:900}.title{font-size:22px;font-weight:900}.title b{color:var(--cyan)}.status{font-size:9px;color:#91a6b8;letter-spacing:1px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px}.wrap{padding:22px;max-width:1800px;margin:auto}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.btn{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:8px;padding:10px 13px;font-weight:900;letter-spacing:.7px;cursor:pointer}.btn.primary{background:var(--cyan);color:#04111c;border-color:var(--cyan)}.btn:disabled{opacity:.5;cursor:wait}.file{display:none}.hint{color:var(--muted);font-size:11px}.summary{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;margin-bottom:16px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px}.kpi span{display:block;color:#70869c;font-size:8px;font-weight:900;letter-spacing:1.2px}.kpi b{display:block;font-size:20px;margin-top:5px}.table-wrap{background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:auto}.table{width:100%;border-collapse:collapse;min-width:1180px}.table th{position:sticky;top:0;background:#0d1d31;color:#7890a7;font-size:8px;letter-spacing:1px;text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:10px 9px;border-bottom:1px solid #162b40;vertical-align:top;font-size:10px}.table td:nth-child(2){min-width:130px}.table td:nth-child(4){min-width:145px}.table tr:hover td{background:#0c1d30}.status-pill{display:inline-block;border-radius:20px;padding:4px 7px;font-size:8px;font-weight:900;white-space:nowrap}.ok{color:var(--green);border:1px solid #24694f;background:#0c2b25}.warn{color:var(--amber);border:1px solid #6b5730;background:#2a2418}.bad{color:var(--red);border:1px solid #693040;background:#2a1720}.neutral{color:#9db0c1;border:1px solid #30465a;background:#102032}.expand{border:1px solid #31566e;background:#0a2234;color:#a9dfff;border-radius:6px;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}.detail-row td{padding:0;background:#081522}.detail{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.detail-card{border:1px solid var(--line);background:#0a1727;border-radius:9px;padding:12px}.detail-card h4{margin:0 0 10px;font-size:9px;letter-spacing:1.2px;color:var(--cyan)}.kv{display:grid;grid-template-columns:1fr 1fr;gap:6px}.kv div{padding:7px;border-bottom:1px solid #172d42}.kv span{display:block;color:#71889e;font-size:7px;letter-spacing:.8px}.kv b{display:block;margin-top:3px;font-size:10px}.cost-grid{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:7px}.cost-box{border:1px solid #213a51;border-radius:8px;padding:9px;background:#091827}.cost-box span{display:block;color:#71889e;font-size:7px;letter-spacing:.9px}.cost-box b{display:block;margin-top:5px;font-size:11px}.cost-box.total{border-color:#2d718c;background:#0b2234}.cost-box.total b{color:var(--cyan)}.error{padding:11px;border:1px solid #6c3442;background:#2a1720;color:#ffb9c4;border-radius:9px;margin-bottom:12px;display:none}.progress{color:#9eb3c4;font-size:10px;margin-left:auto}.empty{padding:45px;text-align:center;color:#657c91}.sda a{color:var(--cyan);text-decoration:none}.small{font-size:8px;color:#667e92}.mono{font-family:ui-monospace,monospace}
