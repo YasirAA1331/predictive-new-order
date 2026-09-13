@@ -269,7 +269,7 @@ async function loadB2SIntelligence(){
         b2s_land_type:b2sResult?.area_type
       },
       cost:{
-        survey:{sis:0,ses:0,rerunning_sda:0},
+        survey:{sis:num(bd.sis,0),ses:0,rerunning_sda:0},
         sitac_1:{sewa_lahan:b2sResult?.b2s_initial_land_lease_annual!=null&&b2sResult?.b2s_initial_lease_years!=null?num(b2sResult.b2s_initial_land_lease_annual)*num(b2sResult.b2s_initial_lease_years):num(bd.land,0),izin_warga:0,rekom_lurah:0,rekom_camat:0,jasa_sitac:num(bd.sitac_non_land,0)},
         sitac_2:{pbg:0,slf:0,retribusi:0,pbb:0,jasa_pengurusan_perizinan:0}
       },
@@ -832,7 +832,7 @@ function bulkSingleSiteMetrics(r){
   };
   if(isB2S){
     const bd=r.raw?.b2s_scenario?.breakdown||{};
-    costBreakdown.survey_sis=0; costBreakdown.survey_ses=0; costBreakdown.survey_rerunning_sda=0;
+    costBreakdown.survey_sis=bulkNum(bd.sis,0); costBreakdown.survey_ses=0; costBreakdown.survey_rerunning_sda=0;
     costBreakdown.sitac1_sewa_lahan=inv.b2s_initial_land_lease_annual!=null&&inv.b2s_initial_lease_years!=null?bulkNum(inv.b2s_initial_land_lease_annual)*bulkNum(inv.b2s_initial_lease_years):bulkNum(bd.land,0);
     costBreakdown.sitac1_izin_warga=0; costBreakdown.sitac1_rekom_lurah=0; costBreakdown.sitac1_rekom_camat=0; costBreakdown.sitac1_jasa_sitac=bulkNum(bd.sitac_non_land,0);
     costBreakdown.sitac2_pbg=0; costBreakdown.sitac2_slf=0; costBreakdown.sitac2_retribusi=0; costBreakdown.sitac2_pbb=0; costBreakdown.sitac2_jasa_perizinan=0;
