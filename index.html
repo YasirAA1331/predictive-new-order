@@ -54,6 +54,12 @@
 .candidate-row[data-option="B2S"]:hover{border-color:#52718a;background:#0d2132}
 </style>
 
+
+<style id="pmno-carry-over-css">
+.pmno-ms-list{display:grid;gap:8px}.pmno-ms-carry{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px;border:1px solid #25415b;border-radius:9px;background:#0a1b2c}
+.pmno-ms-carry-name{font-size:11px;font-weight:800}.pmno-ms-carry-meta{font-size:9px;color:#91a4bd;margin-top:3px}
+@media(max-width:640px){.pmno-ms-carry{align-items:flex-start;flex-direction:column}.pmno-ms-carry .pmno-ms-btn{width:100%}}
+</style>
 <style id="pmno-meeting-sites-css">
 .pmno-ms-shell{display:none;min-height:100vh;background:#071525;color:#eaf2ff;padding:24px}
 .pmno-ms-shell.active{display:block}.pmno-ms-wrap{max-width:1180px;margin:auto}
@@ -79,9 +85,14 @@
     <button class="pmno-ms-btn ghost" onclick="pmnoMeetingSitesBack()">← MEETINGS</button>
     <div class="pmno-ms-head">
       <div><div id="pmnoMsTitle" class="pmno-ms-title">MEETING</div><div id="pmnoMsSub" class="pmno-ms-sub"></div></div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pmno-ms-btn primary" onclick="pmnoMsRunBulk()">RUN BULK ANALYSIS →</button><button class="pmno-ms-btn" onclick="pmnoMsAddPanel()">＋ ADD SITES</button></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pmno-ms-btn primary" onclick="pmnoMsRunBulk()">RUN BULK ANALYSIS →</button><button class="pmno-ms-btn" onclick="pmnoMsCarryPanel()">↻ CARRY OVER</button><button class="pmno-ms-btn" onclick="pmnoMsAddPanel()">＋ ADD SITES</button></div>
     </div>
-    <div id="pmnoMsAddPanel" class="pmno-ms-panel" style="display:none">
+    
+<div id="pmnoMsCarryPanel" class="pmno-ms-panel" style="display:none">
+  <div style="font-weight:800;margin-bottom:10px">CARRY OVER FROM PREVIOUS MEETINGS</div>
+  <div id="pmnoMsCarryList" class="pmno-ms-list"></div>
+</div>
+<div id="pmnoMsAddPanel" class="pmno-ms-panel" style="display:none">
       <div style="font-weight:800;margin-bottom:10px">ADD NEW SITES</div>
       <div class="pmno-ms-addgrid">
         <input id="pmnoMsSiteId" placeholder="Site ID *"><input id="pmnoMsSiteName" placeholder="Site Name">
@@ -603,7 +614,10 @@ window.pmnoPersistence = (() => {
       return Array.isArray(rows) ? (rows[0] || null) : rows;
     },
 
-    async meetingSitesWithProjectSites(meetingId){
+    async projectFollowUpSites(projectId){
+    return await request('pmno_project_sites?project_id=eq.'+encodeURIComponent(projectId)+'&current_status=eq.FOLLOW%20UP&order=updated_at.desc','GET');
+  },
+  async meetingSitesWithProjectSites(meetingId){
     const rows=await request('/pmno_meeting_sites?meeting_id=eq.'+encodeURIComponent(meetingId)+'&order=display_order.asc','GET');
     const out=[];
     for(const r of (rows||[])){
@@ -1026,6 +1040,50 @@ window.pmnoMsBuildApprovalSnapshot=function(p,row){
     meeting_id:window.pmnoMsState.meeting?.id||null,
     approved_at:new Date().toISOString()
   };
+};
+
+
+/* PMNO TASK 7 — CARRY OVER */
+window.pmnoMsCarryPanel=async function(){
+  const panel=document.getElementById('pmnoMsCarryPanel');
+  if(!panel)return;
+  if(panel.style.display==='block'){panel.style.display='none';return;}
+  panel.style.display='block';
+  const list=document.getElementById('pmnoMsCarryList');
+  if(list)list.innerHTML='<div class="pmno-ms-empty">Loading follow-up sites…</div>';
+  await window.pmnoMsLoadCarryOver();
+};
+window.pmnoMsLoadCarryOver=async function(){
+  const projectId=window.pmnoMeetingState.projectId, m=window.pmnoMsState.meeting;
+  const list=document.getElementById('pmnoMsCarryList'); if(!list||!projectId||!m)return;
+  try{
+    const candidates=await window.pmnoPersistence.projectFollowUpSites(projectId);
+    const existing=new Set((window.pmnoMsState.rows||[]).map(x=>x.project_site?.id).filter(Boolean));
+    const available=(candidates||[]).filter(x=>!existing.has(x.id));
+    if(!available.length){
+      list.innerHTML='<div class="pmno-ms-empty">Tidak ada site FOLLOW UP dari meeting sebelumnya yang belum masuk meeting ini.</div>';
+      return;
+    }
+    list.innerHTML=available.map(p=>`
+      <div class="pmno-ms-carry">
+        <div><div class="pmno-ms-carry-name">${pmnoProjectEsc(p.site_id||'')} · ${pmnoProjectEsc(p.site_name||'')}</div>
+        <div class="pmno-ms-carry-meta">${pmnoProjectEsc(p.target_tenant||'')} · Status FOLLOW UP${p.current_note?' · '+pmnoProjectEsc(p.current_note):''}</div></div>
+        <button class="pmno-ms-btn primary" onclick="pmnoMsAddCarryOver('${p.id}')">ADD TO MEETING</button>
+      </div>`).join('');
+  }catch(e){
+    console.error(e);list.innerHTML='<div class="pmno-ms-empty">Gagal memuat carry-over: '+pmnoProjectEsc(e?.message||e)+'</div>';
+  }
+};
+window.pmnoMsAddCarryOver=async function(projectSiteId){
+  const m=window.pmnoMsState.meeting;if(!m)return;
+  const existing=new Set((window.pmnoMsState.rows||[]).map(x=>x.project_site?.id).filter(Boolean));
+  if(existing.has(projectSiteId)){alert('Site sudah ada di meeting ini.');return;}
+  try{
+    const order=(window.pmnoMsState.rows||[]).length+1;
+    await window.pmnoPersistence.meetingSiteUpsert(m.id,projectSiteId,'CARRY_OVER',order);
+    await window.pmnoMsLoad();
+    await window.pmnoMsLoadCarryOver();
+  }catch(e){console.error(e);alert('Gagal menambahkan carry-over: '+(e?.message||e));}
 };
 
 async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
