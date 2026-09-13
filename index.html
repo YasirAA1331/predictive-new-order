@@ -1,6 +1,6 @@
 
 <style id="pmno-bulk-visible-meeting-css">
-#pmnoBulkMeetingBar{display:none;margin:0 0 14px;padding:12px 14px;border:1px solid #28516c;border-radius:12px;background:#0b1d30}
+#pmnoBulkMeetingBar{display:block;margin:0 0 14px;padding:12px 14px;border:1px solid #28516c;border-radius:12px;background:#0b1d30}
 #pmnoBulkMeetingBar.active{display:block}
 .pmno-bm-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
 .pmno-bm-kicker{font-size:9px;letter-spacing:1.6px;color:#6f8aa5;font-weight:900}
@@ -144,7 +144,7 @@
 .pmno-review-badge.follow-up{color:#ffd76a;background:#3b2f12;border-color:#6b5521}
 .pmno-review-badge.approved{color:#8df2c2;background:#103b2c;border-color:#28795a}
 .pmno-review-badge.rejected{color:#ff9cad;background:#421d28;border-color:#7b3347}
-.pmno-review-btn{border:1px solid #31506a;background:#0b2033;color:#b8d4e7;border-radius:6px;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}
+.pmno-review-btn:disabled{opacity:.38;cursor:not-allowed}.pmno-review-btn{border:1px solid #31506a;background:#0b2033;color:#b8d4e7;border-radius:6px;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}
 .pmno-review-btn.approve{border-color:#28795a;color:#8df2c2}
 </style>
 </style>
@@ -305,11 +305,11 @@ body.bulk-page .mobile-nav{
   <div class="pmno-bm-row">
     <div>
       <div class="pmno-bm-kicker">MEETING WORKSPACE</div>
-      <div id="pmnoBulkMeetingTitle" class="pmno-bm-title">No active meeting</div>
-      <div id="pmnoBulkMeetingMeta" class="pmno-bm-meta">Run Bulk Analyzer standalone or open a Meeting to work in meeting mode.</div>
+      <div id="pmnoBulkMeetingTitle" class="pmno-bm-title">STANDALONE BULK ANALYZER</div>
+      <div id="pmnoBulkMeetingMeta" class="pmno-bm-meta">Analysis mode · Review &amp; approval require an active Meeting.</div>
     </div>
     <div class="pmno-bm-actions">
-      <button class="pmno-bm-btn" onclick="pmnoBulkMeetingSelectSites()">SELECT / MANAGE SITES</button>
+      <button class="pmno-bm-btn" onclick="pmnoBulkOpenProjectMeeting()">OPEN PROJECT / MEETING</button><button class="pmno-bm-btn" onclick="pmnoBulkMeetingSelectSites()">SELECT / MANAGE SITES</button>
       <button class="pmno-bm-btn active" data-bm-filter="ALL" onclick="pmnoBulkReviewFilter('ALL')">ALL</button>
       <button class="pmno-bm-btn" data-bm-filter="NOT REVIEWED" onclick="pmnoBulkReviewFilter('NOT REVIEWED')">NOT REVIEWED</button>
       <button class="pmno-bm-btn" data-bm-filter="FOLLOW UP" onclick="pmnoBulkReviewFilter('FOLLOW UP')">FOLLOW UP</button>
@@ -1145,6 +1145,10 @@ window.pmnoMsAddCarryOver=async function(projectSiteId){
 /* PMNO TASK 8 — END-TO-END MEETING/BULK UX */
 
 /* PMNO TASK 9 — VISIBLE BULK MEETING WORKSPACE */
+window.pmnoBulkOpenProjectMeeting=function(){
+  if(typeof window.pmnoProjectShow==='function') window.pmnoProjectShow();
+  else alert('Project Management belum tersedia pada runtime ini.');
+};
 window.pmnoBulkMeetingSelectSites=function(){
   const ctx=bulkState.meetingContext;
   if(ctx?.meetingId){
@@ -1162,7 +1166,12 @@ window.pmnoBulkMeetingRender=function(){
   const ctx=bulkState.meetingContext;
   if(!bar)return;
   if(!ctx?.meetingId){
-    bar.classList.remove('active');
+    bar.classList.add('active');
+    const title=document.getElementById('pmnoBulkMeetingTitle');
+    const meta=document.getElementById('pmnoBulkMeetingMeta');
+    if(title)title.textContent='STANDALONE BULK ANALYZER';
+    if(meta)meta.textContent='Analysis mode · Review & approval require an active Meeting.';
+    document.querySelectorAll('[data-bm-filter]').forEach(b=>b.classList.remove('active'));
     return;
   }
   bar.classList.add('active');
@@ -1936,7 +1945,7 @@ function render(){
       ${cell(m.needStr,'center')}${cell(m.reinforcement,'num')}${m.sdaDocuments?.length?`<td class="pmno-sda-cell"><a class="pmno-sda-link" href="${bulkEsc(m.sdaDocuments[0].document_url)}" target="_blank" rel="noopener noreferrer">SDA ↗</a>${m.sdaDocuments.length>1?`<small style="display:block;margin-top:3px;color:#71869b">+${m.sdaDocuments.length-1} more</small>`:''}</td>`:`<td class="pmno-sda-cell">${bulkEsc(m.sda??'—')}</td>`}${cell(m.ses)}${cell(m.comcase,'center')}${cell(m.red,'center')}${cell(m.access)}${cell(m.road,'num')}${cell(m.days)}${cell(m.reinfProb,'num')}${cell(m.structural,'num')}${cell(m.physical,'num')}
       ${cell(costVal('survey_sis'))}${cell(costVal('survey_ses'))}${cell(costVal('survey_rerunning_sda'))}${cell(costVal('sitac1_sewa_lahan'))}${cell(costVal('sitac1_izin_warga'))}${cell(costVal('sitac1_rekom_lurah'))}${cell(costVal('sitac1_rekom_camat'))}${cell(costVal('sitac1_jasa_sitac'))}${cell(costVal('sitac2_pbg'))}${cell(costVal('sitac2_slf'))}${cell(costVal('sitac2_retribusi'))}${cell(costVal('sitac2_pbb'))}${cell(costVal('sitac2_jasa_perizinan'))}${cell(costVal('material_tower'))}${cell(costVal('material_fence'))}${cell(costVal('material_mounting'))}${cell(costVal('delivery_factory_port'))}${cell(costVal('delivery_langsir'))}${cell(costVal('delivery_port_site'))}${cell(costVal('cme_str_material'))}${cell(costVal('cme_foundation_tower'))}${cell(costVal('cme_foundation_rbs'))}${cell(costVal('cme_rbs_apd'))}${cell(costVal('cme_grounding'))}${cell(costVal('cme_electrical'))}${cell(costVal('cme_transformer'))}${cell(costVal('cme_pln'))}${cell(costVal('cme_jasa_cme'))}${cell(costVal('cme_erection'))}
       ${cell(money(m.totalCost))}${cell(m.existingNbv!=null?money(m.existingNbv):'—')}${cell(m.existingIrr!=null?m.existingIrr.toFixed(2)+'%':'—','num')}${cell(money(m.estCapex))}${cell(m.isB2S?'—':(m.estNbv!=null?money(m.estNbv):'—'))}${cell(b2sIrr,'num')}${cell(feasibility, feasibility==='FEASIBLE'?'center feasible-cell':'center')}
-      <td class="center"><div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap"><button class="pmno-review-btn" onclick="pmnoBulkReview(${i},'FOLLOW UP')">FOLLOW UP</button><button class="pmno-review-btn approve" onclick="pmnoBulkReview(${i},'APPROVED')">APPROVE</button></div></td>
+      <td class="center"><div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap"><button class="pmno-review-btn" ${bulkState.meetingContext?.meetingId?'':'disabled title="Open a Meeting first"'} onclick="pmnoBulkReview(${i},'FOLLOW UP')">FOLLOW UP</button><button class="pmno-review-btn approve" ${bulkState.meetingContext?.meetingId?'':'disabled title="Open a Meeting first"'} onclick="pmnoBulkReview(${i},'APPROVED')">APPROVE</button></div></td>
       </tr>`;
     }).join('')+'</tbody></table>';
   updateKpi();
