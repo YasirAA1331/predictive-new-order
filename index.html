@@ -261,17 +261,33 @@ body.bulk-page .mobile-nav{
 .pmno-sda-cell{text-align:center!important;vertical-align:middle!important}
 .pmno-sda-cell .pmno-sda-link{margin-left:auto;margin-right:auto}
 </style>
-
-<style>
-/* FINAL FLOW FIX — preserve existing PMNO table structure, prevent mobile overflow/regression */
-.pmno-bulk-wrap{width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
-.pmno-bulk-wrap table{min-width:1180px;border-collapse:separate;border-spacing:0}
-.pmno-bulk-wrap th,.pmno-bulk-wrap td{white-space:nowrap;vertical-align:middle}
-.pmno-bulk-wrap .sticky-1,.pmno-bulk-wrap .sticky-2,.pmno-bulk-wrap .sticky-3{position:sticky;z-index:4}
-.pmno-bulk-wrap .sticky-1{left:0}.pmno-bulk-wrap .sticky-2{left:48px}.pmno-bulk-wrap .sticky-3{left:190px}
-@media(max-width:900px){
-  .pmno-bulk-wrap table{min-width:1120px}
-  .pmno-bulk-wrap th,.pmno-bulk-wrap td{font-size:11px;padding:8px 9px}
+<style id="pmno-bulk-final-flow-css">
+.pmno-bulk-project-bar{margin:0 0 12px;padding:12px 14px;border:1px solid #29445c;border-radius:12px;background:#0a1b2c}
+.pmno-bulk-project-head{display:flex;justify-content:space-between;align-items:center;gap:14px;flex-wrap:wrap}
+.pmno-bulk-project-kicker{font-size:8px;letter-spacing:1.7px;color:#6f8aa5;font-weight:950}
+.pmno-bulk-project-title{font-size:14px;font-weight:950;margin-top:3px}
+.pmno-bulk-project-meta{font-size:9px;color:#91a4bd;margin-top:4px}
+.pmno-bulk-project-actions{display:flex;gap:6px;flex-wrap:wrap}
+.pmno-bulk-project-btn{border:1px solid #31506a;background:#10243b;color:#cfe0f5;border-radius:8px;padding:7px 9px;font-size:8px;font-weight:950;cursor:pointer;letter-spacing:.4px}
+.pmno-bulk-project-btn.primary{background:#1b73e8;border-color:#1b73e8;color:#fff}
+.pmno-bulk-project-btn.next{border-color:#28795a;color:#8df2c2}
+.pmno-bulk-project-btn:disabled{opacity:.45;cursor:not-allowed}
+@media(max-width:760px){
+ .pmno-bulk-project-head{display:block}
+ .pmno-bulk-project-actions{margin-top:9px}
+ .pmno-bulk-project-btn{flex:1;min-width:120px}
+}
+</style>
+<style id="pmno-bulk-final-cleanup-css">
+/* FINAL CLEANUP: control layer only; existing Bulk table/map remain untouched. */
+#pmnoBulkProjectBar{position:relative;z-index:2}
+#pmnoBulkMeetingBar{position:relative;z-index:2}
+.bulk-table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:visible;-webkit-overflow-scrolling:touch;touch-action:pan-x pan-y}
+.bulk-table{width:max-content;min-width:100%;table-layout:auto}
+.bulk-table th,.bulk-table td{box-sizing:border-box}
+@media(max-width:760px){
+  .bulk-table-wrap{margin-right:0}
+  .bulk-table{min-width:1900px}
 }
 </style>
 </head>
@@ -355,6 +371,23 @@ body.bulk-page .mobile-nav{
         <div class="pmno-project-sub">Manage customer projects and meeting sessions</div>
       </div>
       <button class="pmno-project-btn primary" onclick="pmnoCreateProject()">＋ NEW PROJECT</butt
+<div id="pmnoBulkProjectBar" class="pmno-bulk-project-bar">
+  <div class="pmno-bulk-project-head">
+    <div>
+      <div class="pmno-bulk-project-kicker">PROJECT / MEETING CONTROL</div>
+      <div id="pmnoBulkProjectTitle" class="pmno-bulk-project-title">STANDALONE BULK ANALYZER</div>
+      <div id="pmnoBulkProjectMeta" class="pmno-bulk-project-meta">No active Project / Meeting · Upload mode available.</div>
+    </div>
+    <div class="pmno-bulk-project-actions">
+      <button class="pmno-bulk-project-btn" onclick="pmnoBulkReloadProject()">↻ RELOAD PROJECT</button>
+      <button class="pmno-bulk-project-btn primary" onclick="pmnoBulkSaveProject()">SAVE TO PROJECT</button>
+      <button class="pmno-bulk-project-btn" onclick="pmnoBulkReloadMeeting()">↻ RELOAD MEETING</button>
+      <button class="pmno-bulk-project-btn" onclick="pmnoBulkOpenProjectMeeting()">PROJECT / MEETING</button>
+      <button class="pmno-bulk-project-btn" onclick="pmnoBulkMeetingSelectSites()">SELECT SITES</button>
+      <button class="pmno-bulk-project-btn next" onclick="pmnoBulkCreateNextMeeting()">CREATE NEXT MEETING →</button>
+    </div>
+  </div>
+</div>
 <div id="pmnoBulkMeetingBar">
   <div class="pmno-bm-row">
     <div>
@@ -567,26 +600,11 @@ on>
     <button class="pmno-ss-btn warn" onclick="pmnoSsFilter('FOLLOW UP')">FOLLOW UP SITES</button>
     <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(true)">SELECT ALL</button>
     <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(false)">CLEAR</button>
-    <button class="pmno-ss-btn primary" onclick="pmnoSsAddSelected()">ADD SELECTED TO MEETING</button>
+    <button class="pmno-ss-btn primary" onclick="pmnoSsAddSelected()">ADD SELECTED TO MEETING</button><button class="pmno-ss-btn primary" onclick="pmnoSsRunBulk()">RUN BULK ANALYSIS →</button>
   </div>
   <div id="pmnoSsList" class="pmno-ss-list"></div>
 </div>
 
-<div id="pmnoSiteSelection">
-  <div class="pmno-ss-head">
-    <div><div class="pmno-ss-title">SITE SELECTION</div><div class="pmno-ss-sub">Pilih site yang akan dibahas pada meeting ini. Site master tidak diduplikasi.</div></div>
-    <div class="pmno-ss-count">SELECTED <b id="pmnoSsSelected">0</b></div>
-  </div>
-  <div class="pmno-ss-actions">
-    <button class="pmno-ss-btn" onclick="pmnoSsFilter('ALL')">ALL</button>
-    <button class="pmno-ss-btn" onclick="pmnoSsFilter('NEW')">NEW SITES</button>
-    <button class="pmno-ss-btn warn" onclick="pmnoSsFilter('FOLLOW UP')">FOLLOW UP SITES</button>
-    <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(true)">SELECT ALL</button>
-    <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(false)">CLEAR</button>
-    <button class="pmno-ss-btn primary" onclick="pmnoSsAddSelected()">ADD SELECTED TO MEETING</button>
-  </div>
-  <div id="pmnoSsList" class="pmno-ss-list"></div>
-</div>
 <div id="pmnoMeetingList" class="pmno-meeting-list"></div>
   </div>
 </div>
@@ -807,7 +825,7 @@ window.pmnoPersistence = (() => {
     return out;
   },
   async meetingsLoad(projectId){
-    return await rest('pmno_meetings?project_id=eq.'+encodeURIComponent(projectId)+'&order=meeting_no.asc','GET');
+    return await request('/pmno_meetings?project_id=eq.'+encodeURIComponent(projectId)+'&order=meeting_no.asc','GET');
   },
   async projectSiteUpsert(projectId, site) {
       return request('/pmno_project_sites', {
@@ -1219,12 +1237,7 @@ window.pmnoSsAddSelected=async function(){
     alert(`${rows.length} site ditambahkan ke Meeting.`);
   }catch(e){console.error(e);alert('Gagal menambahkan site: '+(e?.message||e));}
 };
-window.pmnoOpenMeeting=function(meetingId){
-  const m=(window.pmnoMeetingState.meetings||[]).find(x=>x.id===meetingId);
-  if(!m)return;
-  window.pmnoMeetingState.selectedMeeting=m;
-  alert(`Meeting #${m.meeting_no} selected. Site selection masuk di Task 4.`);
-};
+
 window.pmnoMeetingShow=async function(projectId){
   document.getElementById('pmnoProjectShell')?.classList.remove('active');
   const app=document.getElementById('app');if(app)app.style.display='none';
@@ -1287,6 +1300,30 @@ window.pmnoMsSaveSite=async function(){
     window.pmnoMsAddPanel(false);await window.pmnoMsLoad();
   }catch(e){console.error(e);alert('Gagal menambahkan site: '+(e?.message||e));}
 };
+window.pmnoSsRunBulk=async function(){
+  const m=window.pmnoMeetingState.selectedMeeting;
+  if(!m){alert('Pilih Meeting terlebih dahulu.');return;}
+  try{
+    const rows=await window.pmnoPersistence.meetingSitesWithProjectSites(m.id)||[];
+    rows.sort((a,b)=>(Number(a.display_order)||0)-(Number(b.display_order)||0));
+    if(!rows.length){alert('Belum ada site di Meeting. Tambahkan site terlebih dahulu.');return;}
+    const inputs=rows.map(x=>{
+      const p=x.project_site||{};
+      return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id,meeting_display_order:Number(x.display_order)||0};
+    }).filter(x=>x.site_id&&Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&x.tenant);
+    if(!inputs.length){alert('Data site di Meeting belum lengkap.');return;}
+    bulkState.inputs=inputs;
+    bulkState.results=[];
+    bulkState.reviewFilter='ALL';
+    bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId:m.id,meeting:m};
+    window.pmnoBulkProjectRender?.();
+    window.pmnoBulkMeetingRender?.();
+    document.getElementById('bulkMenu')?.click();
+    setTimeout(()=>window.dispatchEvent(new Event('resize')),80);
+    render();
+  }catch(e){console.error(e);alert('Gagal menjalankan Bulk Meeting: '+(e?.message||e));}
+};
+
 window.pmnoOpenMeeting=function(meetingId){
   const m=(window.pmnoMeetingState.meetings||[]).find(x=>x.id===meetingId);if(!m)return;
   window.pmnoMeetingState.selectedMeeting=m;window.pmnoMsOpen(m);
@@ -1392,10 +1429,90 @@ window.pmnoMsAddCarryOver=async function(projectSiteId){
 async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};state.recommendedId=enrichedRecommended?.site_id||null;const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)selectCandidate(enrichedRecommended);else updateDetail({recommended:enrichedRecommended});$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
 catch(e){showError('PMNO Engine belum dapat diakses. '+e.message+' Pastikan API function public.pmno_decision sudah ter-deploy.');}
 finally{setLoading(false)}}
+window.pmnoBulkProjectRender=function(){
+  const bar=document.getElementById('pmnoBulkProjectBar');
+  if(!bar)return;
+  const title=document.getElementById('pmnoBulkProjectTitle');
+  const meta=document.getElementById('pmnoBulkProjectMeta');
+  const ctx=bulkState.meetingContext;
+  const project=window.pmnoProjectState?.project||window.pmnoMeetingState?.project||null;
+  const meeting=ctx?.meeting||window.pmnoMeetingState?.selectedMeeting||null;
+  if(title) title.textContent=project ? (meeting ? `${project.customer_name||'PROJECT'} · ${project.project_name||'Project'} · MEETING #${meeting.meeting_no||'—'}` : `${project.customer_name||'PROJECT'} · ${project.project_name||'Project'}`) : 'STANDALONE BULK ANALYZER';
+  if(meta) meta.textContent=meeting ? `${meeting.meeting_date||'—'} · ${bulkState.inputs?.length||0} sites · ${bulkState.results?.length||0} analyzed · ${bulkState.results?.filter(r=>r.review_status==='APPROVED').length||0} approved` : (project ? `${bulkState.inputs?.length||0} input sites · save current inputs to Project` : 'No active Project / Meeting · Upload mode available.');
+};
+window.pmnoBulkReloadProject=async function(){
+  const projectId=bulkState.meetingContext?.projectId||window.pmnoProjectState?.projectId||window.pmnoMeetingState?.projectId;
+  if(!projectId){alert('Belum ada Project aktif. Buka Project terlebih dahulu.');return;}
+  try{
+    const project=await window.pmnoPersistence.projectLoad(projectId);
+    if(project){window.pmnoProjectState.projectId=project.id;window.pmnoProjectState.project=project;window.pmnoMeetingState.projectId=project.id;window.pmnoMeetingState.project=project;}
+    if(bulkState.meetingContext?.meetingId){await window.pmnoBulkReloadMeeting();return;}
+    const sites=await window.pmnoPersistence.projectSitesLoad(projectId)||[];
+    bulkState.inputs=sites.map(p=>({site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',project_site_id:p.id})).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
+    bulkState.results=[];
+    bulk$('bulk-analyze').disabled=!bulkState.inputs.length;
+    bulk$('bulk-export').disabled=true;
+    window.pmnoBulkProjectRender();
+    render();
+    alert(`Project reloaded · ${bulkState.inputs.length} site`);
+  }catch(e){console.error(e);alert('Gagal reload project: '+(e?.message||e));}
+};
+window.pmnoBulkSaveProject=async function(){
+  const projectId=bulkState.meetingContext?.projectId||window.pmnoProjectState?.projectId||window.pmnoMeetingState?.projectId;
+  if(!projectId){alert('Belum ada Project aktif. Buka atau buat Project terlebih dahulu.');return;}
+  const inputs=bulkState.inputs||[];
+  if(!inputs.length){alert('Belum ada input site untuk disimpan.');return;}
+  try{
+    let saved=0;
+    for(const x of inputs){
+      await window.pmnoPersistence.projectSiteUpsert(projectId,{
+        site_id:x.site_id,site_name:x.site_name,latitude:x.lat,longitude:x.lon,target_tenant:x.tenant,
+        ...(x.project_site_id?{current_status:x.review_status||'NOT REVIEWED'}:{})
+      });
+      saved++;
+    }
+    const p=await window.pmnoPersistence.projectLoad(projectId);
+    if(p){window.pmnoProjectState.projectId=p.id;window.pmnoProjectState.project=p;}
+    window.pmnoBulkProjectRender();
+    alert(`${saved} site berhasil disimpan ke Project.`);
+  }catch(e){console.error(e);alert('Gagal menyimpan ke Project: '+(e?.message||e));}
+};
+window.pmnoBulkReloadMeeting=async function(){
+  const meetingId=bulkState.meetingContext?.meetingId||window.pmnoMeetingState?.selectedMeeting?.id;
+  if(!meetingId){alert('Belum ada Meeting aktif.');return;}
+  try{
+    const rows=await window.pmnoPersistence.meetingSitesWithProjectSites(meetingId);
+    rows.sort((a,b)=>(Number(a.display_order)||0)-(Number(b.display_order)||0));
+    const meeting=window.pmnoMeetingState.meetings?.find(x=>x.id===meetingId)||bulkState.meetingContext?.meeting||window.pmnoMeetingState.selectedMeeting;
+    const inputs=rows.map(x=>{
+      const p=x.project_site||{};
+      return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id,meeting_display_order:Number(x.display_order)||0};
+    }).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
+    bulkState.inputs=inputs;bulkState.results=[];bulkState.reviewFilter='ALL';
+    bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId,meeting:meeting||{}};
+    bulk$('bulk-analyze').disabled=!inputs.length;bulk$('bulk-export').disabled=true;
+    window.pmnoBulkMeetingRender();window.pmnoBulkProjectRender();render();
+    alert(`Meeting reloaded · ${inputs.length} site`);
+  }catch(e){console.error(e);alert('Gagal reload meeting: '+(e?.message||e));}
+};
+window.pmnoBulkCreateNextMeeting=async function(){
+  if(!window.pmnoMeetingState?.selectedMeeting && !bulkState.meetingContext?.meetingId){alert('Belum ada Meeting aktif.');return;}
+  if(typeof window.pmnoCreateNextMeeting!=='function'){alert('Fitur Create Next Meeting belum tersedia.');return;}
+  await window.pmnoCreateNextMeeting();
+  setTimeout(()=>window.pmnoBulkProjectRender(),80);
+};
+
 window.pmnoBulkOpenProjectMeeting=function(){
+  const projectId=bulkState.meetingContext?.projectId||window.pmnoMeetingState?.projectId||window.pmnoProjectState?.projectId;
+  const meeting=bulkState.meetingContext?.meeting||window.pmnoMeetingState?.selectedMeeting;
+  if(projectId&&typeof window.pmnoMeetingShow==='function'){
+    window.pmnoMeetingShow(projectId).then(()=>{if(meeting)window.pmnoMsOpen?.(meeting);});
+    return;
+  }
   if(typeof window.pmnoProjectShow==='function') window.pmnoProjectShow();
   else alert('Project Management belum tersedia pada runtime ini.');
 };
+window.pmnoProjectNew=function(){if(typeof window.pmnoCreateProject==='function')window.pmnoCreateProject();else if(typeof window.pmnoNewProject==='function')window.pmnoNewProject();};
 window.pmnoProjectOpenBulk=function(){
   const bulkMenu=document.getElementById('bulkMenu');
   if(bulkMenu)bulkMenu.click();
@@ -2235,30 +2352,44 @@ window.pmnoMsRunBulk=async function(){
     const rows=await window.pmnoPersistence.meetingSitesWithProjectSites(m.id);
     rows.sort((a,b)=>(Number(a.display_order)||0)-(Number(b.display_order)||0));
     if(!rows.length){alert('Belum ada site pada meeting ini. Tambahkan site terlebih dahulu.');return;}
-    bulkState.inputs=rows.map(x=>{
+    const inputs=rows.map(x=>{
       const p=x.project_site||{};
-      return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id};
+      return {
+        site_id:String(p.site_id||''),
+        site_name:String(p.site_name||''),
+        lat:bulkNum(p.latitude),
+        lon:bulkNum(p.longitude),
+        tenant:String(p.target_tenant||'').toUpperCase(),
+        review_status:p.current_status||'NOT REVIEWED',
+        meeting_source:x.source||'NEW',
+        project_site_id:p.id,
+        meeting_site_id:x.id,
+        meeting_display_order:Number(x.display_order)||0
+      };
     }).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
-    bulkState.results=[];bulkState.reviewFilter='ALL';
-    bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId:m.id,meeting:m};
+
+    if(!inputs.length){alert('Site meeting belum memiliki data Site ID, koordinat, dan Target Tenant yang valid.');return;}
+
+    bulkState.inputs=inputs;
+    bulkState.results=[];
+    bulkState.reviewFilter='ALL';
+    bulkState.meetingContext={
+      projectId:window.pmnoMeetingState.projectId,
+      meetingId:m.id,
+      meeting:m
+    };
     window.pmnoBulkMeetingRender();
-    const meetingBox=document.getElementById('pmnoMeetingBulkContext');
-    const meetingTitle=document.getElementById('pmnoMeetingBulkTitle');
-    const meetingMeta=document.getElementById('pmnoMeetingBulkMeta');
-    if(meetingBox)meetingBox.style.display='block';
-    if(meetingTitle)meetingTitle.textContent=`MEETING #${m.meeting_no} · ${m.meeting_title||''}`;
-    if(meetingMeta)meetingMeta.textContent=`${m.meeting_date||'—'} · ${bulkState.inputs.length} SITES`;
-    const ctx=bulk$('bulk-meeting-context');
-    if(ctx){ctx.style.display='block';ctx.textContent=`MEETING #${m.meeting_no} · ${m.meeting_title||''} · ${bulkState.inputs.length} SITES`;}
-    bulk$('bulk-analyze').disabled=!bulkState.inputs.length;
+    window.pmnoBulkProjectRender();
+    const ctx=document.getElementById('bulk-meeting-context');
+    if(ctx){ctx.style.display='block';ctx.textContent=`MEETING #${m.meeting_no} · ${m.meeting_title||''} · ${inputs.length} SITES · ORDER LOCKED TO MEETING`;}
+    bulk$('bulk-analyze').disabled=!inputs.length;
     bulk$('bulk-export').disabled=true;
     document.getElementById('pmnoMeetingSitesShell')?.classList.remove('active');
-    const bulkMenu=document.getElementById('bulkMenu');
-    if(bulkMenu)bulkMenu.click();
+    document.getElementById('bulkMenu')?.click();
+    setTimeout(()=>{window.dispatchEvent(new Event('resize'));if(window.map)window.map.invalidateSize({animate:false});},80);
     render();
   }catch(e){console.error(e);alert('Gagal menyiapkan Bulk Meeting: '+(e?.message||e));}
 };
-
 window.pmnoBulkReview=async function(rowIndex,status){
   const r=bulkState.results?.[rowIndex],ctx=bulkState.meetingContext;
   if(!r||!ctx?.meetingId||!r.project_site_id){alert('Site belum terhubung ke meeting.');return;}
@@ -2367,9 +2498,9 @@ window.pmnoBulkBuildFullSnapshot=function(r){
   return snapshot;
 };
 
-bulk$('bulk-file').onchange=async e=>{try{bulk$('bulk-error').style.display='none';const raw=await parseFile(e.target.files[0]);bulkState.inputs=raw.map(normalizeInput).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);bulkState.results=[];bulk$('bulk-analyze').disabled=!bulkState.inputs.length;render();if(raw.length&&!bulkState.inputs.length)throw new Error('Tidak ada row valid. Required: Site ID, Latitude, Longitude, Target Tenant.')}catch(err){bulk$('bulk-error').textContent=err.message;bulk$('bulk-error').style.display='block'}};
+bulk$('bulk-file').onchange=async e=>{try{if(bulkState.meetingContext?.meetingId){alert('Meeting aktif. Kelola site melalui SELECT SITES / SITE SELECTION. Upload template hanya untuk Standalone Bulk.');e.target.value='';return;}bulk$('bulk-error').style.display='none';const raw=await parseFile(e.target.files[0]);bulkState.inputs=raw.map(normalizeInput).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);bulkState.results=[];bulk$('bulk-analyze').disabled=!bulkState.inputs.length;render();if(raw.length&&!bulkState.inputs.length)throw new Error('Tidak ada row valid. Required: Site ID, Latitude, Longitude, Target Tenant.')}catch(err){bulk$('bulk-error').textContent=err.message;bulk$('bulk-error').style.display='block'}};
 bulk$('bulk-template').onclick=()=>{const data=[['Site ID','Site Name','Latitude','Longitude','Target Tenant'],['SITE-001','Example Site',-6.9818,110.4093,'IOH']];const ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'PMNO Bulk Input');XLSX.writeFile(wb,'PMNO_Bulk_Input_Template.xlsx')};
-bulk$('bulk-analyze').onclick=async()=>{bulkState.results=[];bulk$('bulk-analyze').disabled=true;bulk$('bulk-export').disabled=true;bulk$('bulk-error').style.display='none';for(let i=0;i<bulkState.inputs.length;i++){const x=bulkState.inputs[i];bulk$('bulk-progress').textContent=`Analyzing ${i+1}/${bulkState.inputs.length} · ${x.site_id}`;try{bulkState.results.push(await analyzeOne(x))}catch(e){bulkState.results.push({...x,decision:'ERROR',error:e.message,cost:{}})}}bulk$('bulk-progress').textContent=`Completed ${bulkState.results.length} sites`;bulk$('bulk-analyze').disabled=false;bulk$('bulk-export').disabled=false;render()};
+bulk$('bulk-analyze').onclick=async()=>{if(bulkState.meetingContext?.meetingId){bulkState.inputs.sort((a,b)=>(Number(a.meeting_display_order)||0)-(Number(b.meeting_display_order)||0));}bulkState.results=[];bulk$('bulk-analyze').disabled=true;bulk$('bulk-export').disabled=true;bulk$('bulk-error').style.display='none';for(let i=0;i<bulkState.inputs.length;i++){const x=bulkState.inputs[i];bulk$('bulk-progress').textContent=`Analyzing ${i+1}/${bulkState.inputs.length} · ${x.site_id}`;try{bulkState.results.push(await analyzeOne(x))}catch(e){bulkState.results.push({...x,decision:'ERROR',error:e.message,cost:{}})}}bulk$('bulk-progress').textContent=`Completed ${bulkState.results.length} sites`;bulk$('bulk-analyze').disabled=false;bulk$('bulk-export').disabled=false;window.pmnoBulkProjectRender?.();render()};
 bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID':r.site_id,'Site Name':r.site_name,'Target Tenant':r.tenant,'Candidate Site ID':r.candidate_id,'Candidate Site Name':r.candidate_name,'Decision':r.decision,'Distance (km)':r.distance_m!=null?bulkNum(r.distance_m)/1000:null,'Tower Type':r.tower_type||'','Tower Height (m)':r.tower_height_m,'Existing Tenant Count':r.tenant_count,'Signal RSRP (dBm)':r.signal,'SDA Link':Array.isArray(r.detail?.sda_documents)&&r.detail.sda_documents[0]?.document_url?r.detail.sda_documents[0].document_url:'','Need STR':r.b2s?'N/A':(r.need_str||''),'Reinforcement (Ton)':r.b2s?'N/A':(r.reinforcement??''),'Survey':r.cost?.survey||0,'SITAC 1':r.cost?.sitac1||0,'SITAC 2':r.cost?.sitac2||0,'Material':r.cost?.material||0,'Delivery':r.cost?.delivery||0,'CME':r.cost?.cme||0,'TOTAL CAPEX':r.cost?.total||r.capex||0,'Existing IRR':r.existing_irr??'','Estimated IRR':r.estimated_irr??'','Feasibility':bulkSingleSiteMetrics(r).feasibility,'Investment Decision':r.investment_decision||''}));const ws=XLSX.utils.json_to_sheet(out),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Summary');XLSX.writeFile(wb,'PMNO_Bulk_Results.xlsx')};
 
 // Expose Bulk actions for inline table handlers.
