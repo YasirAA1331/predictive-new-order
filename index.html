@@ -157,6 +157,17 @@ body.bulk-page .mobile-nav{
 .pmno-open-single:hover{background:rgba(85,199,255,.10);border-color:#55c7ff}
 </style>
 
+
+<style id="pmno-bulk-sda-style">
+.pmno-sda-link{
+  display:inline-flex;align-items:center;gap:4px;
+  color:#55c7ff;text-decoration:none;font-weight:800;font-size:11px;
+  border:1px solid rgba(85,199,255,.30);border-radius:7px;
+  padding:5px 8px;background:rgba(85,199,255,.06);white-space:nowrap;
+}
+.pmno-sda-link:hover{background:rgba(85,199,255,.12);border-color:rgba(85,199,255,.6)}
+.pmno-sda-empty{color:#71869b;font-size:11px}
+</style>
 </head>
 <body>
 <div class="app">
@@ -963,6 +974,7 @@ function bulkSingleSiteMetrics(r){
   const distance=isB2S?'0.00 km':(rec.distance_m!=null?(bulkNum(rec.distance_m)/1000).toFixed(2)+' km':r.distance_m!=null?(bulkNum(r.distance_m)/1000).toFixed(2)+' km':'—');
   const signal=isB2S?'—':(rec.signal_rsrp_avg_dbm!=null?bulkNum(rec.signal_rsrp_avg_dbm).toFixed(1)+' dBm':r.signal!=null?bulkNum(r.signal).toFixed(1)+' dBm':'—');
   const sda=isB2S?'—':(sdaAvailable==null?'—':(sdaAvailable===true||String(sdaAvailable).toLowerCase()==='true'?'YES':'NO'));
+  const sdaDocuments=(!isB2S && Array.isArray(detail?.sda_documents))?detail.sda_documents.filter(d=>d&&d.document_url):[];
   const capexItems=Array.isArray(rec.capex_items)?rec.capex_items:(Array.isArray(detail.capex_items)?detail.capex_items:[]);
   const code=x=>String(x?.item_code||'').toUpperCase();
   const group=x=>String(x?.driver?.boq_group||'').toUpperCase();
@@ -1057,7 +1069,7 @@ function bulkSingleSiteMetrics(r){
   const renewalIncrease=isB2S?pick(inv.b2s_renewal_increase_pct,r.b2s_renewal_increase_pct):null;
   return {isB2S,rec,detail,eng,inv,design,tower,height,distance,signal,tenants,needStr,landType,landArea,density,networkGap,npv,initialLease,initialLandLease,renewalCost,renewalIncrease,
     reinforcement:isB2S?'—':(needStr==='NO'?'NOT REQUIRED':reinforcement!=null?bulkNum(reinforcement).toFixed(2)+' Ton':'—'),
-    sda,ses:isB2S?'—':(sesType||'—'),comcase:isB2S?'—':(comCount!=null?String(comCount):'—'),red:isB2S?'—':redzone,
+    sda,sdaDocuments,ses:isB2S?'—':(sesType||'—'),comcase:isB2S?'—':(comCount!=null?String(comCount):'—'),red:isB2S?'—':redzone,
     access:isB2S?'—':access,road:isB2S?'—':(roadhead!=null?bulkNum(roadhead).toFixed(0)+' m':'—'),days:isB2S?'—':(days!=null?bulkNum(days).toFixed(1)+' days':'—'),
     reinfProb:isB2S?'—':(eng.reinforcement_probability!=null?bulkNum(eng.reinforcement_probability).toFixed(1)+'%':'—'),
     structural:isB2S?'—':(eng.structural_utilization_proxy!=null?bulkNum(eng.structural_utilization_proxy).toFixed(1)+'%':'—'),
@@ -1086,7 +1098,7 @@ function render(){
       const candidateHtml=pmnoCandidateSelect(r, i);
       return `<tr><td class="expand-cell sticky-1">${pmnoOpenSingleSite(r,i)}</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="type-cell"><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="candidate-cell">${candidateHtml}</td>
       ${cell(m.distance)}${cell(m.tower)}${cell(m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—','num')}${cell(m.isB2S?'—':m.tenants,'center')}${cell(m.signal,'num')}
-      ${cell(m.needStr,'center')}${cell(m.reinforcement,'num')}${cell(m.sda,'center')}${cell(m.ses)}${cell(m.comcase,'center')}${cell(m.red,'center')}${cell(m.access)}${cell(m.road,'num')}${cell(m.days)}${cell(m.reinfProb,'num')}${cell(m.structural,'num')}${cell(m.physical,'num')}
+      ${cell(m.needStr,'center')}${cell(m.reinforcement,'num')}${m.sdaDocuments?.length?`<td><a class="pmno-sda-link" href="${bulkEsc(m.sdaDocuments[0].document_url)}" target="_blank" rel="noopener noreferrer">SDA ↗</a>${m.sdaDocuments.length>1?`<small style="display:block;margin-top:3px;color:#71869b">+${m.sdaDocuments.length-1} more</small>`:''}</td>`:cell(m.sda,'center')}${cell(m.ses)}${cell(m.comcase,'center')}${cell(m.red,'center')}${cell(m.access)}${cell(m.road,'num')}${cell(m.days)}${cell(m.reinfProb,'num')}${cell(m.structural,'num')}${cell(m.physical,'num')}
       ${cell(costVal('survey_sis'))}${cell(costVal('survey_ses'))}${cell(costVal('survey_rerunning_sda'))}${cell(costVal('sitac1_sewa_lahan'))}${cell(costVal('sitac1_izin_warga'))}${cell(costVal('sitac1_rekom_lurah'))}${cell(costVal('sitac1_rekom_camat'))}${cell(costVal('sitac1_jasa_sitac'))}${cell(costVal('sitac2_pbg'))}${cell(costVal('sitac2_slf'))}${cell(costVal('sitac2_retribusi'))}${cell(costVal('sitac2_pbb'))}${cell(costVal('sitac2_jasa_perizinan'))}${cell(costVal('material_tower'))}${cell(costVal('material_fence'))}${cell(costVal('material_mounting'))}${cell(costVal('delivery_factory_port'))}${cell(costVal('delivery_langsir'))}${cell(costVal('delivery_port_site'))}${cell(costVal('cme_str_material'))}${cell(costVal('cme_foundation_tower'))}${cell(costVal('cme_foundation_rbs'))}${cell(costVal('cme_rbs_apd'))}${cell(costVal('cme_grounding'))}${cell(costVal('cme_electrical'))}${cell(costVal('cme_transformer'))}${cell(costVal('cme_pln'))}${cell(costVal('cme_jasa_cme'))}${cell(costVal('cme_erection'))}
       ${cell(money(m.totalCost))}${cell(m.existingNbv!=null?money(m.existingNbv):'—')}${cell(m.existingIrr!=null?m.existingIrr.toFixed(2)+'%':'—','num')}${cell(money(m.estCapex))}${cell(m.isB2S?'—':(m.estNbv!=null?money(m.estNbv):'—'))}${cell(b2sIrr,'num')}${cell(feasibility, feasibility==='FEASIBLE'?'center feasible-cell':'center')}
       </tr>`;
@@ -1120,7 +1132,7 @@ function normalizeInput(r){const get=(...ks)=>{for(const k of ks){if(r[k]!==unde
 bulk$('bulk-file').onchange=async e=>{try{bulk$('bulk-error').style.display='none';const raw=await parseFile(e.target.files[0]);bulkState.inputs=raw.map(normalizeInput).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);bulkState.results=[];bulk$('bulk-analyze').disabled=!bulkState.inputs.length;render();if(raw.length&&!bulkState.inputs.length)throw new Error('Tidak ada row valid. Required: Site ID, Latitude, Longitude, Target Tenant.')}catch(err){bulk$('bulk-error').textContent=err.message;bulk$('bulk-error').style.display='block'}};
 bulk$('bulk-template').onclick=()=>{const data=[['Site ID','Site Name','Latitude','Longitude','Target Tenant'],['SITE-001','Example Site',-6.9818,110.4093,'IOH']];const ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'PMNO Bulk Input');XLSX.writeFile(wb,'PMNO_Bulk_Input_Template.xlsx')};
 bulk$('bulk-analyze').onclick=async()=>{bulkState.results=[];bulk$('bulk-analyze').disabled=true;bulk$('bulk-export').disabled=true;bulk$('bulk-error').style.display='none';for(let i=0;i<bulkState.inputs.length;i++){const x=bulkState.inputs[i];bulk$('bulk-progress').textContent=`Analyzing ${i+1}/${bulkState.inputs.length} · ${x.site_id}`;try{bulkState.results.push(await analyzeOne(x))}catch(e){bulkState.results.push({...x,decision:'ERROR',error:e.message,cost:{}})}}bulk$('bulk-progress').textContent=`Completed ${bulkState.results.length} sites`;bulk$('bulk-analyze').disabled=false;bulk$('bulk-export').disabled=false;render()};
-bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID':r.site_id,'Site Name':r.site_name,'Target Tenant':r.tenant,'Candidate Site ID':r.candidate_id,'Candidate Site Name':r.candidate_name,'Decision':r.decision,'Distance (km)':r.distance_m!=null?bulkNum(r.distance_m)/1000:null,'Tower Type':r.tower_type||'','Tower Height (m)':r.tower_height_m,'Existing Tenant Count':r.tenant_count,'Signal RSRP (dBm)':r.signal,'Need STR':r.b2s?'N/A':(r.need_str||''),'Reinforcement (Ton)':r.b2s?'N/A':(r.reinforcement??''),'Survey':r.cost?.survey||0,'SITAC 1':r.cost?.sitac1||0,'SITAC 2':r.cost?.sitac2||0,'Material':r.cost?.material||0,'Delivery':r.cost?.delivery||0,'CME':r.cost?.cme||0,'TOTAL CAPEX':r.cost?.total||r.capex||0,'Existing IRR':r.existing_irr??'','Estimated IRR':r.estimated_irr??'','Feasibility':bulkSingleSiteMetrics(r).feasibility,'Investment Decision':r.investment_decision||''}));const ws=XLSX.utils.json_to_sheet(out),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Summary');XLSX.writeFile(wb,'PMNO_Bulk_Results.xlsx')};
+bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID':r.site_id,'Site Name':r.site_name,'Target Tenant':r.tenant,'Candidate Site ID':r.candidate_id,'Candidate Site Name':r.candidate_name,'Decision':r.decision,'Distance (km)':r.distance_m!=null?bulkNum(r.distance_m)/1000:null,'Tower Type':r.tower_type||'','Tower Height (m)':r.tower_height_m,'Existing Tenant Count':r.tenant_count,'Signal RSRP (dBm)':r.signal,'SDA Link':Array.isArray(r.detail?.sda_documents)&&r.detail.sda_documents[0]?.document_url?r.detail.sda_documents[0].document_url:'','Need STR':r.b2s?'N/A':(r.need_str||''),'Reinforcement (Ton)':r.b2s?'N/A':(r.reinforcement??''),'Survey':r.cost?.survey||0,'SITAC 1':r.cost?.sitac1||0,'SITAC 2':r.cost?.sitac2||0,'Material':r.cost?.material||0,'Delivery':r.cost?.delivery||0,'CME':r.cost?.cme||0,'TOTAL CAPEX':r.cost?.total||r.capex||0,'Existing IRR':r.existing_irr??'','Estimated IRR':r.estimated_irr??'','Feasibility':bulkSingleSiteMetrics(r).feasibility,'Investment Decision':r.investment_decision||''}));const ws=XLSX.utils.json_to_sheet(out),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Summary');XLSX.writeFile(wb,'PMNO_Bulk_Results.xlsx')};
 
 // Expose Bulk actions for inline table handlers.
 window.pmnoBulkSelectCandidate=pmnoBulkSelectCandidate;
