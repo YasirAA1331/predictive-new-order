@@ -1,3 +1,20 @@
+
+<style id="pmno-bulk-visible-meeting-css">
+#pmnoBulkMeetingBar{display:none;margin:0 0 14px;padding:12px 14px;border:1px solid #28516c;border-radius:12px;background:#0b1d30}
+#pmnoBulkMeetingBar.active{display:block}
+.pmno-bm-row{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.pmno-bm-kicker{font-size:9px;letter-spacing:1.6px;color:#6f8aa5;font-weight:900}
+.pmno-bm-title{font-size:14px;font-weight:900;margin-top:3px}
+.pmno-bm-meta{font-size:10px;color:#91a4bd;margin-top:4px}
+.pmno-bm-actions{display:flex;gap:6px;flex-wrap:wrap}
+.pmno-bm-btn{border:1px solid #31506a;background:#10243b;color:#cfe0f5;border-radius:8px;padding:7px 10px;font-size:9px;font-weight:900;cursor:pointer}
+.pmno-bm-btn.active{background:#1b73e8;border-color:#1b73e8;color:#fff}
+.pmno-bm-btn.approved{border-color:#28795a;color:#8df2c2}
+.pmno-bm-counts{display:flex;gap:7px;margin-top:10px;flex-wrap:wrap}
+.pmno-bm-count{padding:5px 8px;border-radius:999px;background:#081728;border:1px solid #203852;font-size:9px;color:#9bb0c4}
+.pmno-bm-count b{color:#eaf2ff}
+@media(max-width:640px){#pmnoBulkMeetingBar{padding:10px}.pmno-bm-row{display:block}.pmno-bm-actions{margin-top:9px}.pmno-bm-btn{flex:1;min-width:88px}}
+</style>
 <!doctype html>
 <html lang="en">
 <head>
@@ -283,7 +300,32 @@ body.bulk-page .mobile-nav{
         <div class="pmno-project-title">PROJECTS</div>
         <div class="pmno-project-sub">Manage customer projects and meeting sessions</div>
       </div>
-      <button class="pmno-project-btn primary" onclick="pmnoCreateProject()">＋ NEW PROJECT</button>
+      <button class="pmno-project-btn primary" onclick="pmnoCreateProject()">＋ NEW PROJECT</butt
+<div id="pmnoBulkMeetingBar">
+  <div class="pmno-bm-row">
+    <div>
+      <div class="pmno-bm-kicker">MEETING WORKSPACE</div>
+      <div id="pmnoBulkMeetingTitle" class="pmno-bm-title">No active meeting</div>
+      <div id="pmnoBulkMeetingMeta" class="pmno-bm-meta">Run Bulk Analyzer standalone or open a Meeting to work in meeting mode.</div>
+    </div>
+    <div class="pmno-bm-actions">
+      <button class="pmno-bm-btn" onclick="pmnoBulkMeetingSelectSites()">SELECT / MANAGE SITES</button>
+      <button class="pmno-bm-btn active" data-bm-filter="ALL" onclick="pmnoBulkReviewFilter('ALL')">ALL</button>
+      <button class="pmno-bm-btn" data-bm-filter="NOT REVIEWED" onclick="pmnoBulkReviewFilter('NOT REVIEWED')">NOT REVIEWED</button>
+      <button class="pmno-bm-btn" data-bm-filter="FOLLOW UP" onclick="pmnoBulkReviewFilter('FOLLOW UP')">FOLLOW UP</button>
+      <button class="pmno-bm-btn" data-bm-filter="APPROVED" onclick="pmnoBulkReviewFilter('APPROVED')">APPROVED</button>
+      <button class="pmno-bm-btn approved" onclick="pmnoBulkSaveMeetingState()">SAVE REVIEW</button>
+    </div>
+  </div>
+  <div class="pmno-bm-counts">
+    <span class="pmno-bm-count">TOTAL <b id="pmnoBmTotal">0</b></span>
+    <span class="pmno-bm-count">NEW <b id="pmnoBmNew">0</b></span>
+    <span class="pmno-bm-count">CARRY OVER <b id="pmnoBmCarry">0</b></span>
+    <span class="pmno-bm-count">FOLLOW UP <b id="pmnoBmFollow">0</b></span>
+    <span class="pmno-bm-count">APPROVED <b id="pmnoBmApproved">0</b></span>
+  </div>
+</div>
+on>
     </div>
 
     <div id="pmnoProjectForm" class="pmno-project-form">
@@ -1101,8 +1143,46 @@ window.pmnoMsAddCarryOver=async function(projectSiteId){
 
 
 /* PMNO TASK 8 — END-TO-END MEETING/BULK UX */
+
+/* PMNO TASK 9 — VISIBLE BULK MEETING WORKSPACE */
+window.pmnoBulkMeetingSelectSites=function(){
+  const ctx=bulkState.meetingContext;
+  if(ctx?.meetingId){
+    window.pmnoMsOpen?.(ctx.meeting);
+    return;
+  }
+  if(window.pmnoMeetingState?.selectedMeeting){
+    window.pmnoMsOpen(window.pmnoMeetingState.selectedMeeting);
+    return;
+  }
+  alert('Belum ada Meeting aktif. Buat/pilih Meeting terlebih dahulu.');
+};
+window.pmnoBulkMeetingRender=function(){
+  const bar=document.getElementById('pmnoBulkMeetingBar');
+  const ctx=bulkState.meetingContext;
+  if(!bar)return;
+  if(!ctx?.meetingId){
+    bar.classList.remove('active');
+    return;
+  }
+  bar.classList.add('active');
+  const m=ctx.meeting||{};
+  const title=document.getElementById('pmnoBulkMeetingTitle');
+  const meta=document.getElementById('pmnoBulkMeetingMeta');
+  if(title)title.textContent=`Meeting #${m.meeting_no||'—'} · ${m.meeting_title||'Meeting'}`;
+  if(meta)meta.textContent=`${m.meeting_date||'—'} · ${bulkState.results?.length||bulkState.inputs?.length||0} sites`;
+  const all=bulkState.results||[];
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=String(v)};
+  set('pmnoBmTotal',all.length);
+  set('pmnoBmNew',all.filter(r=>(r.meeting_source||'NEW')==='NEW').length);
+  set('pmnoBmCarry',all.filter(r=>r.meeting_source==='CARRY_OVER').length);
+  set('pmnoBmFollow',all.filter(r=>(r.review_status||'NOT REVIEWED')==='FOLLOW UP').length);
+  set('pmnoBmApproved',all.filter(r=>(r.review_status||'NOT REVIEWED')==='APPROVED').length);
+  document.querySelectorAll('[data-bm-filter]').forEach(b=>b.classList.toggle('active',b.dataset.bmFilter===(bulkState.reviewFilter||'ALL')));
+};
 window.pmnoBulkReviewFilter=function(filter){
   bulkState.reviewFilter=filter||'ALL';
+  window.pmnoBulkMeetingRender();
   const ctx=document.getElementById('pmnoMeetingBulkContext');
   if(ctx)ctx.dataset.filter=bulkState.reviewFilter;
   render();
@@ -1128,7 +1208,7 @@ window.pmnoBulkSaveMeetingState=async function(){
       }
     }
     alert('Review meeting berhasil disimpan.');
-    render();
+    render();window.pmnoBulkMeetingRender();
   }catch(e){console.error(e);alert('Gagal menyimpan review meeting: '+(e?.message||e));}
 };
 
@@ -1899,6 +1979,7 @@ window.pmnoMsRunBulk=async function(){
     }).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
     bulkState.results=[];bulkState.reviewFilter='ALL';
     bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId:m.id,meeting:m};
+    window.pmnoBulkMeetingRender();
     const meetingBox=document.getElementById('pmnoMeetingBulkContext');
     const meetingTitle=document.getElementById('pmnoMeetingBulkTitle');
     const meetingMeta=document.getElementById('pmnoMeetingBulkMeta');
