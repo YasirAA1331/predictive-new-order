@@ -158,7 +158,7 @@ const combinedIrr=(nbv,irr,capex)=>{
     return pv;
   };
   let lo=-.9999,hi=5,flo=cashAt(lo),fhi=cashAt(hi);
-  if(!Number.isFinite(flo)||!Number.isFinite(fhi)||flo*fhi>0)return irr;
+  if(!Number.isFinite(flo)||!Number.isFinite(fhi)||flo*fhi>0)return null;
   for(let i=0;i<120;i++){
     const mid=(lo+hi)/2,fm=cashAt(mid);
     if(fm===0){lo=hi=mid;break}
@@ -168,7 +168,7 @@ const combinedIrr=(nbv,irr,capex)=>{
 };
 const estIrr=combinedIrr(existingNbv,existingIrr,estCapex);
 const estNbv=existingNbv!=null&&estCapex!=null?num(existingNbv)+num(estCapex):null;
-const invStatus=estIrr==null?'—':(estIrr>targetIrr?'FEASIBLE':Math.abs(estIrr-targetIrr)<.0005?'BORDERLINE':'NOT FEASIBLE');
+const invStatus=estIrr==null?'CALCULATION ERROR':(estIrr>targetIrr?'FEASIBLE':Math.abs(estIrr-targetIrr)<.0005?'BORDERLINE':'NOT FEASIBLE');
 $('investmentPanel').innerHTML=`<div class="investment-row"><div class="investment-cell"><span>EXISTING NBV</span><b>${existingNbv!=null?formatMoney(existingNbv):'—'}</b><small>Existing tower case</small></div><div class="investment-cell"><span>EXISTING IRR</span><b>${existingIrr!=null?num(existingIrr).toFixed(2)+'%':'—'}</b><small>Existing tower case</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${estCapex!=null?formatMoney(estCapex):'—'}</b><small>Same as Total Selected Case</small></div><div class="investment-cell"><span>ESTIMATED IRR</span><b>${estIrr!=null?num(estIrr).toFixed(2)+'%':'—'}</b><small>Existing + New Order</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED NBV</span><b>${estNbv!=null?formatMoney(estNbv):'—'}</b><small>Existing NBV + New Order CAPEX</small></div></div><div class="investment-result"><span>INVESTMENT DECISION · HURDLE 10.73%</span><b>${invStatus}</b></div>`;
 
 }
