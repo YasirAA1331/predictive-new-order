@@ -117,8 +117,8 @@ body.bulk-page #bulkView .wrap{
   min-height:max-content !important;
   padding-bottom:80px !important;
 }
-html.pmno-preload-bulk #bulkView .table-wrap,
-body.bulk-page #bulkView .table-wrap{
+html.pmno-preload-bulk #bulkView .bulk-table-wrap,
+body.bulk-page #bulkView .bulk-table-wrap{
   width:100% !important;
   max-width:100% !important;
   overflow-x:auto !important;
@@ -126,14 +126,15 @@ body.bulk-page #bulkView .table-wrap{
   -webkit-overflow-scrolling:touch;
   touch-action:auto !important;
 }
-html.pmno-preload-bulk #bulkView .table,
-body.bulk-page #bulkView .table{
+html.pmno-preload-bulk #bulkView .bulk-table,
+body.bulk-page #bulkView .bulk-table{
   min-width:1450px !important;
 }
 body.bulk-page .mobile-nav{
   display:none !important;
 }
 
+@media(orientation:landscape) and (max-width:900px){body.bulk-page{overflow:auto!important}.app{height:auto!important;min-height:100dvh!important}.bulk-view{min-height:100dvh!important}.bulk-view .top{height:60px;min-height:60px;padding:0 14px}.bulk-view .wrap{padding:12px 12px 72px;max-width:none}.bulk-view .toolbar{margin-bottom:10px}.bulk-view .summary{grid-template-columns:repeat(5,minmax(120px,1fr));overflow-x:auto}.bulk-view .bulk-table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:visible;touch-action:pan-x}.bulk-view .bulk-table{min-width:1900px}}
 @media(max-width:760px){.bulk-result-context{grid-template-columns:1fr 1fr}.bulk-result-context .bulk-result-decision{order:3}.bulk-result-context .expand{order:4}.bulk-detail{padding:0 10px 10px}.bulk-detail .info-grid,.bulk-detail .investment-row{grid-template-columns:1fr}.bulk-detail .info-cell:nth-child(odd){border-right:0}.bulk-detail .info-cell:nth-last-child(-n+2){border-bottom:1px solid #1b3146}.bulk-detail .info-cell:last-child{border-bottom:0}}
 </style>
 
@@ -697,7 +698,7 @@ function costSummary(detail){const cost=detail?.cost||{};const rows=Array.isArra
   material_tower:item(['MAT-TOWER','TWR-MAT','TOWER-MAT','MAT-TWR-SST']),material_fence:item(['FENCE-YARD-FENCE','FENCE-YARD-GATE','FENCE-YARD-YARD']),material_mounting:item(['MNT-ANT','MNT-AAU','MNT-RRU','MNT-MW','MAT-MNT']),
   delivery_factory_port:item(['DEL-FP','DEL-FAC']),delivery_langsir:item(['DEL-LS','DEL-LANG']),delivery_port_site:item(['DEL-PS','DEL-SITE']),
   cme_str_material:item(['STR-MAT','STR-MATERIAL','STR-001']),cme_foundation_tower:item(['FOUND-TOWER','FOUNDATION-TOWER','TOWER-FOUNDATION'],['FOUND']),cme_foundation_rbs:item(['RBS-MAT','RBS-MATERIAL','RBS-001']),cme_rbs_apd:item(['RBS-APD','RBS-APD-MATERIAL','RBS-APD-001']),cme_grounding:item(['ME-GROUNDING','MAT-GND']),cme_electrical:item(['ME-CABLE','ME-PANEL','ME-PROTECTION']),cme_transformer:item(['TRF-UNIT','TRANSFORMATOR','TRANSFORMER-MATERIAL','TRF-MAT'],['TRANSFORMER']),cme_pln:item([],['PLN']),cme_jasa_cme:item(['JASA-CME-COLLO','JASA-CME-B2S','JASA-CME']),cme_erection:item(['ERECT-JASA'])
-};detailBreakdown.total=Object.entries(detailBreakdown).filter(([k])=>k!=='total').reduce((a,[,v])=>a+bulkNum(v,0),0);return {survey,sitac1,sitac2,material,delivery,cme,total,breakdown:detailBreakdown}}
+};detailBreakdown.total=Object.entries(detailBreakdown).filter(([k])=>k!=='total').reduce((a,[,v])=>a+bulkNum(v,0),0);return {survey,sitac1,sitac2,material,delivery,cme,total:detailBreakdown.total,breakdown:detailBreakdown}}
 async function analyzeOne(x){
   const raw=await bulkRpc('pmno_decision',{
     p_lat:x.lat,p_lon:x.lon,p_target_tenant:x.tenant,p_radius_m:3000,
