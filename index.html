@@ -93,7 +93,8 @@
         <button class="pmno-ms-btn primary" onclick="pmnoMsSaveSite()">ADD SITE</button>
       </div>
     </div>
-    <div class="pmno-ms-toolbar">
+    <div id="pmnoMsReviewInfo" class="pmno-ms-panel" style="display:none"></div>
+<div class="pmno-ms-toolbar">
       <button class="pmno-ms-filter active" data-ms-filter="ALL" onclick="pmnoMsFilter('ALL')">ALL</button>
       <button class="pmno-ms-filter" data-ms-filter="NOT REVIEWED" onclick="pmnoMsFilter('NOT REVIEWED')">NOT REVIEWED</button>
       <button class="pmno-ms-filter" data-ms-filter="FOLLOW UP" onclick="pmnoMsFilter('FOLLOW UP')">FOLLOW UP</button>
@@ -942,8 +943,10 @@ window.pmnoMsRender=function(){
   else if(f!=='ALL') view=rows.filter(x=>(x.project_site?.current_status||'NOT REVIEWED')===f);
   const t=document.getElementById('pmnoMsTable');if(!t)return;
   if(!view.length){t.innerHTML='<div class="pmno-ms-empty">Belum ada site pada filter ini.</div>';return;}
-  t.innerHTML=`<table class="pmno-ms-table"><thead><tr><th>#</th><th>Site</th><th>Tenant</th><th>Source</th><th>Status</th><th>Candidate</th></tr></thead><tbody>`+
-    view.map((x,i)=>{const p=x.project_site||{};return `<tr><td>${i+1}</td><td><b>${pmnoProjectEsc(p.site_id||'')}</b><br><span class="pmno-ms-status">${pmnoProjectEsc(p.site_name||'')}</span></td><td>${pmnoProjectEsc(p.target_tenant||'')}</td><td><span class="pmno-ms-badge ${x.source==='CARRY_OVER'?'carry':'new'}">${x.source||'NEW'}</span></td><td>${pmnoProjectEsc(p.current_status||'NOT REVIEWED')}</td><td>${pmnoProjectEsc(p.selected_candidate_id||'Candidate #1')}</td></tr>`}).join('')+
+  t.innerHTML=`<table class="pmno-ms-table"><thead><tr><th>#</th><th>Site</th><th>Tenant</th><th>Source</th><th>Status</th><th>Candidate</th><th>REVIEW</th></tr></thead><tbody>`+
+    view.map((x,i)=>{const p=x.project_site||{};return `<tr><td>${i+1}</td><td><b>${pmnoProjectEsc(p.site_id||'')}</b><br><span class="pmno-ms-status">${pmnoProjectEsc(p.site_name||'')}</span></td><td>${pmnoProjectEsc(p.target_tenant||'')}</td><td><span class="pmno-ms-badge ${x.source==='CARRY_OVER'?'carry':'new'}">${x.source||'NEW'}</span></td><td>${pmnoProjectEsc(p.current_status||'NOT REVIEWED')}</td><td>${pmnoProjectEsc(p.selected_candidate_id||'Candidate #1')}</td>
+<td><button class="pmno-ms-btn" onclick="pmnoMsReview('${p.id}','${m.id}','FOLLOW UP')">FOLLOW UP</button>
+<button class="pmno-ms-btn primary" onclick="pmnoMsReview('${p.id}','${m.id}','APPROVED')">APPROVE</button></td></tr>`}).join('')+
     '</tbody></table>';
 };
 window.pmnoMsFilter=function(f){window.pmnoMsState.filter=f;window.pmnoMsRender();};
@@ -971,6 +974,50 @@ window.pmnoMeetingSitesBack=function(){
   document.getElementById('pmnoMeetingSitesShell')?.classList.remove('active');
   document.getElementById('pmnoMeetingShell')?.classList.add('active');
   window.pmnoRenderMeetings();
+};
+
+
+/* PMNO TASK 5 — REVIEW / APPROVAL STATE */
+window.pmnoMsReview=async function(projectSiteId,meetingId,status){
+  const row=(window.pmnoMsState.rows||[]).find(x=>x.project_site?.id===projectSiteId);
+  const p=row?.project_site;
+  if(!p)return;
+  const candidate=p.selected_candidate_id||'Candidate #1';
+  let note=null;
+  if(status==='FOLLOW UP'){
+    note=prompt('Catatan follow up (optional):','')||null;
+  }
+  if(status==='APPROVED'){
+    const ok=confirm(`Approve ${p.site_id} dengan ${candidate}?\nHasil Bulk yang tampil akan disimpan sebagai immutable snapshot.`);
+    if(!ok)return;
+  }
+  try{
+    let snapshot=null;
+    if(status==='APPROVED'){
+      snapshot=window.pmnoMsBuildApprovalSnapshot(p,row);
+    }
+    await window.pmnoPersistence.siteReviewSave(projectSiteId,meetingId,{
+      status:status,candidate_id:candidate,note:note,snapshot:snapshot
+    });
+    if(status==='APPROVED'){
+      await window.pmnoPersistence.approvedSnapshotCreate(projectSiteId,meetingId,candidate,snapshot,null);
+    }
+    await window.pmnoMsLoad();
+  }catch(e){
+    console.error(e);
+    alert('Gagal menyimpan review: '+(e?.message||e));
+  }
+};
+
+window.pmnoMsBuildApprovalSnapshot=function(p,row){
+  // Snapshot is intentionally a display-oriented object. Calculation engines remain source of truth.
+  return {
+    site_id:p.site_id,site_name:p.site_name,latitude:p.latitude,longitude:p.longitude,
+    target_tenant:p.target_tenant,selected_candidate_id:p.selected_candidate_id||'Candidate #1',
+    status:'APPROVED',source:row?.source||'NEW',
+    meeting_id:window.pmnoMsState.meeting?.id||null,
+    approved_at:new Date().toISOString()
+  };
 };
 
 async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
