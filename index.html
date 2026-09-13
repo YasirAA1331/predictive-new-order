@@ -58,7 +58,31 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:13px}.app{min-height:100vh}.top{height:72px;padding:0 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#071321}.kicker{font-size:9px;letter-spacing:2px;color:#70869c;font-weight:900}.title{font-size:22px;font-weight:900}.title b{color:var(--cyan)}.status{font-size:9px;color:#91a6b8;letter-spacing:1px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px}.wrap{padding:22px;max-width:1800px;margin:auto}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.btn{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:8px;padding:10px 13px;font-weight:900;letter-spacing:.7px;cursor:pointer}.btn.primary{background:var(--cyan);color:#04111c;border-color:var(--cyan)}.btn:disabled{opacity:.5;cursor:wait}.file{display:none}.hint{color:var(--muted);font-size:11px}.summary{display:grid;grid-template-columns:repeat(5,minmax(130px,1fr));gap:10px;margin-bottom:16px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px}.kpi span{display:block;color:#70869c;font-size:8px;font-weight:900;letter-spacing:1.2px}.kpi b{display:block;font-size:20px;margin-top:5px}.table-wrap{background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:auto}.table{width:100%;border-collapse:collapse;min-width:1400px}.table th{position:sticky;top:0;background:#0d1d31;color:#7890a7;font-size:8px;letter-spacing:1px;text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:10px 9px;border-bottom:1px solid #162b40;vertical-align:top;font-size:10px}.table tr:hover td{background:#0c1d30}.status-pill{display:inline-block;border-radius:20px;padding:4px 7px;font-size:8px;font-weight:900;white-space:nowrap}.ok{color:var(--green);border:1px solid #24694f;background:#0c2b25}.warn{color:var(--amber);border:1px solid #6b5730;background:#2a2418}.bad{color:var(--red);border:1px solid #693040;background:#2a1720}.neutral{color:#9db0c1;border:1px solid #30465a;background:#102032}.expand{border:1px solid #31566e;background:#0a2234;color:#a9dfff;border-radius:6px;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}.detail-row td{padding:0;background:#081522}.detail{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.detail-card{border:1px solid var(--line);background:#0a1727;border-radius:9px;padding:12px}.detail-card h4{margin:0 0 10px;font-size:9px;letter-spacing:1.2px;color:var(--cyan)}.kv{display:grid;grid-template-columns:1fr 1fr;gap:6px}.kv div{padding:7px;border-bottom:1px solid #172d42}.kv span{display:block;color:#71889e;font-size:7px;letter-spacing:.8px}.kv b{display:block;margin-top:3px;font-size:10px}.cost-grid{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:7px}.cost-box{border:1px solid #213a51;border-radius:8px;padding:9px;background:#091827}.cost-box span{display:block;color:#71889e;font-size:7px;letter-spacing:.9px}.cost-box b{display:block;margin-top:5px;font-size:11px}.cost-box.total{border-color:#2d718c;background:#0b2234}.cost-box.total b{color:var(--cyan)}.error{padding:11px;border:1px solid #6c3442;background:#2a1720;color:#ffb9c4;border-radius:9px;margin-bottom:12px;display:none}.progress{color:#9eb3c4;font-size:10px;margin-left:auto}.empty{padding:45px;text-align:center;color:#657c91}.sda a{color:var(--cyan);text-decoration:none}.small{font-size:8px;color:#667e92}.mono{font-family:ui-monospace,monospace}
 @media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.detail{grid-template-columns:1fr}.cost-grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:12px}.top{padding:0 14px}.status{display:none}}
 
-.bulk-view{min-height:calc(100vh - 72px);background:#06111f;color:#edf5fb;position:relative;z-index:5}.mode-menu{display:flex;gap:8px;margin-left:auto}.mode-menu button{border:1px solid #29445c;background:#0a1727;color:#9db0c1;border-radius:7px;padding:8px 11px;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer}.mode-menu button.active{color:#35c8ff;border-color:#2b617c;background:#0b2234}</style></head>
+.bulk-view{min-height:calc(100vh - 72px);background:#06111f;color:#edf5fb;position:relative;z-index:5}.mode-menu{display:flex;gap:8px;margin-left:auto}.mode-menu button{border:1px solid #29445c;background:#0a1727;color:#9db0c1;border-radius:7px;padding:8px 11px;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer}.mode-menu button.active{color:#35c8ff;border-color:#2b617c;background:#0b2234}</style>
+<style id="bulk-landscape-scroll-fix">
+/* PMNO Bulk — landscape mobile/tablet scroll fix */
+@media (orientation: landscape) and (max-width: 900px){
+  body:has(#bulkView[style*="display: block"]){
+    overflow-y:auto;
+    overflow-x:hidden;
+    height:auto;
+    min-height:100dvh;
+  }
+  .app:has(#bulkView[style*="display: block"]){
+    height:auto;
+    min-height:100dvh;
+  }
+  .bulk-view{
+    min-height:calc(100dvh - 64px);
+    height:auto;
+    overflow:visible;
+  }
+  .bulk-view .wrap{
+    padding-bottom:40px;
+  }
+}
+</style>
+</head>
 <body>
 <div class="app">
 <header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
