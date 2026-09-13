@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
+<title>PMNO — Predictive Mapping New Order</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<style>
+:root{--bg:#06111f;--panel:#0a1727;--panel2:#0d1d31;--line:#20364f;--text:#edf5fb;--muted:#7e93a8;--cyan:#35c8ff;--green:#43e0a0;--red:#ff5570;--amber:#f5bf5c;--shadow:0 18px 50px rgba(0,0,0,.38)}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overflow:hidden}.app{height:100dvh;display:flex;flex-direction:column;min-height:0}.topbar{height:72px;flex:0 0 72px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:#071321;z-index:50}.brand-kicker{font-size:9px;letter-spacing:2px;font-weight:900;color:#70869c}.brand-title{font-size:23px;line-height:1.05;font-weight:850;letter-spacing:-.7px;margin-top:3px}.brand-title b{color:var(--cyan)}.status{display:flex;align-items:center;gap:8px;color:#91a6b8;font-size:10px;font-weight:800;letter-spacing:1px}.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 15px var(--green)}
+.workspace{flex:1;min-height:0;display:grid;grid-template-columns:255px minmax(0,1fr) 390px;overflow:hidden}.panel{min-width:0;min-height:0;background:var(--panel);overflow:auto}.input-panel{border-right:1px solid var(--line);padding:22px}.detail-panel{border-left:1px solid var(--line);padding:20px}.section-kicker{font-size:10px;letter-spacing:1.9px;color:#71889e;font-weight:900}.field{margin-top:16px}.field label{display:block;font-size:9px;letter-spacing:1.2px;font-weight:800;color:#7890a7;margin-bottom:6px}.field input,.field select{width:100%;height:42px;border:1px solid #29435e;border-radius:9px;background:#071321;color:var(--text);padding:0 11px;font-size:13px;outline:none}.field input:focus,.field select:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(53,200,255,.08)}.analyze{width:100%;height:44px;margin-top:20px;border:0;border-radius:9px;background:var(--cyan);color:#04111c;font-weight:950;letter-spacing:1px;cursor:pointer}.analyze:disabled{opacity:.55;cursor:wait}.rule{margin-top:16px;padding:13px;border:1px solid #25455f;border-radius:9px;background:#0b1c2e}.rule strong{font-size:10px;color:var(--cyan);letter-spacing:1px}.rule p{font-size:10px;line-height:1.55;color:#8196aa;margin:7px 0 0}.source{margin-top:18px;padding:12px;border:1px solid #1e344b;border-radius:9px;color:#7c91a5;font-size:9px;line-height:1.5}.source b{color:#9db0c1}.source .ok{color:var(--green);font-weight:800}
+.map-stage{position:relative;min-width:0;min-height:0;height:100%;width:100%;overflow:hidden;background:#0a1827}.map{position:absolute;inset:0;width:100%;height:100%;z-index:1}.leaflet-container{background:#0a1827;font:inherit}.leaflet-tile{filter:saturate(.92) contrast(1.03) brightness(.78)}.leaflet-control-zoom{margin:0 12px 54px 0!important}.leaflet-control-zoom a{background:#071321!important;color:#f2f7fb!important;border-color:#29445d!important;width:34px!important;height:34px!important;line-height:34px!important}.leaflet-control-attribution{background:rgba(4,13,23,.75)!important;color:#8ba0b2!important;font-size:8px!important}.leaflet-control-attribution a{color:#b0c4d5!important}.map-toolbar{position:absolute;z-index:1000;left:14px;right:14px;top:14px;min-height:46px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border:1px solid rgba(142,178,208,.25);border-radius:11px;background:rgba(5,15,27,.9);backdrop-filter:blur(10px);box-shadow:var(--shadow);pointer-events:none}.context{display:flex;align-items:center;gap:8px;min-width:0;font-size:10px;letter-spacing:1.2px;color:#a4b6c6;font-weight:800}.context .dot{width:8px;height:8px;border-radius:50%;background:var(--cyan);box-shadow:0 0 13px var(--cyan);flex:0 0 auto}.context span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.map-actions{display:flex;align-items:center;gap:9px;pointer-events:auto}.map-actions button{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:8px;padding:7px 10px;font-size:9px;font-weight:900;letter-spacing:1px;cursor:pointer}.map-actions small{color:#7f95a9;font-size:9px;white-space:nowrap}.map-actions b{color:#e8f1f7}.map-overlay{position:absolute;z-index:1000;background:rgba(5,15,27,.92);backdrop-filter:blur(10px);border:1px solid rgba(142,178,208,.25);border-radius:10px;box-shadow:var(--shadow)}.legend{left:14px;bottom:40px;width:188px;padding:12px}.overlay-title{font-size:9px;letter-spacing:1.5px;font-weight:950;color:#d8e5ee;margin-bottom:8px}.legend-row{display:flex;align-items:center;gap:8px;color:#a8bac9;font-size:9px;margin-top:7px}.legend-dot{width:9px;height:9px;border-radius:50%;border:1px solid rgba(255,255,255,.55);flex:0 0 auto}.legend-order{background:var(--red)}.legend-rec{background:var(--green);box-shadow:0 0 9px var(--green)}.legend-collo{background:var(--cyan);box-shadow:0 0 8px var(--cyan)}.legend-existing{background:#a7b5c0}.legend-risk{background:var(--amber)}.map-summary{right:14px;bottom:40px;padding:11px 13px;min-width:184px}.summary-kicker{font-size:8px;letter-spacing:1.5px;font-weight:900;color:#7890a6}.summary-value{font-size:22px;line-height:1;font-weight:900;margin-top:4px}.summary-meta{margin-top:7px;font-size:8px;color:#7e94a9;white-space:nowrap}.summary-meta b{color:var(--cyan)}.map-caption{position:absolute;z-index:1000;left:14px;right:14px;bottom:12px;font-size:8px;color:#8ca1b3;pointer-events:none;text-shadow:0 1px 5px #000}.map-caption b{color:#d3e0e8}
+.marker{position:relative;display:grid;place-items:center;filter:drop-shadow(0 8px 14px rgba(0,0,0,.5));transform:translate(var(--cluster-x,0px),var(--cluster-y,0px))}.tower{border-radius:50%;display:grid;place-items:center}.tower svg{display:block}.tower-rec{width:46px;height:46px;border:2px solid var(--green);background:rgba(67,224,160,.13);box-shadow:0 0 0 6px rgba(67,224,160,.06),0 0 20px rgba(67,224,160,.28)}.tower-collo{width:34px;height:34px;border:1.5px solid var(--cyan);background:rgba(53,200,255,.1)}.tower-risk{width:30px;height:30px;border:2px solid var(--amber);background:rgba(245,191,92,.14);box-shadow:0 0 0 5px rgba(245,191,92,.07),0 0 15px rgba(245,191,92,.2)}.intelligence-selected{animation:intelligencePulse .9s ease-out}@keyframes intelligencePulse{0%{box-shadow:inset 0 0 0 2px rgba(53,200,255,.75)}100%{box-shadow:inset 0 0 0 0 rgba(53,200,255,0)}}.candidate-marker-selected{transform:translate(var(--cluster-x,0px),var(--cluster-y,0px)) scale(1.16);filter:drop-shadow(0 0 10px rgba(53,200,255,.9))!important}.tower-existing{width:32px;height:32px;border:1px solid #b0bec9;background:rgba(167,181,192,.1)}.rank{position:absolute;right:-3px;top:-5px;min-width:18px;height:18px;padding:0 4px;border-radius:10px;background:#071321;border:1px solid var(--cyan);color:var(--cyan);font-size:9px;font-weight:950;display:grid;place-items:center}.b2s-marker{cursor:pointer;pointer-events:auto;width:54px;height:54px;display:grid;place-items:center;transform:translate(0,0);filter:drop-shadow(0 8px 14px rgba(0,0,0,.5))}.b2s-marker.selected .b2s-pin{border-color:#fff;box-shadow:0 0 0 5px rgba(245,191,92,.22),0 0 0 11px rgba(53,200,255,.16),0 0 28px rgba(245,191,92,.55)}.b2s-pin{width:42px;height:42px;border-radius:50%;display:grid;place-items:center;border:2px solid var(--amber);background:rgba(245,191,92,.14);box-shadow:0 0 0 7px rgba(245,191,92,.08),0 0 24px rgba(245,191,92,.25)}.target-marker{width:54px;height:62px;display:flex;align-items:center;justify-content:center;position:relative}.target-pin{width:44px;height:52px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:var(--red);border:2px solid #ffd8df;box-shadow:0 0 0 7px rgba(255,85,112,.12),0 12px 22px rgba(0,0,0,.48)}.target-pin:after{content:'';position:absolute;width:16px;height:16px;border-radius:50%;background:#fff;left:12px;top:12px}.target-label,.distance-label{background:rgba(4,13,23,.92);border:1px solid rgba(125,170,200,.38);border-radius:7px;color:#eaf4fa;white-space:nowrap;box-shadow:0 7px 14px rgba(0,0,0,.32)}.target-label{padding:7px 9px;min-width:104px;text-align:center}.target-label strong{display:block;color:#ff9cad;font-size:8px;letter-spacing:1.3px}.target-label span{display:block;font-size:10px;font-weight:850;margin-top:2px}.distance-label{padding:5px 7px;font-size:9px;font-weight:900}.distance-label.rec{border-color:#2c9c7a;color:#b8f8dc}.distance-label.collo{border-color:#286a85;color:#b8eaff}.candidate-popup{width:270px;padding:14px;background:rgba(5,15,27,.96);border:1px solid #2d6b84;border-radius:11px;box-shadow:var(--shadow);color:var(--text)}.candidate-popup .close{position:absolute;right:8px;top:7px;width:24px;height:24px;border:0;background:transparent;color:#8ba2b4;font-size:17px;cursor:pointer}.candidate-popup .tenant-line{margin-top:8px;color:#a6bac9;font-size:9px;line-height:1.35}.candidate-popup .tenant-line b{color:#f0f7fb}.candidate-popup .signal-line{font-size:10px;line-height:1.5;white-space:pre-line}.candidate-popup .str-yes{color:#ffb45e}.candidate-popup .str-no{color:#43e0a0}.candidate-popup .kicker{font-size:8px;letter-spacing:1.4px;font-weight:950;color:var(--cyan)}.candidate-popup h3{font-size:14px;margin:5px 0 3px}.candidate-popup .sub{font-size:9px;color:#8197aa}.popup-grid{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:11px;border-top:1px solid #213a51}.popup-grid div{padding:9px 5px 5px 0}.popup-grid span{display:block;font-size:8px;color:#6f879c;letter-spacing:1px}.popup-grid b{display:block;font-size:13px;margin-top:3px}.popup-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;padding-top:8px;border-top:1px solid #213a51}.popup-foot button{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:7px;padding:7px 9px;font-size:8px;font-weight:900;letter-spacing:.8px}.popup-foot small{color:#8298aa;font-size:8px}
+.target-strip{display:flex;justify-content:space-between;align-items:center;margin-top:12px;padding:9px 10px;border:1px solid #1f4059;background:#0a1b2c;border-radius:8px}.target-strip span,.mini-label{font-size:8px;letter-spacing:1.2px;color:#6f879c;font-weight:900}.target-strip b{font-size:11px;color:var(--cyan)}.section-block{margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}.section-title{display:flex;align-items:center;gap:7px;margin-bottom:9px}.section-title>span{font-size:8px;color:var(--cyan);font-weight:950;letter-spacing:1px}.section-title strong{font-size:9px;letter-spacing:1.2px}.section-title small{margin-left:auto;color:#657d92;font-size:8px}.info-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid #1d344b;border-radius:8px;overflow:hidden}.info-cell{padding:9px;border-bottom:1px solid #1b3146}.info-cell:nth-child(odd){border-right:1px solid #1b3146}.info-cell:nth-last-child(-n+2){border-bottom:0}.info-cell span{display:block;color:#668097;font-size:7px;letter-spacing:1px;font-weight:900}.info-cell b{display:block;margin-top:4px;font-size:11px;line-height:1.25}.info-cell small{display:block;margin-top:2px;color:#71879a;font-size:7px}.signal-card{margin-top:8px;padding:9px;border:1px solid #1d425a;background:#0a1c2d;border-radius:8px}.signal-detail{margin-top:6px;display:grid;gap:3px}.signal-detail div{display:flex;justify-content:space-between;align-items:center}.signal-detail strong{font-size:10px}.signal-detail span{font-size:8px;color:#8ca1b2}.compact{margin-top:9px}.cost-stack{display:grid;gap:8px}.cost-subtotal{display:flex;justify-content:space-between;align-items:center;margin:7px 9px 9px;padding:7px 8px;border-radius:6px;background:#0d2639;border:1px solid #244c65}.cost-subtotal span{font-size:7px;letter-spacing:1px;color:#7893a7;font-weight:900}.cost-subtotal b{font-size:10px;color:var(--cyan)}.cost-group{border:1px solid #1d344b;border-radius:8px;background:#0a1a2a;overflow:hidden}.cost-group-head{display:flex;justify-content:space-between;align-items:center;padding:8px 9px;border-bottom:1px solid #1b3146}.cost-group-head strong{font-size:8px;letter-spacing:1px}.cost-group-head b{font-size:10px;color:#dce9f1}.cost-items{padding:5px 9px}.cost-item{display:flex;justify-content:space-between;gap:8px;padding:5px 0;font-size:8px;color:#8298aa}.cost-item+.cost-item{border-top:1px dashed #1b3044}.cost-item b{color:#b8c8d4;font-size:8px}.investment-card{border:1px solid #24445c;border-radius:9px;background:#0a1a2a;padding:11px}.investment-row{display:grid;grid-template-columns:1fr 1fr;gap:8px}.investment-cell{padding:8px;border:1px solid #1a3248;border-radius:7px}.investment-cell span{display:block;color:#6e879c;font-size:7px;letter-spacing:1px;font-weight:900}.investment-cell b{display:block;margin-top:5px;font-size:17px}.investment-cell small{display:block;margin-top:2px;color:#6d8498;font-size:7px}.investment-result{display:flex;justify-content:space-between;align-items:center;margin-top:9px;padding-top:9px;border-top:1px solid #20394f}.investment-result span{font-size:8px;color:#7c92a5}.investment-result b{font-size:10px;color:var(--green)}.no-data{color:#637b8f!important;font-weight:700!important}
+.detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px}.decision-label{font-size:9px;letter-spacing:1.6px;font-weight:900;color:#70869d}.decision{font-size:30px;font-weight:950;letter-spacing:-1px;color:var(--green);margin-top:3px}.decision-pill{border:1px solid #28627e;color:var(--cyan);border-radius:20px;padding:6px 9px;font-size:8px;font-weight:900;white-space:nowrap}.site-name{margin-top:7px;color:#8ea3b5;font-size:10px}.score-line{display:flex;align-items:center;gap:12px;margin-top:17px;padding-bottom:15px;border-bottom:1px solid var(--line)}.score{font-size:43px;line-height:.9;font-weight:950;letter-spacing:-2px}.score-copy strong{font-size:11px}.score-copy p{margin:3px 0 0;font-size:9px;color:#71879b}.metrics{display:grid;grid-template-columns:1fr 1fr;border-bottom:1px solid var(--line)}.metric{padding:12px 8px 11px 0}.metric:nth-child(even){border-left:1px solid var(--line);padding-left:10px}.metric span{display:block;color:#667f95;font-size:8px;font-weight:900;letter-spacing:1.2px}.metric b{display:block;font-size:16px;margin-top:4px}.metric small{display:block;color:#657c91;font-size:8px;margin-top:2px}.metric #signal{white-space:pre-line;line-height:1.35}.bar-row{margin-top:13px}.bar-head{display:flex;justify-content:space-between;color:#8ea2b3;font-size:9px}.bar{height:5px;margin-top:6px;background:#16283a;border-radius:4px;overflow:hidden}.bar i{display:block;height:100%;background:var(--cyan);border-radius:4px}.challenge{margin-top:14px;padding:11px;border:1px solid #5a4850;background:#211c25;border-radius:8px}.challenge .decision-label{font-size:8px}.challenge strong{display:block;margin-top:5px;color:var(--amber);font-size:10px}.challenge p{margin:4px 0 0;color:#8e8490;font-size:9px;line-height:1.45}.rank-head{display:flex;justify-content:space-between;align-items:end;margin:17px 0 8px}.rank-head strong{font-size:9px;letter-spacing:1.2px}.rank-head small{font-size:8px;color:#667e92}.candidate-list{display:grid;gap:6px}.candidate-row{display:grid;grid-template-columns:28px 1fr auto;align-items:center;gap:8px;padding:8px;border:1px solid #1e344a;background:#0b1a2b;border-radius:8px;cursor:pointer}.candidate-row.active{border-color:#2c718c;background:#0d2437}.candidate-rank{font-size:10px;color:#71889d;font-weight:950}.candidate-row strong{display:block;font-size:9px}.candidate-row small{display:block;margin-top:3px;color:#667e92;font-size:8px}.candidate-right{text-align:right}.candidate-right b{display:block;color:var(--cyan);font-size:11px}.candidate-right small{color:#7890a4}.fallback-candidate{margin-top:6px}.fallback-candidate strong{color:#c9d5df}.fallback-candidate small{line-height:1.3}.fallback-candidate .candidate-right b{color:var(--amber)}.fallback-candidate .candidate-right small{color:#7890a4}.error{position:absolute;z-index:2000;top:76px;left:14px;right:14px;padding:11px 13px;border:1px solid #6c3442;background:rgba(40,15,24,.95);border-radius:9px;color:#ffb9c4;font-size:9px;box-shadow:var(--shadow);display:none}.loading{position:absolute;z-index:2001;inset:0;display:none;place-items:center;background:rgba(4,12,22,.4);backdrop-filter:blur(2px)}.loading.show{display:grid}.loader-card{padding:14px 18px;border:1px solid #29475f;background:#081827;border-radius:10px;color:#9eb3c4;font-size:10px}.mobile-nav{display:none}
+@media(max-width:1100px){.workspace{grid-template-columns:220px minmax(0,1fr) 330px}.input-panel{padding:17px}.detail-panel{padding:16px}.brand-title{font-size:20px}}
+@media(max-width:760px){body{overflow:auto}.app{height:auto;min-height:100dvh}.topbar{height:auto;min-height:76px;padding:16px 18px}.brand-title{font-size:21px;max-width:280px}.status{font-size:8px}.workspace{display:grid;grid-template-columns:1fr;grid-template-rows:auto minmax(430px,62dvh) auto;overflow:visible}.panel{overflow:visible}.input-panel{border-right:0;border-bottom:1px solid var(--line);padding:18px 18px 16px}.input-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px}.input-grid .field{margin-top:12px}.field input,.field select{height:46px;font-size:14px}.analyze{height:48px;margin-top:15px}.rule,.source{display:none}.map-stage{height:100%;min-height:430px}.map-toolbar{top:10px;left:10px;right:10px;min-height:54px;padding:8px 11px}.map-actions small{display:none}.legend{left:10px;bottom:54px;width:164px;padding:10px}.legend-row{font-size:8px;margin-top:6px}.map-summary{right:10px;bottom:54px;min-width:158px;padding:10px}.summary-value{font-size:20px}.summary-meta{font-size:7px}.map-caption{display:none}.detail-panel{border-left:0;border-top:1px solid var(--line);padding:18px 18px 88px}.decision{font-size:32px}.mobile-nav{position:fixed;z-index:3000;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:1fr 1fr 1fr;padding:5px;border:1px solid #2a4964;background:rgba(6,17,31,.94);backdrop-filter:blur(14px);border-radius:17px;box-shadow:var(--shadow)}.mobile-nav button{height:52px;border:0;background:transparent;color:#8197aa;border-radius:12px;font-size:8px;font-weight:900;letter-spacing:1px}.mobile-nav button.active{background:#0c2b42;color:var(--cyan)}.candidate-popup{width:min(250px,calc(100vw - 34px))}.target-label{min-width:94px}.leaflet-control-zoom{margin-bottom:56px!important}}
+@media(max-width:390px){.workspace{grid-template-rows:auto minmax(350px,52dvh) auto}.map-stage{min-height:350px}.legend{width:148px}.map-summary{min-width:142px}.summary-meta{font-size:6px}.brand-title{font-size:19px}}
+@media(orientation:landscape) and (max-width:900px){body{overflow:auto}.workspace{grid-template-columns:200px minmax(0,1fr) 290px;grid-template-rows:1fr;min-height:calc(100dvh - 64px);overflow:hidden}.topbar{height:64px;min-height:64px}.input-panel,.detail-panel{overflow:auto}.map-stage{min-height:0}.mobile-nav{display:none}}
+.sda-link{margin-top:12px}.sda-link a{display:inline-flex;align-items:center;gap:7px;color:#35aaff;font-weight:800;font-size:12px;letter-spacing:.08em;text-decoration:none;border:1px solid rgba(53,170,255,.35);padding:8px 11px;border-radius:8px;background:rgba(53,170,255,.06)}.sda-link a:hover{background:rgba(53,170,255,.12);border-color:rgba(53,170,255,.65)}.sda-link .sda-meta{display:block;margin-top:6px;color:#71869b;font-size:10px;letter-spacing:.03em}
+.candidate-marker.selected{transform:scale(1.18);filter:drop-shadow(0 0 10px rgba(72,170,255,.95));z-index:9999!important}
+.candidate-row.active{outline:2px solid rgba(72,170,255,.85);outline-offset:-2px;box-shadow:0 0 0 1px rgba(72,170,255,.35) inset}
+.b2s-popup{pointer-events:auto!important}
+.intelligence-pulse{animation:pmnoIntelligencePulse .9s ease}
+@keyframes pmnoIntelligencePulse{0%{box-shadow:0 0 0 0 rgba(72,170,255,.65)}100%{box-shadow:0 0 0 18px rgba(72,170,255,0)}}
+
+</style>
+
+<style>
+.pmno-target-icon{background:transparent!important;border:0!important}
+.pmno-target{width:64px;height:72px;display:block;overflow:visible;pointer-events:auto}
+.pmno-target svg{display:block;overflow:visible}
+</style>
+
+<style>
+.pmno-target-icon{background:transparent!important;border:0!important}
+.target-marker.target-red{width:58px;height:58px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible}
+.target-marker.target-red .target-ring{
+  width:54px;height:54px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--red);
+  border:2px solid rgba(255,255,255,.92);
+  box-shadow:0 0 0 3px rgba(255,85,112,.16),0 5px 12px rgba(0,0,0,.35);
+}
+.target-marker.target-red .target-ring svg{display:block}
+</style>
+<style>
+.candidate-row{cursor:pointer;transition:border-color .15s ease,background .15s ease,box-shadow .15s ease}
+.candidate-row.active{border-color:var(--cyan)!important;background:#0d2437!important;box-shadow:inset 3px 0 0 var(--cyan),0 0 0 1px rgba(53,200,255,.10)}
+.candidate-row.active .candidate-rank{color:var(--cyan)!important}
+.candidate-row:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.candidate-row[data-option="B2S"] .candidate-right b{color:var(--amber)}
+.candidate-row[data-option="B2S"]:hover{border-color:#52718a;background:#0d2132}
+</style>
+</head>
+<body>
+<div class="app">
+<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
+<main class="workspace">
+<aside class="panel input-panel">
+<div class="section-kicker">NEW ORDER INPUT</div>
+<div class="input-grid">
+<div class="field"><label>LATITUDE</label><input id="lat" type="number" step="0.0001" value="-6.9818"></div>
+<div class="field"><label>LONGITUDE</label><input id="lon" type="number" step="0.0001" value="110.4093"></div>
+<div class="field"><label>TARGET TENANT</label><select id="tenant"><option>IOH</option><option>TSEL</option><option>XLS</option><option>SFN</option></select></div>
+<div class="field"><label>SEARCH RADIUS</label><select id="radius"><option value="1000">1 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></div>
+</div>
+<button id="analyze" class="analyze">ANALYZE NEW ORDER <span>→</span></button>
+<div class="rule"><strong>COLLO FIRST</strong><p>Existing tower opportunities are evaluated before Predictive New Site / B2S fallback.</p></div>
+<div class="source"><b>Data source</b><br><span class="ok">● Supabase PMNO Engine</span><br>Live decision RPC · dynamic radius · tenant-aware map</div>
+</aside>
+<section class="map-stage">
+<div class="map-toolbar"><div class="context"><i class="dot"></i><span id="context">SEMarang · CENTRAL JAVA</span></div><div class="map-actions"><button id="baseMapToggle">SATELLITE</button><small>Radius <b id="radiusText">3 km</b></small></div></div>
+<div id="map" class="map"></div>
+<div id="error" class="error"></div>
+<div id="loading" class="loading"><div class="loader-card">Running PMNO decision engine…</div></div>
+<div class="map-overlay legend"><div class="overlay-title">MAP LEGEND</div><div class="legend-row"><i class="legend-dot legend-order"></i>New Order</div><div class="legend-row"><i class="legend-dot legend-rec"></i>Recommended COLLO</div><div class="legend-row"><i class="legend-dot legend-collo"></i>Top 5 COLLO</div><div class="legend-row"><i class="legend-dot legend-existing"></i>Existing Site</div><div class="legend-row"><i class="legend-dot legend-risk"></i>Risk / Redzone</div></div>
+<div class="map-overlay map-summary"><div class="summary-kicker">SEARCH RADIUS</div><div class="summary-value" id="summaryRadius">3 KM</div><div class="summary-meta"><b id="summarySites">0</b> EXISTING · <b id="summaryCollo">0</b> TOP COLLO</div></div>
+<div class="map-caption"><b>Map intelligence</b> — Technical ranking: tenant exclusion → distance → height → signal.</div>
+</section>
+<aside class="panel detail-panel">
+<div class="detail-head"><div><div id="decisionKicker" class="decision-label">COLLO SUGGESTION</div><div id="decision" class="decision">—</div></div><div class="decision-pill">COLLO FIRST</div></div>
+<div id="siteName" class="site-name">Run analysis to generate recommendation.</div>
+<div class="target-strip"><span>TARGET TENANT</span><b id="targetTenant">—</b></div>
+<div class="section-block"><div class="section-title"><span>01</span><strong>TOP 5 CANDIDATES</strong><small>Technical priority</small></div><div id="candidateList" class="candidate-list"></div></div>
+<div class="section-block"><div class="section-title"><span>02</span><strong>CANDIDATE PROFILE</strong></div><div class="info-grid" id="profileGrid"></div><div class="signal-card"><div class="mini-label">TARGET TENANT SIGNAL · INFORMATION</div><div id="signalDetail" class="signal-detail">—</div></div></div>
+<div class="section-block"><div class="section-title"><span>03</span><strong>ENGINEERING &amp; DELIVERY</strong></div><div class="info-grid" id="engineeringGrid"></div><div class="challenge compact"><div class="decision-label">KEY ENGINEERING FLAG</div><strong id="challenge">—</strong><p id="challengeText">—</p><div id="sdaLink" class="sda-link"></div></div></div>
+<div class="section-block"><div class="section-title"><span>04</span><strong>COST BUILD-UP</strong></div><div id="costBuildUp" class="cost-stack"></div></div>
+<div class="section-block"><div class="section-title"><span>05</span><strong>INVESTMENT</strong><small>Economics only</small></div><div id="investmentPanel" class="investment-card"></div></div>
+
+</aside>
+</main>
+<nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button></nav>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script>
+const SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
+const SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
+const TARGET_IRR=10.73;
+const state={lat:-6.9818,lon:110.4093,tenant:'IOH',radius:3000,decision:null,mapData:[],top5:[],selectedId:null,satellite:true};
+let map,targetMarker,targetLabelLayer,b2sMarker,b2sPopup,radiusCircle,routeLine,satelliteLayer,streetLayer,resizeObserver,selectedCandidatePopup;
+const candidateLayers=new Map();
+const distanceLayers=new Map();
+const apiHeaders=()=>({'apikey':SUPABASE_KEY,'Authorization':'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'});
+function $(id){return document.getElementById(id)}
+function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
+function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
+function towerSvg(stroke='#35c8ff',size=30){return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><path d="M11 32h18M14 29l6-21 6 21M16 21h8M15 25h10M20 8V5M17 10l-4-3M23 10l4-3" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+function targetIcon(){return L.divIcon({className:'pmno-target-icon',html:`<div class="target-marker target-red"><div class="target-ring">${towerSvg('#ffffff',34)}</div></div>`,iconSize:[58,58],iconAnchor:[29,29]})}
+function b2sIcon(){return L.divIcon({className:'',html:`<div class="b2s-marker"><div class="b2s-pin">${towerSvg('#f5bf5c',30)}</div></div>`,iconSize:[54,54],iconAnchor:[27,27]})}
+function b2sInfoIcon(){const d=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};return L.divIcon({className:'',html:`<div class="candidate-popup b2s-popup" data-site-id="__B2S__"><button class="close" aria-label="Close">×</button><div class="kicker">PREDICTIVE NEW SITE / B2S</div><h3>${esc(state.tenant)} NEW BUILD</h3><div class="sub">Predicted at New Order location</div><div class="popup-grid"><div><span>TOWER</span><b>${esc(d.tower_type||'SST')} · ${d.recommended_height_m!=null?num(d.recommended_height_m).toFixed(0)+' m':'—'}</b></div><div><span>LAND</span><b>${d.recommended_land_area_m2!=null?num(d.recommended_land_area_m2).toFixed(0)+' m²':'—'}</b></div><div><span>DENSITY</span><b>${esc(d.density_class||'—')}</b></div><div><span>NETWORK GAP</span><b>${d.network_gap_score!=null?num(d.network_gap_score).toFixed(1):'—'}</b></div></div><div class="popup-foot"><small>Candidate #6 · Fallback</small><button>VIEW INTELLIGENCE</button></div></div>`,iconSize:[270,205],iconAnchor:[135,205]})}
+function targetLabel(){return L.divIcon({className:'',html:`<div class="target-label"><strong>NEW ORDER</strong><span>${esc(state.tenant)} TARGET</span></div>`,iconSize:[104,42],iconAnchor:[52,43]})}
+function isRiskSite(c){const raw=c?.red_zone??c?.redzone??c?.community_risk_level??c?.risk_level??c?.risk;return raw===true||String(raw??'').toUpperCase()==='YES'||String(raw??'').toUpperCase()==='HIGH'||String(raw??'').toUpperCase()==='REDZONE'}
+function mapMarkerStyle(category){const styles={
+  'recommended-collo':{stroke:'#43e0a0',border:'#43e0a0',bg:'rgba(67,224,160,.13)',shadow:'0 0 0 6px rgba(67,224,160,.06),0 0 20px rgba(67,224,160,.28)'},
+  'top5-collo':{stroke:'#35c8ff',border:'#35c8ff',bg:'rgba(53,200,255,.10)',shadow:'none'},
+  'risk-redzone':{stroke:'#f5bf5c',border:'#f5bf5c',bg:'rgba(245,191,92,.14)',shadow:'0 0 0 5px rgba(245,191,92,.07),0 0 15px rgba(245,191,92,.20)'},
+  'existing-site':{stroke:'#a7b5c0',border:'#a7b5c0',bg:'rgba(167,181,192,.10)',shadow:'none'}
+};return styles[category]||styles['existing-site']}
+function candidateIcon(c,isRec,rank,selected=false,isRisk=false){
+  const category=isRec?'recommended-collo':(isRisk?'risk-redzone':'top5-collo');
+  const st=mapMarkerStyle(category);
+  const size=isRec?46:(isRisk?30:34), svgSize=isRec?36:(isRisk?25:27);
+  const selectedCls=selected?'candidate-marker-selected':'';
+  return L.divIcon({className:'',html:`<div class="marker ${selectedCls}" data-map-category="${category}"><div class="tower" style="width:${size}px;height:${size}px;border-radius:50%;display:grid;place-items:center;border:${isRec?'2px':'1.5px'} solid ${st.border};background:${st.bg};box-shadow:${st.shadow};">${towerSvg(st.stroke,svgSize)}${!isRec&&rank?`<span class="rank">${rank}</span>`:''}</div></div>`,iconSize:[isRec?50:38,isRec?50:38],iconAnchor:[isRec?25:19,isRec?25:19]})
+}
+function existingIcon(c,isRisk=false){
+  const risk=isRiskSite(c)||isRisk;
+  const category=risk?'risk-redzone':'existing-site';
+  const st=mapMarkerStyle(category);
+  const size=risk?30:32, svgSize=risk?22:19;
+  return L.divIcon({className:'',html:`<div class="marker" data-map-category="${category}"><div class="tower" style="width:${size}px;height:${size}px;border-radius:50%;display:grid;place-items:center;border:${risk?'2px':'1px'} solid ${st.border};background:${st.bg};box-shadow:${st.shadow};">${towerSvg(st.stroke,svgSize)}</div></div>`,iconSize:[28,28],iconAnchor:[14,14]})
+}
+function distanceIcon(c,isRec,rank){return L.divIcon({className:'',html:`<div class="distance-label ${isRec?'rec':'collo'}">${isRec?'★ TOP COLLO · ':''}${(num(c.distance_m)/1000).toFixed(2)} km</div>`,iconSize:[1,1],iconAnchor:[0,0]})}
+function clusterOffset(items,index){if(items.length<=1)return [0,0];const ranked=items.filter(x=>x.rank);const priority=ranked.length?ranked:items;const centerIndex=priority.indexOf(items[index]);if(centerIndex===0)return [0,0];const others=items.filter((x,i)=>!(priority.length&&priority.indexOf(x)===0));const oi=others.indexOf(items[index]);const n=Math.max(1,others.length);const angle=(-Math.PI/2)+(oi*(2*Math.PI/n));const radius=28+Math.min(10,n*2);return [Math.round(Math.cos(angle)*radius),Math.round(Math.sin(angle)*radius)]}
+function applyMarkerDeclutter(entries){
+  if(!entries.length)return;
+  // Declutter in SCREEN SPACE, not geographic meters. At a given zoom level
+  // 20 m can be visually farther apart than 80 m at another zoom level.
+  const points=entries.map(e=>map.latLngToLayerPoint([e.lat,e.lon]));
+  const priority=e=>e.rank===1?0:e.rank?e.rank:e.isRisk?8:20;
+  const ordered=entries.map((e,i)=>({...e,i,point:points[i]})).sort((a,b)=>priority(a)-priority(b));
+  const placed=[];
+  const MIN_GAP=34;
+  const offsets=(n)=>{
+    if(n===0)return [0,0];
+    const ring=Math.ceil((Math.sqrt(n)-1)/2);
+    const count=Math.max(6,ring*6);
+    const slot=(n-1)%count;
+    const angle=(slot/count)*Math.PI*2-Math.PI/2;
+    const radius=30+ring*22;
+    return [Math.cos(angle)*radius,Math.sin(angle)*radius];
+  };
+  ordered.forEach((entry)=>{
+    let chosen=[0,0];
+    for(let attempt=0;attempt<12;attempt++){
+      const candidate=offsets(placed.length+attempt);
+      const cx=entry.point.x+candidate[0],cy=entry.point.y+candidate[1];
+      if(placed.every(p=>Math.hypot(cx-p.x,cy-p.y)>=MIN_GAP)){chosen=candidate;break;}
+    }
+    const el=entry.marker.getElement()?.querySelector('.marker');
+    if(el){el.style.setProperty('--cluster-x',`${chosen[0]}px`);el.style.setProperty('--cluster-y',`${chosen[1]}px`);}
+    const labelEntry=candidateLayers.get(entry.site_id);
+    const label=labelEntry?.label?.getElement()?.querySelector('.distance-label');
+    if(label){
+      const lx=chosen[0]+(entry.rank===1?34:24);
+      const ly=chosen[1]+(entry.rank===1?-18:10);
+      label.style.transform=`translate(${lx}px,${ly}px)`;
+    }
+    placed.push({x:entry.point.x+chosen[0],y:entry.point.y+chosen[1]});
+  });
+}
+
+function targetInfoIcon(){return L.divIcon({className:'',html:`<div class="target-label"><strong>NEW ORDER</strong><span>${esc(state.tenant)} · ${state.lat.toFixed(4)}, ${state.lon.toFixed(4)}</span></div>`,iconSize:[160,42],iconAnchor:[80,43]})}
+function initMap(){
+ map=L.map('map',{zoomControl:true,attributionControl:true,preferCanvas:true,zoomAnimation:true}).setView([state.lat,state.lon],13);
+ satelliteLayer=L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,maxNativeZoom:19,keepBuffer:2,updateWhenZooming:true,updateWhenIdle:false,attribution:'Tiles © Esri'}).addTo(map);
+ streetLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:2,updateWhenZooming:true,updateWhenIdle:false,attribution:'© OpenStreetMap contributors'});
+ radiusCircle=L.circle([state.lat,state.lon],{radius:state.radius,color:'#35c8ff',weight:2,dashArray:'8 7',fillColor:'#35c8ff',fillOpacity:.045,interactive:false}).addTo(map);
+ targetMarker=L.marker([state.lat,state.lon],{icon:targetIcon(),zIndexOffset:3000}).addTo(map);
+ targetLabelLayer=null;
+ bindTargetMarker();
+ $('baseMapToggle').onclick=toggleBasemap;
+ map.on('click',e=>{if(e.originalEvent?.target?.closest?.('.leaflet-marker-icon'))return;closeMapSelection()});
+ map.on('zoomend moveend',()=>{if(routeLine)routeLine.bringToFront();targetMarker?.setZIndexOffset(3000);b2sMarker?.setZIndexOffset(3600);});
+ setTimeout(()=>map.invalidateSize({animate:false}),100);
+}
+function bindTargetMarker(){targetMarker.off('click');targetMarker.on('click',()=>showTargetPopup())}
+function showTargetPopup(){closeMapSelection();selectedCandidatePopup=L.marker([state.lat,state.lon],{icon:targetInfoIcon(),interactive:true,zIndexOffset:4000}).addTo(map);selectedCandidatePopup.on('click',e=>{e.originalEvent?.stopPropagation();closeMapSelection()})}
+async function loadB2SIntelligence(){
+  if(state.b2sLoading)return; state.b2sLoading=true;
+  state.selectedId='__B2S__';
+  b2sMarker?.getElement()?.querySelector('.b2s-marker')?.classList.add('selected');
+  document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x.id==='fallbackCandidate'));
+  const anchor=state.top5?.[0]||state.decision?.rows?.[0];
+  if(!anchor?.site_id){
+    updateDetail({recommended:null,final_decision:'B2S',raw:state.decision?.raw||{}});
+    return;
+  }
+  try{
+    setLoading(true);
+    const rawDetail=await rpc('pmno_candidate_detail_by_site_id',{
+      p_site_id:anchor.site_id,
+      p_target_tenant:state.tenant,
+      p_added_device_count:7,
+      p_added_load_kw:12,
+      p_annual_revenue:120000000,
+      p_annual_opex_ratio:.20,
+      p_horizon_years:20,
+      p_revenue_growth:0,
+      p_wacc:.0873,
+      p_option:'B2S'
+    });
+    const detail=normalizeCandidateDetailPayload(rawDetail);
+    const eng=detail.engineering||{};
+    const capexItems=finalizeCapexItems(detail.capex_items,'B2S');
+    const design=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};
+    const b2s={
+      ...anchor,
+      site_id:null,
+      site_name:'PREDICTED NEW SITE',
+      latitude:state.lat,
+      longitude:state.lon,
+      tower_height_m:design.recommended_height_m??anchor.tower_height_m,
+      tower_type:design.tower_type??anchor.tower_type??'SST',
+      tenant_count:0,
+      distance_m:0,
+      detail,
+      capex_items:capexItems,
+      option:'B2S',
+      need_str:eng.need_str,
+      reinforcement_expected_ton:eng.reinforcement_expected_ton,
+      reinforcement_probability:eng.reinforcement_probability,
+      structural_utilization_proxy:eng.structural_utilization_proxy,
+      sda_available:eng.sda_available,
+      ses_work_type:eng.ses_work_type,
+      ses_work_cost:eng.ses_work_cost,
+      community_case_count:eng.community_case_count,
+      red_zone:eng.red_zone,
+      access_level:eng.access_level,
+      estimated_days:eng.estimated_to_on_air_days,
+      roadhead_distance_m:detail.site?.roadhead_distance_m,
+      existing_nbv:detail.investment?.existing_nbv??anchor.existing_nbv??anchor.nbv_existing??anchor.nbv??null,
+      existing_irr:detail.investment?.existing_irr??null,
+      npv:detail.investment?.npv??null,
+      capex_total:detail.investment?.capex_total??detail.investment?.estimated_capex??null
+    };
+    state.b2sDetail=b2s;
+    updateDetail({recommended:b2s,final_decision:'B2S',raw:state.decision?.raw||{}});
+    updateFallback({raw:state.decision?.raw||{},new_site:detail.investment||{}});
+  }catch(e){
+    showError('B2S Intelligence belum dapat dimuat. '+e.message);
+  }finally{setLoading(false);state.b2sLoading=false}
+}
+function showB2SPopup(){
+  closeMapSelection();
+  b2sPopup=L.marker([state.lat,state.lon],{icon:b2sInfoIcon(),interactive:true,zIndexOffset:3900}).addTo(map);
+  b2sPopup.on('click',e=>{e.originalEvent?.stopPropagation()});
+  const el=b2sPopup.getElement();
+  el?.querySelector('.close')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();b2sPopup?.remove();b2sPopup=null});
+  el?.querySelector('.popup-foot button')?.addEventListener('click',async e=>{
+    e.preventDefault();e.stopPropagation();
+    b2sPopup?.remove();b2sPopup=null;
+    await selectB2S(false);
+    focusIntelligence();
+  });
+}
+function closeMapSelection(clearSelection=true){if(selectedCandidatePopup){selectedCandidatePopup.remove();selectedCandidatePopup=null}if(b2sPopup){b2sPopup.remove();b2sPopup=null}if(clearSelection){state.selectedId=null;document.querySelectorAll('.candidate-row').forEach(x=>x.classList.remove('active'))}}
+function toggleBasemap(){state.satellite=!state.satellite;if(state.satellite){map.removeLayer(streetLayer);satelliteLayer.addTo(map);$('baseMapToggle').textContent='SATELLITE'}else{map.removeLayer(satelliteLayer);streetLayer.addTo(map);$('baseMapToggle').textContent='MAP'};setTimeout(()=>map.invalidateSize({animate:false}),40)}
+// calculate_pmno_decision is exposed through public.pmno_decision.
+async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
+async function loadTenants(){try{const data=await rpc('pmno_tenants',{});if(Array.isArray(data)){const sel=$('tenant');const current=state.tenant;sel.innerHTML=data.map(t=>`<option value="${esc(t.code)}">${esc(t.name||t.code)}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===current)?current:(sel.options[0]?.value||'IOH');state.tenant=sel.value}}catch(e){/* keep fallback tenant list */}}
+function showError(msg){$('error').textContent=msg;$('error').style.display='block'}function clearError(){$('error').style.display='none'}
+function setLoading(on){$('loading').classList.toggle('show',on);$('analyze').disabled=on}
+function normalizeDecision(raw){const d=raw||{};const rows=(d.collo?.top_5||[]).map((r,i)=>({...r,rank:r.rank||i+1}));const recommended=d.collo?.recommended;return {raw:d,rows,recommended}}
+function enrichRows(rows,mapData){const byId=new Map(mapData.map(x=>[x.site_id,x]));return rows.map(r=>({...r,...(byId.get(r.site_id)||{})}));}
+function enrichRecommended(rec,mapData){if(!rec)return rec;const m=mapData.find(x=>x.site_id===rec.site_id);return m?{...m,...rec}:rec}
+function mergeCandidates(mapData,decisionRows){const byId=new Map(decisionRows.map(x=>[x.site_id,x]));return mapData.map(c=>({...c,...(byId.get(c.site_id)||{}),isTargetTenant:!!c.target_tenant_present})).sort((a,b)=>num(a.distance_m)-num(b.distance_m))}
+function clearCandidateLayers(){candidateLayers.forEach(x=>{x.marker.remove();x.label?.remove()});candidateLayers.clear();distanceLayers.forEach(x=>x.remove());distanceLayers.clear()}
+function fitMapToData(data){const bounds=L.latLngBounds([[state.lat,state.lon]]);data.forEach(c=>{const lat=num(c.latitude,null),lon=num(c.longitude,null);if(lat!==null&&lon!==null)bounds.extend([lat,lon])});if(bounds.isValid())map.fitBounds(bounds,{padding:[65,65],maxZoom:14,animate:false})}
+function renderMap(data,decisionRows){
+ clearCandidateLayers();state.mapData=data;state.top5=decisionRows;
+ const rankMap=new Map(decisionRows.map((c,i)=>[c.site_id,i+1]));
+ const declutterEntries=[];data.forEach(c=>{const lat=num(c.latitude,null),lon=num(c.longitude,null);if(lat===null||lon===null)return;const ranked=rankMap.get(c.site_id);const rec=state.decision?.recommended?.site_id===c.site_id;const risk=isRiskSite(c);const useCollo=!!ranked;const marker=L.marker([lat,lon],{icon:useCollo?candidateIcon(c,rec,ranked,state.selectedId===c.site_id,risk):existingIcon(c,risk),zIndexOffset:rec?2500:useCollo?1000:risk?500:100}).addTo(map);marker.on('click',e=>{e.originalEvent?.stopPropagation();selectCandidate(c);});const label=useCollo?L.marker([lat,lon],{icon:distanceIcon(c,rec,ranked),interactive:false,zIndexOffset:rec?2400:900}).addTo(map):null;candidateLayers.set(c.site_id,{marker,label});if(label)distanceLayers.set(c.site_id,label);declutterEntries.push({lat,lon,rank:ranked,isRisk:risk,site_id:c.site_id,marker})});
+ if(routeLine)routeLine.remove();if(state.decision?.recommended){const rec=state.decision.recommended;const rc=data.find(c=>c.site_id===rec.site_id);if(rc&&rc.latitude!=null){routeLine=L.polyline([[state.lat,state.lon],[rc.latitude,rc.longitude]],{color:'#35aaff',weight:3,opacity:.9,dashArray:'9 8',lineCap:'round',interactive:false}).addTo(map)}}
+ radiusCircle.setLatLng([state.lat,state.lon]).setRadius(state.radius);targetMarker.setLatLng([state.lat,state.lon]);targetMarker.setZIndexOffset(3000);if(b2sMarker)b2sMarker.remove();b2sMarker=L.marker([state.lat,state.lon],{icon:targetIcon(),zIndexOffset:3600}).addTo(map);b2sMarker.on('click',e=>{e.originalEvent?.stopPropagation();selectB2S(true)});fitMapToData(data);requestAnimationFrame(()=>applyMarkerDeclutter(declutterEntries));setTimeout(()=>map.invalidateSize({animate:false}),80);updateSummary(data,decisionRows)
+}
+
+
+function normalizeCandidateDetailPayload(payload){
+  const p=Array.isArray(payload)?payload[0]:payload;
+  if(!p || typeof p!=='object')return {};
+  // Support both the direct composite return and wrapped JSON shapes.
+  const d=p.detail&&typeof p.detail==='object'?p.detail:p;
+  return {
+    ...p,
+    ...d,
+    engineering:p.engineering??d.engineering??{},
+    cost:p.cost??d.cost??{},
+    investment:p.investment??d.investment??{},
+    sda_documents:p.sda_documents??d.sda_documents??[],
+    capex_items:Array.isArray(p.capex_items)?p.capex_items:(Array.isArray(d.capex_items)?d.capex_items:[])
+  };
+}
+
+function finalizeCapexItems(items,option='COLLO'){
+  const rows=Array.isArray(items)?items.slice():[];
+  const codes=new Set(rows.map(x=>String(x?.item_code||'').toUpperCase()));
+  const add=(x)=>{if(!codes.has(String(x.item_code).toUpperCase())){rows.push(x);codes.add(String(x.item_code).toUpperCase())}};
+  add({bucket:'MATERIAL',item_code:'MNT-ANT',item_name:'Mounting · Material',quantity:7,unit:'set',unit_cost:6500000,total_cost:45500000,driver:{option,driver:'passive_antenna_count',added_device_count:7}});
+  add({bucket:'CME',item_code:'RBS-MAT',item_name:'Pondasi RBS · Material',quantity:1,unit:'lot',unit_cost:18000000,total_cost:18000000,driver:{option,driver:'always_required'}});
+  if(option==='COLLO')add({bucket:'CME',item_code:'RBS-APD',item_name:'Pondasi RBS · APD Pondasi RBS',quantity:1,unit:'lot',unit_cost:2500000,total_cost:2500000,driver:{option,driver:'collo_only'}});
+  add({bucket:'CME',item_code:'TRF-UNIT',item_name:'Transformator · Material',quantity:1,unit:'unit',unit_cost:85000000,total_cost:85000000,driver:{option,driver:'always_included',added_load_kw:12}});
+  return rows;
+}
+
+async function selectCandidate(c){
+  const candidate=state.top5.find(x=>String(x.site_id)===String(c.site_id))||c;
+  state.selectedId=candidate.site_id;
+  document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x.dataset.id===candidate.site_id));
+  candidateLayers.forEach((entry,id)=>{ const item=state.mapData.find(x=>String(x.site_id)===String(id)); if(item){ const ranked=state.top5.findIndex(x=>String(x.site_id)===String(id))+1; const rec=state.decision?.recommended?.site_id===id; entry.marker.setIcon(candidateIcon(item,rec,ranked>0?ranked:null,id===candidate.site_id)); } });
+  const panel=document.querySelector('.right-panel')||document.querySelector('#detailPanel')||document.querySelector('main'); panel?.classList.add('intelligence-selected'); setTimeout(()=>panel?.classList.remove('intelligence-selected'),900);
+  closeMapSelection(false);
+
+  // Render candidate immediately from the row-level data.
+  const preview={...candidate,detail:normalizeCandidateDetailPayload(candidate.detail||{}),capex_items:Array.isArray(candidate.capex_items)?candidate.capex_items:[]};
+  state.decision.recommended=preview;
+  updateDetail({recommended:preview});
+
+  if(candidate.latitude!=null&&candidate.longitude!=null){
+    selectedCandidatePopup=L.marker([num(candidate.latitude),num(candidate.longitude)],{
+      icon:popupIcon(candidate),interactive:true,zIndexOffset:3500,autoPan:false
+    }).addTo(map);
+    const el=selectedCandidatePopup.getElement();
+    el?.querySelector('.close')?.addEventListener('click',e=>{
+      e.preventDefault();e.stopPropagation();closeMapSelection();
+    });
+    el?.querySelector('.popup-foot button')?.addEventListener('click',async e=>{
+      e.preventDefault();e.stopPropagation();
+      selectedCandidatePopup?.remove();selectedCandidatePopup=null;
+      setSelectionVisual(candidate.site_id);
+      focusIntelligence();
+      await selectCandidate(candidate);
+    });
+  }
+
+  try{
+    const rawDetail=await rpc('pmno_candidate_detail_by_site_id',{
+      p_site_id:candidate.site_id,
+      p_target_tenant:state.tenant,
+      p_added_device_count:7,
+      p_added_load_kw:12,
+      p_annual_revenue:120000000,
+      p_annual_opex_ratio:.20,
+      p_horizon_years:20,
+      p_revenue_growth:0,
+      p_wacc:.0873,
+      p_option:'COLLO'
+    });
+
+    const detail=normalizeCandidateDetailPayload(rawDetail);
+    const eng=detail.engineering||{};
+    const capexItems=finalizeCapexItems(detail.capex_items,'COLLO');
+
+    if(String(state.selectedId)!==String(candidate.site_id))return;
+
+    const merged={
+      ...candidate,
+      ...(detail.site||{}),
+      detail,
+      capex_items:capexItems,
+
+      // Explicit engineering mapping from the candidate-detail RPC.
+      need_str:eng.need_str,
+      reinforcement_expected_ton:eng.reinforcement_expected_ton,
+      reinforcement_probability:eng.reinforcement_probability,
+      structural_utilization_proxy:eng.structural_utilization_proxy,
+      sda_available:eng.sda_available,
+      ses_work_type:eng.ses_work_type,
+      ses_work_cost:eng.ses_work_cost,
+      community_case_count:eng.community_case_count,
+      red_zone:eng.red_zone,
+      access_level:eng.access_level,
+      estimated_days:eng.estimated_to_on_air_days,
+      roadhead_distance_m:detail.site?.roadhead_distance_m,
+
+      existing_nbv:detail.investment?.existing_nbv??candidate.existing_nbv??candidate.nbv_existing??candidate.nbv??null,
+      existing_irr:detail.investment?.existing_irr??null,
+      npv:detail.investment?.npv??null,
+      capex_total:capexItems.reduce((a,x)=>a+num(x?.total_cost,0),0)
+    };
+
+    state.decision.recommended=merged;
+    state.top5=state.top5.map(x=>String(x.site_id)===String(candidate.site_id)?merged:x);
+
+    // One final render using the complete candidate detail.
+    updateDetail({recommended:merged});
+    renderList(state.top5);
+    document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x.dataset.id===candidate.site_id));
+  }catch(e){
+    // Keep the already rendered candidate profile. Show the actual detail
+    // retrieval error instead of silently reverting to the generic state.
+    showError(`Detail ${candidate.site_id} belum dapat dimuat: ${e.message}`);
+  }
+}
+function signalSummary(){const techs=state.decision?.raw?.rf?.technologies||[];const best={};techs.forEach(t=>{const k=t.technology;if(!k)return;const r=num(t.estimated_rsrp_dbm,null);if(r===null)return;if(!best[k]||num(t.confidence,0)>num(best[k].confidence,0))best[k]=t});const order=['4G','5G','3G','2G'];return order.filter(k=>best[k]).slice(0,2).map(k=>`${k} · ${num(best[k].estimated_rsrp_dbm).toFixed(1)} dBm`).join('\n')||'—'}
+function strStatus(c){const e=c?.detail?.engineering;if(e?.need_str)return e.need_str;const challenges=Array.isArray(c?.challenges)?c.challenges:[];return challenges.includes('ENGINEERING / STRUCTURAL')?'YES':'NO'}
+function popupIcon(c){const rec=state.decision?.recommended?.site_id===c.site_id;const tenants=Array.isArray(c.tenants)&&c.tenants.length?c.tenants.join(' · '):`${num(c.tenant_count)} tenant`;const signal=c?.signal_rsrp_avg_dbm!=null?`${num(c.signal_rsrp_avg_dbm).toFixed(1)} dBm`:'—';const needStr=strStatus(c);const html=`<div class="candidate-popup" data-site-id="${esc(c.site_id||'')}"><button class="close" aria-label="Close">×</button><div class="kicker">${rec?'RECOMMENDED COLLO':'COLLO OPPORTUNITY'}</div><h3>${esc(c.site_name||c.site_id)}</h3><div class="sub">${esc(c.site_id)} · ${(num(c.distance_m)/1000).toFixed(2)} km</div><div class="tenant-line"><b>EXISTING TENANTS:</b> ${esc(tenants)}</div><div class="popup-grid"><div><span>OPPORTUNITY</span><b>${num(c.opportunity_score).toFixed(1)}</b></div><div><span>NEED STR</span><b class="${needStr==='YES'?'str-yes':'str-no'}">${needStr}</b></div><div><span>SIGNAL</span><b class="signal-line">${esc(signal)}</b></div><div><span>TECHNOLOGY</span><b>${esc(c.tower_type||'EXISTING SITE')} · ${num(c.tower_height_m).toFixed(0)} m</b></div></div><div class="popup-foot"><small>${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}</small><button>VIEW INTELLIGENCE</button></div></div>`;return L.divIcon({className:'',html,iconSize:[270,225],iconAnchor:[135,225]})}
+function updateSummary(data,rows){$('summaryRadius').textContent=(state.radius/1000).toFixed(0)+' KM';$('summarySites').textContent=data.length;$('summaryCollo').textContent=rows.length;$('radiusText').textContent=(state.radius/1000).toFixed(0)+' km'}
+function signalRows(rec){
+  const out=[];
+  const push=(technology,value,quality)=>{const r=num(value,null);if(r!==null)out.push({technology,rsrp:r,quality:quality||'—'})};
+  // Candidate-level PMNO decision values are the source of truth for the
+  // selected site. Use the actual candidate row, not the global target RF.
+  if(rec?.signal_rsrp_avg_dbm!=null){
+    push('AVG',rec.signal_rsrp_avg_dbm,rec.signal_quality||'AVERAGE');
+  }
+  if(rec?.signal_rsrp_worst_dbm!=null){
+    push('WORST',rec.signal_rsrp_worst_dbm,'WORST CASE');
+  }
+  // Preserve detailed 4G/5G values when a candidate detail payload supplies them.
+  const techs=rec?.detail?.rf?.technologies||rec?.detail?.signal?.technologies||[];
+  techs.forEach(t=>push(t.technology,t.estimated_rsrp_dbm,t.quality));
+  return out;
+}
+function infoCell(label,value,sub=''){return `<div class="info-cell"><span>${esc(label)}</span><b class="${value==='—'?'no-data':''}">${esc(value)}</b>${sub?`<small>${esc(sub)}</small>`:''}</div>`}
+function renderCostGroup(title,items,total){return `<div class="cost-group"><div class="cost-group-head"><strong>${esc(title)}</strong><b>${formatMoney(total)}</b></div><div class="cost-items">${items.map(x=>`<div class="cost-item"><span>${esc(x.label)}</span><b>${formatMoney(x.value)}</b></div>`).join('')}</div></div>`}
+
+function setSelectionVisual(selectionId){
+  state.selectedId=selectionId;
+  document.querySelectorAll('.candidate-row').forEach(r=>{
+    r.classList.toggle('active', String(r.dataset.id)===String(selectionId));
+  });
+  if(window.map){
+    document.querySelectorAll('.candidate-marker').forEach(el=>{
+      el.classList.toggle('selected', el.dataset.siteId===String(selectionId));
+    });
+  }
+}
+function focusIntelligence(){
+  const panel=document.querySelector('.intelligence-panel,.detail-panel,#detailPanel');
+  if(panel) panel.classList.add('intelligence-pulse');
+  setTimeout(()=>panel?.classList.remove('intelligence-pulse'),900);
+}
+async function selectB2S(fromMap=false){
+  setSelectionVisual('__B2S__');
+  state.b2sSelected=true;
+  closeMapSelection(false);
+  if(fromMap)showB2SPopup();
+  await loadB2SIntelligence();
+  focusIntelligence();
+}
+function selectCandidateUnified(c){
+  if(!c)return;
+  setSelectionVisual(c.site_id);
+  state.b2sSelected=false;
+  closeMapSelection(false);
+  selectCandidate(c);
+  focusIntelligence();
+}
+
+function updateDetail(d){const rec=d?.recommended;const finalDecision=d?.raw?.final_decision||d?.final_decision||'';if(!rec){if(finalDecision==='B2S'||finalDecision==='NO-GO'){$('decisionKicker').textContent='NEW BUILD SUGGESTION';$('decision').textContent='PREDICTED NEW SITE';$('decision').style.color='var(--amber)';$('siteName').textContent=`${state.lat.toFixed(5)}, ${state.lon.toFixed(5)}`;$('targetTenant').textContent=state.tenant||'—';$('candidateList').innerHTML='<div class="no-data">No technically eligible COLLO candidate.</div>';}else $('decision').textContent='—';return}const isCollo=!!rec.site_id;$('decisionKicker').textContent=isCollo?'COLLO SUGGESTION':'NEW BUILD SUGGESTION';$('decision').textContent=isCollo?(rec.site_id||'—'):'PREDICTED NEW SITE';$('decision').style.color='var(--green)';$('siteName').textContent=isCollo?(rec.site_name||'Recommended candidate'):`${state.lat.toFixed(5)}, ${state.lon.toFixed(5)}`;$('targetTenant').textContent=state.tenant||'—';
+const site=rec.detail?.site||{};const invProfile=rec.detail?.investment||{};const design=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};const isB2SProfile=!rec.site_id;const tenants=Array.isArray(site.tenants)&&site.tenants.length?site.tenants.join(' · '):(Array.isArray(rec.tenants)&&rec.tenants.length?rec.tenants.join(' · '):`${num(site.tenant_count??rec.tenant_count)} tenant${num(site.tenant_count??rec.tenant_count)===1?'':'s'}`);const signals=signalRows(rec);if(isB2SProfile){const b2sLand=invProfile.b2s_land_type||rec.b2s_land_type||design.land_type||design.density_class||'—';const b2sHeight=design.recommended_height_m??rec.tower_height_m;const b2sTower=design.tower_type||rec.tower_type||'—';const b2sArea=design.recommended_land_area_m2;const b2sLocation=`${state.lat.toFixed(5)}, ${state.lon.toFixed(5)}`;$('profileGrid').innerHTML=[infoCell('SITE TYPE','PREDICTIVE NEW SITE'),infoCell('TARGET TENANT',state.tenant||'—','new tenant opportunity'),infoCell('LOCATION',b2sLocation,'New Order location'),infoCell('LAND TYPE',b2sLand),infoCell('LAND AREA',b2sArea!=null?num(b2sArea).toFixed(0)+' m²':'—'),infoCell('TOWER TYPE',b2sTower),infoCell('TOWER HEIGHT',b2sHeight!=null?num(b2sHeight).toFixed(0)+' m':'—'),infoCell('EXISTING TENANTS','—'),infoCell('TENANT LIST','—'),infoCell('DISTANCE','0.00 km','from New Order')].join('')}else{$('profileGrid').innerHTML=[infoCell('TOWER HEIGHT',(site.tower_height_m??rec.tower_height_m)!=null?num(site.tower_height_m??rec.tower_height_m).toFixed(0)+' m':'—'),infoCell('TOWER TYPE',site.tower_type||rec.tower_type||'—'),infoCell('EXISTING TENANTS',String(site.tenant_count??rec.tenant_count??0)),infoCell('TENANT LIST',tenants),infoCell('DISTANCE',(num(rec.distance_m)/1000).toFixed(2)+' km','from New Order'),infoCell('TARGET TENANT',state.tenant||'—','not existing on candidate')].join('')}$('signalDetail').innerHTML=signals.length?signals.map(x=>`<div><strong>${x.technology} · ${x.rsrp.toFixed(1)} dBm</strong><span>${esc(x.quality)}</span></div>`).join(''):'<div class="no-data">No signal data available</div>';
+const detail=rec.detail||{};const detailSite=detail.site||{};const eng=detail.engineering||{};const cost=detail.cost||{};const inv=detail.investment||{};
+const pick=(...vals)=>vals.find(v=>v!==undefined&&v!==null&&v!=='');
+const needStr=pick(eng.need_str,rec.need_str,strStatus(rec))||'—';
+const reinforcement=pick(eng.reinforcement_expected_ton,rec.reinforcement_expected_ton,rec.reinforcement_ton);
+const accessLevel=pick(eng.access_level,detailSite.access_level,rec.last_mile_access_level,rec.access_level);
+const access=accessLevel!=null?(num(accessLevel)<=1?'EASY':num(accessLevel)<=2?'MEDIUM':'DIFFICULT'):pick(rec.access_class,rec.last_mile_access_class,'—');
+const comCount=pick(eng.community_case_count,detailSite.community_case_count,rec.community_case_count,rec.comcase_count);
+const redRaw=pick(eng.red_zone,detailSite.red_zone,rec.red_zone);
+const redzone=redRaw!=null?(redRaw===true||String(redRaw).toLowerCase()==='true'?'YES':'NO'):((String(detailSite.community_risk_level||rec.community_risk_level||'').toUpperCase()==='HIGH')?'YES':'—');
+const days=pick(eng.estimated_to_on_air_days,rec.estimated_days,rec.total_days);
+const sdaAvailable=pick(eng.sda_available,rec.sda_available);
+const sesType=pick(eng.ses_work_type,rec.ses_work_type);
+const sesCost=pick(eng.ses_work_cost,rec.ses_work_cost);
+const roadhead=pick(detailSite.roadhead_distance_m,rec.roadhead_distance_m);
+const onAir=days!=null?`${num(days).toFixed(1)} days`:'—';
+const isB2S=!isCollo;
+const sdaText=isB2S?'—':(sdaAvailable==null?'—':(sdaAvailable===true||String(sdaAvailable).toLowerCase()==='true'?'YES':'NO'));
+const engineeringNA=isB2S?'—':null;
+$('engineeringGrid').innerHTML=[
+  infoCell('NEED STR',isB2S?'—':needStr),
+  infoCell('EST. REINFORCEMENT',isB2S?'—':(needStr==='NO'?'NOT REQUIRED':reinforcement!=null?num(reinforcement).toFixed(2)+' Ton':'—')),
+  infoCell('SDA AVAILABLE',sdaText),
+  infoCell('SES / DELIVERY',isB2S?'—':(sesType||'—'),!isB2S&&sesCost!=null?formatMoney(sesCost):''),
+  infoCell('COMCASE HISTORY',isB2S?'—':(comCount!=null?String(comCount):'—')),
+  infoCell('RED ZONE',isB2S?'—':redzone),
+  infoCell('ACCESS DIFFICULTY',access,accessLevel!=null?`Level ${accessLevel}`:''),
+  infoCell('ROADHEAD DISTANCE',roadhead!=null?num(roadhead).toFixed(0)+' m':'—'),
+  infoCell('EST. TO ON AIR',onAir),
+  infoCell('REINFORCEMENT PROB.',isB2S?'—':(eng.reinforcement_probability!=null?num(eng.reinforcement_probability).toFixed(1)+'%':'—')),
+  infoCell('STRUCTURAL UTILIZATION',isB2S?'—':(eng.structural_utilization_proxy!=null?num(eng.structural_utilization_proxy).toFixed(1)+'%':'—')),
+  infoCell('PHYSICAL SES PROB.',isB2S?'—':(eng.physical_ses_probability!=null?num(eng.physical_ses_probability).toFixed(1)+'%':'—'))
+].join('');
+$('challenge').textContent=isB2S?'NEW SITE / B2S':(needStr==='YES'?'ENGINEERING / STRUCTURAL':(redzone==='YES'?'COMMUNITY / RED ZONE':'TECHNICAL REVIEW'));
+$('challengeText').textContent=isB2S
+  ?'New site candidate — existing-site engineering and SDA history are not applicable.'
+  :(needStr==='YES'
+    ?`Structural reinforcement probability ${eng.reinforcement_probability!=null?num(eng.reinforcement_probability).toFixed(1)+'%':'—'} · expected ${reinforcement!=null?num(reinforcement).toFixed(2)+' Ton':'—'}.`
+    :(redzone==='YES'?'Historical community risk requires focused SITAC planning.':'Candidate requires engineering validation before final design.'));
+const sda=Array.isArray(detail.sda_documents)&&!isB2S?detail.sda_documents:[];$('sdaLink').innerHTML=isB2S?'':(sda.length?sda.slice(0,3).map(d=>`<a href="${esc(d.document_url)}" target="_blank" rel="noopener noreferrer">↗ VIEW SDA DOCUMENT</a><span class="sda-meta">${esc(d.document_name||'SDA')} · ${esc(d.document_status||'VALID')}</span>`).join(''):'<span class="sda-meta">SDA document link not available</span>');
+const scenarioOptionEarly=String(inv.option??rec.option??'COLLO').toUpperCase();
+const b2sInitialLeaseYears=inv.b2s_initial_lease_years??rec.b2s_initial_lease_years??null;
+const b2sInitialLandLeaseAnnual=inv.b2s_initial_land_lease_annual??rec.b2s_initial_land_lease_annual??null;
+// B2S initial CAPEX includes only the first lease period; renewal (+30%) is economic cash-flow only.
+const b2sInitialLandLease=(scenarioOptionEarly==='B2S'&&b2sInitialLandLeaseAnnual!=null&&b2sInitialLeaseYears!=null)
+  ? num(b2sInitialLandLeaseAnnual)*num(b2sInitialLeaseYears)
+  : null;
+// For B2S, use the economic-engine CAPEX (first lease period only).
+// capex_items may still contain the legacy 10-year land value, so summing it
+// would make TOTAL SELECTED CASE higher than the Investment CAPEX.
+const capex=scenarioOptionEarly==='B2S'
+  ? (inv.capex_total??rec.capex_total??(Array.isArray(rec.capex_items)?rec.capex_items.reduce((a,x)=>a+num(x?.total_cost,0),0):null))
+  : (Array.isArray(rec.capex_items)?rec.capex_items.reduce((a,x)=>a+num(x?.total_cost,0),0):(inv.capex_total??rec.capex_total??null));const survey=cost.survey||{};const surveySIS=num(survey.sis,0);const surveySES=num(survey.ses,0);const surveyRerun=num(survey.rerunning_sda,0);const rows=Array.isArray(rec.capex_items)?rec.capex_items:[];const code=x=>String(x?.item_code||'').toUpperCase();const group=x=>String(x?.driver?.boq_group||'').toUpperCase();const sumCodes=codes=>rows.filter(x=>codes.includes(code(x))).reduce((a,x)=>a+num(x.total_cost,0),0);const sumGroups=groups=>rows.filter(x=>groups.includes(group(x))).reduce((a,x)=>a+num(x.total_cost,0),0);const materialTower=sumCodes(['MAT-TOWER','TWR-MAT','TOWER-MAT','MAT-TWR-SST']);const materialFence=sumCodes(['FENCE-YARD-FENCE','FENCE-YARD-GATE','FENCE-YARD-YARD']);const deliveryFP=sumCodes(['DEL-FP','DEL-FAC']);const deliveryLangsir=sumCodes(['DEL-LS','DEL-LANG']);const deliveryPS=sumCodes(['DEL-PS','DEL-SITE']);const meGrounding=sumCodes(['ME-GROUNDING','MAT-GND']);const meElectrical=sumCodes(['ME-CABLE','ME-PANEL','ME-PROTECTION']);const strMaterial=sumCodes(['STR-MAT','STR-MATERIAL','STR-001']);const rbsMaterial=sumCodes(['RBS-MAT','RBS-MATERIAL','RBS-001']);const rbsApd=sumCodes(['RBS-APD','RBS-APD-MATERIAL','RBS-APD-001']);const foundation=sumGroups(['FOUND']);const transformer=sumCodes(['TRF-UNIT','TRANSFORMATOR','TRANSFORMER-MATERIAL','TRF-MAT'])||sumGroups(['TRANSFORMER']);const pln=sumGroups(['PLN']);const mountingMaterial=sumCodes(['MNT-ANT','MNT-AAU','MNT-RRU','MNT-MW','MAT-MNT']);const erection=sumCodes(['ERECT-JASA']);const jasaCme=sumCodes(['JASA-CME-COLLO','JASA-CME-B2S','JASA-CME']);const sitac2PermitService=num(cost.sitac_2?.jasa_pengurusan_perizinan??cost.sitac_2?.jasa_perizinan,0);const materialTotal=materialTower+materialFence+mountingMaterial;const deliveryTotal=deliveryFP+deliveryLangsir+deliveryPS;const cmeTotal=meGrounding+meElectrical+strMaterial+rbsMaterial+rbsApd+foundation+transformer+pln+jasaCme+erection;const constructionTotal=materialTotal+deliveryTotal+cmeTotal;const groups=[{title:'SURVEY',items:[{label:'SIS',value:surveySIS},{label:'SES',value:surveySES},{label:'Rerunning SDA',value:surveyRerun}]},{title:'SITAC 1',items:[{label:scenarioOptionEarly==='B2S'?'Sewa Lahan · Initial Lease':'Sewa Lahan',value:scenarioOptionEarly==='B2S'?b2sInitialLandLease:num(cost.sitac_1?.sewa_lahan,0)},{label:'Izin Warga',value:num(cost.sitac_1?.izin_warga,0)},{label:'Rekom Lurah',value:num(cost.sitac_1?.rekom_lurah,0)},{label:'Rekom Camat',value:num(cost.sitac_1?.rekom_camat,0)},{label:'Jasa SITAC',value:num(cost.sitac_1?.jasa_sitac,0)}]},{title:'SITAC 2',items:[{label:'PBG',value:num(cost.sitac_2?.pbg,0)},{label:'SLF',value:num(cost.sitac_2?.slf,0)},{label:'Retribusi',value:num(cost.sitac_2?.retribusi,0)},{label:'PBB',value:num(cost.sitac_2?.pbb,0)},{label:'Jasa Pengurusan Perizinan',value:sitac2PermitService}]}];const renderConstruction=()=>{const mat=[['Tower',materialTower],['Fence & Yard',materialFence],['Mounting · Material',mountingMaterial]];const del=[['Factory → Port',deliveryFP],['Langsir / Local Haulage',deliveryLangsir],['Port → Site',deliveryPS]];const cme=[['STR · Material STR',strMaterial],['Pondasi Tower · Material',foundation],['Pondasi RBS · Material',rbsMaterial],['Pondasi RBS · APD Pondasi RBS',rbsApd],['Mechanical Electrical · Grounding',meGrounding],['Mechanical Electrical · Material Electrical',meElectrical],['Transformator · Material',transformer],['PLN Connection · Material',pln],['Jasa CME',jasaCme],['Jasa Erection',erection]];const card=(title,items,total)=>`<div class="cost-group"><div class="cost-group-head"><strong>${title}</strong><b>${formatMoney(total)}</b></div><div class="cost-items">${items.map(x=>`<div class="cost-item"><span>${esc(x[0])}</span><b>${formatMoney(x[1])}</b></div>`).join('')}</div></div>`;return card('MATERIAL',mat,materialTotal)+card('DELIVERY',del,deliveryTotal)+card('CME',cme,cmeTotal)};$('costBuildUp').innerHTML=groups.map(g=>renderCostGroup(g.title,g.items,g.items.reduce((a,x)=>a+num(x.value,0),0))).join('')+renderConstruction()+(capex!=null?`<div class="cost-group"><div class="cost-group-head"><strong>TOTAL SELECTED CASE</strong><b>${formatMoney(capex)}</b></div></div>`:'');
+const existingNbv=rec.existing_nbv??rec.nbv_existing??rec.nbv??inv.existing_nbv??null;
+const existingIrrRaw=inv.existing_irr??null;
+/* calculate_scenario_irr returns existing_irr in percentage points (e.g. 15.35),
+   matching estimated_irr. The investment card appends '%' directly. */
+const existingIrr=existingIrrRaw==null?null:num(existingIrrRaw);const existingOpexRatio=inv.existing_opex_ratio??null;
+const displayedCapex=Array.isArray(rec.capex_items)
+  ? rec.capex_items.reduce((a,x)=>a+num(x?.total_cost,0),0)
+  : null;
+const estCapex=inv.capex_total??rec.capex_total??displayedCapex??null;
+const targetIrr=10.73/100;
+// Backend is the single source of truth for all economic calculations.
+const backendEstimatedIrr=inv.estimated_irr??rec.estimated_irr??null;
+const estIrr=backendEstimatedIrr==null?null:(Math.abs(num(backendEstimatedIrr))>1?num(backendEstimatedIrr)/100:num(backendEstimatedIrr));
+const scenarioOption=String(inv.option??rec.option??'COLLO').toUpperCase();
+const estNbv=scenarioOption==='B2S'?(estCapex!=null?num(estCapex):null):(existingNbv!=null&&estCapex!=null?num(existingNbv)+num(estCapex):null);
+const invStatus=pick(inv.decision,rec.investment_decision,rec.decision);
+const irrLabel=scenarioOption==='B2S'?'B2S STANDALONE IRR':'ESTIMATED IRR · EXISTING + COLLO';
+const irrSub=scenarioOption==='B2S'?'Standalone New Build economics':'Existing asset + incremental COLLO economics';
+const nbvSub=scenarioOption==='B2S'?'Standalone investment base':'Existing NBV + incremental COLLO CAPEX';
+const investmentDecision=`<div class="investment-result"><span>INVESTMENT DECISION · HURDLE 10.73%</span><b>${invStatus||'—'}</b></div>`;
+if(scenarioOption==='B2S'){
+  $('investmentPanel').innerHTML=`<div class="investment-row"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${estCapex!=null?formatMoney(estCapex):'—'}</b><small>Standalone B2S CAPEX</small></div><div class="investment-cell"><span>B2S STANDALONE IRR</span><b>${estIrr!=null?(num(estIrr)*100).toFixed(2)+'%':'—'}</b><small>Standalone New Build economics</small></div></div>${investmentDecision}`;
+}else{
+  $('investmentPanel').innerHTML=`<div class="investment-row"><div class="investment-cell"><span>EXISTING NBV</span><b>${existingNbv!=null?formatMoney(existingNbv):'—'}</b><small>Existing asset baseline</small></div><div class="investment-cell"><span>EXISTING IRR</span><b>${existingIrr!=null?num(existingIrr).toFixed(2)+'%':'—'}</b><small>${existingIrr==null?'Economic engine · data required':`Economic engine${existingOpexRatio!=null?` · OPEX ${num(existingOpexRatio*100).toFixed(0)}%`:''}`}</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${estCapex!=null?formatMoney(estCapex):'—'}</b><small>Incremental COLLO CAPEX</small></div><div class="investment-cell"><span>ESTIMATED IRR · EXISTING + COLLO</span><b>${estIrr!=null?(num(estIrr)*100).toFixed(2)+'%':'—'}</b><small>Existing asset + incremental COLLO economics</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>INVESTMENT BASE</span><b>${estNbv!=null?formatMoney(estNbv):'—'}</b><small>Existing NBV + incremental COLLO CAPEX</small></div></div>${investmentDecision}`;
+}
+
+}
+function formatMoney(v){const n=num(v,null);if(n===null)return '—';if(n===0)return '-';if(n>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' B';if(n>=1e6)return 'Rp '+(n/1e6).toFixed(0)+' M';return 'Rp '+Math.round(n).toLocaleString('id-ID')}
+function renderList(rows){const items=rows.map((c,i)=>`<div class="candidate-row ${state.selectedId===c.site_id?'active':''}" data-id="${esc(c.site_id)}" role="button" tabindex="0"><div class="candidate-rank">#${i+1}</div><div><strong>${esc(c.site_id)}</strong><small>${(num(c.distance_m)/1000).toFixed(2)} km · ${esc(c.tower_type||'—')} · ${num(c.tower_height_m).toFixed(0)} m · ${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}</small></div><div class="candidate-right"><b>${num(c.distance_m).toFixed(0)} m</b><small>${c.signal_rsrp_avg_dbm!=null?num(c.signal_rsrp_avg_dbm).toFixed(1)+' dBm':'Signal —'}</small></div></div>`).join('');const fallback=`<div id="fallbackCandidate" class="candidate-row ${state.selectedId==='__B2S__'?'active':''}" data-id="__B2S__" data-option="B2S" role="button" tabindex="0"><div class="candidate-rank">#6</div><div><strong>PREDICTIVE NEW SITE / B2S</strong><small>Technical fallback · only if COLLO #1–#5 are not selected</small></div><div class="candidate-right"><b id="fallbackHeight">—</b><small id="fallbackLand">— · IRR —</small></div></div>`;$('candidateList').innerHTML=items+fallback;bindCandidateSelection();if(state.decision)updateFallback(state.decision)}
+
+function bindCandidateSelection(){
+  const list=$('candidateList');
+  if(!list || list.dataset.bound==='1')return;
+  list.dataset.bound='1';
+  list.addEventListener('click',e=>{
+    const row=e.target.closest?.('.candidate-row');
+    if(!row || !list.contains(row))return;
+    e.preventDefault();
+    e.stopPropagation();
+    const id=row.dataset.id;
+    if(id==='__B2S__'){selectB2S(false);return;}
+    const c=state.top5.find(x=>String(x.site_id)===String(id));
+    if(c)selectCandidateUnified(c);
+  });
+  list.addEventListener('keydown',e=>{
+    if(e.key!=='Enter'&&e.key!==' ')return;
+    const row=e.target.closest?.('.candidate-row');
+    if(!row || !list.contains(row))return;
+    e.preventDefault();
+    if(row.dataset.id==='__B2S__'){selectB2S(false);return;}
+    const c=state.top5.find(x=>String(x.site_id)===String(row.dataset.id));
+    if(c)selectCandidateUnified(c);
+  });
+}
+function updateFallback(d){const design=d?.raw?.predictive_design||d?.raw?.new_site?.design||{};$('fallbackHeight').textContent=design.recommended_height_m?num(design.recommended_height_m).toFixed(0)+' m':'—';const land=design.recommended_land_area_m2?num(design.recommended_land_area_m2).toFixed(0)+' m²':'Land —';const b2s=d?.raw?.new_site?.irr;$('fallbackLand').textContent=`${land} · IRR ${b2s?num(b2s).toFixed(2)+'%':'—'}`}
+async function runDecision(payload){return rpc('pmno_decision',payload)}
+async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)selectCandidate(enrichedRecommended);else updateDetail({recommended:enrichedRecommended});$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
+catch(e){showError('PMNO Engine belum dapat diakses. '+e.message+' Pastikan API function public.pmno_decision sudah ter-deploy.');}
+finally{setLoading(false)}}
+let analysisTimer;function scheduleAnalysis(){clearTimeout(analysisTimer);analysisTimer=setTimeout(loadAnalysis,450)}
+$('analyze').addEventListener('click',loadAnalysis);$('tenant').addEventListener('change',()=>{state.tenant=$('tenant').value;scheduleAnalysis()});$('radius').addEventListener('change',()=>{state.radius=num($('radius').value);$('radiusText').textContent=(state.radius/1000)+' km';if(radiusCircle)radiusCircle.setRadius(state.radius);scheduleAnalysis()});
+document.querySelectorAll('.mobile-nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.mobile-nav button').forEach(b=>b.classList.toggle('active',b===btn));const target=btn.dataset.target;const el=target==='input'?document.querySelector('.input-panel'):target==='map'?document.querySelector('.map-stage'):document.querySelector('.detail-panel');el?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>map.invalidateSize({animate:false}),250)}));
+function installResize(){const stage=document.querySelector('.map-stage');if('ResizeObserver'in window){resizeObserver=new ResizeObserver(()=>requestAnimationFrame(()=>map.invalidateSize({animate:false})));resizeObserver.observe(stage)}window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize({animate:false}),100),{passive:true});window.addEventListener('orientationchange',()=>setTimeout(()=>map.invalidateSize({animate:false}),250),{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize({animate:false}),100),{passive:true})}
+initMap();installResize();loadTenants().finally(loadAnalysis);
+</script>
+</body>
+</html>
