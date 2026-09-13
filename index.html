@@ -826,25 +826,68 @@ function pmnoOpenSingleSite(row,rowIndex){
   return `<button class="pmno-open-single" onclick="pmnoBulkOpenSingleSite(${rowIndex})">OPEN SINGLE SITE ↗</button>`;
 }
 function pmnoBulkOpenSingleSite(rowIndex){
-  const row=bulkState.results?.[rowIndex]; if(!row)return;
+  const row=bulkState.results?.[rowIndex];
+  if(!row)return;
   const candidate=String(row.selectedCandidateId||row.candidate_id||(row.b2s?'B2S':''));
   const p=new URLSearchParams();
-  p.set('site_id',String(row.site_id||'')); p.set('lat',String(row.lat??'')); p.set('lon',String(row.lon??''));
-  p.set('target_tenant',String(row.tenant||'')); p.set('candidate',candidate); p.set('radius','3000'); p.set('source','bulk');
+  p.set('site_id',String(row.site_id||''));
+  p.set('lat',String(row.lat??''));
+  p.set('lon',String(row.lon??''));
+  p.set('target_tenant',String(row.tenant||''));
+  p.set('candidate',candidate);
+  p.set('radius','3000');
+  p.set('source','bulk');
+
   const targetUrl=`${location.pathname}?${p.toString()}#single`;
   history.pushState({pmnoPage:'single'},'',targetUrl);
-  // The navigation router owns page visibility; invoke it through the existing menu,
-  // then let the route-context loader perform the native Single Site calculation.
+
+  // Switch the SPA to Single Site immediately.
   const singleMenu=document.getElementById('singleMenu');
   if(singleMenu) singleMenu.click();
-  else window.dispatchEvent(new Event('hashchange'));
-  // Populate the existing Single Site controls and run the native route-context loader.
+  else {
+    const bulkView=document.getElementById('bulkView');
+    const workspace=document.querySelector('.workspace');
+    if(bulkView)bulkView.style.display='none';
+    if(workspace)workspace.style.display='grid';
+  }
+
+  // Run the actual Single Site engine directly. Do not depend on the initial
+  // page-load route hook, because this is an in-page Bulk → Single transition.
   setTimeout(async()=>{
     try{
-      if(typeof pmnoLoadRouteContext==='function') await pmnoLoadRouteContext();
-    }catch(e){console.warn('Bulk → Single Site handoff failed',e)}
-  },40);
+      const latEl=document.getElementById('lat');
+      const lonEl=document.getElementById('lon');
+      const tenantEl=document.getElementById('tenant');
+      const radiusEl=document.getElementById('radius');
+      if(!latEl||!lonEl||!tenantEl||!radiusEl) throw new Error('Single Site input controls not found');
+
+      latEl.value=String(row.lat??'');
+      lonEl.value=String(row.lon??'');
+      if([...tenantEl.options].some(o=>String(o.value)===String(row.tenant||''))){
+        tenantEl.value=String(row.tenant||'');
+      }
+      radiusEl.value='3000';
+      if(document.getElementById('radiusText'))document.getElementById('radiusText').textContent='3 km';
+
+      if(typeof loadAnalysis!=='function') throw new Error('Single Site calculation engine not found');
+      await loadAnalysis();
+
+      // Select the exact candidate chosen in Bulk after the native decision has loaded.
+      if(candidate.toUpperCase()==='B2S'){
+        if(typeof selectB2S==='function') await selectB2S(false);
+      }else{
+        const rows=state.decision?.rows||[];
+        const found=rows.find(x=>String(x.site_id)===candidate);
+        if(found && typeof selectCandidate==='function') await selectCandidate(found);
+      }
+      window.scrollTo({top:0,behavior:'smooth'});
+    }catch(e){
+      console.error('Bulk → Single Site handoff failed',e);
+      if(typeof showError==='function')showError('Bulk → Single Site gagal: '+e.message);
+    }
+  },120);
 }
+
 async function pmnoBulkSelectCandidate(rowIndex,candidateId){
   const row=bulkState.results?.[rowIndex]; if(!row)return;
   const id=String(candidateId);
