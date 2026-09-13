@@ -168,10 +168,14 @@ body.bulk-page .mobile-nav{
 .pmno-sda-link:hover{background:rgba(85,199,255,.12);border-color:rgba(85,199,255,.6)}
 .pmno-sda-empty{color:#71869b;font-size:11px}
 </style>
+
+<style id="pmno-drm-css">
+.drm-view{display:none;min-height:calc(100dvh - 76px);background:var(--bg);color:var(--text);overflow:auto}.drm-shell{max-width:1500px;margin:0 auto;padding:24px 28px 80px}.drm-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;margin-bottom:20px}.drm-kicker{font-size:10px;letter-spacing:2px;color:#55c7ff;font-weight:900}.drm-title{font-size:30px;font-weight:800;margin-top:5px}.drm-sub{color:#7890a3;font-size:12px;margin-top:6px}.drm-projectbar,.drm-card{background:#071725;border:1px solid #1d3850;border-radius:14px;box-shadow:var(--shadow)}.drm-projectbar{padding:14px 16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:14px}.drm-projectbar select,.drm-input{height:40px;background:#0a1d2d;border:1px solid #29475f;color:#dce8f1;border-radius:8px;padding:0 11px;font-weight:700}.drm-actions{display:flex;gap:8px;flex-wrap:wrap}.drm-btn{height:40px;padding:0 13px;border:1px solid #29475f;background:#0a1d2d;color:#b8ccda;border-radius:8px;font-size:10px;font-weight:900;letter-spacing:.5px;cursor:pointer}.drm-btn.primary{background:#0d4262;border-color:#1d7ea9;color:#fff}.drm-btn:disabled{opacity:.45;cursor:not-allowed}.drm-file{display:none}.drm-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px}.drm-kpi{padding:14px 16px;background:#071725;border:1px solid #1d3850;border-radius:12px}.drm-kpi span{display:block;font-size:8px;color:#6f879a;letter-spacing:1.2px;font-weight:900}.drm-kpi b{display:block;font-size:25px;margin-top:6px}.drm-layout{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:14px}.drm-card{padding:15px}.drm-card-title{font-size:10px;letter-spacing:1.3px;font-weight:900;color:#9eb3c4;margin-bottom:12px}.drm-table-wrap{overflow:auto}.drm-table{width:100%;border-collapse:collapse;min-width:900px}.drm-table th{font-size:8px;color:#71869b;letter-spacing:1px;text-align:left;padding:9px;border-bottom:1px solid #1d3850;white-space:nowrap}.drm-table td{padding:9px;border-bottom:1px solid #132b3d;font-size:10px;white-space:nowrap}.drm-table tr:hover{background:rgba(85,199,255,.035)}.drm-status{display:inline-flex;padding:5px 8px;border-radius:7px;font-size:8px;font-weight:900;letter-spacing:.5px;border:1px solid #315066}.drm-status.approved{color:#7be6b0;border-color:#286a4d;background:#0b2a20}.drm-status.review{color:#ffd47a;border-color:#755c25;background:#30260f}.drm-status.rejected{color:#ff9eab;border-color:#6b3541;background:#2d1720}.drm-decision{height:30px;background:#0a1d2d;border:1px solid #29475f;color:#dce8f1;border-radius:7px;font-size:9px;font-weight:900;padding:0 7px}.drm-saved{display:flex;flex-direction:column;gap:8px}.drm-run-item{border:1px solid #1d3850;background:#091b2a;border-radius:9px;padding:10px}.drm-run-item strong{font-size:10px}.drm-run-item small{display:block;color:#71869b;margin-top:4px;font-size:8px}.drm-run-item button{margin-top:8px;width:100%}.drm-empty{padding:30px;text-align:center;color:#647b8d;font-size:10px}.drm-note{font-size:9px;line-height:1.5;color:#71869b}.drm-context{font-size:9px;color:#7f96a8}.drm-progress{font-size:9px;color:#55c7ff;font-weight:800}@media(max-width:900px){.drm-shell{padding:18px 16px 90px}.drm-head{align-items:flex-start;flex-direction:column}.drm-layout{grid-template-columns:1fr}.drm-kpis{grid-template-columns:repeat(2,1fr)}}
+</style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
+<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
 <main class="workspace">
 <aside class="panel input-panel">
 <div class="section-kicker">NEW ORDER INPUT</div>
@@ -207,6 +211,14 @@ body.bulk-page .mobile-nav{
 </aside>
 </main>
 <section id="bulkView" class="bulk-view" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input id="bulk-file" class="file" type="file" accept=".xlsx,.xls,.csv"></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" id="bulk-analyze" disabled>RUN BULK ANALYSIS →</button><button class="btn" id="bulk-export" disabled>EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div id="bulk-error" class="error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
+<section id="drmView" class="drm-view">
+  <div class="drm-shell">
+    <div class="drm-head"><div><div class="drm-kicker">DESIGN REVIEW MEETING</div><div class="drm-title">DRM <b>Workspace</b></div><div class="drm-sub">Run → Save → Reload → Manage tenant decision</div></div><div class="drm-context" id="drm-context">No project selected</div></div>
+    <div class="drm-projectbar"><input id="drm-project-name" class="drm-input" placeholder="Project name" aria-label="Project name"><button id="drm-create-project" class="drm-btn primary">CREATE PROJECT</button><label class="drm-btn">UPLOAD TEMPLATE<input id="drm-file" class="drm-file" type="file" accept=".xlsx,.xls,.csv"></label><button id="drm-run" class="drm-btn primary" disabled>RUN →</button><span id="drm-progress" class="drm-progress"></span></div>
+    <div class="drm-kpis"><div class="drm-kpi"><span>TOTAL SITES</span><b id="drm-k-total">0</b></div><div class="drm-kpi"><span>APPROVED</span><b id="drm-k-approved">0</b></div><div class="drm-kpi"><span>NEED REVIEW</span><b id="drm-k-review">0</b></div><div class="drm-kpi"><span>REJECTED</span><b id="drm-k-rejected">0</b></div></div>
+    <div class="drm-layout"><div class="drm-card"><div class="drm-card-title">SITE DECISION MANAGEMENT</div><div id="drm-table-wrap" class="drm-table-wrap"><div class="drm-empty">Create a project, upload a template, then RUN.</div></div></div><aside class="drm-card"><div class="drm-card-title">SAVED RUNS</div><div id="drm-saved-runs" class="drm-saved"><div class="drm-empty">No saved runs yet.</div></div><div class="drm-note" style="margin-top:12px">Saved runs are snapshots of the DRM result. Reloading a run does not re-run the PMNO engine.</div></aside></div>
+  </div>
+</section>
 <nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button></nav>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -713,50 +725,25 @@ loadTenants().then(pmnoLoadRouteContext);
 </script>
 <script>
 (function(){
-  // PMNO navigation router: one source of truth for Single/Bulk.
-  const s=document.getElementById('singleMenu'),b=document.getElementById('bulkMenu'),w=document.getElementById('bulkView'),orig=document.querySelector('.workspace'),mob=document.querySelector('.mobile-nav');
+  // PMNO navigation router: Single/Bulk behavior preserved; DRM is an additional page.
+  const s=document.getElementById('singleMenu'),b=document.getElementById('bulkMenu'),d=document.getElementById('drmMenu'),w=document.getElementById('bulkView'),drm=document.getElementById('drmView'),orig=document.querySelector('.workspace'),mob=document.querySelector('.mobile-nav');
   const KEY='pmno_active_page';
-  const valid=p=>p==='bulk'||p==='single';
+  const valid=p=>p==='bulk'||p==='single'||p==='drm';
   function readSaved(){try{const p=localStorage.getItem(KEY);return valid(p)?p:null}catch(e){return null}}
   function save(page){try{localStorage.setItem(KEY,page)}catch(e){}}
   function apply(page){
     document.documentElement.classList.remove('pmno-preload-bulk');
-    if(page==='bulk'){
-      orig.style.display='none'; w.style.display='block';
-      document.body.classList.add('bulk-page');
-      b.classList.add('active'); s.classList.remove('active');
-      if(mob)mob.style.display='none';
-    }else{
-      orig.style.display='grid'; w.style.display='none';
-      document.body.classList.remove('bulk-page');
-      s.classList.add('active'); b.classList.remove('active');
-      if(mob)mob.style.display='';
-    }
-    save(page);
-    window.dispatchEvent(new Event('resize'));
+    orig.style.display=page==='single'?'grid':'none'; w.style.display=page==='bulk'?'block':'none'; drm.style.display=page==='drm'?'block':'none';
+    document.body.classList.toggle('bulk-page',page==='bulk');
+    s.classList.toggle('active',page==='single'); b.classList.toggle('active',page==='bulk'); d.classList.toggle('active',page==='drm');
+    if(mob)mob.style.display=page==='single'?'':'none';
+    save(page); window.dispatchEvent(new Event('resize'));
   }
-  function current(){
-    const h=String(location.hash||'').replace(/^#/,'').toLowerCase();
-    if(valid(h)) return h;
-    return readSaved()||'single';
-  }
-  function navigate(page,replace=false){
-    if(!valid(page)) page='single';
-    const target='#'+page;
-    if(location.hash!==target){
-      if(replace) history.replaceState({pmnoPage:page},'',target);
-      else history.pushState({pmnoPage:page},'',target);
-    }
-    apply(page);
-  }
-  s.onclick=()=>navigate('single');
-  b.onclick=()=>navigate('bulk');
-  window.addEventListener('popstate',()=>apply(current()));
-  window.addEventListener('hashchange',()=>apply(current()));
-  window.addEventListener('pageshow',()=>apply(current()));
-  const initial=current();
-  if(location.hash!=='#'+initial) history.replaceState({pmnoPage:initial},'', '#'+initial);
-  apply(initial);
+  function current(){const h=String(location.hash||'').replace(/^#/,'').toLowerCase();return valid(h)?h:(readSaved()||'single')}
+  function navigate(page,replace=false){if(!valid(page))page='single';const target='#'+page;if(location.hash!==target){if(replace)history.replaceState({pmnoPage:page},'',target);else history.pushState({pmnoPage:page},'',target)}apply(page)}
+  s.onclick=()=>navigate('single'); b.onclick=()=>navigate('bulk'); d.onclick=()=>navigate('drm');
+  window.addEventListener('popstate',()=>apply(current())); window.addEventListener('hashchange',()=>apply(current())); window.addEventListener('pageshow',()=>apply(current()));
+  const initial=current(); if(location.hash!=='#'+initial)history.replaceState({pmnoPage:initial},'', '#'+initial); apply(initial);
 })();
 </script>
 <script>
@@ -1137,6 +1124,30 @@ bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID'
 // Expose Bulk actions for inline table handlers.
 window.pmnoBulkSelectCandidate=pmnoBulkSelectCandidate;
 window.pmnoBulkOpenSingleSite=pmnoBulkOpenSingleSite;
+})();
+</script>
+<script id="pmno-drm-js">
+(function(){
+  const $=id=>document.getElementById(id);
+  const state={project:null,inputs:[],results:[],saved:[]};
+  const loadSaved=()=>{try{state.saved=JSON.parse(localStorage.getItem('pmno_drm_saved_runs')||'[]')}catch(e){state.saved=[]}};
+  const saveSaved=()=>{try{localStorage.setItem('pmno_drm_saved_runs',JSON.stringify(state.saved))}catch(e){}};
+  const esc=v=>String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
+  const compactResult=r=>({site_id:r.site_id,site_name:r.site_name,tenant:r.tenant,candidate_id:r.candidate_id,candidate_name:r.candidate_name,decision:r.decision,feasibility:bulkSingleSiteMetrics(r).feasibility,estimated_irr:bulkSingleSiteMetrics(r).estIrr});
+  function renderSaved(){const el=$('drm-saved-runs');if(!state.saved.length){el.innerHTML='<div class="drm-empty">No saved runs yet.</div>';return}el.innerHTML=state.saved.map((x,i)=>`<div class="drm-run-item"><strong>${esc(x.name)}</strong><small>${x.count} sites · ${esc(x.created)}</small><button class="drm-btn" data-reload="${i}">RELOAD RUN</button></div>`).join('');el.querySelectorAll('[data-reload]').forEach(b=>b.onclick=()=>reloadRun(Number(b.dataset.reload)))}
+  function render(){const rows=state.results;const a=rows.filter(r=>r.drm_status==='APPROVED').length,rv=rows.filter(r=>r.drm_status==='NEED REVIEW').length,rj=rows.filter(r=>r.drm_status==='REJECTED').length;$('drm-k-total').textContent=rows.length;$('drm-k-approved').textContent=a;$('drm-k-review').textContent=rv;$('drm-k-rejected').textContent=rj;
+    const wrap=$('drm-table-wrap'); if(!rows.length){wrap.innerHTML='<div class="drm-empty">Run analysis to populate DRM results.</div>';return}
+    wrap.innerHTML=`<table class="drm-table"><thead><tr><th>SITE</th><th>TENANT</th><th>OPTION</th><th>IRR</th><th>FEASIBILITY</th><th>TENANT DECISION</th></tr></thead><tbody>${rows.map((r,i)=>{const m=bulkSingleSiteMetrics(r);const st=r.drm_status||'NEED REVIEW';const cls=st==='APPROVED'?'approved':st==='REJECTED'?'rejected':'review';const opt=m.isB2S?'B2S':(r.candidate_id||'COLLO');const irr=m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—';return `<tr><td><strong>${esc(r.site_id)}</strong>${r.site_name?`<small style="display:block;color:#71869b;margin-top:3px">${esc(r.site_name)}</small>`:''}</td><td>${esc(r.tenant||'—')}</td><td>${esc(opt)}</td><td>${irr}</td><td>${esc(m.feasibility)}</td><td><select class="drm-decision" data-decision="${i}"><option ${st==='APPROVED'?'selected':''}>APPROVED</option><option ${st==='NEED REVIEW'?'selected':''}>NEED REVIEW</option><option ${st==='REJECTED'?'selected':''}>REJECTED</option></select><span class="drm-status ${cls}" style="margin-left:6px">${st}</span></td></tr>`}).join('')}</tbody></table>`;
+    wrap.querySelectorAll('[data-decision]').forEach(sel=>sel.onchange=()=>{state.results[Number(sel.dataset.decision)].drm_status=sel.value;render()});
+  }
+  function parseFile(file){return new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]];resolve(XLSX.utils.sheet_to_json(ws,{defval:''}))}catch(err){reject(err)}};rd.onerror=reject;rd.readAsArrayBuffer(file)})}
+  function normalize(r){const get=(...ks)=>{for(const k of ks){if(r[k]!==undefined&&r[k]!=='')return r[k];const f=Object.keys(r).find(x=>x.trim().toLowerCase()===k.toLowerCase());if(f)return r[f]}return ''};return {site_id:String(get('Site ID','site_id')).trim(),site_name:String(get('Site Name','site_name')).trim(),lat:bulkNum(get('Latitude','latitude')),lon:bulkNum(get('Longitude','longitude')),tenant:String(get('Target Tenant','target_tenant','Tenant')).trim().toUpperCase()}}
+  $('drm-create-project').onclick=()=>{const name=$('drm-project-name').value.trim()||prompt('Project name?')||'';if(!name)return;state.project={name,created:new Date().toLocaleString('id-ID')};$('drm-context').textContent=name;$('drm-project-name').value=name;};
+  $('drm-file').onchange=async e=>{try{if(!state.project)state.project={name:$('drm-project-name').value.trim()||'Untitled DRM Project',created:new Date().toLocaleString('id-ID')};const raw=await parseFile(e.target.files[0]);state.inputs=raw.map(normalize).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);$('drm-run').disabled=!state.inputs.length;$('drm-progress').textContent=`${state.inputs.length} valid sites ready`;render()}catch(err){$('drm-progress').textContent='Upload error: '+err.message}};
+  $('drm-run').onclick=async()=>{if(!state.inputs.length)return;$('drm-run').disabled=true;state.results=[];for(let i=0;i<state.inputs.length;i++){const x=state.inputs[i];$('drm-progress').textContent=`Running ${i+1}/${state.inputs.length} · ${x.site_id}`;try{const r=await analyzeOne(x);r.drm_status='NEED REVIEW';state.results.push(r)}catch(e){state.results.push({...x,decision:'ERROR',error:e.message,drm_status:'NEED REVIEW',cost:{}})}}$('drm-progress').textContent=`Completed ${state.results.length} sites`;$('drm-run').disabled=false;render();saveRun()};
+  function saveRun(){if(!state.results.length)return;const item={name:state.project?.name||'Untitled DRM Project',created:new Date().toLocaleString('id-ID'),count:state.results.length,inputs:state.inputs,results:state.results.map(compactResult).map((r,i)=>({...r,drm_status:state.results[i].drm_status}))};state.saved.unshift(item);state.saved=state.saved.slice(0,20);saveSaved();renderSaved()}
+  function reloadRun(i){const x=state.saved[i];if(!x)return;state.project={name:x.name,created:x.created};$('drm-project-name').value=x.name;$('drm-context').textContent=x.name;state.inputs=x.inputs||[];state.results=x.results||[];$('drm-run').disabled=!state.inputs.length;$('drm-progress').textContent=`Reloaded saved run · ${state.results.length} sites`;render()}
+  loadSaved();renderSaved();
 })();
 </script>
 </body>
