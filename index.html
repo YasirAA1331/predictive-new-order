@@ -290,6 +290,36 @@ body.bulk-page .mobile-nav{
 </style>
 
 <div id="pmnoProjectShell" class="pmno-project-shell">
+<style id="pmno-project-landing-css">
+#pmnoProjectLanding{margin:0 0 18px;padding:18px;border:1px solid #29445c;border-radius:14px;background:#0b1d30}
+.pmno-pl-kicker{font-size:9px;letter-spacing:2px;color:#6f8aa5;font-weight:900}
+.pmno-pl-title{font-size:22px;font-weight:900;margin-top:5px}
+.pmno-pl-sub{font-size:11px;color:#91a4bd;margin-top:5px}
+.pmno-pl-flow{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:14px}
+.pmno-pl-step{padding:7px 10px;border:1px solid #29445c;border-radius:8px;background:#081728;font-size:9px;font-weight:900}
+.pmno-pl-arrow{color:#4abcf0;font-weight:900}
+.pmno-pl-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.pmno-pl-btn{border:1px solid #31506a;background:#10243b;color:#cfe0f5;border-radius:8px;padding:8px 11px;font-size:9px;font-weight:900;cursor:pointer}
+.pmno-pl-btn.primary{background:#1b73e8;border-color:#1b73e8;color:#fff}
+@media(max-width:600px){.pmno-pl-flow{display:grid;grid-template-columns:1fr auto 1fr}.pmno-pl-actions .pmno-pl-btn{flex:1}}
+</style>
+<div id="pmnoProjectLanding">
+  <div class="pmno-pl-kicker">PROJECT WORKSPACE</div>
+  <div class="pmno-pl-title">PMNO Project Management</div>
+  <div class="pmno-pl-sub">Satu project menjadi container untuk site, meeting, review, dan historical approval.</div>
+  <div class="pmno-pl-flow">
+    <div class="pmno-pl-step">PROJECT</div><div class="pmno-pl-arrow">→</div>
+    <div class="pmno-pl-step">MEETINGS</div><div class="pmno-pl-arrow">→</div>
+    <div class="pmno-pl-step">BULK ANALYZER</div><div class="pmno-pl-arrow">→</div>
+    <div class="pmno-pl-step">APPROVAL SNAPSHOT</div>
+  </div>
+  <div class="pmno-pl-actions">
+    <button class="pmno-pl-btn primary" onclick="pmnoProjectNew()">＋ NEW PROJECT</button>
+    <button class="pmno-pl-btn" onclick="document.getElementById('pmnoProjectList')?.scrollIntoView({behavior:'smooth'})">VIEW PROJECTS ↓</button>
+    <button class="pmno-pl-btn" onclick="pmnoProjectOpenBulk()">OPEN BULK ANALYZER →</button>
+  </div>
+</div>
+
   <div class="pmno-project-wrap">
     <div class="pmno-project-nav">
       <button class="pmno-project-btn" onclick="pmnoProjectBackToApp()">← PMNO Analyzer</button>
@@ -1148,6 +1178,11 @@ window.pmnoMsAddCarryOver=async function(projectSiteId){
 window.pmnoBulkOpenProjectMeeting=function(){
   if(typeof window.pmnoProjectShow==='function') window.pmnoProjectShow();
   else alert('Project Management belum tersedia pada runtime ini.');
+};
+window.pmnoProjectOpenBulk=function(){
+  const bulkMenu=document.getElementById('bulkMenu');
+  if(bulkMenu)bulkMenu.click();
+  else if(typeof window.showBulk==='function')window.showBulk();
 };
 window.pmnoBulkMeetingSelectSites=function(){
   const ctx=bulkState.meetingContext;
