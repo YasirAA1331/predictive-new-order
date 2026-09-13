@@ -1046,7 +1046,7 @@ function render(){
       const invIrr=m.isB2S?'—':(m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—');
       const b2sIrr=m.isB2S?(m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—'):invIrr;
       const costVal=k=>c[k]==='—'?'—':money(c[k]);
-      const candidateHtml=pmnoCandidateSelect(m, i);
+      const candidateHtml=pmnoCandidateSelect(r, i);
       return `<tr><td class="expand-cell sticky-1">${pmnoOpenSingleSite(r,i)}</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="type-cell"><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="candidate-cell">${candidateHtml}</td>
       ${cell(m.distance)}${cell(m.tower)}${cell(m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—','num')}${cell(m.isB2S?'—':m.tenants,'center')}${cell(m.signal,'num')}
       ${cell(m.needStr,'center')}${cell(m.reinforcement,'num')}${cell(m.sda,'center')}${cell(m.ses)}${cell(m.comcase,'center')}${cell(m.red,'center')}${cell(m.access)}${cell(m.road,'num')}${cell(m.days)}${cell(m.reinfProb,'num')}${cell(m.structural,'num')}${cell(m.physical,'num')}
