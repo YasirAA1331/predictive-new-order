@@ -59,27 +59,22 @@
 @media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.detail{grid-template-columns:1fr}.cost-grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:12px}.top{padding:0 14px}.status{display:none}}
 
 .bulk-view{min-height:calc(100vh - 72px);background:#06111f;color:#edf5fb;position:relative;z-index:5}.mode-menu{display:flex;gap:8px;margin-left:auto}.mode-menu button{border:1px solid #29445c;background:#0a1727;color:#9db0c1;border-radius:7px;padding:8px 11px;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer}.mode-menu button.active{color:#35c8ff;border-color:#2b617c;background:#0b2234}</style>
-<style id="bulk-landscape-scroll-fix">
-/* PMNO Bulk — landscape mobile/tablet scroll fix */
+<style id="bulk-navigation-scroll-fix">
+/* PMNO Bulk — robust landscape scrolling + page persistence */
 @media (orientation: landscape) and (max-width: 900px){
-  body:has(#bulkView[style*="display: block"]){
-    overflow-y:auto;
-    overflow-x:hidden;
-    height:auto;
-    min-height:100dvh;
-  }
-  .app:has(#bulkView[style*="display: block"]){
-    height:auto;
-    min-height:100dvh;
-  }
-  .bulk-view{
-    min-height:calc(100dvh - 64px);
-    height:auto;
-    overflow:visible;
-  }
-  .bulk-view .wrap{
-    padding-bottom:40px;
-  }
+  body.bulk-page{overflow:auto !important; overflow-x:hidden !important; height:auto !important; min-height:100dvh;}
+  body.bulk-page .app{height:auto !important; min-height:100dvh;}
+  body.bulk-page #bulkView{display:block; min-height:calc(100dvh - 64px); height:auto; overflow:visible;}
+  body.bulk-page #bulkView .wrap{padding-bottom:40px;}
+  body.bulk-page #bulkView .table-wrap{width:100%; max-width:100%; overflow-x:auto !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y;}
+  body.bulk-page #bulkView .table{min-width:1450px;}
+}
+@media (max-width:760px){
+  body.bulk-page{overflow:auto !important; height:auto !important; min-height:100dvh;}
+  body.bulk-page .app{height:auto !important; min-height:100dvh;}
+  body.bulk-page #bulkView{display:block; min-height:calc(100dvh - 72px); height:auto; overflow:visible;}
+  body.bulk-page #bulkView .table-wrap{overflow-x:auto !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y;}
+  body.bulk-page #bulkView .table{min-width:1450px;}
 }
 </style>
 </head>
@@ -578,7 +573,51 @@ function installResize(){const stage=document.querySelector('.map-stage');if('Re
 initMap();installResize();loadTenants().finally(loadAnalysis);
 </script>
 <script>
-(function(){const s=document.getElementById('singleMenu'),b=document.getElementById('bulkMenu'),w=document.getElementById('bulkView'),orig=document.querySelector('.workspace'),mob=document.querySelector('.mobile-nav');function showSingle(){orig.style.display='grid';w.style.display='none';s.classList.add('active');b.classList.remove('active');if(mob)mob.style.display='';window.dispatchEvent(new Event('resize'));}function showBulk(){orig.style.display='none';w.style.display='block';b.classList.add('active');s.classList.remove('active');if(mob)mob.style.display='none';}s.onclick=showSingle;b.onclick=showBulk;})();
+(function(){
+  // PMNO navigation router: one source of truth for Single/Bulk.
+  const s=document.getElementById('singleMenu'),b=document.getElementById('bulkMenu'),w=document.getElementById('bulkView'),orig=document.querySelector('.workspace'),mob=document.querySelector('.mobile-nav');
+  const KEY='pmno_active_page';
+  const valid=p=>p==='bulk'||p==='single';
+  function readSaved(){try{const p=localStorage.getItem(KEY);return valid(p)?p:null}catch(e){return null}}
+  function save(page){try{localStorage.setItem(KEY,page)}catch(e){}}
+  function apply(page){
+    if(page==='bulk'){
+      orig.style.display='none'; w.style.display='block';
+      document.body.classList.add('bulk-page');
+      b.classList.add('active'); s.classList.remove('active');
+      if(mob)mob.style.display='none';
+    }else{
+      orig.style.display='grid'; w.style.display='none';
+      document.body.classList.remove('bulk-page');
+      s.classList.add('active'); b.classList.remove('active');
+      if(mob)mob.style.display='';
+    }
+    save(page);
+    window.dispatchEvent(new Event('resize'));
+  }
+  function current(){
+    const h=String(location.hash||'').replace(/^#/,'').toLowerCase();
+    if(valid(h)) return h;
+    return readSaved()||'single';
+  }
+  function navigate(page,replace=false){
+    if(!valid(page)) page='single';
+    const target='#'+page;
+    if(location.hash!==target){
+      if(replace) history.replaceState({pmnoPage:page},'',target);
+      else history.pushState({pmnoPage:page},'',target);
+    }
+    apply(page);
+  }
+  s.onclick=()=>navigate('single');
+  b.onclick=()=>navigate('bulk');
+  window.addEventListener('popstate',()=>apply(current()));
+  window.addEventListener('hashchange',()=>apply(current()));
+  window.addEventListener('pageshow',()=>apply(current()));
+  const initial=current();
+  if(location.hash!=='#'+initial) history.replaceState({pmnoPage:initial},'', '#'+initial);
+  apply(initial);
+})();
 </script>
 <script>
 (function(){
