@@ -471,6 +471,7 @@ async function loadB2SIntelligence(){
   // It must still run when Top 5 COLLO is empty.
   try{
     setLoading(true);
+    const anchor=state.top5?.[0]||state.decision?.rows?.[0]||{};
     const b2sResult=await rpc('pmno_b2s_point_scenario',{
       p_lat:state.lat,p_lon:state.lon,p_target_tenant:state.tenant,p_radius_m:3000,
       p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_wacc:.0873
