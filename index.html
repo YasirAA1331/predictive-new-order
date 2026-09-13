@@ -456,7 +456,7 @@ const existingNbv=rec.existing_nbv??rec.nbv_existing??rec.nbv??inv.existing_nbv?
 const existingIrrRaw=rec.existing_irr??inv.existing_irr??null;
 /* Backend returns existing_irr as percent (e.g. 12.40), while the IRR
    calculation requires a decimal (0.124). Normalize once at the FE boundary. */
-const existingIrr=existingIrrRaw==null?null:(Math.abs(num(existingIrrRaw))>1?num(existingIrrRaw)/100:num(existingIrrRaw));
+const existingIrr=existingIrrRaw==null?null:num(existingIrrRaw);
 const displayedCapex=Array.isArray(rec.capex_items)
   ? rec.capex_items.reduce((a,x)=>a+num(x?.total_cost,0),0)
   : null;
