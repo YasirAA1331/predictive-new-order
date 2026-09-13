@@ -141,6 +141,18 @@ function renderMap(data,decisionRows){
  if(routeLine)routeLine.remove();if(state.decision?.recommended){const rec=state.decision.recommended;const rc=data.find(c=>c.site_id===rec.site_id);if(rc&&rc.latitude!=null){routeLine=L.polyline([[state.lat,state.lon],[rc.latitude,rc.longitude]],{color:'#35aaff',weight:3,opacity:.9,dashArray:'9 8',lineCap:'round',interactive:false}).addTo(map)}}
  radiusCircle.setLatLng([state.lat,state.lon]).setRadius(state.radius);targetMarker.setLatLng([state.lat,state.lon]);targetMarker.setZIndexOffset(3000);if(b2sMarker)b2sMarker.remove();b2sMarker=L.marker([state.lat,state.lon],{icon:b2sIcon(),zIndexOffset:2900}).addTo(map);b2sMarker.on('click',e=>{e.originalEvent?.stopPropagation();showB2SPopup()});fitMapToData(data);setTimeout(()=>map.invalidateSize({animate:false}),80);updateSummary(data,decisionRows)
 }
+
+function finalizeCapexItems(items,option='COLLO'){
+  const rows=Array.isArray(items)?items.slice():[];
+  const codes=new Set(rows.map(x=>String(x?.item_code||'').toUpperCase()));
+  const add=(x)=>{if(!codes.has(String(x.item_code).toUpperCase())){rows.push(x);codes.add(String(x.item_code).toUpperCase())}};
+  add({bucket:'MATERIAL',item_code:'MNT-ANT',item_name:'Mounting · Material',quantity:7,unit:'set',unit_cost:6500000,total_cost:45500000,driver:{option,driver:'passive_antenna_count',added_device_count:7}});
+  add({bucket:'CME',item_code:'RBS-MAT',item_name:'Pondasi RBS · Material',quantity:1,unit:'lot',unit_cost:18000000,total_cost:18000000,driver:{option,driver:'always_required'}});
+  if(option==='COLLO')add({bucket:'CME',item_code:'RBS-APD',item_name:'Pondasi RBS · APD Pondasi RBS',quantity:1,unit:'lot',unit_cost:2500000,total_cost:2500000,driver:{option,driver:'collo_only'}});
+  add({bucket:'CME',item_code:'TRF-UNIT',item_name:'Transformator · Material',quantity:1,unit:'unit',unit_cost:85000000,total_cost:85000000,driver:{option,driver:'always_included',added_load_kw:12}});
+  return rows;
+}
+
 async function selectCandidate(c){
   const row=state.top5.find(x=>x.site_id===c.site_id)||c;
   state.selectedId=c.site_id;
