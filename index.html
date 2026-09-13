@@ -467,11 +467,8 @@ async function loadB2SIntelligence(){
   state.selectedId='__B2S__';
   b2sMarker?.getElement()?.querySelector('.b2s-marker')?.classList.add('selected');
   document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x.id==='fallbackCandidate'));
-  const anchor=state.top5?.[0]||state.decision?.rows?.[0];
-  if(!anchor?.site_id){
-    updateDetail({recommended:null,final_decision:'B2S',raw:state.decision?.raw||{}});
-    return;
-  }
+  // B2S is a predictive point scenario and must not depend on an existing COLLO candidate.
+  // It must still run when Top 5 COLLO is empty.
   try{
     setLoading(true);
     const b2sResult=await rpc('pmno_b2s_point_scenario',{
@@ -606,10 +603,10 @@ window.pmnoPersistence = (() => {
     },
 
     async meetingSitesWithProjectSites(meetingId){
-    const rows=await rest('pmno_meeting_sites?meeting_id=eq.'+encodeURIComponent(meetingId)+'&order=display_order.asc','GET');
+    const rows=await request('/pmno_meeting_sites?meeting_id=eq.'+encodeURIComponent(meetingId)+'&order=display_order.asc','GET');
     const out=[];
     for(const r of (rows||[])){
-      const ps=await rest('pmno_project_sites?id=eq.'+encodeURIComponent(r.project_site_id),'GET');
+      const ps=await request('/pmno_project_sites?id=eq.'+encodeURIComponent(r.project_site_id),'GET');
       out.push({...r,project_site:Array.isArray(ps)?ps[0]:null});
     }
     return out;
@@ -1353,7 +1350,7 @@ function bindCandidateSelection(){
 }
 function updateFallback(d){const design=d?.raw?.predictive_design||d?.raw?.new_site?.design||{};$('fallbackHeight').textContent=design.recommended_height_m?num(design.recommended_height_m).toFixed(0)+' m':'—';const land=design.recommended_land_area_m2?num(design.recommended_land_area_m2).toFixed(0)+' m²':'Land —';const b2s=d?.raw?.new_site?.irr;$('fallbackLand').textContent=`${land} · IRR ${b2s?num(b2s).toFixed(2)+'%':'—'}`}
 async function runDecision(payload){return rpc('pmno_decision',payload)}
-async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};state.recommendedId=enrichedRecommended?.site_id||null;const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)selectCandidate(enrichedRecommended);else updateDetail({recommended:enrichedRecommended});$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
+async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};state.recommendedId=enrichedRecommended?.site_id||null;const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)await selectCandidate(enrichedRecommended);else{updateDetail({recommended:enrichedRecommended,final_decision:normalized.raw?.final_decision,raw:normalized.raw});if(String(normalized.raw?.final_decision||'').toUpperCase()==='B2S')await loadB2SIntelligence();}$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
 catch(e){showError('PMNO Engine belum dapat diakses. '+e.message+' Pastikan API function public.pmno_decision sudah ter-deploy.');}
 finally{setLoading(false)}}
 let analysisTimer;function scheduleAnalysis(){clearTimeout(analysisTimer);analysisTimer=setTimeout(loadAnalysis,450)}
