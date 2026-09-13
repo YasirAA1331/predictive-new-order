@@ -1122,7 +1122,25 @@ window.pmnoBulkEngine={analyzeOne,bulkSingleSiteMetrics};
 <script id="pmno-drm-js">
 (function(){
  const $=id=>document.getElementById(id); const state={project:null,inputs:[],results:[],saved:[],dirty:false,filter:'ALL'};
- const loadSaved=()=>{try{state.saved=JSON.parse(localStorage.getItem('pmno_drm_saved_runs')||'[]')}catch(e){state.saved=[]}}; const persist=()=>{try{localStorage.setItem('pmno_drm_saved_runs',JSON.stringify(state.saved))}catch(e){}};
+ const loadSaved=()=>{
+  try{
+    state.saved=JSON.parse(localStorage.getItem('pmno_drm_saved_runs')||'[]');
+    /* One-time cleanup of duplicate prototype TEST APPS runs. Keep newest only; preserve real/non-test history. */
+    if(!localStorage.getItem('pmno_drm_test_cleanup_v1')){
+      const testRuns=state.saved.filter(x=>String(x?.name||'').trim().toUpperCase()==='TEST APPS');
+      if(testRuns.length>1){
+        let kept=false;
+        state.saved=state.saved.filter(x=>{
+          if(String(x?.name||'').trim().toUpperCase()!=='TEST APPS') return true;
+          if(!kept){kept=true;return true;}
+          return false;
+        });
+        localStorage.setItem('pmno_drm_saved_runs',JSON.stringify(state.saved));
+      }
+      localStorage.setItem('pmno_drm_test_cleanup_v1','1');
+    }
+  }catch(e){state.saved=[]}
+}; const persist=()=>{try{localStorage.setItem('pmno_drm_saved_runs',JSON.stringify(state.saved))}catch(e){}};
  const esc=v=>String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
  const engine=()=>window.pmnoBulkEngine;
  function metrics(r){if(r.saved_metrics)return r.saved_metrics;try{return engine()?.bulkSingleSiteMetrics?engine().bulkSingleSiteMetrics(r):{feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}}catch(e){return {feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}}}
