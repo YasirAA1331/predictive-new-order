@@ -287,6 +287,17 @@ body.bulk-page .mobile-nav{
 .pmno-project-nav{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
 .pmno-project-back{margin-bottom:14px}
 @media(max-width:640px){.pmno-project-shell{padding:14px}.pmno-project-top{align-items:flex-start;flex-direction:column}.pmno-project-btn{width:100%}.pmno-project-actions{flex-direction:column}.pmno-project-actions .pmno-project-btn{width:100%}}
+
+.pmno-project-portfolio-card{min-width:0}
+.pmno-project-card-top{display:flex;justify-content:space-between;gap:8px;align-items:flex-start}
+.pmno-project-kicker{font-size:8px;letter-spacing:1.5px;color:#6f8aa5;font-weight:900;margin-bottom:4px}
+.pmno-project-live{font-size:8px;font-weight:900;letter-spacing:1px;color:#8df2c2;border:1px solid #286b53;border-radius:999px;padding:4px 7px}
+.pmno-project-stats{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin:14px 0}
+.pmno-project-stats>div{padding:9px;background:#081728;border:1px solid #1d344b;border-radius:8px}
+.pmno-project-stats span{display:block;font-size:7px;letter-spacing:1.2px;color:#6f8aa5;font-weight:900}
+.pmno-project-stats b{display:block;font-size:17px;margin-top:3px}
+.pmno-project-actions{display:flex;gap:7px;flex-wrap:wrap}
+@media(max-width:600px){.pmno-project-actions .pmno-project-btn{flex:1}.pmno-project-stats{margin:10px 0}}
 </style>
 
 <div id="pmnoProjectShell" class="pmno-project-shell">
@@ -327,7 +338,7 @@ body.bulk-page .mobile-nav{
 
     <div class="pmno-project-top">
       <div>
-        <div class="pmno-project-title">PROJECTS</div>
+        <div class="pmno-project-title">PROJECT PORTFOLIO</div>
         <div class="pmno-project-sub">Manage customer projects and meeting sessions</div>
       </div>
       <button class="pmno-project-btn primary" onclick="pmnoCreateProject()">＋ NEW PROJECT</butt
@@ -480,7 +491,27 @@ on>
       <button class="pmno-meeting-btn primary" onclick="pmnoNewMeeting()">＋ NEW MEETING</button>
     </div>
 
-    <div id="pmnoMeetingForm" class="pmno-meeting-form">
+    
+<style id="pmno-meeting-dashboard-css">
+#pmnoMeetingDashboard{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px;margin:0 0 16px}
+.pmno-md-card{padding:12px;border:1px solid #203852;border-radius:11px;background:#0b1d30}
+.pmno-md-label{font-size:8px;letter-spacing:1.3px;color:#6f8aa5;font-weight:900}.pmno-md-value{font-size:20px;font-weight:900;margin-top:4px}
+.pmno-md-card.follow .pmno-md-value{color:#ffd76a}.pmno-md-card.approved .pmno-md-value{color:#8df2c2}.pmno-md-card.carry .pmno-md-value{color:#70cfff}
+.pmno-md-actions{display:flex;gap:7px;flex-wrap:wrap;margin:0 0 16px}.pmno-md-btn{border:1px solid #31506a;background:#10243b;color:#cfe0f5;border-radius:8px;padding:8px 10px;font-size:9px;font-weight:900;cursor:pointer}.pmno-md-btn.primary{background:#1b73e8;border-color:#1b73e8;color:#fff}
+@media(max-width:700px){#pmnoMeetingDashboard{grid-template-columns:repeat(2,minmax(0,1fr))}.pmno-md-card:last-child{grid-column:span 2}}
+</style>
+<div id="pmnoMeetingDashboard">
+  <div class="pmno-md-card"><div class="pmno-md-label">TOTAL SITES</div><div id="pmnoMdTotal" class="pmno-md-value">0</div></div>
+  <div class="pmno-md-card"><div class="pmno-md-label">NOT REVIEWED</div><div id="pmnoMdNot" class="pmno-md-value">0</div></div>
+  <div class="pmno-md-card follow"><div class="pmno-md-label">FOLLOW UP</div><div id="pmnoMdFollow" class="pmno-md-value">0</div></div>
+  <div class="pmno-md-card approved"><div class="pmno-md-label">APPROVED</div><div id="pmnoMdApproved" class="pmno-md-value">0</div></div>
+  <div class="pmno-md-card carry"><div class="pmno-md-label">CARRY OVER</div><div id="pmnoMdCarry" class="pmno-md-value">0</div></div>
+</div>
+<div class="pmno-md-actions">
+  <button class="pmno-md-btn primary" onclick="pmnoCreateNextMeeting()">CREATE NEXT MEETING</button>
+  <button class="pmno-md-btn" onclick="pmnoMeetingShowBulk()">OPEN BULK ANALYZER →</button>
+</div>
+<div id="pmnoMeetingForm" class="pmno-meeting-form">
       <div class="pmno-meeting-fields">
         <div class="pmno-meeting-field">
           <label>Meeting Date</label>
@@ -500,7 +531,50 @@ on>
         <button class="pmno-meeting-btn primary" onclick="pmnoSaveMeeting()">CREATE MEETING</button>
       </div>
     </div>
-    <div id="pmnoMeetingList" class="pmno-meeting-list"></div>
+    
+<style id="pmno-site-selection-css">
+#pmnoSiteSelection{margin:0 0 14px;padding:12px;border:1px solid #29445c;border-radius:11px;background:#0b1d30}
+.pmno-ss-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+.pmno-ss-title{font-size:11px;font-weight:900}.pmno-ss-sub{font-size:9px;color:#91a4bd;margin-top:3px}
+.pmno-ss-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.pmno-ss-btn{border:1px solid #31506a;background:#10243b;color:#cfe0f5;border-radius:7px;padding:7px 9px;font-size:8px;font-weight:900;cursor:pointer}
+.pmno-ss-btn.primary{background:#1b73e8;border-color:#1b73e8;color:#fff}.pmno-ss-btn.warn{color:#ffd76a;border-color:#66531e}
+.pmno-ss-count{font-size:9px;color:#91a4bd;margin-top:8px}.pmno-ss-list{display:grid;gap:6px;margin-top:10px;max-height:330px;overflow:auto}
+.pmno-ss-item{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:9px;align-items:center;padding:9px;border:1px solid #203852;border-radius:8px;background:#081728}
+.pmno-ss-item input{width:16px;height:16px}.pmno-ss-site{font-size:10px;font-weight:800}.pmno-ss-meta{font-size:8px;color:#91a4bd;margin-top:2px}
+.pmno-ss-badge{font-size:7px;font-weight:900;padding:3px 5px;border-radius:999px;border:1px solid #31506a;color:#a9dfff;white-space:nowrap}
+.pmno-ss-badge.follow{color:#ffd76a;border-color:#66531e}.pmno-ss-badge.in{color:#8df2c2;border-color:#28795a}
+@media(max-width:620px){.pmno-ss-item{grid-template-columns:24px minmax(0,1fr)}.pmno-ss-item .pmno-ss-badge{grid-column:2}.pmno-ss-actions .pmno-ss-btn{flex:1}}
+</style>
+<div id="pmnoSiteSelection">
+  <div class="pmno-ss-head"><div><div class="pmno-ss-title">SITE SELECTION</div><div class="pmno-ss-sub">Pilih site yang akan dibahas pada meeting ini. Site master tidak diduplikasi.</div></div><div class="pmno-ss-count">SELECTED <b id="pmnoSsSelected">0</b></div></div>
+  <div class="pmno-ss-actions">
+    <button class="pmno-ss-btn" onclick="pmnoSsFilter('ALL')">ALL</button>
+    <button class="pmno-ss-btn" onclick="pmnoSsFilter('NEW')">NEW SITES</button>
+    <button class="pmno-ss-btn warn" onclick="pmnoSsFilter('FOLLOW UP')">FOLLOW UP SITES</button>
+    <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(true)">SELECT ALL</button>
+    <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(false)">CLEAR</button>
+    <button class="pmno-ss-btn primary" onclick="pmnoSsAddSelected()">ADD SELECTED TO MEETING</button>
+  </div>
+  <div id="pmnoSsList" class="pmno-ss-list"></div>
+</div>
+
+<div id="pmnoSiteSelection">
+  <div class="pmno-ss-head">
+    <div><div class="pmno-ss-title">SITE SELECTION</div><div class="pmno-ss-sub">Pilih site yang akan dibahas pada meeting ini. Site master tidak diduplikasi.</div></div>
+    <div class="pmno-ss-count">SELECTED <b id="pmnoSsSelected">0</b></div>
+  </div>
+  <div class="pmno-ss-actions">
+    <button class="pmno-ss-btn" onclick="pmnoSsFilter('ALL')">ALL</button>
+    <button class="pmno-ss-btn" onclick="pmnoSsFilter('NEW')">NEW SITES</button>
+    <button class="pmno-ss-btn warn" onclick="pmnoSsFilter('FOLLOW UP')">FOLLOW UP SITES</button>
+    <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(true)">SELECT ALL</button>
+    <button class="pmno-ss-btn" onclick="pmnoSsSelectAll(false)">CLEAR</button>
+    <button class="pmno-ss-btn primary" onclick="pmnoSsAddSelected()">ADD SELECTED TO MEETING</button>
+  </div>
+  <div id="pmnoSsList" class="pmno-ss-list"></div>
+</div>
+<div id="pmnoMeetingList" class="pmno-meeting-list"></div>
   </div>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
@@ -694,6 +768,14 @@ window.pmnoPersistence = (() => {
       }));
     },
 
+    async projectsLoad() {
+      return request('/pmno_projects?select=*&order=updated_at.desc');
+    },
+
+    async projectSitesLoad(projectId) {
+      return await request(`/pmno_project_sites?project_id=eq.${encodeURIComponent(projectId)}&order=created_at.asc`);
+    },
+
     async projectLoad(projectId) {
       const rows = await request(`/pmno_projects?id=eq.${encodeURIComponent(projectId)}&select=*`);
       return Array.isArray(rows) ? (rows[0] || null) : rows;
@@ -871,6 +953,9 @@ window.pmnoSaveProject = async function(){
   }
 };
 
+window.pmnoOpenProjectMeetings=async function(projectId){
+  await window.pmnoOpenProject(projectId);
+};
 window.pmnoOpenProject = async function(projectId){
   try{
     const project = await window.pmnoPersistence.projectLoad(projectId);
@@ -888,20 +973,44 @@ window.pmnoOpenProject = async function(projectId){
 window.pmnoRenderProjectList = async function(){
   const list = document.getElementById('pmnoProjectList');
   if(!list) return;
-  const selected = window.pmnoProjectState.project;
-  if(selected){
-    list.innerHTML = `
-      <div class="pmno-project-card">
-        <h3>${pmnoProjectEsc(selected.project_name)}</h3>
-        <div class="pmno-project-meta">
-          <strong>Customer:</strong> ${pmnoProjectEsc(selected.customer_name)}<br>
-          ${pmnoProjectEsc(selected.description || 'No description')}<br><br>
-          <button class="pmno-project-btn primary" onclick="pmnoProjectOpenAnalyzer()">OPEN BULK ANALYZER</button>
+  try{
+    const rows=await window.pmnoPersistence.projectsLoad();
+    const projects=Array.isArray(rows)?rows:[];
+    window.pmnoProjectState.projects=projects;
+    if(!projects.length){
+      list.innerHTML='<div class="pmno-project-empty"><b>NO PROJECTS YET</b><br>Create a Project to start the PMNO governance workflow.</div>';
+      return;
+    }
+    const enriched=[];
+    for(const p of projects){
+      let meetings=[],sites=[];
+      try{meetings=await window.pmnoPersistence.meetingsLoad(p.id)||[];}catch(e){}
+      try{sites=await window.pmnoPersistence.projectSitesLoad(p.id)||[];}catch(e){}
+      enriched.push({...p,_meetingCount:meetings.length,_siteCount:sites.length});
+    }
+    list.innerHTML=enriched.map(p=>`
+      <div class="pmno-project-card pmno-project-portfolio-card">
+        <div class="pmno-project-card-top">
+          <div>
+            <div class="pmno-project-kicker">${pmnoProjectEsc(p.customer_name||'CUSTOMER')}</div>
+            <h3>${pmnoProjectEsc(p.project_name||'Untitled Project')}</h3>
+          </div>
+          <span class="pmno-project-live">ACTIVE</span>
         </div>
-      </div>`;
-    return;
+        <div class="pmno-project-meta">${pmnoProjectEsc(p.description||'No description')}</div>
+        <div class="pmno-project-stats">
+          <div><span>MEETING COUNT</span><b>${p._meetingCount}</b></div>
+          <div><span>SITE COUNT</span><b>${p._siteCount}</b></div>
+        </div>
+        <div class="pmno-project-actions">
+          <button class="pmno-project-btn primary" onclick="pmnoOpenProject('${p.id}')">OPEN PROJECT</button>
+          <button class="pmno-project-btn" onclick="pmnoOpenProjectMeetings('${p.id}')">MEETINGS →</button>
+        </div>
+      </div>`).join('');
+  }catch(e){
+    console.error(e);
+    list.innerHTML='<div class="pmno-project-empty">Unable to load project portfolio.</div>';
   }
-  list.innerHTML = '<div class="pmno-project-empty">No project selected. Create a new project to start.</div>';
 };
 
 window.pmnoProjectEsc = function(value){
@@ -940,6 +1049,41 @@ window.pmnoProjectShow = async function(){
 /* PMNO TASK 3 — MEETING MANAGEMENT */
 window.pmnoMeetingState={projectId:null,project:null,meetings:[],selectedMeeting:null};
 
+
+window.pmnoMeetingDashboardRender=function(rows){
+  const a=Array.isArray(rows)?rows:[];
+  const status=x=>x?.project_site?.current_status||'NOT REVIEWED';
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.textContent=String(v)};
+  set('pmnoMdTotal',a.length);
+  set('pmnoMdNot',a.filter(x=>status(x)==='NOT REVIEWED').length);
+  set('pmnoMdFollow',a.filter(x=>status(x)==='FOLLOW UP').length);
+  set('pmnoMdApproved',a.filter(x=>status(x)==='APPROVED').length);
+  set('pmnoMdCarry',a.filter(x=>x.source==='CARRY_OVER').length);
+};
+window.pmnoMeetingShowBulk=function(){
+  const m=window.pmnoMeetingState.selectedMeeting||(window.pmnoMeetingState.meetings||[])[0];
+  if(!m){alert('Belum ada Meeting.');return;}
+  window.pmnoMsOpen(m);
+  setTimeout(()=>window.pmnoMsRunBulk?.(),0);
+};
+window.pmnoCreateNextMeeting=async function(){
+  const projectId=window.pmnoMeetingState.projectId;
+  if(!projectId){alert('Project belum dipilih.');return;}
+  const current=window.pmnoMeetingState.selectedMeeting||(window.pmnoMeetingState.meetings||[])[0];
+  try{
+    const follow=current?await window.pmnoPersistence.meetingSitesWithProjectSites(current.id):[];
+    const nextNo=(window.pmnoMeetingState.meetings||[]).reduce((m,x)=>Math.max(m,Number(x.meeting_no)||0),0)+1;
+    const title=`Follow-up PMNO #${nextNo}`;
+    const rows=await window.pmnoPersistence.meetingCreate(projectId,{meeting_no:nextNo,meeting_date:new Date().toISOString().slice(0,10),meeting_title:title,meeting_note:'Auto-created from previous meeting; FOLLOW UP sites are proposed as CARRY OVER.'});
+    const meeting=Array.isArray(rows)?rows[0]:rows;
+    if(!meeting?.id)throw new Error('Meeting ID tidak diterima.');
+    const pending=follow.filter(x=>(x.project_site?.current_status||'NOT REVIEWED')==='FOLLOW UP');
+    for(let i=0;i<pending.length;i++)await window.pmnoPersistence.meetingSiteUpsert(meeting.id,pending[i].project_site.id,'CARRY_OVER',i+1);
+    window.pmnoMeetingState.selectedMeeting=meeting;
+    await window.pmnoLoadMeetings(projectId);
+    window.pmnoMsOpen(meeting);
+  }catch(e){console.error(e);alert('Gagal membuat next meeting: '+(e?.message||e));}
+};
 window.pmnoNewMeeting=function(){
   document.getElementById('pmnoMeetingForm')?.classList.add('active');
   const d=document.getElementById('pmnoMeetingDate');
@@ -975,6 +1119,9 @@ window.pmnoLoadMeetings=async function(projectId){
     if(p) window.pmnoMeetingState.project=p;
     const rows=await window.pmnoPersistence.meetingsLoad(projectId);
     window.pmnoMeetingState.meetings=Array.isArray(rows)?rows:[];
+    for(const m of window.pmnoMeetingState.meetings){
+      try{m._site_rows=await window.pmnoPersistence.meetingSitesWithProjectSites(m.id);}catch(e){m._site_rows=[];}
+    }
   }catch(e){
     console.error(e);window.pmnoMeetingState.meetings=[];
     alert('Gagal memuat meeting: '+(e?.message||e));
@@ -988,8 +1135,15 @@ window.pmnoRenderMeetings=function(){
   const list=document.getElementById('pmnoMeetingList');
   if(title) title.textContent=p?.project_name||'MEETINGS';
   if(sub) sub.textContent=p?`${p.customer_name||''} · Meeting Sessions`:'';
-  if(!list)return;
   const ms=window.pmnoMeetingState.meetings||[];
+  // Dashboard reflects the latest meeting's discussed sites, if available.
+  const latest=ms.length?ms[0]:null;
+  if(latest && latest._site_rows){
+    pmnoMeetingDashboardRender(latest._site_rows);
+  }else{
+    ['pmnoMdTotal','pmnoMdNot','pmnoMdFollow','pmnoMdApproved','pmnoMdCarry'].forEach(id=>{const e=document.getElementById(id);if(e)e.textContent='0';});
+  }
+  if(!list)return;
   if(!ms.length){
     list.innerHTML='<div class="pmno-meeting-empty">Belum ada meeting. Klik <b>＋ NEW MEETING</b> untuk membuat Meeting #1.</div>';
     return;
@@ -1004,6 +1158,53 @@ window.pmnoRenderMeetings=function(){
         <button class="pmno-meeting-btn primary" onclick="pmnoOpenMeeting('${m.id}')">OPEN MEETING</button>
       </div>
     </div>`).join('');
+};
+
+/* PMNO TASK 10 — SITE SELECTION */
+window.pmnoSsState={rows:[],filter:'ALL',selected:new Set()};
+window.pmnoSsLoad=async function(){
+  const projectId=window.pmnoMeetingState.projectId, meeting=window.pmnoMeetingState.selectedMeeting;
+  if(!projectId||!meeting)return;
+  try{
+    const all=await window.pmnoPersistence.projectSitesLoad(projectId)||[];
+    const inMeeting=await window.pmnoPersistence.meetingSitesWithProjectSites(meeting.id)||[];
+    const inSet=new Set(inMeeting.map(x=>x.project_site?.id).filter(Boolean));
+    window.pmnoSsState.rows=all.map(p=>({p,inMeeting:inSet.has(p.id)}));
+    window.pmnoSsState.selected=new Set();
+    pmnoSsRender();
+  }catch(e){console.error(e);const l=document.getElementById('pmnoSsList');if(l)l.innerHTML='<div class="pmno-meeting-empty">Gagal memuat site selection.</div>';}
+};
+window.pmnoSsFilter=function(f){window.pmnoSsState.filter=f||'ALL';pmnoSsRender();};
+window.pmnoSsSelectAll=function(on){
+  const st=window.pmnoSsState;
+  st.rows.filter(x=>!x.inMeeting&&(st.filter==='ALL'||(st.filter==='FOLLOW UP'?x.p.current_status==='FOLLOW UP':st.filter==='NEW'?x.p.current_status!=='FOLLOW UP':true)))
+    .forEach(x=>on?st.selected.add(x.p.id):st.selected.delete(x.p.id));
+  pmnoSsRender();
+};
+window.pmnoSsToggle=function(id,on){if(on)window.pmnoSsState.selected.add(id);else window.pmnoSsState.selected.delete(id);pmnoSsRender();};
+window.pmnoSsRender=function(){
+  const st=window.pmnoSsState,list=document.getElementById('pmnoSsList');if(!list)return;
+  const rows=st.rows.filter(x=>st.filter==='ALL'||(st.filter==='FOLLOW UP'?x.p.current_status==='FOLLOW UP':st.filter==='NEW'?x.p.current_status!=='FOLLOW UP':true));
+  const c=document.getElementById('pmnoSsSelected');if(c)c.textContent=String(st.selected.size);
+  if(!rows.length){list.innerHTML='<div class="pmno-meeting-empty">Belum ada site pada Project.</div>';return;}
+  list.innerHTML=rows.map(x=>{
+    const p=x.p,status=p.current_status||'NOT REVIEWED',source=x.inMeeting?'IN MEETING':(status==='FOLLOW UP'?'FOLLOW UP':'NEW');
+    return `<label class="pmno-ss-item"><input type="checkbox" ${x.inMeeting?'disabled':''} ${st.selected.has(p.id)?'checked':''} onchange="pmnoSsToggle('${p.id}',this.checked)"><span><span class="pmno-ss-site">${pmnoProjectEsc(p.site_id||'—')} · ${pmnoProjectEsc(p.site_name||'')}</span><span class="pmno-ss-meta">${pmnoProjectEsc(p.target_tenant||'—')} · ${p.latitude??'—'}, ${p.longitude??'—'}</span></span><span class="pmno-ss-badge ${status==='FOLLOW UP'?'follow':''} ${x.inMeeting?'in':''}">${source}</span></label>`;
+  }).join('');
+};
+window.pmnoSsAddSelected=async function(){
+  const m=window.pmnoMeetingState.selectedMeeting;if(!m)return;
+  const rows=window.pmnoSsState.rows.filter(x=>window.pmnoSsState.selected.has(x.p.id)&&!x.inMeeting);
+  if(!rows.length){alert('Tidak ada site baru yang dipilih.');return;}
+  try{
+    const existing=(await window.pmnoPersistence.meetingSitesWithProjectSites(m.id)||[]).length;
+    for(let i=0;i<rows.length;i++){
+      const source=rows[i].p.current_status==='FOLLOW UP'?'CARRY_OVER':'NEW';
+      await window.pmnoPersistence.meetingSiteUpsert(m.id,rows[i].p.id,source,existing+i+1);
+    }
+    await window.pmnoMsLoad(); await window.pmnoSsLoad();
+    alert(`${rows.length} site ditambahkan ke Meeting.`);
+  }catch(e){console.error(e);alert('Gagal menambahkan site: '+(e?.message||e));}
 };
 window.pmnoOpenMeeting=function(meetingId){
   const m=(window.pmnoMeetingState.meetings||[]).find(x=>x.id===meetingId);
@@ -1967,7 +2168,7 @@ function render(){
   const cell=(v,cls='')=>`<td class="${cls}">${bulkEsc(v==null||v===''?'—':v)}</td>`;
   const money=v=>bulkMoney(v);
   wrap.innerHTML=`<table class="bulk-table"><thead>
-    <tr><th rowspan="2" class="sticky-1"> </th><th rowspan="2" class="sticky-2">SITE</th><th rowspan="2" class="sticky-3">TARGET TENANT</th><th rowspan="2">STATUS</th><th rowspan="2">SOURCE</th><th rowspan="2">TYPE</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th colspan="3">SURVEY</th><th colspan="5">SITAC 1</th><th colspan="5">SITAC 2</th><th colspan="3">MATERIAL</th><th colspan="3">DELIVERY</th><th colspan="10">CME</th><th rowspan="2">TOTAL CAPEX</th><th colspan="4">INVESTMENT</th><th rowspan="2">ESTIMATED IRR</th><th rowspan="2">FEASIBILITY</th><th rowspan="2">REVIEW</th></tr>
+    <tr><th rowspan="2">#</th><th rowspan="2" class="sticky-1"> </th><th rowspan="2" class="sticky-2">SITE</th><th rowspan="2" class="sticky-3">TARGET TENANT</th><th rowspan="2">STATUS</th><th rowspan="2">SOURCE</th><th rowspan="2">TYPE</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th colspan="3">SURVEY</th><th colspan="5">SITAC 1</th><th colspan="5">SITAC 2</th><th colspan="3">MATERIAL</th><th colspan="3">DELIVERY</th><th colspan="10">CME</th><th rowspan="2">TOTAL CAPEX</th><th colspan="4">INVESTMENT</th><th rowspan="2">ESTIMATED IRR</th><th rowspan="2">FEASIBILITY</th><th rowspan="2">REVIEW</th></tr>
     <tr><th>DISTANCE</th><th>TOWER TYPE</th><th>HEIGHT</th><th>EXISTING TENANTS</th><th>TARGET TENANT SIGNAL</th><th>NEED STR</th><th>EST. REINFORCEMENT</th><th>SDA AVAILABLE</th><th>SES / DELIVERY</th><th>COMCASE HISTORY</th><th>RED ZONE</th><th>ACCESS DIFFICULTY</th><th>ROADHEAD DISTANCE</th><th>EST. TO ON AIR</th><th>REINFORCEMENT PROB.</th><th>STRUCTURAL UTILIZATION</th><th>PHYSICAL SES PROB.</th><th>SIS</th><th>SES</th><th>RERUNNING SDA</th><th>SEWA LAHAN</th><th>IZIN WARGA</th><th>REKOM LURAH</th><th>REKOM CAMAT</th><th>JASA SITAC</th><th>PBG</th><th>SLF</th><th>RETRIBUSI</th><th>PBB</th><th>JASA PERIZINAN</th><th>TOWER</th><th>FENCE &amp; YARD</th><th>MOUNTING</th><th>FACTORY → PORT</th><th>LANGSIR / LOCAL HAULAGE</th><th>PORT → SITE</th><th>STR · MATERIAL STR</th><th>PONDASI TOWER · MATERIAL</th><th>PONDASI RBS · MATERIAL</th><th>APD PONDASI RBS</th><th>GROUNDING</th><th>ELECTRICAL</th><th>TRANSFORMER</th><th>PLN CONNECTION</th><th>JASA CME</th><th>JASA ERECTION</th><th>EXISTING NBV</th><th>EXISTING IRR</th><th>ESTIMATED CAPEX</th><th>INVESTMENT BASE</th></tr></thead><tbody>`+
     rows.map((r,i)=>{
       if(String(r.decision||'').toUpperCase()==='ERROR')return `<tr class="error-row"><td class="expand-cell sticky-1">—</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell" colspan="58"><span class="status-pill bad">ERROR</span> <span>${bulkEsc(r.error||'Analysis failed')}</span></td></tr>`;
@@ -2019,10 +2220,11 @@ window.pmnoMsRunBulk=async function(){
   if(!m){alert('Meeting belum dipilih.');return;}
   try{
     const rows=await window.pmnoPersistence.meetingSitesWithProjectSites(m.id);
+    rows.sort((a,b)=>(Number(a.display_order)||0)-(Number(b.display_order)||0));
     if(!rows.length){alert('Belum ada site pada meeting ini. Tambahkan site terlebih dahulu.');return;}
     bulkState.inputs=rows.map(x=>{
       const p=x.project_site||{};
-      return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id};
+      return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id,meeting_display_order:Number(x.display_order)||0};
     }).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
     bulkState.results=[];bulkState.reviewFilter='ALL';
     bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId:m.id,meeting:m};
