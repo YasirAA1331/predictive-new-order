@@ -1407,29 +1407,14 @@ function bindCandidateSelection(){
     if(c)selectCandidateUnified(c);
   });
 }
-function updateFallback(d){const design=d?.raw?.predictive_design||d?.raw?.new_site?.design||{};$('fallbackHeight').textContent=design.recommended_height_m?num(design.recommended_height_m).toFixed(0)+' m':'—';const land=design.recommended_land_area_m2?num(design.recommended_land_area_m2).toFixed(0)+' m²':'Land —';const b2s=d?.raw?.new_site?.irr;$('fallbackLand').textContent=`${land} · IRR ${b2s?num(b2s).toFixed(2)+'%':'—'}`}
-async function runDecision(payload){return rpc('pmno_decision',payload)}
-async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};state.recommendedId=enrichedRecommended?.site_id||null;const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)await selectCandidate(enrichedRecommended);else{updateDetail({recommended:enrichedRecommended,final_decision:normalized.raw?.final_decision,raw:normalized.raw});if(String(normalized.raw?.final_decision||'').toUpperCase()==='B2S')await loadB2SIntelligence();}$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
-catch(e){showError('PMNO Engine belum dapat diakses. '+e.message+' Pastikan API function public.pmno_decision sudah ter-deploy.');}
-finally{setLoading(false)}}
-let analysisTimer;function scheduleAnalysis(){clearTimeout(analysisTimer);analysisTimer=setTimeout(loadAnalysis,450)}
-$('analyze').addEventListener('click',loadAnalysis);$('tenant').addEventListener('change',()=>{state.tenant=$('tenant').value;scheduleAnalysis()});$('radius').addEventListener('change',()=>{state.radius=num($('radius').value);$('radiusText').textContent=(state.radius/1000)+' km';if(radiusCircle)radiusCircle.setRadius(state.radius);scheduleAnalysis()});
-document.querySelectorAll('.mobile-nav button').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.mobile-nav button').forEach(b=>b.classList.toggle('active',b===btn));const target=btn.dataset.target;const el=target==='input'?document.querySelector('.input-panel'):target==='map'?document.querySelector('.map-stage'):document.querySelector('.detail-panel');el?.scrollIntoView({behavior:'smooth',block:'start'});setTimeout(()=>map.invalidateSize({animate:false}),250)}));
-function installResize(){const stage=document.querySelector('.map-stage');if('ResizeObserver'in window){resizeObserver=new ResizeObserver(()=>requestAnimationFrame(()=>map.invalidateSize({animate:false})));resizeObserver.observe(stage)}window.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize({animate:false}),100),{passive:true});window.addEventListener('orientationchange',()=>setTimeout(()=>map.invalidateSize({animate:false}),250),{passive:true});if(window.visualViewport)window.visualViewport.addEventListener('resize',()=>setTimeout(()=>map.invalidateSize({animate:false}),100),{passive:true})}
-initMap();installResize();
-async function pmnoLoadRouteContext(){
-  const q=new URLSearchParams(location.search||'');
-  const lat=q.get('lat'),lon=q.get('lon'),tenant=q.get('target_tenant'),radius=q.get('radius');
-  if(lat!==null && lon!==null){$('lat').value=lat;$('lon').value=lon;}
-  if(radius!==null && $('radius')){$('radius').value=radius;$('radiusText').textContent=(num(radius,3000)/1000)+' km';}
-  if(tenant){state.tenant=tenant; const sel=$('tenant'); if(sel && [...sel.options].some(o=>o.value===tenant)) sel.value=tenant;}
-  const candidate=q.get('candidate');
-  try{await loadAnalysis();
-    if(candidate){
-      if(String(candidate).toUpperCase()==='B2S') await selectB2S(false);
-      else {const found=state.decision?.rows?.find(x=>String(x.site_id)===String(candidate)); if(found) selectCandidate(found);}
-    }
-  }catch(e){}
+function updateFallback(d){
+  const design=d?.raw?.predictive_design||d?.raw?.new_site?.design||{};
+  const h=$('fallbackHeight'), l=$('fallbackLand');
+  const height=design.recommended_height_m!=null?num(design.recommended_height_m).toFixed(0)+' m':'—';
+  const land=design.recommended_land_area_m2!=null?num(design.recommended_land_area_m2).toFixed(0)+' m²':'Land —';
+  const b2s=d?.raw?.new_site?.irr;
+  if(h)h.textContent=height;
+  if(l)l.textContent=`${land} · IRR ${b2s!=null?num(b2s).toFixed(2)+'%':'—'}`;
 }
 loadTenants().then(pmnoLoadRouteContext);
 </script>
@@ -1898,28 +1883,91 @@ window.pmnoBulkReview=async function(rowIndex,status){
 
 window.pmnoBulkBuildFullSnapshot=function(r){
   const m=bulkSingleSiteMetrics(r);
-  return {
-    site_id:r.site_id,site_name:r.site_name,target_tenant:r.tenant,
-    candidate_site_id:r.candidate_id,candidate_site_name:r.candidate_name,
-    decision:r.decision,type:m.isB2S?'B2S':'COLLO',
-    distance_km:m.distance!=null?bulkNum(m.distance):null,
-    tower_type:m.tower,tower_height_m:m.height,existing_tenant_count:m.isB2S?null:m.tenants,
-    target_tenant_signal:m.signal,need_str:m.needStr,reinforcement:m.reinforcement,
-    sda_available:m.sda,sda_documents:m.sdaDocuments||[],ses_delivery:m.ses,
-    comcase_history:m.comcase,red_zone:m.red,access_difficulty:m.access,
-    roadhead_distance:m.road,estimated_to_on_air:m.days,
-    reinforcement_probability:m.reinfProb,structural_utilization:m.structural,physical_ses_probability:m.physical,
-    cost_breakdown:m.costBreakdown,total_capex:m.totalCost,
-    existing_nbv:m.existingNbv,existing_irr:m.existingIrr,estimated_capex:m.estCapex,
-    investment_base:m.estNbv,estimated_irr:m.estIrr!=null?m.estIrr*100:null,
-    feasibility:m.feasibility,investment_decision:m.invStatus,
-    b2s_design:m.isB2S?(r.b2s_design||null):null,
-    b2s_land_type:m.isB2S?(r.b2s_land_type||null):null,
-    b2s_land_area_m2:m.isB2S?(r.land_area_m2||null):null,
-    b2s_npv:m.isB2S?m.npv:null,
+  const c=m.costBreakdown||{};
+  const moneyValue=(v)=>v==null?'—':bulkNum(v);
+  const percentValue=(v)=>v==null?'—':bulkNum(v);
+  const snapshot={
+    // Identity / meeting context
+    site_id:r.site_id,site_name:r.site_name||null,target_tenant:r.tenant,
+    project_site_id:r.project_site_id||null,meeting_site_id:r.meeting_site_id||null,
     meeting_id:bulkState.meetingContext?.meetingId||null,
+    meeting_source:r.meeting_source||'NEW',
+    review_status:'APPROVED',
+
+    // Exact Bulk display groups
+    candidate_profile:{
+      candidate:m.isB2S?'PREDICTIVE NEW SITE':(r.candidate_id||m.rec?.site_id||'—'),
+      distance:m.distance,tower_type:m.tower,height:m.height!=null?bulkNum(m.height):null,
+      existing_tenants:m.isB2S?'—':m.tenants,target_tenant_signal:m.signal
+    },
+    engineering_delivery:{
+      need_str:m.needStr,estimated_reinforcement:m.reinforcement,
+      sda_available:m.sda,ses_delivery:m.ses,comcase_history:m.comcase,
+      red_zone:m.red,access_difficulty:m.access,roadhead_distance:m.road,
+      estimated_to_on_air:m.days,reinforcement_probability:m.reinfProb,
+      structural_utilization:m.structural,physical_ses_probability:m.physical
+    },
+    survey:{
+      sis:moneyValue(c.survey_sis),ses:moneyValue(c.survey_ses),
+      rerunning_sda:moneyValue(c.survey_rerunning_sda)
+    },
+    sitac:{
+      sitac1_sewa_lahan:moneyValue(c.sitac1_sewa_lahan),
+      sitac1_izin_warga:moneyValue(c.sitac1_izin_warga),
+      sitac1_rekom_lurah:moneyValue(c.sitac1_rekom_lurah),
+      sitac1_rekom_camat:moneyValue(c.sitac1_rekom_camat),
+      sitac1_jasa_sitac:moneyValue(c.sitac1_jasa_sitac),
+      sitac2_pbg:moneyValue(c.sitac2_pbg),sitac2_slf:moneyValue(c.sitac2_slf),
+      sitac2_retribusi:moneyValue(c.sitac2_retribusi),sitac2_pbb:moneyValue(c.sitac2_pbb),
+      sitac2_jasa_perizinan:moneyValue(c.sitac2_jasa_perizinan)
+    },
+    material:{
+      tower:moneyValue(c.material_tower),fence_yard:moneyValue(c.material_fence),
+      mounting:moneyValue(c.material_mounting)
+    },
+    delivery:{
+      factory_to_port:moneyValue(c.delivery_factory_port),
+      langsir_local_haulage:moneyValue(c.delivery_langsir),
+      port_to_site:moneyValue(c.delivery_port_site)
+    },
+    cme:{
+      str_material:moneyValue(c.cme_str_material),
+      foundation_tower_material:moneyValue(c.cme_foundation_tower),
+      foundation_rbs_material:moneyValue(c.cme_foundation_rbs),
+      apd_foundation_rbs:moneyValue(c.cme_rbs_apd),
+      grounding:moneyValue(c.cme_grounding),electrical:moneyValue(c.cme_electrical),
+      transformer:moneyValue(c.cme_transformer),pln_connection:moneyValue(c.cme_pln),
+      jasa_cme:moneyValue(c.cme_jasa_cme),jasa_erection:moneyValue(c.cme_erection)
+    },
+    total_capex:moneyValue(m.totalCost),
+    investment:{
+      existing_nbv:m.existingNbv==null?'—':moneyValue(m.existingNbv),
+      existing_irr:m.existingIrr==null?'—':percentValue(m.existingIrr),
+      estimated_capex:m.estCapex==null?'—':moneyValue(m.estCapex),
+      investment_base:m.isB2S?'—':(m.estNbv==null?'—':moneyValue(m.estNbv))
+    },
+    estimated_irr:m.isB2S?(m.estIrr==null?'—':percentValue(m.estIrr*100)):(m.estIrr==null?'—':percentValue(m.estIrr*100)),
+    feasibility:m.feasibility,
+
+    // B2S-only decision context; COLLO values remain explicitly blank/—
+    b2s:m.isB2S?{
+      tower_height_m:m.height==null?null:bulkNum(m.height),tower_type:m.tower,
+      land_type:m.landType,land_area_m2:m.landArea,density_class:m.density,
+      network_gap_score:m.networkGap,initial_lease_years:m.initialLease,
+      initial_land_lease_annual:m.initialLandLease,renewal_cost_annual:m.renewalCost,
+      renewal_increase_pct:m.renewalIncrease,npv:m.npv,investment_decision:m.invStatus
+    }:null,
+    existing:{
+      nbv:m.isB2S?null:m.existingNbv,irr:m.isB2S?null:m.existingIrr
+    },
+
+    // Detailed DB-generated CAPEX is retained for auditability, while display groups above
+    // remain the stable historical snapshot surface.
+    capex_items:Array.isArray(r.capex_items)?r.capex_items:(Array.isArray(r.raw?.b2s_scenario?.capex_items)?r.raw.b2s_scenario.capex_items:[]),
+    source_engine:m.isB2S?'app.build_capex_shopping_list_option + app.calculate_scenario_irr':'pmno_candidate_detail_by_site_id',
     snapshot_generated_at:new Date().toISOString()
   };
+  return snapshot;
 };
 
 bulk$('bulk-file').onchange=async e=>{try{bulk$('bulk-error').style.display='none';const raw=await parseFile(e.target.files[0]);bulkState.inputs=raw.map(normalizeInput).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);bulkState.results=[];bulk$('bulk-analyze').disabled=!bulkState.inputs.length;render();if(raw.length&&!bulkState.inputs.length)throw new Error('Tidak ada row valid. Required: Site ID, Latitude, Longitude, Target Tenant.')}catch(err){bulk$('bulk-error').textContent=err.message;bulk$('bulk-error').style.display='block'}};
