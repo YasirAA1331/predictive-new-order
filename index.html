@@ -175,6 +175,69 @@ body.bulk-page .mobile-nav{
 </style>
 </head>
 <body>
+<style id="pmno-project-ui-css">
+.pmno-project-shell{display:none;min-height:100vh;background:#071525;color:#eaf2ff;padding:24px}
+.pmno-project-shell.active{display:block}
+.pmno-project-wrap{max-width:1180px;margin:0 auto}
+.pmno-project-top{display:flex;justify-content:space-between;gap:16px;align-items:center;margin-bottom:22px}
+.pmno-project-title{font-size:24px;font-weight:800}
+.pmno-project-sub{font-size:12px;color:#91a4bd;margin-top:4px}
+.pmno-project-btn{border:1px solid #28415e;background:#10243b;color:#eaf2ff;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}
+.pmno-project-btn.primary{background:#1b73e8;border-color:#1b73e8}
+.pmno-project-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:14px}
+.pmno-project-card{background:#0d1e32;border:1px solid #203852;border-radius:14px;padding:17px}
+.pmno-project-card h3{margin:0 0 7px;font-size:15px}
+.pmno-project-meta{color:#91a4bd;font-size:12px;line-height:1.55}
+.pmno-project-empty{border:1px dashed #29425e;border-radius:14px;padding:36px;text-align:center;color:#91a4bd}
+.pmno-project-form{display:none;background:#0d1e32;border:1px solid #203852;border-radius:14px;padding:18px;margin-bottom:18px}
+.pmno-project-form.active{display:block}
+.pmno-project-field{margin-bottom:13px}
+.pmno-project-field label{display:block;font-size:11px;color:#91a4bd;margin-bottom:6px}
+.pmno-project-field input,.pmno-project-field textarea{width:100%;box-sizing:border-box;background:#081728;border:1px solid #29425e;border-radius:8px;color:#eaf2ff;padding:10px;font:inherit}
+.pmno-project-field textarea{min-height:80px;resize:vertical}
+.pmno-project-actions{display:flex;justify-content:flex-end;gap:8px}
+.pmno-project-nav{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.pmno-project-back{margin-bottom:14px}
+@media(max-width:640px){.pmno-project-shell{padding:14px}.pmno-project-top{align-items:flex-start;flex-direction:column}.pmno-project-btn{width:100%}.pmno-project-actions{flex-direction:column}.pmno-project-actions .pmno-project-btn{width:100%}}
+</style>
+
+<div id="pmnoProjectShell" class="pmno-project-shell">
+  <div class="pmno-project-wrap">
+    <div class="pmno-project-nav">
+      <button class="pmno-project-btn" onclick="pmnoProjectBackToApp()">← PMNO Analyzer</button>
+    </div>
+
+    <div class="pmno-project-top">
+      <div>
+        <div class="pmno-project-title">PROJECTS</div>
+        <div class="pmno-project-sub">Manage customer projects and meeting sessions</div>
+      </div>
+      <button class="pmno-project-btn primary" onclick="pmnoCreateProject()">＋ NEW PROJECT</button>
+    </div>
+
+    <div id="pmnoProjectForm" class="pmno-project-form">
+      <div class="pmno-project-field">
+        <label>Customer</label>
+        <input id="pmnoProjectCustomer" autocomplete="off">
+      </div>
+      <div class="pmno-project-field">
+        <label>Project Name</label>
+        <input id="pmnoProjectName" autocomplete="off">
+      </div>
+      <div class="pmno-project-field">
+        <label>Description</label>
+        <textarea id="pmnoProjectDescription"></textarea>
+      </div>
+      <div class="pmno-project-actions">
+        <button class="pmno-project-btn" onclick="pmnoCancelProject()">CANCEL</button>
+        <button class="pmno-project-btn primary" onclick="pmnoSaveProject()">CREATE PROJECT</button>
+      </div>
+    </div>
+
+    <div id="pmnoProjectList" class="pmno-project-grid"></div>
+  </div>
+</div>
+
 <div class="app">
 <header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
 <main class="workspace">
@@ -519,6 +582,120 @@ window.pmnoPersistence = (() => {
     }
   };
 })();
+
+
+/* =========================================================
+   PMNO PROJECT MANAGEMENT UI
+   UI/state layer only. Does not alter PMNO calculation functions.
+   ========================================================= */
+window.pmnoProjectState = {
+  projectId: null,
+  project: null,
+  projects: []
+};
+
+window.pmnoCreateProject = function(){
+  const form = document.getElementById('pmnoProjectForm');
+  if(form) form.classList.add('active');
+  const customer = document.getElementById('pmnoProjectCustomer');
+  if(customer) customer.focus();
+};
+
+window.pmnoCancelProject = function(){
+  const form = document.getElementById('pmnoProjectForm');
+  if(form) form.classList.remove('active');
+};
+
+window.pmnoSaveProject = async function(){
+  const customer = document.getElementById('pmnoProjectCustomer')?.value.trim();
+  const projectName = document.getElementById('pmnoProjectName')?.value.trim();
+  const description = document.getElementById('pmnoProjectDescription')?.value.trim() || null;
+  if(!customer || !projectName){
+    alert('Customer dan Project Name wajib diisi.');
+    return;
+  }
+  try{
+    const rows = await window.pmnoPersistence.projectCreate({
+      customer_name: customer,
+      project_name: projectName,
+      description
+    });
+    const project = Array.isArray(rows) ? rows[0] : rows;
+    if(!project?.id) throw new Error('Project berhasil dikirim tetapi ID tidak diterima.');
+    window.pmnoProjectState.projectId = project.id;
+    window.pmnoProjectState.project = project;
+    window.pmnoCancelProject();
+    await window.pmnoRenderProjectList();
+  }catch(err){
+    console.error(err);
+    alert('Gagal membuat project: ' + (err?.message || err));
+  }
+};
+
+window.pmnoOpenProject = async function(projectId){
+  try{
+    const project = await window.pmnoPersistence.projectLoad(projectId);
+    if(!project) throw new Error('Project tidak ditemukan.');
+    window.pmnoProjectState.projectId = project.id;
+    window.pmnoProjectState.project = project;
+    // Meeting management is Task 3; this keeps the selected project ready.
+    await window.pmnoRenderProjectList();
+  }catch(err){
+    console.error(err);
+    alert('Gagal membuka project: ' + (err?.message || err));
+  }
+};
+
+window.pmnoRenderProjectList = async function(){
+  const list = document.getElementById('pmnoProjectList');
+  if(!list) return;
+  const selected = window.pmnoProjectState.project;
+  if(selected){
+    list.innerHTML = `
+      <div class="pmno-project-card">
+        <h3>${pmnoProjectEsc(selected.project_name)}</h3>
+        <div class="pmno-project-meta">
+          <strong>Customer:</strong> ${pmnoProjectEsc(selected.customer_name)}<br>
+          ${pmnoProjectEsc(selected.description || 'No description')}<br><br>
+          <button class="pmno-project-btn primary" onclick="pmnoProjectOpenAnalyzer()">OPEN BULK ANALYZER</button>
+        </div>
+      </div>`;
+    return;
+  }
+  list.innerHTML = '<div class="pmno-project-empty">No project selected. Create a new project to start.</div>';
+};
+
+window.pmnoProjectEsc = function(value){
+  return String(value ?? '').replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+};
+
+window.pmnoProjectOpenAnalyzer = function(){
+  const shell = document.getElementById('pmnoProjectShell');
+  if(shell) shell.classList.remove('active');
+  const app = document.getElementById('app');
+  if(app) app.style.display = '';
+};
+
+window.pmnoProjectBackToApp = function(){
+  const shell = document.getElementById('pmnoProjectShell');
+  if(shell) shell.classList.remove('active');
+  const app = document.getElementById('app');
+  if(app) app.style.display = '';
+};
+
+window.pmnoProjectShow = async function(){
+  const shell = document.getElementById('pmnoProjectShell');
+  const app = document.getElementById('app');
+  if(!shell) return;
+  if(app) app.style.display = 'none';
+  shell.classList.add('active');
+  window.pmnoProjectState.projectId = null;
+  window.pmnoProjectState.project = null;
+  await window.pmnoRenderProjectList();
+};
+
 
 async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
 async function loadTenants(){try{const data=await rpc('pmno_tenants',{});if(Array.isArray(data)){const sel=$('tenant');const current=state.tenant;sel.innerHTML=data.map(t=>`<option value="${esc(t.code)}">${esc(t.name||t.code)}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===current)?current:(sel.options[0]?.value||'IOH');state.tenant=sel.value}}catch(e){/* keep fallback tenant list */}}
