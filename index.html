@@ -53,6 +53,55 @@
 .candidate-row[data-option="B2S"] .candidate-right b{color:var(--amber)}
 .candidate-row[data-option="B2S"]:hover{border-color:#52718a;background:#0d2132}
 </style>
+
+<style id="pmno-meeting-sites-css">
+.pmno-ms-shell{display:none;min-height:100vh;background:#071525;color:#eaf2ff;padding:24px}
+.pmno-ms-shell.active{display:block}.pmno-ms-wrap{max-width:1180px;margin:auto}
+.pmno-ms-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin:16px 0}
+.pmno-ms-title{font-size:22px;font-weight:800}.pmno-ms-sub{font-size:12px;color:#91a4bd;margin-top:5px}
+.pmno-ms-btn{border:1px solid #28415e;background:#10243b;color:#eaf2ff;border-radius:9px;padding:9px 13px;font-weight:700;cursor:pointer}
+.pmno-ms-btn.primary{background:#1b73e8;border-color:#1b73e8}.pmno-ms-btn.ghost{background:transparent}
+.pmno-ms-toolbar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px}
+.pmno-ms-filter{border:1px solid #28415e;background:#0d1e32;color:#cfe0f5;border-radius:999px;padding:7px 12px;font-size:11px;font-weight:700;cursor:pointer}
+.pmno-ms-filter.active{background:#1b73e8;border-color:#1b73e8;color:white}
+.pmno-ms-panel{background:#0d1e32;border:1px solid #203852;border-radius:13px;padding:15px;margin-bottom:14px}
+.pmno-ms-addgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:9px}
+.pmno-ms-addgrid input{width:100%;box-sizing:border-box;background:#081728;border:1px solid #29425e;border-radius:8px;color:#eaf2ff;padding:9px}
+.pmno-ms-table{width:100%;border-collapse:collapse;font-size:11px}.pmno-ms-table th,.pmno-ms-table td{padding:9px;border-bottom:1px solid #1d344c;text-align:left;vertical-align:middle}
+.pmno-ms-table th{color:#91a4bd;font-size:10px;text-transform:uppercase}.pmno-ms-badge{display:inline-block;padding:3px 7px;border-radius:999px;font-size:9px;font-weight:800}
+.pmno-ms-badge.new{background:#123b52;color:#7ddcff}.pmno-ms-badge.carry{background:#3b2f12;color:#ffd76a}
+.pmno-ms-status{color:#91a4bd}.pmno-ms-empty{text-align:center;color:#91a4bd;padding:30px}
+@media(max-width:760px){.pmno-ms-shell{padding:14px}.pmno-ms-head{flex-direction:column}.pmno-ms-head .pmno-ms-btn{width:100%}.pmno-ms-addgrid{grid-template-columns:1fr 1fr}.pmno-ms-table{min-width:760px}.pmno-ms-scroll{overflow:auto}}
+@media(max-width:480px){.pmno-ms-addgrid{grid-template-columns:1fr}}
+</style>
+<div id="pmnoMeetingSitesShell" class="pmno-ms-shell">
+  <div class="pmno-ms-wrap">
+    <button class="pmno-ms-btn ghost" onclick="pmnoMeetingSitesBack()">← MEETINGS</button>
+    <div class="pmno-ms-head">
+      <div><div id="pmnoMsTitle" class="pmno-ms-title">MEETING</div><div id="pmnoMsSub" class="pmno-ms-sub"></div></div>
+      <button class="pmno-ms-btn primary" onclick="pmnoMsAddPanel()">＋ ADD SITES</button>
+    </div>
+    <div id="pmnoMsAddPanel" class="pmno-ms-panel" style="display:none">
+      <div style="font-weight:800;margin-bottom:10px">ADD NEW SITES</div>
+      <div class="pmno-ms-addgrid">
+        <input id="pmnoMsSiteId" placeholder="Site ID *"><input id="pmnoMsSiteName" placeholder="Site Name">
+        <input id="pmnoMsLat" placeholder="Latitude *" inputmode="decimal"><input id="pmnoMsLon" placeholder="Longitude *" inputmode="decimal">
+        <input id="pmnoMsTenant" placeholder="Target Tenant *">
+      </div>
+      <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:10px">
+        <button class="pmno-ms-btn" onclick="pmnoMsAddPanel(false)">CANCEL</button>
+        <button class="pmno-ms-btn primary" onclick="pmnoMsSaveSite()">ADD SITE</button>
+      </div>
+    </div>
+    <div class="pmno-ms-toolbar">
+      <button class="pmno-ms-filter active" data-ms-filter="ALL" onclick="pmnoMsFilter('ALL')">ALL</button>
+      <button class="pmno-ms-filter" data-ms-filter="NOT REVIEWED" onclick="pmnoMsFilter('NOT REVIEWED')">NOT REVIEWED</button>
+      <button class="pmno-ms-filter" data-ms-filter="FOLLOW UP" onclick="pmnoMsFilter('FOLLOW UP')">FOLLOW UP</button>
+      <button class="pmno-ms-filter" data-ms-filter="CARRY OVER" onclick="pmnoMsFilter('CARRY OVER')">CARRY OVER</button>
+    </div>
+    <div class="pmno-ms-panel pmno-ms-scroll"><div id="pmnoMsTable"></div></div>
+  </div>
+</div>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script><style>
 
 :root{--bg:#06111f;--panel:#0a1727;--panel2:#0d1d31;--line:#20364f;--text:#edf5fb;--muted:#7e93a8;--cyan:#35c8ff;--green:#43e0a0;--red:#ff5570;--amber:#f5bf5c}
@@ -545,7 +594,16 @@ window.pmnoPersistence = (() => {
       return Array.isArray(rows) ? (rows[0] || null) : rows;
     },
 
-    async meetingsLoad(projectId){
+    async meetingSitesWithProjectSites(meetingId){
+    const rows=await rest('pmno_meeting_sites?meeting_id=eq.'+encodeURIComponent(meetingId)+'&order=display_order.asc','GET');
+    const out=[];
+    for(const r of (rows||[])){
+      const ps=await rest('pmno_project_sites?id=eq.'+encodeURIComponent(r.project_site_id),'GET');
+      out.push({...r,project_site:Array.isArray(ps)?ps[0]:null});
+    }
+    return out;
+  },
+  async meetingsLoad(projectId){
     return await rest('pmno_meetings?project_id=eq.'+encodeURIComponent(projectId)+'&order=meeting_no.asc','GET');
   },
   async projectSiteUpsert(projectId, site) {
@@ -854,6 +912,65 @@ window.pmnoMeetingShow=async function(projectId){
 window.pmnoMeetingBackToProjects=async function(){
   document.getElementById('pmnoMeetingShell')?.classList.remove('active');
   await window.pmnoProjectShow();
+};
+
+
+/* PMNO TASK 4 — MEETING SITE SELECTION */
+window.pmnoMsState={meeting:null,rows:[],filter:'ALL'};
+
+window.pmnoMsOpen=function(meeting){
+  window.pmnoMsState.meeting=meeting; window.pmnoMsState.filter='ALL';
+  document.getElementById('pmnoMeetingShell')?.classList.remove('active');
+  document.getElementById('pmnoMeetingSitesShell')?.classList.add('active');
+  window.pmnoMsLoad();
+};
+window.pmnoMsLoad=async function(){
+  const m=window.pmnoMsState.meeting;if(!m)return;
+  try{
+    window.pmnoMsState.rows=await window.pmnoPersistence.meetingSitesWithProjectSites(m.id);
+  }catch(e){console.error(e);alert('Gagal memuat site meeting: '+(e?.message||e));window.pmnoMsState.rows=[];}
+  window.pmnoMsRender();
+};
+window.pmnoMsRender=function(){
+  const m=window.pmnoMsState.meeting, rows=window.pmnoMsState.rows||[], f=window.pmnoMsState.filter;
+  const p=document.getElementById('pmnoMsTitle'), sub=document.getElementById('pmnoMsSub');
+  if(p)p.textContent=m?`Meeting #${m.meeting_no} — ${m.meeting_title||''}`:'MEETING';
+  if(sub)sub.textContent=m?.meeting_date?`Date: ${m.meeting_date}`:'';
+  document.querySelectorAll('[data-ms-filter]').forEach(b=>b.classList.toggle('active',b.dataset.msFilter===f));
+  let view=rows;
+  if(f==='CARRY OVER') view=rows.filter(x=>x.source==='CARRY_OVER');
+  else if(f!=='ALL') view=rows.filter(x=>(x.project_site?.current_status||'NOT REVIEWED')===f);
+  const t=document.getElementById('pmnoMsTable');if(!t)return;
+  if(!view.length){t.innerHTML='<div class="pmno-ms-empty">Belum ada site pada filter ini.</div>';return;}
+  t.innerHTML=`<table class="pmno-ms-table"><thead><tr><th>#</th><th>Site</th><th>Tenant</th><th>Source</th><th>Status</th><th>Candidate</th></tr></thead><tbody>`+
+    view.map((x,i)=>{const p=x.project_site||{};return `<tr><td>${i+1}</td><td><b>${pmnoProjectEsc(p.site_id||'')}</b><br><span class="pmno-ms-status">${pmnoProjectEsc(p.site_name||'')}</span></td><td>${pmnoProjectEsc(p.target_tenant||'')}</td><td><span class="pmno-ms-badge ${x.source==='CARRY_OVER'?'carry':'new'}">${x.source||'NEW'}</span></td><td>${pmnoProjectEsc(p.current_status||'NOT REVIEWED')}</td><td>${pmnoProjectEsc(p.selected_candidate_id||'Candidate #1')}</td></tr>`}).join('')+
+    '</tbody></table>';
+};
+window.pmnoMsFilter=function(f){window.pmnoMsState.filter=f;window.pmnoMsRender();};
+window.pmnoMsAddPanel=function(show=true){const e=document.getElementById('pmnoMsAddPanel');if(e)e.style.display=show?'block':'none';};
+window.pmnoMsSaveSite=async function(){
+  const m=window.pmnoMsState.meeting;if(!m)return;
+  const v=id=>document.getElementById(id)?.value.trim();
+  const site={site_id:v('pmnoMsSiteId'),site_name:v('pmnoMsSiteName')||null,latitude:Number(v('pmnoMsLat')),longitude:Number(v('pmnoMsLon')),target_tenant:v('pmnoMsTenant')};
+  if(!site.site_id||!site.target_tenant||!Number.isFinite(site.latitude)||!Number.isFinite(site.longitude)){alert('Site ID, Latitude, Longitude, dan Target Tenant wajib valid.');return;}
+  try{
+    const psRows=await window.pmnoPersistence.projectSiteUpsert(window.pmnoMeetingState.projectId,site);
+    const ps=Array.isArray(psRows)?psRows[0]:psRows;
+    if(!ps?.id)throw new Error('Project Site ID tidak diterima.');
+    const order=(window.pmnoMsState.rows||[]).length+1;
+    await window.pmnoPersistence.meetingSiteUpsert(m.id,ps.id,'NEW',order);
+    ['pmnoMsSiteId','pmnoMsSiteName','pmnoMsLat','pmnoMsLon','pmnoMsTenant'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='';});
+    window.pmnoMsAddPanel(false);await window.pmnoMsLoad();
+  }catch(e){console.error(e);alert('Gagal menambahkan site: '+(e?.message||e));}
+};
+window.pmnoOpenMeeting=function(meetingId){
+  const m=(window.pmnoMeetingState.meetings||[]).find(x=>x.id===meetingId);if(!m)return;
+  window.pmnoMeetingState.selectedMeeting=m;window.pmnoMsOpen(m);
+};
+window.pmnoMeetingSitesBack=function(){
+  document.getElementById('pmnoMeetingSitesShell')?.classList.remove('active');
+  document.getElementById('pmnoMeetingShell')?.classList.add('active');
+  window.pmnoRenderMeetings();
 };
 
 async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
