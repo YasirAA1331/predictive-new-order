@@ -369,6 +369,157 @@ function showB2SPopup(){
 function closeMapSelection(clearSelection=true){if(selectedCandidatePopup){selectedCandidatePopup.remove();selectedCandidatePopup=null}if(selectedExistingPopup){selectedExistingPopup.remove();selectedExistingPopup=null}if(b2sPopup){b2sPopup.remove();b2sPopup=null}if(clearSelection){state.selectedId=null;document.querySelectorAll('.candidate-row').forEach(x=>x.classList.remove('active'))}}
 function toggleBasemap(){state.satellite=!state.satellite;if(state.satellite){map.removeLayer(streetLayer);satelliteLayer.addTo(map);$('baseMapToggle').textContent='SATELLITE'}else{map.removeLayer(satelliteLayer);streetLayer.addTo(map);$('baseMapToggle').textContent='MAP'};setTimeout(()=>map.invalidateSize({animate:false}),40)}
 // calculate_pmno_decision is exposed through public.pmno_decision.
+
+/* =========================================================
+   PMNO PROJECT / MEETING PERSISTENCE ADAPTER
+   Thin persistence layer only — PMNO calculation engines remain unchanged.
+   ========================================================= */
+window.pmnoPersistence = (() => {
+  const base = SUPABASE_URL + '/rest/v1';
+  const headers = () => apiHeaders();
+
+  async function request(path, options = {}) {
+    const res = await fetch(base + path, {
+      ...options,
+      headers: {...headers(), ...(options.headers || {})}
+    });
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(`PMNO persistence HTTP ${res.status}: ${text.slice(0, 300)}`);
+    }
+    if (res.status === 204) return null;
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  const json = (method, body, prefer = 'return=representation') => ({
+    method,
+    headers: {'Prefer': prefer},
+    body: JSON.stringify(body)
+  });
+
+  return {
+    async projectCreate(input) {
+      return request('/pmno_projects', json('POST', {
+        customer_name: String(input.customer_name || '').trim(),
+        project_name: String(input.project_name || '').trim(),
+        description: input.description == null ? null : String(input.description)
+      }));
+    },
+
+    async projectLoad(projectId) {
+      const rows = await request(`/pmno_projects?id=eq.${encodeURIComponent(projectId)}&select=*`);
+      return Array.isArray(rows) ? (rows[0] || null) : rows;
+    },
+
+    async projectSiteUpsert(projectId, site) {
+      return request('/pmno_project_sites', {
+        method: 'POST',
+        headers: {
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify({
+          project_id: projectId,
+          site_id: String(site.site_id || '').trim(),
+          site_name: site.site_name == null ? null : String(site.site_name),
+          latitude: Number(site.latitude),
+          longitude: Number(site.longitude),
+          target_tenant: site.target_tenant == null ? null : String(site.target_tenant),
+          ...(site.selected_candidate_id !== undefined
+            ? {selected_candidate_id: site.selected_candidate_id}
+            : {}),
+          ...(site.current_status !== undefined
+            ? {current_status: site.current_status}
+            : {}),
+          ...(site.current_note !== undefined
+            ? {current_note: site.current_note}
+            : {})
+        })
+      });
+    },
+
+    async meetingCreate(projectId, input) {
+      return request('/pmno_meetings', json('POST', {
+        project_id: projectId,
+        meeting_no: Number(input.meeting_no),
+        meeting_date: input.meeting_date,
+        meeting_title: String(input.meeting_title || '').trim(),
+        meeting_note: input.meeting_note == null ? null : String(input.meeting_note)
+      }));
+    },
+
+    async meetingSitesLoad(meetingId) {
+      return request(
+        `/pmno_meeting_sites?meeting_id=eq.${encodeURIComponent(meetingId)}&select=*%2Cproject_site:project_site_id(*)&order=display_order.asc`
+      );
+    },
+
+    async meetingSiteUpsert(meetingId, projectSiteId, source, displayOrder) {
+      return request('/pmno_meeting_sites', {
+        method: 'POST',
+        headers: {
+          'Prefer': 'resolution=merge-duplicates,return=representation'
+        },
+        body: JSON.stringify({
+          meeting_id: meetingId,
+          project_site_id: projectSiteId,
+          source: source === 'CARRY_OVER' ? 'CARRY_OVER' : 'NEW',
+          display_order: Number(displayOrder || 0)
+        })
+      });
+    },
+
+    async siteReviewSave(projectSiteId, meetingId, review) {
+      const patch = await request(
+        `/pmno_project_sites?id=eq.${encodeURIComponent(projectSiteId)}`,
+        {
+          method: 'PATCH',
+          headers: {'Prefer': 'return=representation'},
+          body: JSON.stringify({
+            current_status: review.status,
+            current_note: review.note == null ? null : String(review.note),
+            ...(review.selected_candidate_id !== undefined
+              ? {selected_candidate_id: review.selected_candidate_id}
+              : {})
+          })
+        }
+      );
+
+      if (review.event_type || review.status || review.note) {
+        await request('/pmno_site_history', json('POST', {
+          project_site_id: projectSiteId,
+          meeting_id: meetingId || null,
+          event_type: review.event_type || 'REVIEW_UPDATED',
+          candidate_id: review.selected_candidate_id || null,
+          status: review.status || null,
+          note: review.note == null ? null : String(review.note),
+          snapshot: review.history_snapshot || null
+        }));
+      }
+      return patch;
+    },
+
+    async approvedSnapshotCreate(projectSiteId, meetingId, candidateId, snapshot, approvedBy) {
+      const existing = await request(
+        `/pmno_approved_snapshots?project_site_id=eq.${encodeURIComponent(projectSiteId)}&select=snapshot_version&order=snapshot_version.desc&limit=1`
+      );
+      const lastVersion = Array.isArray(existing) && existing.length
+        ? Number(existing[0].snapshot_version || 0)
+        : 0;
+
+      return request('/pmno_approved_snapshots', json('POST', {
+        project_site_id: projectSiteId,
+        meeting_id: meetingId || null,
+        snapshot_version: lastVersion + 1,
+        candidate_id: candidateId || null,
+        snapshot: snapshot || {},
+        approved_at: new Date().toISOString(),
+        approved_by: approvedBy || null
+      }));
+    }
+  };
+})();
+
 async function rpc(name,body){const res=await fetch(`${SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:apiHeaders(),body:JSON.stringify(body)});if(!res.ok){const text=await res.text();throw new Error(`${name}: HTTP ${res.status} ${text.slice(0,220)}`)}return res.json()}
 async function loadTenants(){try{const data=await rpc('pmno_tenants',{});if(Array.isArray(data)){const sel=$('tenant');const current=state.tenant;sel.innerHTML=data.map(t=>`<option value="${esc(t.code)}">${esc(t.name||t.code)}</option>`).join('');sel.value=[...sel.options].some(o=>o.value===current)?current:(sel.options[0]?.value||'IOH');state.tenant=sel.value}}catch(e){/* keep fallback tenant list */}}
 function showError(msg){$('error').textContent=msg;$('error').style.display='block'}function clearError(){$('error').style.display='none'}
