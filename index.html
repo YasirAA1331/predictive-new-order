@@ -111,8 +111,26 @@ function b2sIcon(){return L.divIcon({className:'',html:`<div class="b2s-marker">
 function b2sInfoIcon(){const d=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};return L.divIcon({className:'',html:`<div class="candidate-popup b2s-popup" data-site-id="__B2S__"><button class="close" aria-label="Close">×</button><div class="kicker">PREDICTIVE NEW SITE / B2S</div><h3>${esc(state.tenant)} NEW BUILD</h3><div class="sub">Predicted at New Order location</div><div class="popup-grid"><div><span>TOWER</span><b>${esc(d.tower_type||'SST')} · ${d.recommended_height_m!=null?num(d.recommended_height_m).toFixed(0)+' m':'—'}</b></div><div><span>LAND</span><b>${d.recommended_land_area_m2!=null?num(d.recommended_land_area_m2).toFixed(0)+' m²':'—'}</b></div><div><span>DENSITY</span><b>${esc(d.density_class||'—')}</b></div><div><span>NETWORK GAP</span><b>${d.network_gap_score!=null?num(d.network_gap_score).toFixed(1):'—'}</b></div></div><div class="popup-foot"><small>Candidate #6 · Fallback</small><button>VIEW INTELLIGENCE</button></div></div>`,iconSize:[270,205],iconAnchor:[135,205]})}
 function targetLabel(){return L.divIcon({className:'',html:`<div class="target-label"><strong>NEW ORDER</strong><span>${esc(state.tenant)} TARGET</span></div>`,iconSize:[104,42],iconAnchor:[52,43]})}
 function isRiskSite(c){const raw=c?.red_zone??c?.redzone??c?.community_risk_level??c?.risk_level??c?.risk;return raw===true||String(raw??'').toUpperCase()==='YES'||String(raw??'').toUpperCase()==='HIGH'||String(raw??'').toUpperCase()==='REDZONE'}
-function candidateIcon(c,isRec,rank,selected=false,isRisk=false){const risk=!isRec&&isRisk;const stroke=isRec?'#43e0a0':risk?'#f5bf5c':'#35c8ff';const cls=isRec?'tower-rec':risk?'tower-risk':'tower-collo';return L.divIcon({className:'',html:`<div class="marker ${selected?'candidate-marker-selected':''}"><div class="tower ${cls}">${towerSvg(stroke,isRec?36:risk?25:27)}${!isRec&&rank?`<span class="rank">${rank}</span>`:''}</div></div>`,iconSize:[isRec?50:38,isRec?50:38],iconAnchor:[isRec?25:19,isRec?25:19]})}
-function existingIcon(c,isRisk=false){const risk=isRiskSite(c)||isRisk;const stroke=risk?'#f5bf5c':'#a7b5c0';const cls=risk?'tower-risk':'tower-existing';return L.divIcon({className:'',html:`<div class="marker"><div class="tower ${cls}">${towerSvg(stroke,risk?22:19)}</div></div>`,iconSize:[28,28],iconAnchor:[14,14]})}
+function mapMarkerStyle(category){const styles={
+  'recommended-collo':{stroke:'#43e0a0',border:'#43e0a0',bg:'rgba(67,224,160,.13)',shadow:'0 0 0 6px rgba(67,224,160,.06),0 0 20px rgba(67,224,160,.28)'},
+  'top5-collo':{stroke:'#35c8ff',border:'#35c8ff',bg:'rgba(53,200,255,.10)',shadow:'none'},
+  'risk-redzone':{stroke:'#f5bf5c',border:'#f5bf5c',bg:'rgba(245,191,92,.14)',shadow:'0 0 0 5px rgba(245,191,92,.07),0 0 15px rgba(245,191,92,.20)'},
+  'existing-site':{stroke:'#a7b5c0',border:'#a7b5c0',bg:'rgba(167,181,192,.10)',shadow:'none'}
+};return styles[category]||styles['existing-site']}
+function candidateIcon(c,isRec,rank,selected=false,isRisk=false){
+  const category=isRec?'recommended-collo':(isRisk?'risk-redzone':'top5-collo');
+  const st=mapMarkerStyle(category);
+  const size=isRec?46:(isRisk?30:34), svgSize=isRec?36:(isRisk?25:27);
+  const selectedCls=selected?'candidate-marker-selected':'';
+  return L.divIcon({className:'',html:`<div class="marker ${selectedCls}" data-map-category="${category}"><div class="tower" style="width:${size}px;height:${size}px;border-radius:50%;display:grid;place-items:center;border:${isRec?'2px':'1.5px'} solid ${st.border};background:${st.bg};box-shadow:${st.shadow};">${towerSvg(st.stroke,svgSize)}${!isRec&&rank?`<span class="rank">${rank}</span>`:''}</div></div>`,iconSize:[isRec?50:38,isRec?50:38],iconAnchor:[isRec?25:19,isRec?25:19]})
+}
+function existingIcon(c,isRisk=false){
+  const risk=isRiskSite(c)||isRisk;
+  const category=risk?'risk-redzone':'existing-site';
+  const st=mapMarkerStyle(category);
+  const size=risk?30:32, svgSize=risk?22:19;
+  return L.divIcon({className:'',html:`<div class="marker" data-map-category="${category}"><div class="tower" style="width:${size}px;height:${size}px;border-radius:50%;display:grid;place-items:center;border:${risk?'2px':'1px'} solid ${st.border};background:${st.bg};box-shadow:${st.shadow};">${towerSvg(st.stroke,svgSize)}</div></div>`,iconSize:[28,28],iconAnchor:[14,14]})
+}
 function distanceIcon(c,isRec,rank){return L.divIcon({className:'',html:`<div class="distance-label ${isRec?'rec':'collo'}">${isRec?'★ TOP COLLO · ':''}${(num(c.distance_m)/1000).toFixed(2)} km</div>`,iconSize:[1,1],iconAnchor:[0,0]})}
 function clusterOffset(items,index){if(items.length<=1)return [0,0];const ranked=items.filter(x=>x.rank);const priority=ranked.length?ranked:items;const centerIndex=priority.indexOf(items[index]);if(centerIndex===0)return [0,0];const others=items.filter((x,i)=>!(priority.length&&priority.indexOf(x)===0));const oi=others.indexOf(items[index]);const n=Math.max(1,others.length);const angle=(-Math.PI/2)+(oi*(2*Math.PI/n));const radius=28+Math.min(10,n*2);return [Math.round(Math.cos(angle)*radius),Math.round(Math.sin(angle)*radius)]}
 function applyMarkerDeclutter(entries){
