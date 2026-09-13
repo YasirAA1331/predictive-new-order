@@ -197,7 +197,7 @@ async function selectCandidate(c){
       p_target_tenant:state.tenant,
       p_added_device_count:7,
       p_added_load_kw:12,
-      p_annual_revenue:130000000,
+      p_annual_revenue:120000000,
       p_annual_opex_ratio:.20,
       p_horizon_years:10,
       p_revenue_growth:0,
@@ -319,19 +319,16 @@ const estCapex=displayedCapex!=null
   ? displayedCapex
   : (inv.capex_total??rec.capex_total??null);
 const targetIrr=10.73/100;
-const annualRevenue=130000000,opexRatio=.20,taxRate=.22,growthRate=0,horizonYears=10,wacc=.0873;
-const netAnnual=annualRevenue*(1-opexRatio)*(1-taxRate);
-
-/* Combined economics:
-   Existing tower remains the base case.
-   New Order contributes incremental CAPEX + incremental after-tax cash flow.
-   The same capex_items used by Cost Build-Up are used here. */
-// Backend is the single source of truth for scenario economics.
+// Backend is the single source of truth for all economic calculations.
 const backendEstimatedIrr=inv.estimated_irr??rec.estimated_irr??null;
 const estIrr=backendEstimatedIrr==null?null:(Math.abs(num(backendEstimatedIrr))>1?num(backendEstimatedIrr)/100:num(backendEstimatedIrr));
-const estNbv=existingNbv!=null&&estCapex!=null?num(existingNbv)+num(estCapex):null;
-const invStatus=existingIrr==null?'DATA REQUIRED':(estIrr==null?'CALCULATION ERROR':(estIrr>targetIrr?'FEASIBLE':Math.abs(estIrr-targetIrr)<.0005?'BORDERLINE':'NOT FEASIBLE'));
-$('investmentPanel').innerHTML=`<div class="investment-row"><div class="investment-cell"><span>EXISTING NBV</span><b>${existingNbv!=null?formatMoney(existingNbv):'—'}</b><small>Existing tower case</small></div><div class="investment-cell"><span>EXISTING IRR</span><b>${existingIrr!=null?(num(existingIrr)*100).toFixed(2)+'%':'—'}</b><small>${existingIrr==null?'Source not loaded':'Existing asset baseline'}</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${estCapex!=null?formatMoney(estCapex):'—'}</b><small>Same as Total Selected Case</small></div><div class="investment-cell"><span>ESTIMATED IRR</span><b>${estIrr!=null?(num(estIrr)*100).toFixed(2)+'%':'—'}</b><small>Existing + New Order</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED NBV</span><b>${estNbv!=null?formatMoney(estNbv):'—'}</b><small>Existing NBV + New Order CAPEX</small></div></div><div class="investment-result"><span>INVESTMENT DECISION · HURDLE 10.73%</span><b>${invStatus}</b></div>`;
+const scenarioOption=String(inv.option??rec.option??'COLLO').toUpperCase();
+const estNbv=scenarioOption==='B2S'?(estCapex!=null?num(estCapex):null):(existingNbv!=null&&estCapex!=null?num(existingNbv)+num(estCapex):null);
+const invStatus=pick(inv.decision,rec.investment_decision,rec.decision);
+const irrLabel=scenarioOption==='B2S'?'B2S STANDALONE IRR':'ESTIMATED IRR · EXISTING + COLLO';
+const irrSub=scenarioOption==='B2S'?'Standalone New Build economics':'Existing asset + incremental COLLO economics';
+const nbvSub=scenarioOption==='B2S'?'Standalone investment base':'Existing NBV + incremental COLLO CAPEX';
+$('investmentPanel').innerHTML=`<div class="investment-row"><div class="investment-cell"><span>EXISTING NBV</span><b>${existingNbv!=null?formatMoney(existingNbv):'—'}</b><small>Existing asset baseline</small></div><div class="investment-cell"><span>EXISTING IRR</span><b>${existingIrr!=null?(num(existingIrr)*100).toFixed(2)+'%':'—'}</b><small>${existingIrr==null?'Source not loaded':'Existing asset baseline'}</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>ESTIMATED CAPEX</span><b>${estCapex!=null?formatMoney(estCapex):'—'}</b><small>${scenarioOption==='B2S'?'Standalone B2S CAPEX':'Incremental COLLO CAPEX'}</small></div><div class="investment-cell"><span>${irrLabel}</span><b>${estIrr!=null?(num(estIrr)*100).toFixed(2)+'%':'—'}</b><small>${irrSub}</small></div></div><div class="investment-row" style="margin-top:8px"><div class="investment-cell"><span>INVESTMENT BASE</span><b>${estNbv!=null?formatMoney(estNbv):'—'}</b><small>${nbvSub}</small></div></div><div class="investment-result"><span>INVESTMENT DECISION · HURDLE 10.73%</span><b>${invStatus||'—'}</b></div>`;
 
 }
 function formatMoney(v){const n=num(v,null);if(n===null)return '—';if(n===0)return '-';if(n>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' B';if(n>=1e6)return 'Rp '+(n/1e6).toFixed(0)+' M';return 'Rp '+Math.round(n).toLocaleString('id-ID')}
@@ -354,7 +351,7 @@ function bindCandidateSelection(){
 }
 function updateFallback(d){const design=d?.raw?.predictive_design||d?.raw?.new_site?.design||{};$('fallbackHeight').textContent=design.recommended_height_m?num(design.recommended_height_m).toFixed(0)+' m':'—';const land=design.recommended_land_area_m2?num(design.recommended_land_area_m2).toFixed(0)+' m²':'Land —';const b2s=d?.raw?.new_site?.irr;$('fallbackLand').textContent=`${land} · IRR ${b2s?num(b2s).toFixed(2)+'%':'—'}`}
 async function runDecision(payload){return rpc('pmno_decision',payload)}
-async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:130000000,p_annual_opex_ratio:.20,p_horizon_years:10,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)selectCandidate(enrichedRecommended);else updateDetail({recommended:enrichedRecommended});$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
+async function loadAnalysis(){clearError();const lat=num($('lat').value,null),lon=num($('lon').value,null);if(lat===null||lon===null||lat<-90||lat>90||lon<-180||lon>180){showError('Latitude / longitude tidak valid.');return}state.lat=lat;state.lon=lon;state.tenant=$('tenant').value;state.radius=num($('radius').value,3000);setLoading(true);try{const [raw,mapRaw]=await Promise.all([runDecision({p_lat:lat,p_lon:lon,p_target_tenant:state.tenant,p_radius_m:state.radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:10,p_revenue_growth:0,p_wacc:.0873}),rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:state.radius,p_target_tenant:state.tenant})]);const normalized=normalizeDecision(raw);const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];const enrichedRows=enrichRows(normalized.rows,mapData);const enrichedRecommended=enrichRecommended(normalized.recommended,mapData);state.decision={...normalized,recommended:enrichedRecommended,rows:enrichedRows};const merged=mergeCandidates(mapData,enrichedRows);renderMap(merged,enrichedRows);renderList(enrichedRows);updateFallback(normalized);if(enrichedRecommended)selectCandidate(enrichedRecommended);else updateDetail({recommended:enrichedRecommended});$('context').textContent=`${state.tenant} · ${state.radius/1000} KM SEARCH`;map.flyTo([state.lat,state.lon],map.getZoom(),{animate:false});}
 catch(e){showError('PMNO Engine belum dapat diakses. '+e.message+' Pastikan API function public.pmno_decision sudah ter-deploy.');}
 finally{setLoading(false)}}
 let analysisTimer;function scheduleAnalysis(){clearTimeout(analysisTimer);analysisTimer=setTimeout(loadAnalysis,450)}
