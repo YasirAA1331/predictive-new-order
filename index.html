@@ -120,7 +120,80 @@ function initMap(){
 }
 function bindTargetMarker(){targetMarker.off('click');targetMarker.on('click',()=>showTargetPopup())}
 function showTargetPopup(){closeMapSelection();selectedCandidatePopup=L.marker([state.lat,state.lon],{icon:targetInfoIcon(),interactive:true,zIndexOffset:4000}).addTo(map);selectedCandidatePopup.on('click',e=>{e.originalEvent?.stopPropagation();closeMapSelection()})}
-function showB2SPopup(){closeMapSelection();b2sPopup=L.marker([state.lat,state.lon],{icon:b2sInfoIcon(),interactive:true,zIndexOffset:3900}).addTo(map);b2sPopup.on('click',e=>{e.originalEvent?.stopPropagation()});b2sPopup.getElement()?.querySelector('.close')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();b2sPopup?.remove();b2sPopup=null})}
+async function loadB2SIntelligence(){
+  state.selectedId='__B2S__';
+  document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x.id==='fallbackCandidate'));
+  const anchor=state.top5?.[0]||state.decision?.rows?.[0];
+  if(!anchor?.site_id){
+    updateDetail({recommended:null,final_decision:'B2S',raw:state.decision?.raw||{}});
+    return;
+  }
+  try{
+    setLoading(true);
+    const rawDetail=await rpc('pmno_candidate_detail_by_site_id',{
+      p_site_id:anchor.site_id,
+      p_target_tenant:state.tenant,
+      p_added_device_count:7,
+      p_added_load_kw:12,
+      p_annual_revenue:120000000,
+      p_annual_opex_ratio:.20,
+      p_horizon_years:20,
+      p_revenue_growth:0,
+      p_wacc:.0873,
+      p_option:'B2S'
+    });
+    const detail=normalizeCandidateDetailPayload(rawDetail);
+    const eng=detail.engineering||{};
+    const capexItems=finalizeCapexItems(detail.capex_items,'B2S');
+    const design=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};
+    const b2s={
+      ...anchor,
+      site_id:null,
+      site_name:'PREDICTED NEW SITE',
+      latitude:state.lat,
+      longitude:state.lon,
+      tower_height_m:design.recommended_height_m??anchor.tower_height_m,
+      tower_type:design.tower_type??anchor.tower_type??'SST',
+      tenant_count:0,
+      distance_m:0,
+      detail,
+      capex_items:capexItems,
+      option:'B2S',
+      need_str:eng.need_str,
+      reinforcement_expected_ton:eng.reinforcement_expected_ton,
+      reinforcement_probability:eng.reinforcement_probability,
+      structural_utilization_proxy:eng.structural_utilization_proxy,
+      sda_available:eng.sda_available,
+      ses_work_type:eng.ses_work_type,
+      ses_work_cost:eng.ses_work_cost,
+      community_case_count:eng.community_case_count,
+      red_zone:eng.red_zone,
+      access_level:eng.access_level,
+      estimated_days:eng.estimated_to_on_air_days,
+      roadhead_distance_m:detail.site?.roadhead_distance_m,
+      existing_nbv:detail.investment?.existing_nbv??anchor.existing_nbv??anchor.nbv_existing??anchor.nbv??null,
+      existing_irr:detail.investment?.existing_irr??anchor.existing_irr??anchor.current_irr??null,
+      npv:detail.investment?.npv??null,
+      capex_total:detail.investment?.capex_total??detail.investment?.estimated_capex??null
+    };
+    state.b2sDetail=b2s;
+    updateDetail({recommended:b2s,final_decision:'B2S',raw:state.decision?.raw||{}});
+  }catch(e){
+    showError('B2S Intelligence belum dapat dimuat. '+e.message);
+  }finally{setLoading(false)}
+}
+function showB2SPopup(){
+  closeMapSelection();
+  b2sPopup=L.marker([state.lat,state.lon],{icon:b2sInfoIcon(),interactive:true,zIndexOffset:3900}).addTo(map);
+  b2sPopup.on('click',e=>{e.originalEvent?.stopPropagation()});
+  const el=b2sPopup.getElement();
+  el?.querySelector('.close')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();b2sPopup?.remove();b2sPopup=null});
+  el?.querySelector('.popup-foot button')?.addEventListener('click',async e=>{
+    e.preventDefault();e.stopPropagation();
+    b2sPopup?.remove();b2sPopup=null;
+    await loadB2SIntelligence();
+  });
+}
 function closeMapSelection(clearSelection=true){if(selectedCandidatePopup){selectedCandidatePopup.remove();selectedCandidatePopup=null}if(b2sPopup){b2sPopup.remove();b2sPopup=null}if(clearSelection){state.selectedId=null;document.querySelectorAll('.candidate-row').forEach(x=>x.classList.remove('active'))}}
 function toggleBasemap(){state.satellite=!state.satellite;if(state.satellite){map.removeLayer(streetLayer);satelliteLayer.addTo(map);$('baseMapToggle').textContent='SATELLITE'}else{map.removeLayer(satelliteLayer);streetLayer.addTo(map);$('baseMapToggle').textContent='MAP'};setTimeout(()=>map.invalidateSize({animate:false}),40)}
 // calculate_pmno_decision is exposed through public.pmno_decision.
@@ -330,7 +403,7 @@ const b2sLandType=inv.b2s_land_type??rec.b2s_land_type??null;const b2sLeaseYears
 
 }
 function formatMoney(v){const n=num(v,null);if(n===null)return '—';if(n===0)return '-';if(n>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' B';if(n>=1e6)return 'Rp '+(n/1e6).toFixed(0)+' M';return 'Rp '+Math.round(n).toLocaleString('id-ID')}
-function renderList(rows){const items=rows.map((c,i)=>`<div class="candidate-row ${state.selectedId===c.site_id?'active':''}" data-id="${esc(c.site_id)}" role="button" tabindex="0"><div class="candidate-rank">#${i+1}</div><div><strong>${esc(c.site_id)}</strong><small>${(num(c.distance_m)/1000).toFixed(2)} km · ${esc(c.tower_type||'—')} · ${num(c.tower_height_m).toFixed(0)} m · ${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}</small></div><div class="candidate-right"><b>${num(c.distance_m).toFixed(0)} m</b><small>${c.signal_rsrp_avg_dbm!=null?num(c.signal_rsrp_avg_dbm).toFixed(1)+' dBm':'Signal —'}</small></div></div>`).join('');const fallback=`<div id="fallbackCandidate" class="candidate-row fallback-candidate ${state.selectedId==='__B2S__'?'active':''}" role="button" tabindex="0"><div class="candidate-rank">#6</div><div><strong>PREDICTIVE NEW SITE / B2S</strong><small>Technical fallback · only if COLLO #1–#5 are not selected</small></div><div class="candidate-right"><b id="fallbackHeight">—</b><small id="fallbackLand">— · IRR —</small></div></div>`;$('candidateList').innerHTML=items+fallback;bindCandidateSelection();document.querySelectorAll('.candidate-row[data-id]').forEach(el=>{const pick=()=>{const c=rows.find(x=>x.site_id===el.dataset.id);if(c)selectCandidate(c)};el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}})});const fb=$('fallbackCandidate');fb.addEventListener('click',()=>{state.selectedId='__B2S__';document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x===fb));showB2SPopup();updateDetail({raw:state.decision?.raw||{},recommended:null,final_decision:'B2S'})});fb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fb.click()}})}
+function renderList(rows){const items=rows.map((c,i)=>`<div class="candidate-row ${state.selectedId===c.site_id?'active':''}" data-id="${esc(c.site_id)}" role="button" tabindex="0"><div class="candidate-rank">#${i+1}</div><div><strong>${esc(c.site_id)}</strong><small>${(num(c.distance_m)/1000).toFixed(2)} km · ${esc(c.tower_type||'—')} · ${num(c.tower_height_m).toFixed(0)} m · ${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}</small></div><div class="candidate-right"><b>${num(c.distance_m).toFixed(0)} m</b><small>${c.signal_rsrp_avg_dbm!=null?num(c.signal_rsrp_avg_dbm).toFixed(1)+' dBm':'Signal —'}</small></div></div>`).join('');const fallback=`<div id="fallbackCandidate" class="candidate-row fallback-candidate ${state.selectedId==='__B2S__'?'active':''}" role="button" tabindex="0"><div class="candidate-rank">#6</div><div><strong>PREDICTIVE NEW SITE / B2S</strong><small>Technical fallback · only if COLLO #1–#5 are not selected</small></div><div class="candidate-right"><b id="fallbackHeight">—</b><small id="fallbackLand">— · IRR —</small></div></div>`;$('candidateList').innerHTML=items+fallback;bindCandidateSelection();document.querySelectorAll('.candidate-row[data-id]').forEach(el=>{const pick=()=>{const c=rows.find(x=>x.site_id===el.dataset.id);if(c)selectCandidate(c)};el.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();pick()}})});const fb=$('fallbackCandidate');fb.addEventListener('click',()=>{state.selectedId='__B2S__';document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x===fb));showB2SPopup()});fb.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();fb.click()}})}
 
 function bindCandidateSelection(){
   const list=$('candidateList');
