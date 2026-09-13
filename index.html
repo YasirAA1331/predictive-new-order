@@ -24,6 +24,19 @@
 .pmno-target{width:64px;height:72px;display:block;overflow:visible;pointer-events:auto}
 .pmno-target svg{display:block;overflow:visible}
 </style>
+
+<style>
+.pmno-target-icon{background:transparent!important;border:0!important}
+.target-marker.target-red{width:58px;height:58px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible}
+.target-marker.target-red .target-ring{
+  width:54px;height:54px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  background:var(--red);
+  border:2px solid rgba(255,255,255,.92);
+  box-shadow:0 0 0 3px rgba(255,85,112,.16),0 5px 12px rgba(0,0,0,.35);
+}
+.target-marker.target-red .target-ring svg{display:block}
+</style>
 </head>
 <body>
 <div class="app">
@@ -78,7 +91,7 @@ function $(id){return document.getElementById(id)}
 function num(v,d=0){const n=Number(v);return Number.isFinite(n)?n:d}
 function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]))}
 function towerSvg(stroke='#35c8ff',size=30){return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><path d="M11 32h18M14 29l6-21 6 21M16 21h8M15 25h10M20 8V5M17 10l-4-3M23 10l4-3" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
-function targetIcon(){return L.divIcon({className:'pmno-target-icon',html:`<div class="pmno-target"><svg width="64" height="72" viewBox="0 0 64 72" aria-hidden="true"><defs><filter id="targetGlow"><feGaussianBlur stdDeviation="3"/></filter></defs><circle cx="32" cy="31" r="25" fill="rgba(255,85,112,.28)" filter="url(#targetGlow)"/><path d="M32 5C18.2 5 7 16.2 7 30c0 17.6 16.5 28.8 25 37 8.5-8.2 25-19.4 25-37C57 16.2 45.8 5 32 5Z" fill="#ff5570" stroke="#ffd8df" stroke-width="2"/><path d="M24 51h16M26 47l6-25 6 25M28 35h8M27 40h10M32 22v-4" fill="none" stroke="#fff" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M19 20a13 13 0 0 1 13-13M14 20A18 18 0 0 1 32 2M9 20A23 23 0 0 1 32 -3" fill="none" stroke="#fff" stroke-width="2.7" stroke-linecap="round"/></svg></div>`,iconSize:[64,72],iconAnchor:[32,70]})}
+function targetIcon(){return L.divIcon({className:'pmno-target-icon',html:`<div class="target-marker target-red"><div class="target-ring">${towerSvg('#ffffff',34)}</div></div>`,iconSize:[58,58],iconAnchor:[29,29]})}
 function b2sIcon(){return L.divIcon({className:'',html:`<div class="b2s-marker"><div class="b2s-pin">${towerSvg('#f5bf5c',30)}</div></div>`,iconSize:[54,54],iconAnchor:[27,27]})}
 function b2sInfoIcon(){const d=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};return L.divIcon({className:'',html:`<div class="candidate-popup b2s-popup"><button class="close" aria-label="Close">×</button><div class="kicker">PREDICTIVE NEW SITE / B2S</div><h3>${esc(state.tenant)} NEW BUILD</h3><div class="sub">Predicted at New Order location</div><div class="popup-grid"><div><span>TOWER</span><b>${esc(d.tower_type||'SST')} · ${d.recommended_height_m!=null?num(d.recommended_height_m).toFixed(0)+' m':'—'}</b></div><div><span>LAND</span><b>${d.recommended_land_area_m2!=null?num(d.recommended_land_area_m2).toFixed(0)+' m²':'—'}</b></div><div><span>DENSITY</span><b>${esc(d.density_class||'—')}</b></div><div><span>NETWORK GAP</span><b>${d.network_gap_score!=null?num(d.network_gap_score).toFixed(1):'—'}</b></div></div><div class="popup-foot"><small>Candidate #6 · Fallback</small><button>VIEW INTELLIGENCE</button></div></div>`,iconSize:[270,205],iconAnchor:[135,205]})}
 function targetLabel(){return L.divIcon({className:'',html:`<div class="target-label"><strong>NEW ORDER</strong><span>${esc(state.tenant)} TARGET</span></div>`,iconSize:[104,42],iconAnchor:[52,43]})}
