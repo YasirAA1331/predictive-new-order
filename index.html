@@ -79,7 +79,7 @@
     <button class="pmno-ms-btn ghost" onclick="pmnoMeetingSitesBack()">← MEETINGS</button>
     <div class="pmno-ms-head">
       <div><div id="pmnoMsTitle" class="pmno-ms-title">MEETING</div><div id="pmnoMsSub" class="pmno-ms-sub"></div></div>
-      <button class="pmno-ms-btn primary" onclick="pmnoMsAddPanel()">＋ ADD SITES</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="pmno-ms-btn primary" onclick="pmnoMsRunBulk()">RUN BULK ANALYSIS →</button><button class="pmno-ms-btn" onclick="pmnoMsAddPanel()">＋ ADD SITES</button></div>
     </div>
     <div id="pmnoMsAddPanel" class="pmno-ms-panel" style="display:none">
       <div style="font-weight:800;margin-bottom:10px">ADD NEW SITES</div>
@@ -109,7 +109,17 @@
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:13px}.app{min-height:100vh}.top{height:72px;padding:0 24px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;background:#071321}.kicker{font-size:9px;letter-spacing:2px;color:#70869c;font-weight:900}.title{font-size:22px;font-weight:900}.title b{color:var(--cyan)}.status{font-size:9px;color:#91a6b8;letter-spacing:1px}.dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--green);margin-right:7px}.wrap{padding:22px;max-width:1800px;margin:auto}.toolbar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:16px}.btn{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:8px;padding:10px 13px;font-weight:900;letter-spacing:.7px;cursor:pointer}.btn.primary{background:var(--cyan);color:#04111c;border-color:var(--cyan)}.btn:disabled{opacity:.5;cursor:wait}.file{display:none}.hint{color:var(--muted);font-size:11px}.summary{display:grid;grid-template-columns:repeat(6,minmax(130px,1fr));gap:10px;margin-bottom:16px}.kpi{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:13px}.kpi span{display:block;color:#70869c;font-size:8px;font-weight:900;letter-spacing:1.2px}.kpi b{display:block;font-size:20px;margin-top:5px}.table-wrap{background:var(--panel);border:1px solid var(--line);border-radius:11px;overflow:auto}.table{width:100%;border-collapse:collapse;min-width:1180px}.table th{position:sticky;top:0;background:#0d1d31;color:#7890a7;font-size:8px;letter-spacing:1px;text-align:left;padding:11px 9px;border-bottom:1px solid var(--line);white-space:nowrap}.table td{padding:10px 9px;border-bottom:1px solid #162b40;vertical-align:top;font-size:10px}.table td:nth-child(2){min-width:130px}.table td:nth-child(4){min-width:145px}.table tr:hover td{background:#0c1d30}.status-pill{display:inline-block;border-radius:20px;padding:4px 7px;font-size:8px;font-weight:900;white-space:nowrap}.ok{color:var(--green);border:1px solid #24694f;background:#0c2b25}.warn{color:var(--amber);border:1px solid #6b5730;background:#2a2418}.bad{color:var(--red);border:1px solid #693040;background:#2a1720}.neutral{color:#9db0c1;border:1px solid #30465a;background:#102032}.expand{border:1px solid #31566e;background:#0a2234;color:#a9dfff;border-radius:6px;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}.detail-row td{padding:0;background:#081522}.detail{padding:15px;display:grid;grid-template-columns:1fr 1fr;gap:12px}.detail-card{border:1px solid var(--line);background:#0a1727;border-radius:9px;padding:12px}.detail-card h4{margin:0 0 10px;font-size:9px;letter-spacing:1.2px;color:var(--cyan)}.kv{display:grid;grid-template-columns:1fr 1fr;gap:6px}.kv div{padding:7px;border-bottom:1px solid #172d42}.kv span{display:block;color:#71889e;font-size:7px;letter-spacing:.8px}.kv b{display:block;margin-top:3px;font-size:10px}.cost-grid{display:grid;grid-template-columns:repeat(7,minmax(110px,1fr));gap:7px}.cost-box{border:1px solid #213a51;border-radius:8px;padding:9px;background:#091827}.cost-box span{display:block;color:#71889e;font-size:7px;letter-spacing:.9px}.cost-box b{display:block;margin-top:5px;font-size:11px}.cost-box.total{border-color:#2d718c;background:#0b2234}.cost-box.total b{color:var(--cyan)}.error{padding:11px;border:1px solid #6c3442;background:#2a1720;color:#ffb9c4;border-radius:9px;margin-bottom:12px;display:none}.progress{color:#9eb3c4;font-size:10px;margin-left:auto}.empty{padding:45px;text-align:center;color:#657c91}.sda a{color:var(--cyan);text-decoration:none}.small{font-size:8px;color:#667e92}.mono{font-family:ui-monospace,monospace}
 @media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.detail{grid-template-columns:1fr}.cost-grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:12px}.top{padding:0 14px}.status{display:none}}
 
-.bulk-view{min-height:calc(100vh - 72px);background:#06111f;color:#edf5fb;position:relative;z-index:5}.mode-menu{display:flex;gap:8px;margin-left:auto}.mode-menu button{border:1px solid #29445c;background:#0a1727;color:#9db0c1;border-radius:7px;padding:8px 11px;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer}.mode-menu button.active{color:#35c8ff;border-color:#2b617c;background:#0b2234}</style>
+.bulk-view{min-height:calc(100vh - 72px);background:#06111f;color:#edf5fb;position:relative;z-index:5}.mode-menu{display:flex;gap:8px;margin-left:auto}.mode-menu button{border:1px solid #29445c;background:#0a1727;color:#9db0c1;border-radius:7px;padding:8px 11px;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer}.mode-menu button.active{color:#35c8ff;border-color:#2b617c;background:#0b2234}
+<style id="pmno-meeting-bulk-review-css">
+.pmno-review-badge{display:inline-block;padding:3px 7px;border-radius:999px;border:1px solid #29445c;font-size:8px;font-weight:900;white-space:nowrap}
+.pmno-review-badge.not-reviewed{color:#91a4bd;background:#0b1b2b}
+.pmno-review-badge.follow-up{color:#ffd76a;background:#3b2f12;border-color:#6b5521}
+.pmno-review-badge.approved{color:#8df2c2;background:#103b2c;border-color:#28795a}
+.pmno-review-badge.rejected{color:#ff9cad;background:#421d28;border-color:#7b3347}
+.pmno-review-btn{border:1px solid #31506a;background:#0b2033;color:#b8d4e7;border-radius:6px;padding:5px 7px;font-size:8px;font-weight:900;cursor:pointer}
+.pmno-review-btn.approve{border-color:#28795a;color:#8df2c2}
+</style>
+</style>
 <style id="pmno-nav-bootstrap-css">
 /* Prevent Single Site from flashing before the navigation router initializes. */
 html.pmno-preload-bulk .workspace{display:none !important}
@@ -324,7 +334,7 @@ body.bulk-page .mobile-nav{
 
 </aside>
 </main>
-<section id="bulkView" class="bulk-view" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input id="bulk-file" class="file" type="file" accept=".xlsx,.xls,.csv"></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" id="bulk-analyze" disabled>RUN BULK ANALYSIS →</button><button class="btn" id="bulk-export" disabled>EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div id="bulk-error" class="error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
+<section id="bulkView" class="bulk-view" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input id="bulk-file" class="file" type="file" accept=".xlsx,.xls,.csv"></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" id="bulk-analyze" disabled>RUN BULK ANALYSIS →</button><button class="btn" id="bulk-export" disabled>EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div id="bulk-meeting-context" style="display:none;margin:10px 0;padding:9px 12px;border:1px solid #28516c;border-radius:9px;background:#0a2033;color:#a9dfff;font-size:10px;font-weight:800;letter-spacing:.6px"></div><div id="bulk-error" class="error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
 <nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button></nav>
 </div>
 </div>
@@ -397,7 +407,7 @@ body.bulk-page .mobile-nav{
     <div id="pmnoMeetingList" class="pmno-meeting-list"></div>
   </div>
 </div>
-t src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 const SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
 const SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
@@ -1420,7 +1430,7 @@ loadTenants().then(pmnoLoadRouteContext);
 const BULK_SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
 const BULK_SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
 const BULK_H={'apikey':BULK_SUPABASE_KEY,'Authorization':'Bearer '+BULK_SUPABASE_KEY,'Content-Type':'application/json'};
-const bulkState={inputs:[],results:[]}; const bulk$=id=>document.getElementById(id);
+const bulkState={inputs:[],results:[],meetingContext:null}; const bulk$=id=>document.getElementById(id);
 function bulkNum(v,d=null){const n=Number(v);return Number.isFinite(n)?n:d} function bulkEsc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function bulkMoney(v){const n=bulkNum(v,null);if(n===null)return '—';if(n===0)return '-';if(n>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' B';if(n>=1e6)return 'Rp '+(n/1e6).toFixed(0)+' M';return 'Rp '+Math.round(n).toLocaleString('id-ID')}
 async function bulkRpc(name,body){const r=await fetch(`${BULK_SUPABASE_URL}/rest/v1/rpc/${name}`,{method:'POST',headers:BULK_H,body:JSON.stringify(body)});if(!r.ok)throw new Error(`${name} HTTP ${r.status}: ${(await r.text()).slice(0,180)}`);return r.json()}
@@ -1741,10 +1751,10 @@ function render(){
   const cell=(v,cls='')=>`<td class="${cls}">${bulkEsc(v==null||v===''?'—':v)}</td>`;
   const money=v=>bulkMoney(v);
   wrap.innerHTML=`<table class="bulk-table"><thead>
-    <tr><th rowspan="2" class="sticky-1"> </th><th rowspan="2" class="sticky-2">SITE</th><th rowspan="2" class="sticky-3">TARGET TENANT</th><th rowspan="2">TYPE</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th colspan="3">SURVEY</th><th colspan="5">SITAC 1</th><th colspan="5">SITAC 2</th><th colspan="3">MATERIAL</th><th colspan="3">DELIVERY</th><th colspan="10">CME</th><th rowspan="2">TOTAL CAPEX</th><th colspan="4">INVESTMENT</th><th rowspan="2">ESTIMATED IRR</th><th rowspan="2">FEASIBILITY</th></tr>
+    <tr><th rowspan="2" class="sticky-1"> </th><th rowspan="2" class="sticky-2">SITE</th><th rowspan="2" class="sticky-3">TARGET TENANT</th><th rowspan="2">STATUS</th><th rowspan="2">SOURCE</th><th rowspan="2">TYPE</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th colspan="3">SURVEY</th><th colspan="5">SITAC 1</th><th colspan="5">SITAC 2</th><th colspan="3">MATERIAL</th><th colspan="3">DELIVERY</th><th colspan="10">CME</th><th rowspan="2">TOTAL CAPEX</th><th colspan="4">INVESTMENT</th><th rowspan="2">ESTIMATED IRR</th><th rowspan="2">FEASIBILITY</th><th rowspan="2">REVIEW</th></tr>
     <tr><th>DISTANCE</th><th>TOWER TYPE</th><th>HEIGHT</th><th>EXISTING TENANTS</th><th>TARGET TENANT SIGNAL</th><th>NEED STR</th><th>EST. REINFORCEMENT</th><th>SDA AVAILABLE</th><th>SES / DELIVERY</th><th>COMCASE HISTORY</th><th>RED ZONE</th><th>ACCESS DIFFICULTY</th><th>ROADHEAD DISTANCE</th><th>EST. TO ON AIR</th><th>REINFORCEMENT PROB.</th><th>STRUCTURAL UTILIZATION</th><th>PHYSICAL SES PROB.</th><th>SIS</th><th>SES</th><th>RERUNNING SDA</th><th>SEWA LAHAN</th><th>IZIN WARGA</th><th>REKOM LURAH</th><th>REKOM CAMAT</th><th>JASA SITAC</th><th>PBG</th><th>SLF</th><th>RETRIBUSI</th><th>PBB</th><th>JASA PERIZINAN</th><th>TOWER</th><th>FENCE &amp; YARD</th><th>MOUNTING</th><th>FACTORY → PORT</th><th>LANGSIR / LOCAL HAULAGE</th><th>PORT → SITE</th><th>STR · MATERIAL STR</th><th>PONDASI TOWER · MATERIAL</th><th>PONDASI RBS · MATERIAL</th><th>APD PONDASI RBS</th><th>GROUNDING</th><th>ELECTRICAL</th><th>TRANSFORMER</th><th>PLN CONNECTION</th><th>JASA CME</th><th>JASA ERECTION</th><th>EXISTING NBV</th><th>EXISTING IRR</th><th>ESTIMATED CAPEX</th><th>INVESTMENT BASE</th></tr></thead><tbody>`+
     rows.map((r,i)=>{
-      if(String(r.decision||'').toUpperCase()==='ERROR')return `<tr class="error-row"><td class="expand-cell sticky-1">—</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell" colspan="56"><span class="status-pill bad">ERROR</span> <span>${bulkEsc(r.error||'Analysis failed')}</span></td></tr>`;
+      if(String(r.decision||'').toUpperCase()==='ERROR')return `<tr class="error-row"><td class="expand-cell sticky-1">—</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="candidate-cell" colspan="58"><span class="status-pill bad">ERROR</span> <span>${bulkEsc(r.error||'Analysis failed')}</span></td></tr>`;
       const m=bulkSingleSiteMetrics(r),c=m.costBreakdown;
       const candidate=m.isB2S?'PREDICTIVE NEW SITE':(r.candidate_id||m.rec.site_id||'—');
       const feasibility=m.feasibility;
@@ -1752,11 +1762,12 @@ function render(){
       const b2sIrr=m.isB2S?(m.estIrr!=null?(m.estIrr*100).toFixed(2)+'%':'—'):invIrr;
       const costVal=k=>c[k]==='—'?'—':money(c[k]);
       const candidateHtml=pmnoCandidateSelect(r, i);
-      return `<tr><td class="expand-cell sticky-1">${pmnoOpenSingleSite(r,i)}</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="type-cell"><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="candidate-cell">${candidateHtml}</td>
+      return `<tr><td class="expand-cell sticky-1">${pmnoOpenSingleSite(r,i)}</td><td class="site-cell sticky-2"><strong>${bulkEsc(r.site_id||'—')}</strong>${r.site_name?`<small>${bulkEsc(r.site_name)}</small>`:''}</td><td class="sticky-3">${bulkEsc(r.tenant||'—')}</td><td class="center"><span class="pmno-review-badge ${String(r.review_status||'NOT REVIEWED').replace(/\s+/g,'-').toLowerCase()}">${bulkEsc(r.review_status||'NOT REVIEWED')}</span></td><td class="center">${bulkEsc(r.meeting_source||'—')}</td><td class="type-cell"><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="candidate-cell">${candidateHtml}</td>
       ${cell(m.distance)}${cell(m.tower)}${cell(m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—','num')}${cell(m.isB2S?'—':m.tenants,'center')}${cell(m.signal,'num')}
       ${cell(m.needStr,'center')}${cell(m.reinforcement,'num')}${m.sdaDocuments?.length?`<td class="pmno-sda-cell"><a class="pmno-sda-link" href="${bulkEsc(m.sdaDocuments[0].document_url)}" target="_blank" rel="noopener noreferrer">SDA ↗</a>${m.sdaDocuments.length>1?`<small style="display:block;margin-top:3px;color:#71869b">+${m.sdaDocuments.length-1} more</small>`:''}</td>`:`<td class="pmno-sda-cell">${bulkEsc(m.sda??'—')}</td>`}${cell(m.ses)}${cell(m.comcase,'center')}${cell(m.red,'center')}${cell(m.access)}${cell(m.road,'num')}${cell(m.days)}${cell(m.reinfProb,'num')}${cell(m.structural,'num')}${cell(m.physical,'num')}
       ${cell(costVal('survey_sis'))}${cell(costVal('survey_ses'))}${cell(costVal('survey_rerunning_sda'))}${cell(costVal('sitac1_sewa_lahan'))}${cell(costVal('sitac1_izin_warga'))}${cell(costVal('sitac1_rekom_lurah'))}${cell(costVal('sitac1_rekom_camat'))}${cell(costVal('sitac1_jasa_sitac'))}${cell(costVal('sitac2_pbg'))}${cell(costVal('sitac2_slf'))}${cell(costVal('sitac2_retribusi'))}${cell(costVal('sitac2_pbb'))}${cell(costVal('sitac2_jasa_perizinan'))}${cell(costVal('material_tower'))}${cell(costVal('material_fence'))}${cell(costVal('material_mounting'))}${cell(costVal('delivery_factory_port'))}${cell(costVal('delivery_langsir'))}${cell(costVal('delivery_port_site'))}${cell(costVal('cme_str_material'))}${cell(costVal('cme_foundation_tower'))}${cell(costVal('cme_foundation_rbs'))}${cell(costVal('cme_rbs_apd'))}${cell(costVal('cme_grounding'))}${cell(costVal('cme_electrical'))}${cell(costVal('cme_transformer'))}${cell(costVal('cme_pln'))}${cell(costVal('cme_jasa_cme'))}${cell(costVal('cme_erection'))}
       ${cell(money(m.totalCost))}${cell(m.existingNbv!=null?money(m.existingNbv):'—')}${cell(m.existingIrr!=null?m.existingIrr.toFixed(2)+'%':'—','num')}${cell(money(m.estCapex))}${cell(m.isB2S?'—':(m.estNbv!=null?money(m.estNbv):'—'))}${cell(b2sIrr,'num')}${cell(feasibility, feasibility==='FEASIBLE'?'center feasible-cell':'center')}
+      <td class="center"><div style="display:flex;gap:5px;justify-content:center;flex-wrap:wrap"><button class="pmno-review-btn" onclick="pmnoBulkReview(${i},'FOLLOW UP')">FOLLOW UP</button><button class="pmno-review-btn approve" onclick="pmnoBulkReview(${i},'APPROVED')">APPROVE</button></div></td>
       </tr>`;
     }).join('')+'</tbody></table>';
   updateKpi();
@@ -1785,6 +1796,76 @@ function detailHtml(r){
 function updateKpi(){const valid=bulkState.results.filter(x=>x.candidate||x.b2s),c=valid.filter(x=>!x.b2s).length,b=valid.filter(x=>x.b2s).length;const metrics=valid.map(x=>bulkSingleSiteMetrics(x));const f=metrics.filter(m=>m.feasibility==='FEASIBLE').length;const irr=metrics.map(m=>m.estIrr).filter(v=>Number.isFinite(v));const avgIrr=irr.length?irr.reduce((a,v)=>a+v,0)/irr.length:null;bulk$('bulk-kInput').textContent=bulkState.inputs.length;bulk$('bulk-kAnalyzed').textContent=valid.length;bulk$('bulk-kCollo').textContent=c;bulk$('bulk-kB2s').textContent=b;bulk$('bulk-kFeasible').textContent=f;bulk$('bulk-kIrr').textContent=avgIrr!=null?(avgIrr*100).toFixed(2)+'%':'—'}
 function parseFile(file){return new Promise((resolve,reject)=>{const rd=new FileReader();rd.onload=e=>{try{const wb=XLSX.read(e.target.result,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],json=XLSX.utils.sheet_to_json(ws,{defval:''});resolve(json)}catch(err){reject(err)}};rd.onerror=reject;rd.readAsArrayBuffer(file)})}
 function normalizeInput(r){const get=(...ks)=>{for(const k of ks){if(r[k]!==undefined&&r[k]!=='')return r[k];const found=Object.keys(r).find(x=>x.trim().toLowerCase()===k.toLowerCase());if(found)return r[found]}return ''};return {site_id:String(get('Site ID','site_id')).trim(),site_name:String(get('Site Name','site_name')).trim(),lat:bulkNum(get('Latitude','latitude')),lon:bulkNum(get('Longitude','longitude')),tenant:String(get('Target Tenant','target_tenant','Tenant')).trim().toUpperCase()}}
+
+/* PMNO TASK 6 — MEETING → BULK ANALYZER BRIDGE */
+window.pmnoMsRunBulk=async function(){
+  const m=window.pmnoMsState.meeting;
+  if(!m){alert('Meeting belum dipilih.');return;}
+  try{
+    const rows=await window.pmnoPersistence.meetingSitesWithProjectSites(m.id);
+    if(!rows.length){alert('Belum ada site pada meeting ini. Tambahkan site terlebih dahulu.');return;}
+    bulkState.inputs=rows.map(x=>{
+      const p=x.project_site||{};
+      return {site_id:String(p.site_id||''),site_name:String(p.site_name||''),lat:bulkNum(p.latitude),lon:bulkNum(p.longitude),tenant:String(p.target_tenant||'').toUpperCase(),review_status:p.current_status||'NOT REVIEWED',meeting_source:x.source||'NEW',project_site_id:p.id,meeting_site_id:x.id};
+    }).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);
+    bulkState.results=[];
+    bulkState.meetingContext={projectId:window.pmnoMeetingState.projectId,meetingId:m.id,meeting:m};
+    const ctx=bulk$('bulk-meeting-context');
+    if(ctx){ctx.style.display='block';ctx.textContent=`MEETING #${m.meeting_no} · ${m.meeting_title||''} · ${bulkState.inputs.length} SITES`;}
+    bulk$('bulk-analyze').disabled=!bulkState.inputs.length;
+    bulk$('bulk-export').disabled=true;
+    document.getElementById('pmnoMeetingSitesShell')?.classList.remove('active');
+    const bulkMenu=document.getElementById('bulkMenu');
+    if(bulkMenu)bulkMenu.click();
+    render();
+  }catch(e){console.error(e);alert('Gagal menyiapkan Bulk Meeting: '+(e?.message||e));}
+};
+
+window.pmnoBulkReview=async function(rowIndex,status){
+  const r=bulkState.results?.[rowIndex],ctx=bulkState.meetingContext;
+  if(!r||!ctx?.meetingId||!r.project_site_id){alert('Site belum terhubung ke meeting.');return;}
+  const p=r.project_site_id;
+  if(status==='APPROVED'&&!confirm(`Approve ${r.site_id}?\nSnapshot hasil Bulk saat ini akan disimpan.`))return;
+  const note=status==='FOLLOW UP'?(prompt('Catatan follow up (optional):','')||null):null;
+  try{
+    const snapshot=pmnoBulkBuildFullSnapshot(r);
+    await window.pmnoPersistence.siteReviewSave(p,ctx.meetingId,status,{
+      candidate_id:r.selectedCandidateId||r.candidate_id||null,note,snapshot:status==='APPROVED'?snapshot:null
+    });
+    if(status==='APPROVED'){
+      await window.pmnoPersistence.approvedSnapshotCreate(p,ctx.meetingId,r.selectedCandidateId||r.candidate_id||null,snapshot,null);
+    }
+    r.review_status=status;
+    render();
+  }catch(e){console.error(e);alert('Gagal menyimpan review: '+(e?.message||e));}
+};
+
+window.pmnoBulkBuildFullSnapshot=function(r){
+  const m=bulkSingleSiteMetrics(r);
+  return {
+    site_id:r.site_id,site_name:r.site_name,target_tenant:r.tenant,
+    candidate_site_id:r.candidate_id,candidate_site_name:r.candidate_name,
+    decision:r.decision,type:m.isB2S?'B2S':'COLLO',
+    distance_km:m.distance!=null?bulkNum(m.distance):null,
+    tower_type:m.tower,tower_height_m:m.height,existing_tenant_count:m.isB2S?null:m.tenants,
+    target_tenant_signal:m.signal,need_str:m.needStr,reinforcement:m.reinforcement,
+    sda_available:m.sda,sda_documents:m.sdaDocuments||[],ses_delivery:m.ses,
+    comcase_history:m.comcase,red_zone:m.red,access_difficulty:m.access,
+    roadhead_distance:m.road,estimated_to_on_air:m.days,
+    reinforcement_probability:m.reinfProb,structural_utilization:m.structural,physical_ses_probability:m.physical,
+    cost_breakdown:m.costBreakdown,total_capex:m.totalCost,
+    existing_nbv:m.existingNbv,existing_irr:m.existingIrr,estimated_capex:m.estCapex,
+    investment_base:m.estNbv,estimated_irr:m.estIrr!=null?m.estIrr*100:null,
+    feasibility:m.feasibility,investment_decision:m.invStatus,
+    b2s_design:m.isB2S?(r.b2s_design||null):null,
+    b2s_land_type:m.isB2S?(r.b2s_land_type||null):null,
+    b2s_land_area_m2:m.isB2S?(r.land_area_m2||null):null,
+    b2s_npv:m.isB2S?m.npv:null,
+    meeting_id:bulkState.meetingContext?.meetingId||null,
+    snapshot_generated_at:new Date().toISOString()
+  };
+};
+
 bulk$('bulk-file').onchange=async e=>{try{bulk$('bulk-error').style.display='none';const raw=await parseFile(e.target.files[0]);bulkState.inputs=raw.map(normalizeInput).filter(x=>x.site_id&&x.lat!=null&&x.lon!=null&&x.tenant);bulkState.results=[];bulk$('bulk-analyze').disabled=!bulkState.inputs.length;render();if(raw.length&&!bulkState.inputs.length)throw new Error('Tidak ada row valid. Required: Site ID, Latitude, Longitude, Target Tenant.')}catch(err){bulk$('bulk-error').textContent=err.message;bulk$('bulk-error').style.display='block'}};
 bulk$('bulk-template').onclick=()=>{const data=[['Site ID','Site Name','Latitude','Longitude','Target Tenant'],['SITE-001','Example Site',-6.9818,110.4093,'IOH']];const ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'PMNO Bulk Input');XLSX.writeFile(wb,'PMNO_Bulk_Input_Template.xlsx')};
 bulk$('bulk-analyze').onclick=async()=>{bulkState.results=[];bulk$('bulk-analyze').disabled=true;bulk$('bulk-export').disabled=true;bulk$('bulk-error').style.display='none';for(let i=0;i<bulkState.inputs.length;i++){const x=bulkState.inputs[i];bulk$('bulk-progress').textContent=`Analyzing ${i+1}/${bulkState.inputs.length} · ${x.site_id}`;try{bulkState.results.push(await analyzeOne(x))}catch(e){bulkState.results.push({...x,decision:'ERROR',error:e.message,cost:{}})}}bulk$('bulk-progress').textContent=`Completed ${bulkState.results.length} sites`;bulk$('bulk-analyze').disabled=false;bulk$('bulk-export').disabled=false;render()};
