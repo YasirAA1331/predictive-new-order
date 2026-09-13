@@ -59,43 +59,6 @@
 @media(max-width:900px){.summary{grid-template-columns:repeat(2,1fr)}.detail{grid-template-columns:1fr}.cost-grid{grid-template-columns:repeat(2,1fr)}.wrap{padding:12px}.top{padding:0 14px}.status{display:none}}
 
 .bulk-view{min-height:calc(100vh - 72px);background:#06111f;color:#edf5fb;position:relative;z-index:5}.mode-menu{display:flex;gap:8px;margin-left:auto}.mode-menu button{border:1px solid #29445c;background:#0a1727;color:#9db0c1;border-radius:7px;padding:8px 11px;font-size:9px;font-weight:900;letter-spacing:.7px;cursor:pointer}.mode-menu button.active{color:#35c8ff;border-color:#2b617c;background:#0b2234}</style>
-<style id="bulk-navigation-scroll-fix-v2">
-/* PMNO Bulk — force document-flow scrolling on landscape/mobile */
-@media (orientation: landscape) and (max-width: 900px){
-  html:has(body.bulk-page){height:auto !important; min-height:100%;}
-  body.bulk-page{height:auto !important; min-height:100dvh; overflow-y:auto !important; overflow-x:hidden !important;}
-  body.bulk-page .app{display:block !important; height:auto !important; min-height:100dvh; overflow:visible !important;}
-  body.bulk-page #bulkView{display:block !important; position:relative; flex:none !important; width:100%; min-height:calc(100dvh - 64px); height:auto !important; overflow:visible !important;}
-  body.bulk-page #bulkView .wrap{padding-bottom:56px;}
-  body.bulk-page #bulkView .table-wrap{overflow-x:auto !important; overflow-y:visible !important; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y;}
-}
-@media (max-width:760px){
-  html:has(body.bulk-page){height:auto !important; min-height:100%;}
-  body.bulk-page{height:auto !important; min-height:100dvh; overflow-y:auto !important; overflow-x:hidden !important;}
-  body.bulk-page .app{display:block !important; height:auto !important; min-height:100dvh; overflow:visible !important;}
-  body.bulk-page #bulkView{display:block !important; position:relative; flex:none !important; width:100%; min-height:calc(100dvh - 72px); height:auto !important; overflow:visible !important;}
-  body.bulk-page #bulkView .wrap{padding-bottom:56px;}
-  body.bulk-page #bulkView .table-wrap{overflow-x:auto !important; overflow-y:visible !important; touch-action:pan-x pan-y;}
-}
-</style>
-<style id="bulk-navigation-scroll-fix">
-/* PMNO Bulk — robust landscape scrolling + page persistence */
-@media (orientation: landscape) and (max-width: 900px){
-  body.bulk-page{overflow:auto !important; overflow-x:hidden !important; height:auto !important; min-height:100dvh;}
-  body.bulk-page .app{height:auto !important; min-height:100dvh;}
-  body.bulk-page #bulkView{display:block; min-height:calc(100dvh - 64px); height:auto; overflow:visible;}
-  body.bulk-page #bulkView .wrap{padding-bottom:40px;}
-  body.bulk-page #bulkView .table-wrap{width:100%; max-width:100%; overflow-x:auto !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y;}
-  body.bulk-page #bulkView .table{min-width:1450px;}
-}
-@media (max-width:760px){
-  body.bulk-page{overflow:auto !important; height:auto !important; min-height:100dvh;}
-  body.bulk-page .app{height:auto !important; min-height:100dvh;}
-  body.bulk-page #bulkView{display:block; min-height:calc(100dvh - 72px); height:auto; overflow:visible;}
-  body.bulk-page #bulkView .table-wrap{overflow-x:auto !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch; touch-action:pan-x pan-y;}
-  body.bulk-page #bulkView .table{min-width:1450px;}
-}
-</style>
 <style id="pmno-nav-bootstrap-css">
 /* Prevent Single Site from flashing before the navigation router initializes. */
 html.pmno-preload-bulk .workspace{display:none !important}
@@ -113,102 +76,34 @@ html.pmno-preload-bulk #bulkView{display:block !important}
 })();
 </script>
 
-<style id="bulk-scroll-container-final">
-/* PMNO Bulk — single vertical scroll container */
-@media (orientation: landscape) and (max-width: 900px){
-  html, body{height:100% !important;}
-  body.bulk-page{
-    height:100dvh !important;
-    min-height:0 !important;
-    overflow:hidden !important;
-    overflow-x:hidden !important;
-  }
-  body.bulk-page .app{
-    height:100dvh !important;
-    min-height:0 !important;
-    overflow:hidden !important;
-  }
-  body.bulk-page #bulkView{
-    display:block !important;
-    height:100dvh !important;
-    min-height:0 !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-y:contain;
-    touch-action:pan-y;
-  }
-  body.bulk-page #bulkView .wrap{
-    min-height:max-content;
-    padding-bottom:72px;
-  }
-  body.bulk-page #bulkView .table-wrap{
-    overflow-x:auto !important;
-    overflow-y:visible !important;
-    -webkit-overflow-scrolling:touch;
-    touch-action:pan-x;
-  }
-}
-@media (max-width:760px){
-  body.bulk-page{
-    height:100dvh !important;
-    min-height:0 !important;
-    overflow:hidden !important;
-  }
-  body.bulk-page .app{
-    height:100dvh !important;
-    min-height:0 !important;
-    overflow:hidden !important;
-  }
-  body.bulk-page #bulkView{
-    display:block !important;
-    height:100dvh !important;
-    min-height:0 !important;
-    overflow-y:auto !important;
-    overflow-x:hidden !important;
-    -webkit-overflow-scrolling:touch;
-    overscroll-behavior-y:contain;
-    touch-action:pan-y;
-  }
-  body.bulk-page #bulkView .wrap{
-    min-height:max-content;
-    padding-bottom:72px;
-  }
-  body.bulk-page #bulkView .table-wrap{
-    overflow-x:auto !important;
-    overflow-y:visible !important;
-    -webkit-overflow-scrolling:touch;
-    touch-action:pan-x;
-  }
-}
-</style>
-
-
-<style id="pmno-bulk-scroll-universal">
-/* PMNO Bulk — universal document scrolling, independent of viewport width */
-html.pmno-preload-bulk,
-html:has(body.bulk-page){
-  height:auto !important;
-  min-height:100% !important;
-}
+<style id="pmno-navigation-clean-css">
+/* PMNO navigation/layout contract
+   SINGLE: existing responsive workspace.
+   BULK: normal document page; body owns vertical scrolling.
+   TABLE: horizontal overflow only, vertical gestures remain available to page.
+*/
 html.pmno-preload-bulk body,
 body.bulk-page{
-  height:auto !important;
   min-height:100dvh !important;
-  overflow-y:auto !important;
+  height:auto !important;
   overflow-x:hidden !important;
+  overflow-y:auto !important;
+  -webkit-overflow-scrolling:touch;
 }
 html.pmno-preload-bulk .app,
 body.bulk-page .app{
   display:block !important;
-  height:auto !important;
   min-height:100dvh !important;
+  height:auto !important;
   overflow:visible !important;
+}
+html.pmno-preload-bulk .workspace,
+body.bulk-page .workspace{
+  display:none !important;
 }
 html.pmno-preload-bulk #bulkView,
 body.bulk-page #bulkView{
   display:block !important;
-  position:relative !important;
   width:100% !important;
   height:auto !important;
   min-height:calc(100dvh - 72px) !important;
@@ -216,8 +111,10 @@ body.bulk-page #bulkView{
 }
 html.pmno-preload-bulk #bulkView .wrap,
 body.bulk-page #bulkView .wrap{
+  width:100% !important;
+  max-width:1800px !important;
   min-height:max-content !important;
-  padding-bottom:72px !important;
+  padding-bottom:80px !important;
 }
 html.pmno-preload-bulk #bulkView .table-wrap,
 body.bulk-page #bulkView .table-wrap{
@@ -226,11 +123,14 @@ body.bulk-page #bulkView .table-wrap{
   overflow-x:auto !important;
   overflow-y:visible !important;
   -webkit-overflow-scrolling:touch;
-  touch-action:pan-x;
+  touch-action:auto !important;
 }
 html.pmno-preload-bulk #bulkView .table,
 body.bulk-page #bulkView .table{
-  min-width:1450px;
+  min-width:1450px !important;
+}
+body.bulk-page .mobile-nav{
+  display:none !important;
 }
 </style>
 
