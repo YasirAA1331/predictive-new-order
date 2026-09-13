@@ -774,7 +774,8 @@ async function analyzeOne(x){
   });
   const top=normalizeRows(raw);
   const rec=raw?.collo?.recommended||null;
-  const colloCandidate=rec||top[0]||null;
+  // Bulk defaults to technical Candidate #1. The dropdown is the user-controlled driver.
+  const colloCandidate=top[0]||rec||null;
 
   if(colloCandidate?.site_id){
     const detail=await bulkRpc('pmno_candidate_detail_by_site_id',{
@@ -785,7 +786,7 @@ async function analyzeOne(x){
     });
     const inv=detail?.investment||{},eng=detail?.engineering||{},cost=costSummary(detail);
     return {...x,raw,detail,candidate:colloCandidate,b2s:false,
-      decision:rec?'COLLO CANDIDATE':'COLLO',candidate_id:colloCandidate.site_id,
+      decision:'COLLO CANDIDATE',candidate_id:colloCandidate.site_id,
       candidate_name:colloCandidate.site_name||'Recommended candidate',
       distance_m:colloCandidate.distance_m,tower_type:colloCandidate.tower_type,
       tower_height_m:colloCandidate.tower_height_m,tenant_count:colloCandidate.tenant_count,
@@ -815,7 +816,8 @@ function pmnoCandidateOptions(row){
 }
 function pmnoCandidateSelect(row,rowIndex){
   const opts=pmnoCandidateOptions(row);
-  const selected=String(row?.selectedCandidateId||row?.candidate_id||((row?.b2s)?'B2S':(opts[0]?.id||'')));
+  const requested=String(row?.selectedCandidateId||row?.candidate_id||'');
+  const selected=String(row?.b2s?'B2S':(opts.some(o=>String(o.id)===requested)?requested:(opts[0]?.id||'')));
   return `<select class="pmno-candidate-select" data-row-index="${rowIndex}" aria-label="Select candidate" onchange="pmnoBulkSelectCandidate(${rowIndex}, this.value)">
     ${opts.map(o=>`<option value="${bulkEsc(o.id)}" ${String(o.id)===selected?'selected':''}>${bulkEsc(o.label)}</option>`).join('')}
   </select>`;
@@ -829,27 +831,19 @@ function pmnoBulkOpenSingleSite(rowIndex){
   const p=new URLSearchParams();
   p.set('site_id',String(row.site_id||'')); p.set('lat',String(row.lat??'')); p.set('lon',String(row.lon??''));
   p.set('target_tenant',String(row.tenant||'')); p.set('candidate',candidate); p.set('radius','3000'); p.set('source','bulk');
-  history.pushState({pmnoPage:'single'},'',`${location.pathname}?${p.toString()}#single`);
-  window.dispatchEvent(new Event('hashchange'));
-  // Populate the existing Single Site controls and run its native calculation engine.
+  const targetUrl=`${location.pathname}?${p.toString()}#single`;
+  history.pushState({pmnoPage:'single'},'',targetUrl);
+  // The navigation router owns page visibility; invoke it through the existing menu,
+  // then let the route-context loader perform the native Single Site calculation.
+  const singleMenu=document.getElementById('singleMenu');
+  if(singleMenu) singleMenu.click();
+  else window.dispatchEvent(new Event('hashchange'));
+  // Populate the existing Single Site controls and run the native route-context loader.
   setTimeout(async()=>{
     try{
-      if(typeof loadAnalysis!=='function')return;
-      if(document.getElementById('lat'))document.getElementById('lat').value=String(row.lat??'');
-      if(document.getElementById('lon'))document.getElementById('lon').value=String(row.lon??'');
-      if(document.getElementById('tenant')){
-        const sel=document.getElementById('tenant');
-        if([...sel.options].some(o=>o.value===String(row.tenant||'')))sel.value=String(row.tenant||'');
-      }
-      if(document.getElementById('radius'))document.getElementById('radius').value='3000';
-      await loadAnalysis();
-      if(candidate.toUpperCase()==='B2S' && typeof selectB2S==='function') await selectB2S(false);
-      else if(typeof selectCandidate==='function'){
-        const found=state.decision?.rows?.find(x=>String(x.site_id)===candidate);
-        if(found)selectCandidate(found);
-      }
+      if(typeof pmnoLoadRouteContext==='function') await pmnoLoadRouteContext();
     }catch(e){console.warn('Bulk → Single Site handoff failed',e)}
-  },80);
+  },40);
 }
 async function pmnoBulkSelectCandidate(rowIndex,candidateId){
   const row=bulkState.results?.[rowIndex]; if(!row)return;
@@ -1084,6 +1078,10 @@ bulk$('bulk-file').onchange=async e=>{try{bulk$('bulk-error').style.display='non
 bulk$('bulk-template').onclick=()=>{const data=[['Site ID','Site Name','Latitude','Longitude','Target Tenant'],['SITE-001','Example Site',-6.9818,110.4093,'IOH']];const ws=XLSX.utils.aoa_to_sheet(data),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'PMNO Bulk Input');XLSX.writeFile(wb,'PMNO_Bulk_Input_Template.xlsx')};
 bulk$('bulk-analyze').onclick=async()=>{bulkState.results=[];bulk$('bulk-analyze').disabled=true;bulk$('bulk-export').disabled=true;bulk$('bulk-error').style.display='none';for(let i=0;i<bulkState.inputs.length;i++){const x=bulkState.inputs[i];bulk$('bulk-progress').textContent=`Analyzing ${i+1}/${bulkState.inputs.length} · ${x.site_id}`;try{bulkState.results.push(await analyzeOne(x))}catch(e){bulkState.results.push({...x,decision:'ERROR',error:e.message,cost:{}})}}bulk$('bulk-progress').textContent=`Completed ${bulkState.results.length} sites`;bulk$('bulk-analyze').disabled=false;bulk$('bulk-export').disabled=false;render()};
 bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID':r.site_id,'Site Name':r.site_name,'Target Tenant':r.tenant,'Candidate Site ID':r.candidate_id,'Candidate Site Name':r.candidate_name,'Decision':r.decision,'Distance (km)':r.distance_m!=null?bulkNum(r.distance_m)/1000:null,'Tower Type':r.tower_type||'','Tower Height (m)':r.tower_height_m,'Existing Tenant Count':r.tenant_count,'Signal RSRP (dBm)':r.signal,'Need STR':r.b2s?'N/A':(r.need_str||''),'Reinforcement (Ton)':r.b2s?'N/A':(r.reinforcement??''),'Survey':r.cost?.survey||0,'SITAC 1':r.cost?.sitac1||0,'SITAC 2':r.cost?.sitac2||0,'Material':r.cost?.material||0,'Delivery':r.cost?.delivery||0,'CME':r.cost?.cme||0,'TOTAL CAPEX':r.cost?.total||r.capex||0,'Existing IRR':r.existing_irr??'','Estimated IRR':r.estimated_irr??'','Feasibility':bulkSingleSiteMetrics(r).feasibility,'Investment Decision':r.investment_decision||''}));const ws=XLSX.utils.json_to_sheet(out),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Summary');XLSX.writeFile(wb,'PMNO_Bulk_Results.xlsx')};
+
+// Expose Bulk actions for inline table handlers.
+window.pmnoBulkSelectCandidate=pmnoBulkSelectCandidate;
+window.pmnoBulkOpenSingleSite=pmnoBulkOpenSingleSite;
 })();
 </script>
 </body>
