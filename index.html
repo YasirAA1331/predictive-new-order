@@ -356,11 +356,9 @@ async function loadB2SIntelligence(){
   state.selectedId='__B2S__';
   b2sMarker?.getElement()?.querySelector('.b2s-marker')?.classList.add('selected');
   document.querySelectorAll('.candidate-row').forEach(x=>x.classList.toggle('active',x.id==='fallbackCandidate'));
-  const anchor=state.top5?.[0]||state.decision?.rows?.[0];
-  if(!anchor?.site_id){
-    updateDetail({recommended:null,final_decision:'B2S',raw:state.decision?.raw||{}});
-    return;
-  }
+  // B2S must still run when there are zero eligible COLLO candidates.
+  // The B2S point-scenario engine is the source of truth for standalone economics.
+  const anchor=state.top5?.[0]||state.decision?.rows?.[0]||{};
   try{
     setLoading(true);
     const b2sResult=await rpc('pmno_b2s_point_scenario',{
