@@ -497,6 +497,74 @@ body.bulk-page .mobile-nav{
   }
 }
 </style>
+
+<style id="pmno-drm-portrait-site-only-freeze">
+/* Portrait DRM: when the user scrolls right, only SITE remains frozen.
+   DETAIL naturally scrolls away, giving the engineering columns more room. */
+@media (max-width:900px){
+  #drm-table-wrap > .drm-table th:nth-child(1),
+  #drm-table-wrap > .drm-table td:nth-child(1){
+    position:relative;
+    left:auto;
+    z-index:1;
+    width:76px;
+    min-width:76px;
+    max-width:76px;
+    box-shadow:none;
+  }
+
+  #drm-table-wrap > .drm-table th:nth-child(2),
+  #drm-table-wrap > .drm-table td:nth-child(2){
+    position:sticky;
+    left:0;
+    width:136px;
+    min-width:136px;
+    max-width:136px;
+    z-index:30;
+    background:#071725;
+    box-shadow:7px 0 12px -10px rgba(0,0,0,.95);
+  }
+
+  #drm-table-wrap > .drm-table thead th:nth-child(1){
+    position:relative;
+    left:auto;
+    z-index:1;
+    background:#16283f;
+  }
+  #drm-table-wrap > .drm-table thead th:nth-child(2){
+    position:sticky;
+    left:0;
+    z-index:50;
+    background:#16283f;
+  }
+
+  #drm-table-wrap > .drm-table tbody td:nth-child(1){
+    background:#071725;
+  }
+
+  #drm-table-wrap > .drm-table .drm-site-sub{
+    max-width:120px;
+  }
+}
+
+@media (max-width:430px){
+  #drm-table-wrap > .drm-table th:nth-child(1),
+  #drm-table-wrap > .drm-table td:nth-child(1){
+    width:72px;
+    min-width:72px;
+    max-width:72px;
+  }
+  #drm-table-wrap > .drm-table th:nth-child(2),
+  #drm-table-wrap > .drm-table td:nth-child(2){
+    width:128px;
+    min-width:128px;
+    max-width:128px;
+  }
+  #drm-table-wrap > .drm-table .drm-site-sub{
+    max-width:112px;
+  }
+}
+</style>
 </head>
 <body>
 <div class="app">
