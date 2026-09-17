@@ -1210,6 +1210,8 @@ bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID'
 // Expose Bulk actions for inline table handlers.
 window.pmnoBulkSelectCandidate=pmnoBulkSelectCandidate;
 window.pmnoBulkOpenSingleSite=pmnoBulkOpenSingleSite;
+// DRM uses the same candidate-option builder as Bulk; expose it across the IIFE boundary.
+window.pmnoCandidateOptions=pmnoCandidateOptions;
 
 // Narrow DRM bridge: DRM reuses the existing Bulk analysis engine; Single Site and Bulk UI stay unchanged.
 window.pmnoBulkEngine.analyzeOne=analyzeOne;
