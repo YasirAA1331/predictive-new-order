@@ -817,6 +817,56 @@ async function pmnoLoadRouteContext(){
   }catch(e){}
 }
 loadTenants().then(pmnoLoadRouteContext);
+/* PMNO SINGLE SITE SOURCE OF TRUTH BRIDGE
+   DRM/Bulk consumers use this bridge so analysis semantics remain anchored to
+   the exact Single Site RPC + normalization flow. The existing Single Site UI
+   is unchanged. */
+(function(){
+  function singleCandidateOptions(raw){
+    const top=Array.isArray(raw?.collo?.top_5)?raw.collo.top_5:[];
+    return top.map((c,i)=>({index:i,id:String(c?.site_id||`CANDIDATE ${i+1}`),label:`#${i+1} · ${String(c?.site_id||`CANDIDATE ${i+1}`)}`,raw:c}));
+  }
+  async function singleAnalyzeOne(x){
+    const lat=Number(x.lat),lon=Number(x.lon),tenant=String(x.tenant||'').trim().toUpperCase();
+    if(!Number.isFinite(lat)||!Number.isFinite(lon))throw new Error('Latitude / longitude tidak valid.');
+    const radius=Number(x.radius_m||3000);
+    const raw=await runDecision({p_lat:lat,p_lon:lon,p_target_tenant:tenant,p_radius_m:radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873});
+    const normalized=normalizeDecision(raw);
+    const mapRaw=await rpc('pmno_map_candidates',{p_lat:lat,p_lon:lon,p_radius_m:radius,p_target_tenant:tenant});
+    const mapData=Array.isArray(mapRaw?.candidates)?mapRaw.candidates:[];
+    const rows=enrichRows(normalized.rows,mapData);
+    const recommended=enrichRecommended(normalized.recommended,mapData);
+    const colloCandidate=recommended||rows[0]||null;
+    const candidate_options=singleCandidateOptions(raw);
+    if(colloCandidate?.site_id){
+      const detailRaw=await rpc('pmno_candidate_detail_by_site_id',{p_site_id:colloCandidate.site_id,p_target_tenant:tenant,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873,p_option:'COLLO'});
+      const detail=normalizeCandidateDetailPayload(detailRaw);
+      const eng=detail.engineering||{},inv=detail.investment||{},capexItems=finalizeCapexItems(detail.capex_items,'COLLO');
+      const candidate={...colloCandidate,...(detail.site||{}),detail,capex_items:capexItems,need_str:eng.need_str,reinforcement_expected_ton:eng.reinforcement_expected_ton,reinforcement_probability:eng.reinforcement_probability,structural_utilization_proxy:eng.structural_utilization_proxy,sda_available:eng.sda_available,ses_work_type:eng.ses_work_type,ses_work_cost:eng.ses_work_cost,community_case_count:eng.community_case_count,red_zone:eng.red_zone,access_level:eng.access_level,estimated_days:eng.estimated_to_on_air_days,roadhead_distance_m:detail.site?.roadhead_distance_m,existing_nbv:inv.existing_nbv??colloCandidate.existing_nbv??colloCandidate.nbv_existing??colloCandidate.nbv??null,existing_irr:inv.existing_irr??null,npv:inv.npv??null,capex_total:capexItems.reduce((a,z)=>a+num(z?.total_cost,0),0)};
+      return {...x,site_id:x.site_id,site_name:x.site_name||'',lat,lon,tenant,raw,detail,candidate,b2s:false,decision:'COLLO CANDIDATE',candidate_id:candidate.site_id,candidate_name:candidate.site_name||'Recommended candidate',distance_m:candidate.distance_m,tower_type:candidate.tower_type,tower_height_m:candidate.tower_height_m,tenant_count:candidate.tenant_count,signal:candidate.signal_rsrp_avg_dbm,need_str:candidate.need_str,reinforcement:candidate.reinforcement_expected_ton,capex:inv.capex_total??candidate.capex_total,estimated_irr:inv.estimated_irr,investment_decision:inv.decision||candidate.investment_decision,existing_irr:inv.existing_irr,cost:detail.cost||{},selectedCandidateId:candidate.site_id,candidate_options};
+    }
+    const b2sResult=await rpc('pmno_b2s_point_scenario',{p_lat:lat,p_lon:lon,p_target_tenant:tenant,p_radius_m:radius,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_wacc:.0873});
+    if(!b2sResult||typeof b2sResult!=='object')throw new Error('B2S scenario returned no result');
+    const b2s=b2sSharedFromResult(b2sResult,{lat,lon,tenant});
+    return {...x,lat,lon,tenant,raw:{...raw,b2s_scenario:b2sResult,predictive_design:b2s.predictive_design},detail:{engineering:b2s.engineering,investment:b2s.investment,cost:b2s.cost,site:{}},candidate:b2s,b2s:true,decision:'B2S',candidate_id:'PREDICTIVE NEW SITE',candidate_name:'PREDICTIVE NEW SITE',distance_m:0,tower_type:b2s.tower_type,tower_height_m:b2s.tower_height_m,tenant_count:0,signal:null,need_str:'—',reinforcement:'—',capex:b2s.capex_total,estimated_irr:b2s.estimated_irr,investment_decision:b2s.investment_decision,existing_irr:null,b2s_design:b2s.predictive_design,b2s_land_type:b2s.land_type,land_area_m2:b2s.land_area_m2,land_type:b2s.land_type,network_gap_score:b2s.network_gap_score,b2s_initial_lease_years:b2s.b2s_initial_lease_years,b2s_initial_land_lease_annual:b2s.b2s_initial_land_lease_annual,selectedCandidateId:'B2S',candidate_options};
+  }
+  async function singleAnalyzeCandidate(x, candidateId){
+    const id=String(candidateId);
+    if(id==='B2S'){
+      const b2sResult=await rpc('pmno_b2s_point_scenario',{p_lat:Number(x.lat),p_lon:Number(x.lon),p_target_tenant:String(x.tenant||'').trim().toUpperCase(),p_radius_m:Number(x.radius_m||3000),p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_wacc:.0873});
+      const b2s=b2sSharedFromResult(b2sResult,x);
+      return {...x,raw:{...(x.raw||{}),b2s_scenario:b2sResult,predictive_design:b2s.predictive_design},detail:{engineering:b2s.engineering,investment:b2s.investment,cost:b2s.cost,site:{}},candidate:b2s,b2s:true,decision:'B2S',candidate_id:'PREDICTIVE NEW SITE',candidate_name:'PREDICTIVE NEW SITE',distance_m:0,tower_type:b2s.tower_type,tower_height_m:b2s.tower_height_m,tenant_count:0,signal:null,need_str:'—',reinforcement:'—',capex:b2s.capex_total,estimated_irr:b2s.estimated_irr,investment_decision:b2s.investment_decision,existing_irr:null,b2s_design:b2s.predictive_design,b2s_land_type:b2s.land_type,land_area_m2:b2s.land_area_m2,land_type:b2s.land_type,network_gap_score:b2s.network_gap_score,b2s_initial_lease_years:b2s.b2s_initial_lease_years,b2s_initial_land_lease_annual:b2s.b2s_initial_land_lease_annual,selectedCandidateId:'B2S'};
+    }
+    const raw=x.raw||{};const c=(Array.isArray(raw?.collo?.top_5)?raw.collo.top_5:[]).find(z=>String(z?.site_id)===id);
+    if(!c)throw new Error(`Candidate ${id} tidak ditemukan pada hasil Single Site.`);
+    const detailRaw=await rpc('pmno_candidate_detail_by_site_id',{p_site_id:c.site_id,p_target_tenant:String(x.tenant||'').trim().toUpperCase(),p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873,p_option:'COLLO'});
+    const detail=normalizeCandidateDetailPayload(detailRaw),eng=detail.engineering||{},inv=detail.investment||{},capexItems=finalizeCapexItems(detail.capex_items,'COLLO');
+    return {...x,b2s:false,decision:'COLLO CANDIDATE',candidate:{...c,...(detail.site||{}),detail,capex_items:capexItems},candidate_id:c.site_id,candidate_name:c.site_name||'Candidate',distance_m:c.distance_m,tower_type:c.tower_type,tower_height_m:c.tower_height_m,tenant_count:c.tenant_count,signal:c.signal_rsrp_avg_dbm,need_str:eng.need_str||c.need_str,reinforcement:eng.reinforcement_expected_ton??c.reinforcement_expected_ton,capex:inv.capex_total??capexItems.reduce((a,z)=>a+num(z?.total_cost,0),0),estimated_irr:inv.estimated_irr,investment_decision:inv.decision||c.investment_decision,existing_irr:inv.existing_irr,detail,cost:detail.cost||{},selectedCandidateId:c.site_id};
+  }
+  window.pmnoSingleAnalyzeOne=singleAnalyzeOne;
+  window.pmnoSingleAnalyzeCandidate=singleAnalyzeCandidate;
+  window.pmnoSingleCandidateOptions=singleCandidateOptions;
+})();
 </script>
 <script>
 (function(){
@@ -851,50 +901,17 @@ function costSummary(detail){const cost=detail?.cost||{};const rows=Array.isArra
   cme_str_material:item(['STR-MAT','STR-MATERIAL','STR-001']),cme_foundation_tower:item(['FOUND-TOWER','FOUNDATION-TOWER','TOWER-FOUNDATION'],['FOUND']),cme_foundation_rbs:item(['RBS-MAT','RBS-MATERIAL','RBS-001']),cme_rbs_apd:item(['RBS-APD','RBS-APD-MATERIAL','RBS-APD-001']),cme_grounding:item(['ME-GROUNDING','MAT-GND']),cme_electrical:item(['ME-CABLE','ME-PANEL','ME-PROTECTION']),cme_transformer:item(['TRF-UNIT','TRANSFORMATOR','TRANSFORMER-MATERIAL','TRF-MAT'],['TRANSFORMER']),cme_pln:item([],['PLN']),cme_jasa_cme:item(['JASA-CME-COLLO','JASA-CME-B2S','JASA-CME']),cme_erection:item(['ERECT-JASA'])
 };detailBreakdown.total=Object.entries(detailBreakdown).filter(([k])=>k!=='total').reduce((a,[,v])=>a+bulkNum(v,0),0);return {survey,sitac1,sitac2,material,delivery,cme,total:detailBreakdown.total,breakdown:detailBreakdown}}
 async function analyzeOne(x){
-  const raw=await bulkRpc('pmno_decision',{
-    p_lat:x.lat,p_lon:x.lon,p_target_tenant:x.tenant,p_radius_m:3000,
-    p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,
-    p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873
-  });
-  const top=normalizeRows(raw);
-  const rec=raw?.collo?.recommended||null;
-  // Bulk defaults to technical Candidate #1. The dropdown is the user-controlled driver.
-  const colloCandidate=top[0]||rec||null;
-
-  if(colloCandidate?.site_id){
-    const detail=await bulkRpc('pmno_candidate_detail_by_site_id',{
-      p_site_id:colloCandidate.site_id,p_target_tenant:x.tenant,
-      p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,
-      p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,
-      p_wacc:.0873,p_option:'COLLO'
-    });
-    const inv=detail?.investment||{},eng=detail?.engineering||{},cost=costSummary(detail);
-    return {...x,raw,detail,candidate:colloCandidate,b2s:false,
-      decision:'COLLO CANDIDATE',candidate_id:colloCandidate.site_id,
-      candidate_name:colloCandidate.site_name||'Recommended candidate',
-      distance_m:colloCandidate.distance_m,tower_type:colloCandidate.tower_type,
-      tower_height_m:colloCandidate.tower_height_m,tenant_count:colloCandidate.tenant_count,
-      signal:colloCandidate.signal_rsrp_avg_dbm,need_str:eng.need_str||colloCandidate.need_str,
-      reinforcement:eng.reinforcement_expected_ton??colloCandidate.reinforcement_expected_ton,
-      capex:inv.capex_total??cost.total,estimated_irr:inv.estimated_irr,
-      investment_decision:inv.decision||colloCandidate.investment_decision,
-      existing_irr:inv.existing_irr,cost,selectedCandidateId:colloCandidate.site_id};
-  }
-
-  // B2S uses the same dedicated point-scenario economics/design engine as Single Site.
-  const b2sResult=await bulkRpc('pmno_b2s_point_scenario',{
-    p_lat:x.lat,p_lon:x.lon,p_target_tenant:x.tenant,p_radius_m:3000,
-    p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_wacc:.0873
-  });
-  if(!b2sResult || typeof b2sResult!=='object') throw new Error('B2S scenario returned no result');
-  const b2s=b2sSharedFromResult(b2sResult,x);
-  return {...x,raw:{...raw,b2s_scenario:b2sResult,predictive_design:b2s.predictive_design},detail:{engineering:b2s.engineering,investment:b2s.investment,cost:b2s.cost,site:{}},candidate:b2s,b2s:true,decision:'B2S',candidate_id:'PREDICTIVE NEW SITE',candidate_name:'PREDICTIVE NEW SITE',distance_m:0,tower_type:b2s.tower_type,tower_height_m:b2s.tower_height_m,tenant_count:0,signal:null,need_str:'—',reinforcement:'—',capex:b2s.capex_total,estimated_irr:b2s.estimated_irr,investment_decision:b2s.investment_decision,existing_irr:null,b2s_design:b2s.predictive_design,b2s_land_type:b2s.land_type,land_area_m2:b2s.land_area_m2,land_type:b2s.land_type,network_gap_score:b2s.network_gap_score,b2s_initial_lease_years:b2s.b2s_initial_lease_years,b2s_initial_land_lease_annual:b2s.b2s_initial_land_lease_annual,selectedCandidateId:'B2S'};
+  if(typeof window.pmnoSingleAnalyzeOne!=='function')throw new Error('Single Site source-of-truth belum tersedia.');
+  return window.pmnoSingleAnalyzeOne(x);
 }
 
 /* PMNO candidate selection / Single Site bridge */
 function pmnoCandidateOptions(row){
-  const top=Array.isArray(row?.raw?.collo?.top_5)?row.raw.collo.top_5:[];
-  const opts=top.map((c,i)=>({index:i,id:String(c?.site_id||`CANDIDATE ${i+1}`),label:`#${i+1} · ${String(c?.site_id||`CANDIDATE ${i+1}`)}`,raw:c}));
+  const saved=Array.isArray(row?.candidate_options)?row.candidate_options:[];
+  const top=saved.length
+    ? saved.filter(x=>String(x?.id||'')!=='B2S').map((x,i)=>({index:i,id:String(x.id),label:String(x.label||`#${i+1} · ${x.id}`),raw:x.raw||x}))
+    : (Array.isArray(row?.raw?.collo?.top_5)?row.raw.collo.top_5:[]).map((c,i)=>({index:i,id:String(c?.site_id||`CANDIDATE ${i+1}`),label:`#${i+1} · ${String(c?.site_id||`CANDIDATE ${i+1}`)}`,raw:c}));
+  const opts=top.slice(0,5);
   opts.push({index:opts.length,id:'B2S',label:'B2S · PREDICTIVE NEW SITE',raw:{isB2S:true}});
   return opts;
 }
@@ -973,52 +990,15 @@ function pmnoBulkOpenSingleSite(rowIndex){
 }
 
 async function pmnoBulkSelectCandidate(rowIndex,candidateId){
-  const row=bulkState.results?.[rowIndex]; if(!row)return;
-  const id=String(candidateId);
-  const option=pmnoCandidateOptions(row).find(x=>x.id===id); if(!option)return;
-  row.selectedCandidateId=id;
+  const row=bulkState.results?.[rowIndex];if(!row)return;
+  const id=String(candidateId);const opts=pmnoCandidateOptions(row);if(!opts.some(x=>String(x.id)===id))return;
   try{
     bulk$('bulk-progress').textContent=`Recalculating ${row.site_id} · ${id==='B2S'?'B2S':id}`;
-    if(id==='B2S'){
-      let b2sResult=row.raw?.b2s_scenario;
-      if(!b2sResult){
-        b2sResult=await bulkRpc('pmno_b2s_point_scenario',{
-          p_lat:row.lat,p_lon:row.lon,p_target_tenant:row.tenant,p_radius_m:3000,
-          p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_wacc:.0873
-        });
-        row.raw={...(row.raw||{}),b2s_scenario:b2sResult};
-      }
-      const b2s=b2sSharedFromResult(b2sResult,row);
-      row.b2s=true; row.decision='B2S'; row.candidate=b2s; row.candidate_id='PREDICTIVE NEW SITE';
-      row.candidate_name='PREDICTIVE NEW SITE'; row.distance_m=0; row.tower_type=b2s.tower_type;
-      row.tower_height_m=b2s.tower_height_m; row.tenant_count=0; row.signal=null; row.need_str='—';
-      row.reinforcement='—'; row.capex=b2s.capex_total; row.estimated_irr=b2s.estimated_irr;
-      row.investment_decision=b2s.investment_decision; row.existing_irr=null;
-      row.b2s_design=b2s.predictive_design; row.b2s_land_type=b2s.land_type; row.land_area_m2=b2s.land_area_m2;
-      row.land_type=b2s.land_type; row.network_gap_score=b2s.network_gap_score;
-      row.b2s_initial_lease_years=b2s.b2s_initial_lease_years; row.b2s_initial_land_lease_annual=b2s.b2s_initial_land_lease_annual;
-      row.detail={engineering:b2s.engineering,investment:b2s.investment,cost:b2s.cost,site:{}};
-    }else{
-      const c=option.raw;
-      const detail=await bulkRpc('pmno_candidate_detail_by_site_id',{
-        p_site_id:c.site_id,p_target_tenant:row.tenant,p_added_device_count:7,p_added_load_kw:12,
-        p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873,p_option:'COLLO'
-      });
-      const inv=detail?.investment||{},eng=detail?.engineering||{},cost=costSummary(detail);
-      row.b2s=false; row.decision='COLLO CANDIDATE'; row.candidate=c; row.candidate_id=c.site_id;
-      row.candidate_name=c.site_name||'Candidate'; row.distance_m=c.distance_m; row.tower_type=c.tower_type;
-      row.tower_height_m=c.tower_height_m; row.tenant_count=c.tenant_count; row.signal=c.signal_rsrp_avg_dbm;
-      row.need_str=eng.need_str||c.need_str; row.reinforcement=eng.reinforcement_expected_ton??c.reinforcement_expected_ton;
-      row.capex=inv.capex_total??cost.total; row.estimated_irr=inv.estimated_irr;
-      row.investment_decision=inv.decision||c.investment_decision; row.existing_irr=inv.existing_irr;
-      row.detail=detail; row.cost=cost;
-    }
-    render();
-  }catch(e){
-    row.selectedCandidateId=row.candidate_id;
-    bulk$('bulk-error').textContent=`Candidate recalculation failed: ${e.message}`;
-    bulk$('bulk-error').style.display='block'; render();
-  }finally{bulk$('bulk-progress').textContent=`Completed ${bulkState.results.length} sites`;}
+    if(typeof window.pmnoSingleAnalyzeCandidate!=='function')throw new Error('Single Site candidate engine belum tersedia.');
+    const updated=await window.pmnoSingleAnalyzeCandidate(row,id);
+    Object.assign(row,updated,{candidate_options:Array.isArray(row.candidate_options)&&row.candidate_options.length?row.candidate_options:opts,selectedCandidateId:updated.selectedCandidateId||id});
+    renderBulk();
+  }catch(e){bulk$('bulk-progress').textContent=`Candidate recalculation failed: ${e.message}`;}
 }
 function bulkSingleSiteMetrics(r){
   const rec=r.candidate||r.raw?.collo?.recommended||{};
@@ -1210,12 +1190,12 @@ bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID'
 // Expose Bulk actions for inline table handlers.
 window.pmnoBulkSelectCandidate=pmnoBulkSelectCandidate;
 window.pmnoBulkOpenSingleSite=pmnoBulkOpenSingleSite;
-// DRM bridge: expose only Bulk helpers that DRM explicitly reuses across the IIFE boundary.
+// Legacy helper bridge retained for Bulk compatibility; DRM analysis does not use it.
 window.pmnoCandidateOptions=pmnoCandidateOptions;
 window.pmnoBulkNum=bulkNum;
 window.pmnoB2sSharedFromResult=b2sSharedFromResult;
 
-// Narrow DRM bridge: DRM reuses the existing Bulk analysis engine; Single Site and Bulk UI stay unchanged.
+// DRM bridge: Single Site is the canonical source of truth; Bulk remains untouched.
 window.pmnoBulkEngine.analyzeOne=analyzeOne;
 window.pmnoBulkEngine.bulkSingleSiteMetrics=bulkSingleSiteMetrics;
 window.pmnoBulkEngine.ready=true;
@@ -1259,10 +1239,10 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
  async function handleSiteFile(){try{const file=$('drm-site-file').files[0];$('drm-site-file-name').textContent=file?.name||'Belum ada file';if(!file)return;const raw=await parseFile(file);const valid=raw.map(normalize).filter(x=>x.site_id&&x.lat!==null&&x.lon!==null);$('drm-site-modal-msg').textContent=`${valid.length} site siap ditambahkan.`;$('drm-add-sites-confirm').onclick=()=>addSites(raw,false)}catch(e){$('drm-site-modal-msg').textContent='Upload gagal: '+e.message}}
  async function editSelected(){if(state.selected.size!==1){alert('Pilih tepat 1 site untuk EDIT.');return}const id=Array.from(state.selected)[0],s=state.sites.find(x=>String(x.id||x.site_id)===id);if(!s)return;const siteId=prompt('Site ID',s.site_id);if(siteId===null)return;const siteName=prompt('Site Name',s.site_name||'');if(siteName===null)return;const lat=prompt('Latitude',s.lat??s.latitude??'');const lon=prompt('Longitude',s.lon??s.longitude??'');if(lat===null||lon===null)return;Object.assign(s,{site_id:siteId.trim(),site_name:siteName.trim(),lat:Number(lat),lon:Number(lon)});try{if(state.project?.id&&s.id)await api('pmno_project_sites?id=eq.'+encodeURIComponent(s.id),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({site_id:s.site_id,site_name:s.site_name,latitude:s.lat,longitude:s.lon})})}catch(e){}renderProjectWorkspace()}
  async function deleteSelected(){if(!state.selected.size)return;if(!confirm(`Hapus ${state.selected.size} site dari project?`))return;const ids=Array.from(state.selected);try{if(state.project?.id){const dbids=state.sites.filter(s=>ids.includes(String(s.id))).map(s=>s.id);if(dbids.length)await api('pmno_project_sites?id=in.('+dbids.map(encodeURIComponent).join(',')+')',{method:'DELETE'})}}catch(e){}state.sites=state.sites.filter(s=>!ids.includes(String(s.id||s.site_id)));state.selected.clear();renderProjectWorkspace()}
- function snapshot(r){const e=engine();let m;try{m=e?.bulkSingleSiteMetrics?.(r)||{feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}}catch(err){m={feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}};let full;try{full=JSON.parse(JSON.stringify(r))}catch(err){full={...r}};delete full.saved_metrics;return {...full,saved_metrics:{feasibility:m.feasibility||'—',estIrr:m.estIrr!=null?Number(m.estIrr):null,isB2S:!!m.isB2S}}}
+ function snapshot(r){const e=engine();let m;try{m=e?.bulkSingleSiteMetrics?.(r)||{feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}}catch(err){m={feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}};let full;try{full=JSON.parse(JSON.stringify(r))}catch(err){full={...r}};delete full.saved_metrics;return {...full,candidate_options:Array.isArray(r.candidate_options)?r.candidate_options:[],selectedCandidateId:r.selectedCandidateId||r.candidate_id||null,drm_status:r.drm_status||'NEED REVIEW',drm_note:r.drm_note||'',saved_metrics:{feasibility:m.feasibility||'—',estIrr:m.estIrr!=null?Number(m.estIrr):null,isB2S:!!m.isB2S}}}
  function metrics(r){if(r.saved_metrics)return r.saved_metrics;try{return engine()?.bulkSingleSiteMetrics?.(r)||{feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}}catch(e){return {feasibility:r.feasibility||'—',estIrr:r.estimated_irr??null,isB2S:r.b2s===true}}}
  function updateRunProgress(done,total,current,phase){const pct=total?Math.round(done/total*100):0;$('drm-run-progress').classList.remove('hidden');$('drm-progress-title').textContent=phase||'Analisis sedang berjalan';$('drm-progress-count').innerHTML=`${done} <small>/ ${total} site</small>`;$('drm-progress-bar').style.width=`${pct}%`;$('drm-progress-completed').textContent=done;$('drm-progress-processing').textContent=(current&&done<total)?1:0;$('drm-progress-remaining').textContent=Math.max(total-done-(current&&done<total?1:0),0);$('drm-progress-site').innerHTML=current&&done<total?`<span class="drm-progress-spinner"></span>Sedang menganalisis: <strong>${esc(current)}</strong>`:current?`✓ Selesai menganalisis <strong>${esc(current)}</strong>`:'Menunggu...'}
- async function runSelected(ids){if(state.running)return;state.openRunId=null;const selectedSites=state.sites.filter(s=>ids.includes(String(s.id||s.site_id)));if(!selectedSites.length)return;const total=selectedSites.length;state.running=true;updateSelectedUI();$('drm-results').classList.remove('hidden');$('drm-result-state').textContent=`Menyiapkan ${total} site untuk dianalisis...`;state.results=[];updateRunProgress(0,total,null,'Menyiapkan analisis...');let e=null;try{e=await waitForBulkEngine();if(!e?.analyzeOne)throw new Error('Engine analisis belum tersedia. Coba buka ulang DRM.');for(let i=0;i<selectedSites.length;i++){const s=selectedSites[i],x={site_id:s.site_id,site_name:s.site_name||'',lat:Number(s.lat??s.latitude),lon:Number(s.lon??s.longitude),tenant:state.project.tenant_name};updateRunProgress(i,total,s.site_id,'Analysis in progress');$('drm-result-state').textContent=`Menganalisis ${i+1}/${total} · ${s.site_id}`;try{const r=await e.analyzeOne(x);r.drm_status='NEED REVIEW';state.results.push(r);state.selected.delete(String(s.id||s.site_id));renderSiteTable()}catch(err){state.results.push({...x,drm_status:'NEED REVIEW',error:err.message,saved_metrics:{feasibility:'ERROR',estIrr:null,isB2S:false}})}updateRunProgress(i+1,total,s.site_id,i+1===total?'Analysis completed':'Analysis in progress');renderResults()}state.dirty=true;state.selected.clear();updateSelectedUI();renderSiteTable()}catch(err){$('drm-result-state').textContent=`Analisis berhenti: ${err.message}`;updateRunProgress(state.results.length,total,null,'Analisis belum selesai');$('drm-progress-site').textContent=err.message;alert(err.message)}finally{state.running=false;updateSelectedUI();if(state.results.length===total){$('drm-progress-title').textContent='✓ ANALYSIS COMPLETED';$('drm-progress-processing').textContent=0;$('drm-progress-remaining').textContent=0}}}
+ async function runSelected(ids){if(state.running)return;state.openRunId=null;const selectedSites=state.sites.filter(s=>ids.includes(String(s.id||s.site_id)));if(!selectedSites.length)return;const total=selectedSites.length;state.running=true;updateSelectedUI();$('drm-results').classList.remove('hidden');$('drm-result-state').textContent=`Menyiapkan ${total} site untuk dianalisis...`;state.results=[];updateRunProgress(0,total,null,'Menyiapkan analisis...');let e=null;try{if(typeof window.pmnoSingleAnalyzeOne!=='function')throw new Error('Single Site source-of-truth belum tersedia. Coba buka ulang aplikasi.');for(let i=0;i<selectedSites.length;i++){const s=selectedSites[i],x={site_id:s.site_id,site_name:s.site_name||'',lat:Number(s.lat??s.latitude),lon:Number(s.lon??s.longitude),tenant:state.project.tenant_name};updateRunProgress(i,total,s.site_id,'Analysis in progress');$('drm-result-state').textContent=`Menganalisis ${i+1}/${total} · ${s.site_id}`;try{const r=await window.pmnoSingleAnalyzeOne(x);r.candidate_options=Array.isArray(r.candidate_options)?r.candidate_options:((typeof window.pmnoSingleCandidateOptions==='function')?window.pmnoSingleCandidateOptions(r.raw||r):[]);r.selectedCandidateId=r.selectedCandidateId||r.candidate_id;r.drm_status='NEED REVIEW';state.results.push(r);state.selected.delete(String(s.id||s.site_id));renderSiteTable()}catch(err){state.results.push({...x,drm_status:'NEED REVIEW',error:err.message,saved_metrics:{feasibility:'ERROR',estIrr:null,isB2S:false}})}updateRunProgress(i+1,total,s.site_id,i+1===total?'Analysis completed':'Analysis in progress');renderResults()}state.dirty=true;state.selected.clear();updateSelectedUI();renderSiteTable()}catch(err){$('drm-result-state').textContent=`Analisis berhenti: ${err.message}`;updateRunProgress(state.results.length,total,null,'Analisis belum selesai');$('drm-progress-site').textContent=err.message;alert(err.message)}finally{state.running=false;updateSelectedUI();if(state.results.length===total){$('drm-progress-title').textContent='✓ ANALYSIS COMPLETED';$('drm-progress-processing').textContent=0;$('drm-progress-remaining').textContent=0}}}
  function renderResults(){
  const rows=state.results,a=rows.filter(r=>r.drm_status==='APPROVED').length,rv=rows.filter(r=>r.drm_status==='NEED REVIEW').length,rj=rows.filter(r=>r.drm_status==='REJECTED').length;
  $('drm-k-total').textContent=rows.length;$('drm-k-approved').textContent=a;$('drm-k-review').textContent=rv;$('drm-k-rejected').textContent=rj;$('drm-save-run').disabled=!rows.length;$('drm-save-run').textContent=state.openRunId?'SIMPAN PERUBAHAN':'SIMPAN HASIL';$('drm-result-state').textContent=rows.length?`${rows.length} site · ${state.dirty?'Ada perubahan yang belum disimpan':'Hasil tersimpan'}`:'Belum ada hasil.';
@@ -1274,7 +1254,7 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
  <tr><th rowspan="2">SITE</th><th rowspan="2">TENANT</th><th rowspan="2">TYPE</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th rowspan="2">IRR</th><th rowspan="2">FEASIBILITY</th><th rowspan="2">KEPUTUSAN</th><th rowspan="2">CATATAN / NEXT ACTION</th></tr>
  <tr><th>DISTANCE</th><th>TOWER TYPE</th><th>HEIGHT</th><th>EXISTING TENANTS</th><th>TARGET TENANT SIGNAL</th><th>NEED STR</th><th>EST. REINFORCEMENT</th><th>SDA AVAILABLE</th><th>SES / DELIVERY</th><th>COMCASE HISTORY</th><th>RED ZONE</th><th>ACCESS DIFFICULTY</th><th>ROADHEAD DISTANCE</th><th>EST. TO ON AIR</th><th>REINFORCEMENT PROB.</th><th>STRUCTURAL UTILIZATION</th><th>PHYSICAL SES PROB.</th></tr></thead><tbody>`+
  visible.map(r=>{
-   const i=rows.indexOf(r),m=moneylessMetrics(r),st=r.drm_status||'NEED REVIEW';
+   const i=rows.indexOf(r),baseMetrics=moneylessMetrics(r),m={...baseMetrics,isB2S:r.b2s===true||String(r.selectedCandidateId||'')==='B2S'||String(r.candidate_id||'')==='PREDICTIVE NEW SITE',estIrr:r.estimated_irr??baseMetrics.estIrr},st=r.drm_status||'NEED REVIEW';
    const candidateHtml=drmCandidateSelect(r,i);
    const irr=m.estIrr!=null?(Number(m.estIrr)*100).toFixed(2)+'%':'—';
    const feasibility=m.feasibility||'—';
@@ -1292,40 +1272,25 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
 }
 
 function drmCandidateSelect(row,rowIndex){
- const opts=window.pmnoCandidateOptions(row);
+ const persisted=Array.isArray(row?.candidate_options)&&row.candidate_options.length?row.candidate_options:null;
+ const opts=persisted||((typeof window.pmnoSingleCandidateOptions==='function')?window.pmnoSingleCandidateOptions(row.raw||row):[]);
  const requested=String(row?.selectedCandidateId||row?.candidate_id||'');
- const selected=String(row?.b2s?'B2S':(opts.some(o=>String(o.id)===requested)?requested:(opts[0]?.id||'')));
+ const selected=String(opts.some(o=>String(o.id)===requested)?requested:(opts[0]?.id||''));
  return `<select class="pmno-candidate-select drm-candidate-select" data-drm-candidate="1" data-row-index="${rowIndex}" aria-label="Select candidate">${opts.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===selected?'selected':''}>${esc(o.label)}</option>`).join('')}</select>`;
 }
-
 async function drmSelectCandidate(rowIndex,candidateId){
  const row=state.results?.[rowIndex];if(!row)return;
- const id=String(candidateId);const option=window.pmnoCandidateOptions(row).find(x=>String(x.id)===id);if(!option)return;
+ const id=String(candidateId);const opts=Array.isArray(row.candidate_options)?row.candidate_options:((typeof window.pmnoSingleCandidateOptions==='function')?window.pmnoSingleCandidateOptions(row.raw||row):[]);
+ if(!opts.some(x=>String(x.id)===id))return;
  const previous=row.selectedCandidateId||row.candidate_id;row.selectedCandidateId=id;
  try{
-   const e=await waitForBulkEngine();if(!e?.analyzeOne)throw new Error('Engine analisis belum tersedia.');
+   if(typeof window.pmnoSingleAnalyzeCandidate!=='function')throw new Error('Single Site candidate engine belum tersedia.');
    $('drm-result-state').textContent=`Recalculating ${row.site_id} · ${id==='B2S'?'B2S':id}`;
-   if(id==='B2S'){
-     let src=row.raw?.b2s_scenario;
-     if(!src){
-       const resp=await fetch('https://lsiiruhnitbrqfwbmdor.supabase.co/rest/v1/rpc/pmno_b2s_point_scenario',{method:'POST',headers:{apikey:'sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr',Authorization:'Bearer sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr','Content-Type':'application/json'},body:JSON.stringify({p_lat:Number(row.lat),p_lon:Number(row.lon),p_target_tenant:row.tenant||state.project?.tenant_name||'',p_radius_m:3000,p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_wacc:.0873})});
-       if(!resp.ok)throw new Error(`pmno_b2s_point_scenario HTTP ${resp.status}`);
-       src=await resp.json();
-     }
-     if(!src||typeof src!=='object')throw new Error('B2S scenario returned no result');
-     const b2s=typeof window.pmnoB2sSharedFromResult==='function'?window.pmnoB2sSharedFromResult(src,row):null;
-     if(!b2s)throw new Error('B2S shared result helper unavailable');
-     Object.assign(row,{raw:{...(row.raw||{}),b2s_scenario:src,predictive_design:b2s.predictive_design},detail:{engineering:b2s.engineering,investment:b2s.investment,cost:b2s.cost,site:{}},candidate:b2s,b2s:true,decision:'B2S',candidate_id:'PREDICTIVE NEW SITE',candidate_name:'PREDICTIVE NEW SITE',distance_m:0,tower_type:b2s.tower_type,tower_height_m:b2s.tower_height_m,tenant_count:0,signal:null,need_str:'—',reinforcement:'—',capex:b2s.capex_total,estimated_irr:b2s.estimated_irr,investment_decision:b2s.investment_decision,existing_irr:null,b2s_design:b2s.predictive_design,b2s_land_type:b2s.land_type,land_area_m2:b2s.land_area_m2,land_type:b2s.land_type,network_gap_score:b2s.network_gap_score,b2s_initial_lease_years:b2s.b2s_initial_lease_years,b2s_initial_land_lease_annual:b2s.b2s_initial_land_lease_annual});
-   }else{
-     const c=option.raw;
-     const detail=await bulkRpc('pmno_candidate_detail_by_site_id',{p_site_id:c.site_id,p_target_tenant:row.tenant||state.project?.tenant_name||'',p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873,p_option:'COLLO'});
-     const inv=detail?.investment||{},eng=detail?.engineering||{},cost=costSummary(detail);
-     Object.assign(row,{b2s:false,decision:'COLLO CANDIDATE',candidate:c,candidate_id:c.site_id,candidate_name:c.site_name||'Candidate',distance_m:c.distance_m,tower_type:c.tower_type,tower_height_m:c.tower_height_m,tenant_count:c.tenant_count,signal:c.signal_rsrp_avg_dbm,need_str:eng.need_str||c.need_str,reinforcement:eng.reinforcement_expected_ton??c.reinforcement_expected_ton,capex:inv.capex_total??cost.total,estimated_irr:inv.estimated_irr,investment_decision:inv.decision||c.investment_decision,existing_irr:inv.existing_irr,detail,cost});
-   }
-   state.dirty=true;renderResults();
+   const updated=await window.pmnoSingleAnalyzeCandidate(row,id);
+   Object.assign(row,updated,{candidate_options:opts,selectedCandidateId:updated.selectedCandidateId||id});
+   row.dirty_candidate=true;state.dirty=true;renderResults();
  }catch(e){row.selectedCandidateId=previous;$('drm-result-state').textContent=`Candidate recalculation failed: ${e.message}`;renderResults()}
 }
-
 async function saveRun(){if(!state.project||!state.results.length)return;const approved=state.results.filter(r=>r.drm_status==='APPROVED').length,review=state.results.filter(r=>r.drm_status==='NEED REVIEW').length,rejected=state.results.filter(r=>r.drm_status==='REJECTED').length;const snap=state.results.map(snapshot);let run={run_no:(state.runs[0]?.run_no||0)+1,run_name:`${state.project.project_name||state.project.name} · ${new Date().toLocaleDateString('id-ID')}`,site_count:snap.length,approved_count:approved,need_review_count:review,rejected_count:rejected,input_rows:state.sites.filter(s=>state.results.some(r=>r.site_id===s.site_id)),result_rows:snap,created_at:new Date().toISOString()};try{if(state.openRunId&&state.project.id){const rows=await api('pmno_analysis_runs?id=eq.'+encodeURIComponent(state.openRunId),{method:'PATCH',headers:{Prefer:'return=representation'},body:JSON.stringify({site_count:run.site_count,approved_count:approved,need_review_count:review,rejected_count:rejected,input_rows:run.input_rows,result_rows:run.result_rows})});run={...state.runs.find(x=>String(x.id)===String(state.openRunId)),...(rows[0]||{})}}else if(state.project.id){const rows=await api('pmno_analysis_runs',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({...run,project_id:state.project.id})});run=rows[0]}else{run.id=crypto.randomUUID?.()||String(Date.now());state.runs.unshift(run);localSave()}state.openRunId=String(run.id);state.runs=[run,...state.runs.filter(r=>String(r.id)!==String(run.id))];state.dirty=false;$('drm-save-msg').textContent=`✓ ${snap.length} site ${state.openRunId?'tersimpan':'berhasil disimpan'}.`;renderResults();renderHistory()}catch(e){$('drm-save-msg').textContent='Gagal menyimpan: '+e.message}}
  function renderHistory(){const el=$('drm-history');if(!state.runs.length){el.innerHTML='<div class="drm-empty">Belum ada hasil analisis.</div>';return}el.innerHTML=state.runs.map(r=>`<div class="drm-run-item"><div><strong>RUN #${r.run_no}</strong><small>${esc(r.run_name||'')} · ${r.site_count||0} site · ${r.created_at?new Date(r.created_at).toLocaleString('id-ID'):''}</small></div><div class="drm-run-actions"><button class="drm-mini-btn" data-open-run="${esc(r.id)}">BUKA HASIL</button><button class="drm-mini-btn danger" data-delete-run="${esc(r.id)}">HAPUS</button></div></div>`).join('');el.querySelectorAll('[data-open-run]').forEach(b=>b.onclick=()=>openRun(b.dataset.openRun));el.querySelectorAll('[data-delete-run]').forEach(b=>b.onclick=()=>deleteRun(b.dataset.deleteRun))}
  function openRun(id){const r=state.runs.find(x=>String(x.id)===String(id));if(!r)return;state.openRunId=String(id);state.results=r.result_rows||[];state.dirty=false;$('drm-results').classList.remove('hidden');renderResults()}
