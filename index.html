@@ -1210,8 +1210,10 @@ bulk$('bulk-export').onclick=()=>{const out=bulkState.results.map(r=>({'Site ID'
 // Expose Bulk actions for inline table handlers.
 window.pmnoBulkSelectCandidate=pmnoBulkSelectCandidate;
 window.pmnoBulkOpenSingleSite=pmnoBulkOpenSingleSite;
-// DRM uses the same candidate-option builder as Bulk; expose it across the IIFE boundary.
+// DRM bridge: expose only Bulk helpers that DRM explicitly reuses across the IIFE boundary.
 window.pmnoCandidateOptions=pmnoCandidateOptions;
+window.pmnoBulkNum=bulkNum;
+window.pmnoB2sSharedFromResult=b2sSharedFromResult;
 
 // Narrow DRM bridge: DRM reuses the existing Bulk analysis engine; Single Site and Bulk UI stay unchanged.
 window.pmnoBulkEngine.analyzeOne=analyzeOne;
@@ -1278,7 +1280,7 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
    const feasibility=m.feasibility||'—';
    const decisionClass=st==='APPROVED'?'approved':st==='REJECTED'?'rejected':'review';
    return `<tr><td><strong>${esc(r.site_id)}</strong>${r.site_name?`<small style="display:block;color:#71869b;margin-top:3px">${esc(r.site_name)}</small>`:''}</td><td>${esc(r.tenant||state.project?.tenant_name||'—')}</td><td><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="drm-candidate-cell">${candidateHtml}</td>`+
-     cell(m.distance)+cell(m.tower)+cell(m.height!=null?bulkNum(m.height).toFixed(0)+' m':'—','num')+cell(m.isB2S?'—':m.tenants,'center')+cell(m.signal,'num')+
+     cell(m.distance)+cell(m.tower)+cell(m.height!=null?window.pmnoBulkNum(m.height).toFixed(0)+' m':'—','num')+cell(m.isB2S?'—':m.tenants,'center')+cell(m.signal,'num')+
      cell(m.needStr,'center')+cell(m.reinforcement,'num')+cell(m.sda,'center')+cell(m.ses)+cell(m.comcase,'center')+cell(m.red,'center')+cell(m.access)+cell(m.road,'num')+cell(m.days)+cell(m.reinfProb,'num')+cell(m.structural,'num')+cell(m.physical,'num')+
      cell(irr,'num')+`<td>${esc(feasibility)}</td><td><span class="drm-status ${decisionClass}">${esc(st)}</span></td></tr>`;
  }).join('')+'</tbody></table>';
@@ -1286,7 +1288,7 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
 }
 
 function drmCandidateSelect(row,rowIndex){
- const opts=pmnoCandidateOptions(row);
+ const opts=window.pmnoCandidateOptions(row);
  const requested=String(row?.selectedCandidateId||row?.candidate_id||'');
  const selected=String(row?.b2s?'B2S':(opts.some(o=>String(o.id)===requested)?requested:(opts[0]?.id||'')));
  return `<select class="pmno-candidate-select drm-candidate-select" data-drm-candidate="1" data-row-index="${rowIndex}" aria-label="Select candidate">${opts.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===selected?'selected':''}>${esc(o.label)}</option>`).join('')}</select>`;
@@ -1294,7 +1296,7 @@ function drmCandidateSelect(row,rowIndex){
 
 async function drmSelectCandidate(rowIndex,candidateId){
  const row=state.results?.[rowIndex];if(!row)return;
- const id=String(candidateId);const option=pmnoCandidateOptions(row).find(x=>String(x.id)===id);if(!option)return;
+ const id=String(candidateId);const option=window.pmnoCandidateOptions(row).find(x=>String(x.id)===id);if(!option)return;
  const previous=row.selectedCandidateId||row.candidate_id;row.selectedCandidateId=id;
  try{
    const e=await waitForBulkEngine();if(!e?.analyzeOne)throw new Error('Engine analisis belum tersedia.');
@@ -1307,7 +1309,7 @@ async function drmSelectCandidate(rowIndex,candidateId){
        src=await resp.json();
      }
      if(!src||typeof src!=='object')throw new Error('B2S scenario returned no result');
-     const b2s=typeof b2sSharedFromResult==='function'?b2sSharedFromResult(src,row):null;
+     const b2s=typeof window.pmnoB2sSharedFromResult==='function'?window.pmnoB2sSharedFromResult(src,row):null;
      if(!b2s)throw new Error('B2S shared result helper unavailable');
      Object.assign(row,{raw:{...(row.raw||{}),b2s_scenario:src,predictive_design:b2s.predictive_design},detail:{engineering:b2s.engineering,investment:b2s.investment,cost:b2s.cost,site:{}},candidate:b2s,b2s:true,decision:'B2S',candidate_id:'PREDICTIVE NEW SITE',candidate_name:'PREDICTIVE NEW SITE',distance_m:0,tower_type:b2s.tower_type,tower_height_m:b2s.tower_height_m,tenant_count:0,signal:null,need_str:'—',reinforcement:'—',capex:b2s.capex_total,estimated_irr:b2s.estimated_irr,investment_decision:b2s.investment_decision,existing_irr:null,b2s_design:b2s.predictive_design,b2s_land_type:b2s.land_type,land_area_m2:b2s.land_area_m2,land_type:b2s.land_type,network_gap_score:b2s.network_gap_score,b2s_initial_lease_years:b2s.b2s_initial_lease_years,b2s_initial_land_lease_annual:b2s.b2s_initial_land_lease_annual});
    }else{
