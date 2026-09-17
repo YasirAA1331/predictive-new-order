@@ -309,11 +309,12 @@ body.bulk-page .mobile-nav{
   max-width:100%;
   height:min(650px, calc(100dvh - 320px));
   min-height:420px;
-  overflow:auto;
+  overflow-x:auto;
+  overflow-y:auto;
   overflow-anchor:none;
-  overscroll-behavior:contain;
-  scrollbar-gutter:stable;
-  -webkit-overflow-scrolling:touch;
+  overscroll-behavior-x:none;
+  overscroll-behavior-y:contain;
+  touch-action:pan-x pan-y;
   border-radius:10px;
 }
 
@@ -408,20 +409,21 @@ body.bulk-page .mobile-nav{
   text-overflow:ellipsis;
 }
 
-/* Decision: compact, centered, readable and status-aware. */
+/* Decision: keep the original compact control; only center the text. */
 #drm-table-wrap > .drm-table .drm-decision{
-  display:block;
-  width:156px;
-  min-width:156px;
-  height:32px;
+  width:120px;
+  min-width:120px;
+  height:30px;
   margin:0 auto;
-  padding:0 28px 0 10px;
+  padding:0 6px;
   text-align:center;
   text-align-last:center;
   -webkit-text-align-last:center;
+  appearance:none;
+  -webkit-appearance:none;
   font-size:9px;
   font-weight:900;
-  line-height:30px;
+  line-height:28px;
   border-radius:7px;
   cursor:pointer;
 }
@@ -461,8 +463,8 @@ body.bulk-page .mobile-nav{
     min-height:360px;
   }
   #drm-table-wrap > .drm-table .drm-decision{
-    width:150px;
-    min-width:150px;
+    width:120px;
+    min-width:120px;
   }
 }
 </style>
