@@ -456,15 +456,44 @@ body.bulk-page .mobile-nav{
 
 @media (max-width:900px){
   #drm-table-wrap{
-    --drm-detail-w:84px;
-    --drm-site-w:190px;
+    /* Portrait: keep the frozen identity pane compact so the data area remains useful. */
+    --drm-detail-w:78px;
+    --drm-site-w:150px;
     --drm-head-1:38px;
     height:min(560px, calc(100dvh - 280px));
     min-height:360px;
+    overscroll-behavior-x:contain;
   }
   #drm-table-wrap > .drm-table .drm-decision{
     width:120px;
     min-width:120px;
+  }
+  #drm-table-wrap > .drm-table .drm-site-sub{
+    max-width:132px;
+  }
+}
+
+@media (max-width:430px){
+  #drm-table-wrap{
+    --drm-detail-w:76px;
+    --drm-site-w:142px;
+  }
+  #drm-table-wrap > .drm-table .drm-single-link{
+    padding-left:5px;
+    padding-right:5px;
+    font-size:8px;
+  }
+}
+</style>
+<style id="pmno-drm-portrait-scroll-fix">
+/* Portrait tuning: prevent the frozen pane from consuming most of the viewport. */
+@media (max-width:900px){
+  #drm-table-wrap{
+    overflow-x:auto;
+    overflow-y:auto;
+    -webkit-overflow-scrolling:auto;
+    overscroll-behavior-x:contain;
+    overscroll-behavior-y:contain;
   }
 }
 </style>
