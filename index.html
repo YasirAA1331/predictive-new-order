@@ -1254,19 +1254,20 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
  <tr><th rowspan="2">SITE</th><th rowspan="2">TENANT</th><th rowspan="2">TYPE</th><th rowspan="2">CANDIDATE</th><th colspan="5">CANDIDATE PROFILE</th><th colspan="12">ENGINEERING &amp; DELIVERY</th><th rowspan="2">IRR</th><th rowspan="2">FEASIBILITY</th><th rowspan="2">KEPUTUSAN</th><th rowspan="2">CATATAN / NEXT ACTION</th></tr>
  <tr><th>DISTANCE</th><th>TOWER TYPE</th><th>HEIGHT</th><th>EXISTING TENANTS</th><th>TARGET TENANT SIGNAL</th><th>NEED STR</th><th>EST. REINFORCEMENT</th><th>SDA AVAILABLE</th><th>SES / DELIVERY</th><th>COMCASE HISTORY</th><th>RED ZONE</th><th>ACCESS DIFFICULTY</th><th>ROADHEAD DISTANCE</th><th>EST. TO ON AIR</th><th>REINFORCEMENT PROB.</th><th>STRUCTURAL UTILIZATION</th><th>PHYSICAL SES PROB.</th></tr></thead><tbody>`+
  visible.map(r=>{
-   const i=rows.indexOf(r),baseMetrics=moneylessMetrics(r),m={...baseMetrics,isB2S:r.b2s===true||String(r.selectedCandidateId||'')==='B2S'||String(r.candidate_id||'')==='PREDICTIVE NEW SITE',estIrr:r.estimated_irr??baseMetrics.estIrr},st=r.drm_status||'NEED REVIEW';
+   const i=rows.indexOf(r),baseMetrics=moneylessMetrics(r),canonicalEng=r.detail?.engineering||r.candidate?.detail?.engineering||{},canonicalInv=r.detail?.investment||r.candidate?.detail?.investment||{},rawCanonicalIrr=canonicalInv.estimated_irr??r.candidate?.estimated_irr??r.estimated_irr??baseMetrics.estIrr,canonicalIrr=rawCanonicalIrr==null?null:(Math.abs(Number(rawCanonicalIrr))>1?Number(rawCanonicalIrr)/100:Number(rawCanonicalIrr)),m={...baseMetrics,isB2S:r.b2s===true||String(r.selectedCandidateId||'')==='B2S'||String(r.candidate_id||'')==='PREDICTIVE NEW SITE',sda:canonicalEng.sda_available??baseMetrics.sda,estIrr:canonicalIrr};
    const candidateHtml=drmCandidateSelect(r,i);
    const irr=m.estIrr!=null?(Number(m.estIrr)*100).toFixed(2)+'%':'—';
    const feasibility=m.feasibility||'—';
    const fcls=String(feasibility).toUpperCase()==='FEASIBLE'?'feasible':'not-feasible';
    const dcls=st==='APPROVED'?'approved':st==='REJECTED'?'rejected':'review';
    const note=String(r.drm_note??r.note??'');
-   return `<tr><td><strong>${esc(r.site_id)}</strong>${r.site_name?`<small style="display:block;color:#71869b;margin-top:3px">${esc(r.site_name)}</small>`:''}</td><td>${esc(r.tenant||state.project?.tenant_name||'—')}</td><td><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="drm-candidate-cell">${candidateHtml}</td>`+
+   return `<tr><td><strong>${esc(r.site_id)}</strong>${r.site_name?`<small style="display:block;color:#71869b;margin-top:3px">${esc(r.site_name)}</small>`:''}<button class="drm-single-link" data-drm-single-site="1" data-row-index="${i}" type="button">OPEN SINGLE SITE ↗</button></td><td>${esc(r.tenant||state.project?.tenant_name||'—')}</td><td><span class="type-badge ${m.isB2S?'b2s':'collo'}">${m.isB2S?'B2S':'COLLO'}</span></td><td class="drm-candidate-cell">${candidateHtml}</td>`+
      cell(m.distance)+cell(m.tower)+cell(m.height!=null?window.pmnoBulkNum(m.height).toFixed(0)+' m':'—','num')+cell(m.isB2S?'—':m.tenants,'center')+cell(m.signal,'num')+
      cell(m.needStr,'center')+cell(m.reinforcement,'num')+cell(m.sda,'center')+cell(m.ses)+cell(m.comcase,'center')+cell(m.red,'center')+cell(m.access)+cell(m.road,'num')+cell(m.days)+cell(m.reinfProb,'num')+cell(m.structural,'num')+cell(m.physical,'num')+
      cell(irr,'num')+`<td><span class="drm-feasibility ${fcls}">${esc(feasibility)}</span></td><td><select class="drm-decision" data-drm-decision="1" data-row-index="${i}" aria-label="Keputusan"><option value="NEED REVIEW" ${st==='NEED REVIEW'?'selected':''}>NEED REVIEW</option><option value="APPROVED" ${st==='APPROVED'?'selected':''}>APPROVED</option><option value="REJECTED" ${st==='REJECTED'?'selected':''}>REJECTED</option></select></td><td><input class="drm-note" data-drm-note="1" data-row-index="${i}" value="${esc(note)}" placeholder="Tulis catatan / next action" aria-label="Catatan ${esc(r.site_id)}"></td></tr>`;
  }).join('')+'</tbody></table>';
  wrap.querySelectorAll('[data-drm-candidate]').forEach(sel=>sel.onchange=()=>drmSelectCandidate(Number(sel.dataset.rowIndex),sel.value));
+ wrap.querySelectorAll('[data-drm-single-site]').forEach(btn=>btn.onclick=()=>drmOpenSingleSite(Number(btn.dataset.rowIndex)));
  wrap.querySelectorAll('[data-drm-decision]').forEach(sel=>sel.onchange=()=>{const row=rows[Number(sel.dataset.rowIndex)];if(!row)return;row.drm_status=sel.value;state.dirty=true;renderResults()});
  wrap.querySelectorAll('[data-drm-note]').forEach(inp=>{inp.oninput=()=>{const row=rows[Number(inp.dataset.rowIndex)];if(row){row.drm_note=inp.value;state.dirty=true;$('drm-result-state').textContent=`${rows.length} site · Ada perubahan yang belum disimpan`}}});
 }
@@ -1277,6 +1278,31 @@ function drmCandidateSelect(row,rowIndex){
  const requested=String(row?.selectedCandidateId||row?.candidate_id||'');
  const selected=String(opts.some(o=>String(o.id)===requested)?requested:(opts[0]?.id||''));
  return `<select class="pmno-candidate-select drm-candidate-select" data-drm-candidate="1" data-row-index="${rowIndex}" aria-label="Select candidate">${opts.map(o=>`<option value="${esc(o.id)}" ${String(o.id)===selected?'selected':''}>${esc(o.label)}</option>`).join('')}</select>`;
+}
+function drmOpenSingleSite(rowIndex){
+ const row=state.results?.[rowIndex];if(!row)return;
+ const candidate=String(row.selectedCandidateId||row.candidate_id||(row.b2s?'B2S':''));
+ const p=new URLSearchParams();
+ p.set('site_id',String(row.site_id||''));p.set('lat',String(row.lat??''));p.set('lon',String(row.lon??''));
+ p.set('target_tenant',String(row.tenant||state.project?.tenant_name||''));p.set('candidate',candidate);p.set('radius','3000');p.set('source','drm');
+ const targetUrl=`${location.pathname}?${p.toString()}#single`;
+ history.pushState({pmnoPage:'single'},'',targetUrl);
+ const singleMenu=document.getElementById('singleMenu');
+ if(singleMenu)singleMenu.click();
+ setTimeout(async()=>{
+   try{
+     const latEl=document.getElementById('lat'),lonEl=document.getElementById('lon'),tenantEl=document.getElementById('tenant'),radiusEl=document.getElementById('radius');
+     if(!latEl||!lonEl||!tenantEl||!radiusEl)throw new Error('Single Site input controls not found');
+     latEl.value=String(row.lat??'');lonEl.value=String(row.lon??'');radiusEl.value='3000';
+     if(document.getElementById('radiusText'))document.getElementById('radiusText').textContent='3 km';
+     if([...tenantEl.options].some(o=>String(o.value)===String(row.tenant||'')))tenantEl.value=String(row.tenant||'');
+     if(typeof loadAnalysis!=='function')throw new Error('Single Site calculation engine not found');
+     await loadAnalysis();
+     if(candidate.toUpperCase()==='B2S'){if(typeof selectB2S==='function')await selectB2S(false);}
+     else {const found=(state.decision?.rows||[]).find(x=>String(x.site_id)===candidate);if(found&&typeof selectCandidate==='function')await selectCandidate(found);}
+     window.scrollTo({top:0,behavior:'smooth'});
+   }catch(e){console.error('DRM → Single Site handoff failed',e);if(typeof showError==='function')showError('DRM → Single Site gagal: '+e.message);}
+ },120);
 }
 async function drmSelectCandidate(rowIndex,candidateId){
  const row=state.results?.[rowIndex];if(!row)return;
