@@ -188,17 +188,14 @@
   .mode-menu button{padding:8px 9px;font-size:8px}
 }
 @media(max-width:760px){
-  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand status" "nav nav";align-items:center;gap:12px 10px;padding:14px 14px 12px;min-height:0}
+  .topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;grid-template-areas:"brand status" "nav nav";align-items:start;gap:12px 10px;padding:14px 14px 14px;min-height:0;height:auto!important;flex:0 0 auto!important;overflow:visible}
   .topbar>div:first-child{grid-area:brand;min-width:0}
-  .topbar>.status{grid-area:status;justify-self:end}
-  .mode-menu{grid-area:nav;width:100%;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px;margin:0}
-  .nav-group{display:grid;grid-template-columns:1fr;gap:5px;min-width:0}
-  .nav-group-label{font-size:7px;letter-spacing:1.6px;justify-content:flex-start;padding-left:2px}
-  .mode-menu button{width:100%;padding:9px 6px;font-size:8px;min-height:38px;border-radius:8px}
-  .mode-menu .nav-group:nth-child(1){grid-column:1}
-  .mode-menu .nav-group:nth-child(2){grid-column:2}
-  .mode-menu .nav-group:nth-child(3){grid-column:3}
-  .mode-menu .nav-group:nth-child(2) button{width:100%}
+  .topbar>.status{grid-area:status;justify-self:end;align-self:center}
+  .mode-menu{grid-area:nav;width:100%;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr);gap:8px;margin:0;align-items:start}
+  .nav-group{display:flex;flex-direction:column;align-items:stretch;gap:6px;min-width:0;align-self:start}
+  .nav-group-label{font-size:7px;line-height:12px;letter-spacing:1.6px;justify-content:flex-start;padding-left:2px;min-height:12px}
+  .mode-menu button{width:100%;padding:10px 6px;font-size:8px;line-height:1.1;min-height:42px;height:auto;border-radius:9px}
+  .mode-menu .nav-group:nth-child(1),.mode-menu .nav-group:nth-child(2),.mode-menu .nav-group:nth-child(3){grid-column:auto}
   .brand-kicker{font-size:7px;letter-spacing:1.5px}
   .brand-title{font-size:19px;max-width:none}
   .status{font-size:7px;letter-spacing:.7px;white-space:nowrap}
@@ -612,8 +609,15 @@ body.bulk-page .mobile-nav{
 @media(max-width:760px){.dashboard-view,.site-profile-view{min-height:100dvh}.dash-shell,.sp-shell{padding:14px 12px 80px}.dash-head,.sp-head{flex-direction:column}.dash-actions,.sp-actions{width:100%}.dash-actions .dash-btn,.sp-actions .dash-btn{flex:1}.dash-filterbar{grid-template-columns:1fr 1fr}.dash-filterbar label:last-child{grid-column:1/-1}.dash-kpis{grid-template-columns:repeat(2,1fr)}.dash-grid-3{grid-template-columns:1fr}.dash-card-head{padding:11px}.dash-map-card #dash-map{height:390px}.sp-search{align-items:stretch;flex-direction:column}.sp-search input{max-width:none}.sp-hero{flex-direction:column}.sp-badges{justify-content:flex-start}.sp-kv{grid-template-columns:1fr}}
 </style>
 
-<style id="pmno-nav-final-v13">
-@media(max-width:760px){.topbar .mode-menu{display:grid!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;flex-wrap:nowrap!important;justify-content:initial!important}.topbar .nav-group{display:grid!important;grid-template-columns:1fr!important;align-items:stretch!important}.topbar .nav-group-label{display:flex!important}.topbar .mode-menu button{width:100%!important;min-width:0!important}.topbar .status{display:flex!important}}
+<style id="pmno-nav-final-v14">
+/* Final mobile nav fix: let the header grow with the navigation instead of being clipped at 72px. */
+@media(max-width:760px){
+  .topbar{height:auto!important;min-height:0!important;flex:0 0 auto!important;overflow:visible!important}
+  .topbar .mode-menu{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1.25fr) minmax(0,1fr)!important;gap:8px!important;align-items:start!important;flex-wrap:nowrap!important}
+  .topbar .nav-group{display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;align-self:start!important}
+  .topbar .nav-group-label{display:flex!important;align-items:center!important;min-height:12px!important}
+  .topbar .mode-menu button{width:100%!important;min-width:0!important;height:auto!important;min-height:42px!important}
+}
 </style>
 </head>
 <body>
