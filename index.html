@@ -896,8 +896,8 @@ body.bulk-page .mobile-nav{
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
-const SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
-const SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
+const SUPABASE_URL='https://vzeitjesovdojfsfgyza.supabase.co';
+const SUPABASE_KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const TARGET_IRR=10.73;
 const state={lat:-6.9818,lon:110.4093,tenant:'IOH',radius:3000,decision:null,mapData:[],top5:[],selectedId:null,recommendedId:null,satellite:true};
 let map,targetMarker,targetLabelLayer,b2sMarker,b2sPopup,radiusCircle,routeLine,satelliteLayer,streetLayer,resizeObserver,selectedCandidatePopup,selectedExistingPopup;
@@ -1458,8 +1458,8 @@ loadTenants().then(pmnoLoadRouteContext);
 </script>
 <script>
 (function(){
-const BULK_SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
-const BULK_SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
+const BULK_SUPABASE_URL='https://vzeitjesovdojfsfgyza.supabase.co';
+const BULK_SUPABASE_KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const BULK_H={'apikey':BULK_SUPABASE_KEY,'Authorization':'Bearer '+BULK_SUPABASE_KEY,'Content-Type':'application/json'};
 // Publish the bridge immediately; populate it after the Bulk functions are defined.
 window.pmnoBulkEngine=window.pmnoBulkEngine||{};
@@ -1787,8 +1787,8 @@ window.dispatchEvent(new Event('pmno-bulk-engine-ready'));
  function waitForBulkEngine(timeout=12000){return new Promise(resolve=>{const ready=()=>{const e=engine();return e&&typeof e.analyzeOne==='function'&&typeof e.bulkSingleSiteMetrics==='function'};if(ready()){resolve(engine());return}const done=()=>{window.removeEventListener('pmno-bulk-engine-ready',done);clearInterval(timer);clearTimeout(to);resolve(ready()?engine():null)};window.addEventListener('pmno-bulk-engine-ready',done,{once:true});const timer=setInterval(()=>{if(ready())done()},100);const to=setTimeout(done,timeout)})}
  function localLoad(){try{state.projects=JSON.parse(localStorage.getItem(LS)||'[]')}catch(e){state.projects=[]}}
  function localSave(){try{localStorage.setItem(LS,JSON.stringify(state.projects))}catch(e){}}
- function apiHeaders(){return {apikey:'sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr',Authorization:'Bearer sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr','Content-Type':'application/json'}}
- async function api(path,opts={}){const r=await fetch('https://lsiiruhnitbrqfwbmdor.supabase.co/rest/v1/'+path,{...opts,headers:{...apiHeaders(),...(opts.headers||{})}});if(!r.ok)throw new Error((await r.text()).slice(0,220));return r.status===204?null:r.json()}
+ function apiHeaders(){return {apikey:'sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc',Authorization:'Bearer sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc','Content-Type':'application/json'}}
+ async function api(path,opts={}){const r=await fetch('https://vzeitjesovdojfsfgyza.supabase.co/rest/v1/'+path,{...opts,headers:{...apiHeaders(),...(opts.headers||{})}});if(!r.ok)throw new Error((await r.text()).slice(0,220));return r.status===204?null:r.json()}
  async function loadProjects(){try{const rows=await api('pmno_projects?select=id,project_name,customer_name,description,sow,tenant_name,program_name,created_at,updated_at&order=updated_at.desc');state.projects=rows.map(p=>({...p,source:'db'}));localSave()}catch(e){localLoad()}renderProjects()}
  function renderProjects(){const el=$('drm-projects');if(!state.projects.length){el.innerHTML='<div class="drm-empty">Belum ada project tersimpan.</div>';return}el.innerHTML=state.projects.map(p=>`<div class="drm-project-card"><div><strong>${esc(p.project_name||p.name||'Untitled')}</strong><small>${p.sow?esc(p.sow)+' · ':''}${p.tenant_name?esc(p.tenant_name)+' · ':''}${p.program_name?esc(p.program_name):'Tanpa nama program'}</small></div><div class="drm-project-actions"><button class="drm-mini-btn" data-open-project="${esc(p.id||p.localId)}">BUKA</button><button class="drm-mini-btn danger" data-delete-project="${esc(p.id||p.localId)}">HAPUS</button></div></div>`).join('');el.querySelectorAll('[data-open-project]').forEach(b=>b.onclick=()=>openProject(b.dataset.openProject));el.querySelectorAll('[data-delete-project]').forEach(b=>b.onclick=()=>deleteProject(b.dataset.deleteProject))}
  async function createProject(meta){const name=meta.program_name||`${meta.tenant_name} · ${meta.sow}`;let p={name,project_name:name,sow:meta.sow,tenant_name:meta.tenant_name,program_name:meta.program_name||'',created:new Date().toISOString(),localId:crypto.randomUUID?.()||String(Date.now())};try{const rows=await api('pmno_projects',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify({customer_name:'PMNO',project_name:name,sow:meta.sow,tenant_name:meta.tenant_name,program_name:meta.program_name||null})});p={...p,id:rows[0].id,source:'db',...rows[0]}}catch(e){p.source='local'}state.project=p;state.projects=[p,...state.projects.filter(x=>(x.id||x.localId)!==(p.id||p.localId))];localSave();return p}
@@ -1913,7 +1913,7 @@ async function saveRun(){if(!state.project||!state.results.length)return;const a
 </script>
 <script id="pmno-dashboard-controller">
 (function(){
-const URL='https://lsiiruhnitbrqfwbmdor.supabase.co',KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
+const URL='https://vzeitjesovdojfsfgyza.supabase.co',KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let rows=[],filtered=[],dashMap=null,dashMarkers=[];
@@ -2009,7 +2009,7 @@ try{const initialHash=String(location.hash||'').replace(/^#/, '').toLowerCase();
 <!-- PMNO MASTER DATA ADDITION: START CONTROLLER -->
 <script id="master-data-controller">
 (function(){
-const URL='https://lsiiruhnitbrqfwbmdor.supabase.co',KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
+const URL='https://vzeitjesovdojfsfgyza.supabase.co',KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const modules=[
 ['STATIC_MASTER','STATIC MASTER',['Site Master','Device Catalog','Tower Catalog','Mounting Catalog','CAPEX / Shopping List','Power Cost','RF Parameter','Area Classification','Last Mile Access']],
 ['OPERATIONAL_DATA','OPERATIONAL DATA',['Tenant Contract','Tenant Power Existing','Maintenance']],
