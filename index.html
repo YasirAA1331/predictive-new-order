@@ -2060,8 +2060,63 @@ async function render(){const box=$('masterSections');if(!box)return;const mods=
 function moduleName(code){return Object.entries(codeByName).find(x=>x[1]===code)?.[0]||code}
 async function openModule(code){selected=code;parsed=null;$('masterModalTitle').textContent=moduleName(code);$('masterModalSub').textContent=`${code} · Export → Edit → Upload → Validate → Impact → Publish`;$('masterUploadInfo').textContent='No file uploaded. Export the official template or upload an edited workbook.';$('masterStructure').textContent='PENDING';$('masterBusiness').textContent='PENDING';$('masterImpact').textContent='Upload and validate a version to preview affected engines.';$('masterPublish').disabled=true;const hist=['LEASE_HISTORY','SITAC_HISTORY','PERMIT_HISTORY','CONSTRUCTION_HISTORY','DELIVERY_HISTORY','COMMUNITY_HISTORY'].includes(code);$('masterOperation').value=hist?'APPEND':'REPLACE';$('masterOperation').disabled=!hist;$('masterModal').classList.add('show');await renderHistory(code)}
 function exportRows(rows,name){const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master Data');XLSX.writeFile(wb,name)}
-async function fetchAllRows(table){const out=[];const page=1000;for(let from=0;;from+=page){const r=await fetch(URL+'/rest/v1/'+table+'?select=*',{headers:{...apiHeaders(),'Range-Unit':'items','Range':`${from}-${from+page-1}`}});if(!r.ok)throw Error('Export failed');const rows=await r.json();out.push(...rows);if(rows.length<page)break}return out}
-async function exportModule(code){try{if(typeof XLSX==='undefined')throw Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');const mods=await getModules(),m=mods.find(x=>x.module_code===code);if(!m)throw Error('Module tidak ditemukan: '+code);const schema=headersFor(code)||[];let data=[];let backendAvailable=true;try{data=await fetchAllRows(m.target_table)}catch(e){backendAvailable=false}if(!data.length&&schema.length){const aoa=[schema,schema.map(()=> '')];const ws=XLSX.utils.aoa_to_sheet(aoa);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master Data');XLSX.writeFile(wb,`PMNO_${code}_Template.xlsx`);$('masterUploadInfo').textContent=`Template exported · ${schema.length} columns · ${moduleName(code)}${backendAvailable?' · no records yet':' · backend table belum tersedia, template siap digunakan'}.`;return}const clean=data.map(row=>{const x={...row};delete x.id;delete x.created_at;delete x.updated_at;return x});exportRows(clean,`PMNO_${code}_Current.xlsx`);$('masterUploadInfo').textContent=`Exported · ${clean.length.toLocaleString('id-ID')} rows · ${moduleName(code)}.`}catch(e){console.error(e);alert('Export failed: '+e.message)}}
+async function fetchAllRows(table,onProgress){
+  const page=1000, concurrency=8;
+  const base=URL+'/rest/v1/'+table+'?select=*';
+  const first=await fetch(base,{headers:{...apiHeaders(),'Prefer':'count=exact','Range-Unit':'items','Range':'0-999'}});
+  if(!first.ok)throw Error('Export failed: HTTP '+first.status);
+  const totalHeader=first.headers.get('content-range')||'';
+  const total=totalHeader.includes('/')?Number(totalHeader.split('/')[1]):null;
+  const firstRows=await first.json();
+  if(!Array.isArray(firstRows))throw Error('Export returned invalid data');
+  if(!total || total<=firstRows.length){
+    onProgress?.(firstRows.length,total||firstRows.length);
+    return firstRows;
+  }
+  const out=new Array(total);
+  firstRows.forEach((row,i)=>out[i]=row);
+  onProgress?.(firstRows.length,total);
+  let next=page;
+  while(next<total){
+    const jobs=[];
+    for(let i=0;i<concurrency && next<total;i++,next+=page){
+      const from=next,to=Math.min(next+page-1,total-1);
+      jobs.push(fetch(base,{headers:{...apiHeaders(),'Range-Unit':'items','Range':`${from}-${to}`}})
+        .then(async r=>{if(!r.ok)throw Error('Export failed: HTTP '+r.status);return {from,rows:await r.json()}}));
+    }
+    const results=await Promise.all(jobs);
+    let loaded=firstRows.length;
+    for(const item of results){item.rows.forEach((row,i)=>out[item.from+i]=row);loaded+=item.rows.length}
+    onProgress?.(loaded,total);
+  }
+  return out.filter(Boolean);
+}
+async function exportModule(code){
+  try{
+    if(typeof XLSX==='undefined')throw Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');
+    const mods=await getModules(),m=mods.find(x=>x.module_code===code);
+    if(!m)throw Error('Module tidak ditemukan: '+code);
+    const schema=headersFor(code)||[];
+    $('masterUploadInfo').textContent='Preparing export…';
+    let data=[],backendAvailable=true;
+    try{
+      data=await fetchAllRows(m.target_table,(loaded,total)=>{
+        $('masterUploadInfo').textContent=`Exporting ${loaded.toLocaleString('id-ID')}${total?` / ${total.toLocaleString('id-ID')}`:''} rows…`;
+      });
+    }catch(e){backendAvailable=false}
+    if(!data.length&&schema.length){
+      const aoa=[schema,schema.map(()=> '')],ws=XLSX.utils.aoa_to_sheet(aoa),wb=XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wb,ws,'Master Data');
+      XLSX.writeFile(wb,`PMNO_${code}_Template.xlsx`,{compression:false});
+      $('masterUploadInfo').textContent=`Template exported · ${schema.length} columns · ${moduleName(code)}${backendAvailable?' · no records yet':' · backend table belum tersedia, template siap digunakan'}.`;
+      return;
+    }
+    const clean=data.map(row=>{const x={...row};delete x.id;delete x.created_at;delete x.updated_at;return x});
+    $('masterUploadInfo').textContent=`Building Excel · ${clean.length.toLocaleString('id-ID')} rows…`;
+    exportRows(clean,`PMNO_${code}_Current.xlsx`);
+    $('masterUploadInfo').textContent=`Exported · ${clean.length.toLocaleString('id-ID')} rows · ${moduleName(code)}.`;
+  }catch(e){console.error(e);$('masterUploadInfo').textContent='Export failed: '+e.message;alert('Export failed: '+e.message)}
+}
 $('masterClose').onclick=()=>$('masterModal').classList.remove('show');
 $('masterExport').onclick=()=>{if(!selected){alert('Pilih module terlebih dahulu.');return}exportModule(selected)};
 const NULL_TOKENS=new Set(['','null','n/a','na','n.a.','ny data','no data','not available','not available data','-','--','none','nil','nill','00/00/0000','00-00-0000','00.00.0000']);
