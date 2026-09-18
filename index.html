@@ -2066,7 +2066,22 @@ $('masterPublish').onclick=async()=>{
     const impact={row_count:uploadRows.length,operation:op,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
     $('masterPublish').disabled=true;
     $('masterPublish').textContent='PUBLISHING…';
-    const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_module_code:selected,p_operation:op,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:uploadRows,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact})});
+    const sourceFile=$('masterFile').files?.[0]?.name||'uploaded_workbook';
+    // Large workbooks (40K+ rows) must use the staged/chunked RPC path.
+    // Sending the entire JSON array to PostgREST in one request causes upstream
+    // connection termination before the database function can finish.
+    const batchId=crypto.randomUUID();
+    const chunkSize=500;
+    let staged=0;
+    for(let start=0;start<uploadRows.length;start+=chunkSize){
+      const chunk=uploadRows.slice(start,start+chunkSize);
+      const sr=await fetch(URL+'/rest/v1/rpc/pmno_master_stage_chunk',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_batch_id:batchId,p_module_code:selected,p_rows:chunk,p_start_row:start,p_reset:start===0})});
+      const st=await sr.text();
+      if(!sr.ok)throw Error(`Stage chunk ${start+1}-${Math.min(start+chunkSize,uploadRows.length)} failed: ${st||('HTTP '+sr.status)}`);
+      staged+=chunk.length;
+      $('masterUploadInfo').textContent=`Staging ${staged.toLocaleString('id-ID')} / ${uploadRows.length.toLocaleString('id-ID')} rows…`;
+    }
+    const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish_staged',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_batch_id:batchId,p_module_code:selected,p_operation:op,p_source_filename:sourceFile,p_impact_preview:impact})});
     const raw=await r.text();
     if(!r.ok)throw Error(raw||('HTTP '+r.status));
     let result={}; try{result=JSON.parse(raw)}catch(e){}
