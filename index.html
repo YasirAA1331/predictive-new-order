@@ -2064,12 +2064,12 @@ $('masterPublish').onclick=async()=>{
   if(originalOp==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
   try{
     $('masterPublish').disabled=true;$('masterPublish').textContent='PUBLISHING…';
-    const chunkSize=500,total=uploadRows.length,totalChunks=Math.ceil(total/chunkSize);
+    const chunkSize=50,total=uploadRows.length,totalChunks=Math.ceil(total/chunkSize);
     let committed=0,completedChunks=0;
     const progress=$('masterPublishProgress'),progressBar=$('masterPublishProgressBar'),progressLabel=$('masterPublishProgressLabel'),progressPct=$('masterPublishProgressPct'),progressChunk=$('masterPublishProgressChunk'),progressRate=$('masterPublishProgressRate');
     progress.className='master-publish-progress';progress.style.display='block';
     const paintProgress=(done,stage)=>{const pct=total?Math.min(100,(done/total)*100):0;progressBar.style.width=pct.toFixed(1)+'%';progressLabel.textContent=`PUBLISHING ${done.toLocaleString('id-ID')} / ${total.toLocaleString('id-ID')}`;progressPct.textContent=Math.round(pct)+'%';progressChunk.textContent=stage;progressRate.textContent=`${completedChunks} / ${totalChunks} chunks`;};
-    paintProgress(0,'Preparing first chunk…');
+    paintProgress(0,`Preparing chunk size ${chunkSize.toLocaleString('id-ID')} rows…`);
     for(let start=0;start<total;start+=chunkSize){
       const chunk=uploadRows.slice(start,start+chunkSize);
       const isFirst=start===0;
@@ -2081,10 +2081,10 @@ $('masterPublish').onclick=async()=>{
       let last='';
       for(let attempt=1;attempt<=4;attempt++){
         try{
-          const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact})});
+          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),25000);let r;try{r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact}),signal:ctl.signal})}finally{clearTimeout(kill)}
           const raw=await r.text();
           if(r.ok){last='';break}
-          last=raw||('HTTP '+r.status);
+          last=`HTTP ${r.status}: ${raw||'empty response'}`;
           if(!/PGRST002|upstream|reset|timeout|502|503|504/i.test(last)||attempt===4)break;
         }catch(e){last=e.message;if(attempt===4)break}
         await new Promise(r=>setTimeout(r,700*attempt));
