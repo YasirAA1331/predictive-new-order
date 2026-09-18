@@ -1,11 +1,10 @@
-<!DOCTYPE html>
-
+<!doctype html>
 <html lang="en">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width,initial-scale=1,viewport-fit=cover" name="viewport"/>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>PMNO — Predictive Mapping New Order</title>
-<link crossorigin="" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" rel="stylesheet"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
 :root{--bg:#06111f;--panel:#0a1727;--panel2:#0d1d31;--line:#20364f;--text:#edf5fb;--muted:#7e93a8;--cyan:#35c8ff;--green:#43e0a0;--red:#ff5570;--amber:#f5bf5c;--shadow:0 18px 50px rgba(0,0,0,.38)}
 *{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{overflow:hidden}.app{height:100dvh;display:flex;flex-direction:column;min-height:0}.topbar{height:72px;flex:0 0 72px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid var(--line);background:#071321;z-index:50}.brand-kicker{font-size:9px;letter-spacing:2px;font-weight:900;color:#70869c}.brand-title{font-size:23px;line-height:1.05;font-weight:850;letter-spacing:-.7px;margin-top:3px}.brand-title b{color:var(--cyan)}.status{display:flex;align-items:center;gap:8px;color:#91a6b8;font-size:10px;font-weight:800;letter-spacing:1px}.status-dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 15px var(--green)}
@@ -139,11 +138,14 @@
 .drm-v4-home{display:grid;grid-template-columns:1.15fr .85fr;gap:14px;margin-bottom:14px}.drm-hero{padding:24px}.drm-hero h2{margin:0;font-size:24px}.drm-hero p{margin:8px 0 20px;color:#7890a3;line-height:1.6;font-size:12px}.drm-home-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px}.drm-big-btn{min-height:82px;border:1px solid #29475f;background:#0a1d2d;color:#dce8f1;border-radius:12px;padding:15px;text-align:left;cursor:pointer}.drm-big-btn strong{display:block;font-size:12px;letter-spacing:.5px}.drm-big-btn span{display:block;color:#71869b;font-size:10px;margin-top:6px;line-height:1.4}.drm-big-btn.primary{background:#0d4262;border-color:#1d7ea9}.drm-project-list{padding:18px}.drm-project-list h3{margin:0 0 5px;font-size:13px}.drm-project-list p{margin:0 0 12px;color:#71869b;font-size:10px}.drm-project-card{border:1px solid #1d3850;background:#091b2a;border-radius:10px;padding:12px;margin-top:8px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:center}.drm-project-card strong{font-size:11px}.drm-project-card small{display:block;color:#71869b;font-size:9px;margin-top:4px}.drm-project-actions{display:flex;gap:6px}.drm-mini-btn{min-height:34px;padding:0 10px;border:1px solid #29475f;background:#0a1d2d;color:#b8ccda;border-radius:7px;font-size:8px;font-weight:900;cursor:pointer}.drm-mini-btn.danger{border-color:#633646;color:#ff9eab}.drm-wizard{padding:18px;margin-bottom:14px}.drm-stepper{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}.drm-step{font-size:8px;font-weight:900;color:#71869b;border:1px solid #29475f;border-radius:999px;padding:6px 9px}.drm-step.active{color:#fff;background:#123c57;border-color:#2388b6}.drm-step.done{color:#7be6b0;border-color:#286a4d;background:#0b2a20}.drm-wizard-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}.drm-wizard-title{font-size:17px;font-weight:900}.drm-wizard-help{color:#71869b;font-size:10px;margin-top:4px;line-height:1.5}.drm-inline-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:13px}.drm-confirm{padding:11px;border:1px solid #29475f;border-radius:9px;background:#091b2a;color:#9db2c1;font-size:10px;margin-top:10px}.drm-result-head{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}.drm-delete-row{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid #173148}.drm-db-badge{font-size:8px;color:#7be6b0}
 @media(max-width:900px){.drm-v4-home{grid-template-columns:1fr}.drm-home-actions{grid-template-columns:1fr}.drm-project-card{grid-template-columns:1fr}.drm-project-actions .drm-mini-btn{flex:1}.drm-hero{padding:18px}}
 </style>
+
+
 <style>
 .pmno-target-icon{background:transparent!important;border:0!important}
 .pmno-target{width:64px;height:72px;display:block;overflow:visible;pointer-events:auto}
 .pmno-target svg{display:block;overflow:visible}
 </style>
+
 <style>
 .pmno-target-icon{background:transparent!important;border:0!important}
 .target-marker.target-red{width:58px;height:58px;display:flex;align-items:center;justify-content:center;position:relative;overflow:visible}
@@ -217,6 +219,7 @@
   }catch(e){}
 })();
 </script>
+
 <style id="pmno-navigation-clean-css">
 /* PMNO navigation/layout contract
    SINGLE: existing responsive workspace.
@@ -277,6 +280,8 @@ body.bulk-page .mobile-nav{
 @media(orientation:landscape) and (max-width:900px){body.bulk-page{overflow:auto!important}.app{height:auto!important;min-height:100dvh!important}.bulk-view{min-height:100dvh!important}.bulk-view .top{height:60px;min-height:60px;padding:0 14px}.bulk-view .wrap{padding:12px 12px 72px;max-width:none}.bulk-view .toolbar{margin-bottom:10px}.bulk-view .summary{grid-template-columns:repeat(6,minmax(120px,1fr));overflow-x:auto}.bulk-view .bulk-table-wrap{width:100%;max-width:100%;overflow-x:auto;overflow-y:visible;touch-action:pan-x pan-y;overscroll-behavior-x:contain}.bulk-view .bulk-table{min-width:1900px}}
 @media(max-width:760px){.bulk-result-context{grid-template-columns:1fr 1fr}.bulk-result-context .bulk-result-decision{order:3}.bulk-result-context .expand{order:4}.bulk-detail{padding:0 10px 10px}.bulk-detail .info-grid,.bulk-detail .investment-row{grid-template-columns:1fr}.bulk-detail .info-cell:nth-child(odd){border-right:0}.bulk-detail .info-cell:nth-last-child(-n+2){border-bottom:1px solid #1b3146}.bulk-detail .info-cell:last-child{border-bottom:0}}
 </style>
+
+
 <style id="pmno-candidate-select-style">
 .pmno-candidate-select{
   width:100%; min-width:150px; max-width:240px;
@@ -294,6 +299,8 @@ body.bulk-page .mobile-nav{
 }
 .pmno-open-single:hover{background:rgba(85,199,255,.10);border-color:#55c7ff}
 </style>
+
+
 <style id="pmno-bulk-sda-style">
 .pmno-sda-link{
   display:inline-flex;align-items:center;gap:4px;
@@ -316,6 +323,7 @@ body.bulk-page .mobile-nav{
 @media(max-width:560px){.master-grid{grid-template-columns:1fr}.master-head{display:block}.master-engine{margin-top:14px;width:max-content}.master-validation{grid-template-columns:1fr}.master-card{min-height:115px}}
 </style>
 <!-- PMNO MASTER DATA ADDITION: END CSS -->
+
 <style id="pmno-drm-final-table-fix">
 /* ============================================================
    DRM RESULT TABLE — FINAL FE FIX
@@ -519,6 +527,7 @@ body.bulk-page .mobile-nav{
   }
 }
 </style>
+
 <style id="pmno-drm-portrait-site-only-freeze">
 /* Portrait DRM: when the user scrolls right, only SITE remains frozen.
    DETAIL naturally scrolls away, giving the engineering columns more room. */
@@ -586,6 +595,7 @@ body.bulk-page .mobile-nav{
   }
 }
 </style>
+
 <style id="pmno-dashboard-css">
 .sp-picker{position:relative;flex:1;min-width:320px}.sp-picker #sp-search{width:100%}.sp-search-results{position:absolute;z-index:1000;left:0;right:0;top:calc(100% + 6px);max-height:360px;overflow:auto;background:#0b1929;border:1px solid #24415b;border-radius:10px;box-shadow:0 18px 40px rgba(0,0,0,.35)}.sp-search-result{display:flex;flex-direction:column;gap:3px;padding:10px 12px;border-bottom:1px solid #193149;cursor:pointer}.sp-search-result:last-child{border-bottom:0}.sp-search-result:hover,.sp-search-result.active{background:#10263b}.sp-search-result b{font-size:11px;color:#edf5fb}.sp-search-result span{font-size:9px;color:#7890a4}.sp-search-result em{font-style:normal;font-size:8px;color:#54d6ff;letter-spacing:.4px}.sp-search-more{padding:9px 12px;color:#71899d;font-size:9px;text-align:center}.sp-search-empty{padding:12px;color:#71899d;font-size:10px}.sp-search-count{margin-left:5px;color:#54d6ff}
 
@@ -593,6 +603,7 @@ body.bulk-page .mobile-nav{
 @media(max-width:1100px){.dash-kpis{grid-template-columns:repeat(4,1fr)}.dash-grid-top{grid-template-columns:1fr}.dash-grid-3{grid-template-columns:1fr 1fr}.dash-map-card #dash-map{height:420px}.dash-filterbar{grid-template-columns:1fr 1fr}.sp-grid{grid-template-columns:1fr}}
 @media(max-width:760px){.dashboard-view,.site-profile-view{min-height:100dvh}.dash-shell,.sp-shell{padding:14px 12px 80px}.dash-head,.sp-head{flex-direction:column}.dash-actions,.sp-actions{width:100%}.dash-actions .dash-btn,.sp-actions .dash-btn{flex:1}.dash-filterbar{grid-template-columns:1fr 1fr}.dash-filterbar label:last-child{grid-column:1/-1}.dash-kpis{grid-template-columns:repeat(2,1fr)}.dash-grid-3{grid-template-columns:1fr}.dash-card-head{padding:11px}.dash-map-card #dash-map{height:390px}.sp-search{align-items:stretch;flex-direction:column}.sp-search input{max-width:none}.sp-hero{flex-direction:column}.sp-badges{justify-content:flex-start}.sp-kv{grid-template-columns:1fr}}
 </style>
+
 <style id="pmno-nav-v20">
 /* V20 — single responsive navigation system; no legacy nav overrides. */
 .topbar{
@@ -715,166 +726,175 @@ body.bulk-page .mobile-nav{
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button class="active" id="singleMenu">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
+<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
 <main class="workspace">
 <aside class="panel input-panel">
 <div class="section-kicker">NEW ORDER INPUT</div>
 <div class="input-grid">
-<div class="field"><label>LATITUDE</label><input id="lat" step="0.0001" type="number" value="-6.9818"/></div>
-<div class="field"><label>LONGITUDE</label><input id="lon" step="0.0001" type="number" value="110.4093"/></div>
+<div class="field"><label>LATITUDE</label><input id="lat" type="number" step="0.0001" value="-6.9818"></div>
+<div class="field"><label>LONGITUDE</label><input id="lon" type="number" step="0.0001" value="110.4093"></div>
 <div class="field"><label>TARGET TENANT</label><select id="tenant"><option>IOH</option><option>TSEL</option><option>XLS</option><option>SFN</option></select></div>
-<div class="field"><label>SEARCH RADIUS</label><select id="radius"><option value="1000">1 km</option><option selected="" value="3000">3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></div>
+<div class="field"><label>SEARCH RADIUS</label><select id="radius"><option value="1000">1 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></div>
 </div>
-<button class="analyze" id="analyze">ANALYZE NEW ORDER <span>→</span></button>
+<button id="analyze" class="analyze">ANALYZE NEW ORDER <span>→</span></button>
 <div class="rule"><strong>COLLO FIRST</strong><p>Existing tower opportunities are evaluated before Predictive New Site / B2S fallback.</p></div>
-<div class="source"><b>Data source</b><br/><span class="ok">● Supabase PMNO Engine</span><br/>Live decision RPC · dynamic radius · tenant-aware map</div>
+<div class="source"><b>Data source</b><br><span class="ok">● Supabase PMNO Engine</span><br>Live decision RPC · dynamic radius · tenant-aware map</div>
 </aside>
 <section class="map-stage">
 <div class="map-toolbar"><div class="context"><i class="dot"></i><span id="context">SEMarang · CENTRAL JAVA</span></div><div class="map-actions"><button id="baseMapToggle">SATELLITE</button><small>Radius <b id="radiusText">3 km</b></small></div></div>
-<div class="map" id="map"></div>
-<div class="error" id="error"></div>
-<div class="loading" id="loading"><div class="loader-card">Running PMNO decision engine…</div></div>
+<div id="map" class="map"></div>
+<div id="error" class="error"></div>
+<div id="loading" class="loading"><div class="loader-card">Running PMNO decision engine…</div></div>
 <div class="map-overlay legend"><div class="overlay-title">MAP LEGEND</div><div class="legend-row"><i class="legend-dot legend-order"></i>New Order</div><div class="legend-row"><i class="legend-dot legend-rec"></i>Recommended COLLO</div><div class="legend-row"><i class="legend-dot legend-collo"></i>Top 5 COLLO</div><div class="legend-row"><i class="legend-dot legend-existing"></i>Existing Site</div><div class="legend-row"><i class="legend-dot legend-risk"></i>Risk / Redzone</div></div>
 <div class="map-overlay map-summary"><div class="summary-kicker">SEARCH RADIUS</div><div class="summary-value" id="summaryRadius">3 KM</div><div class="summary-meta"><b id="summarySites">0</b> EXISTING · <b id="summaryCollo">0</b> TOP COLLO</div></div>
 <div class="map-caption"><b>Map intelligence</b> — Technical ranking: tenant exclusion → distance → height → signal.</div>
 </section>
 <aside class="panel detail-panel">
-<div class="detail-head"><div><div class="decision-label" id="decisionKicker">COLLO SUGGESTION</div><div class="decision" id="decision">—</div></div><div class="decision-pill">COLLO FIRST</div></div>
-<div class="site-name" id="siteName">Run analysis to generate recommendation.</div>
+<div class="detail-head"><div><div id="decisionKicker" class="decision-label">COLLO SUGGESTION</div><div id="decision" class="decision">—</div></div><div class="decision-pill">COLLO FIRST</div></div>
+<div id="siteName" class="site-name">Run analysis to generate recommendation.</div>
 <div class="target-strip"><span>TARGET TENANT</span><b id="targetTenant">—</b></div>
-<div class="section-block"><div class="section-title"><span>01</span><strong>TOP 5 CANDIDATES</strong><small>Technical priority</small></div><div class="candidate-list" id="candidateList"></div></div>
-<div class="section-block"><div class="section-title"><span>02</span><strong>CANDIDATE PROFILE</strong></div><div class="info-grid" id="profileGrid"></div><div class="signal-card"><div class="mini-label">TARGET TENANT SIGNAL · INFORMATION</div><div class="signal-detail" id="signalDetail">—</div></div></div>
-<div class="section-block"><div class="section-title"><span>03</span><strong>ENGINEERING &amp; DELIVERY</strong></div><div class="info-grid" id="engineeringGrid"></div><div class="challenge compact"><div class="decision-label">KEY ENGINEERING FLAG</div><strong id="challenge">—</strong><p id="challengeText">—</p><div class="sda-link" id="sdaLink"></div></div></div>
-<div class="section-block"><div class="section-title"><span>04</span><strong>COST BUILD-UP</strong></div><div class="cost-stack" id="costBuildUp"></div></div>
-<div class="section-block"><div class="section-title"><span>05</span><strong>INVESTMENT</strong><small>Economics only</small></div><div class="investment-card" id="investmentPanel"></div></div>
+<div class="section-block"><div class="section-title"><span>01</span><strong>TOP 5 CANDIDATES</strong><small>Technical priority</small></div><div id="candidateList" class="candidate-list"></div></div>
+<div class="section-block"><div class="section-title"><span>02</span><strong>CANDIDATE PROFILE</strong></div><div class="info-grid" id="profileGrid"></div><div class="signal-card"><div class="mini-label">TARGET TENANT SIGNAL · INFORMATION</div><div id="signalDetail" class="signal-detail">—</div></div></div>
+<div class="section-block"><div class="section-title"><span>03</span><strong>ENGINEERING &amp; DELIVERY</strong></div><div class="info-grid" id="engineeringGrid"></div><div class="challenge compact"><div class="decision-label">KEY ENGINEERING FLAG</div><strong id="challenge">—</strong><p id="challengeText">—</p><div id="sdaLink" class="sda-link"></div></div></div>
+<div class="section-block"><div class="section-title"><span>04</span><strong>COST BUILD-UP</strong></div><div id="costBuildUp" class="cost-stack"></div></div>
+<div class="section-block"><div class="section-title"><span>05</span><strong>INVESTMENT</strong><small>Economics only</small></div><div id="investmentPanel" class="investment-card"></div></div>
+
 </aside>
 </main>
-<section class="dashboard-view" id="dashboardView" style="display:none">
-<div class="dash-shell">
-<div class="dash-head" id="dash-head">
-<div><div class="dash-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="dash-title">ASSET <b>PROFILE DASHBOARD</b></div><div class="dash-sub">Portfolio view — what assets we have, where they are, and how complete the asset profile is.</div></div>
-<div class="dash-actions"><button class="dash-btn primary" id="dash-refresh">↻ REFRESH</button><button class="dash-btn" id="dash-open-site">OPEN SITE PROFILE</button></div>
-</div>
-<div class="dash-filterbar"><label>REGIONAL<select id="dash-regional"><option value="">ALL REGIONAL</option></select></label><label>PROVINCE<select id="dash-province"><option value="">ALL PROVINCE</option></select></label><label>KABUPATEN / KOTA<select id="dash-city"><option value="">ALL KABUPATEN / KOTA</option></select></label><label>SEARCH SITE<input id="dash-search" placeholder="Site ID / Site Name"/></label></div>
-<div class="dash-kpis" id="dash-kpis"></div>
-<div class="dash-grid-top">
-<section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Marker color follows tenant count when tenant data is available.</small></div><div class="dash-map-legend"><i class="t1"></i>1 <i class="t2"></i>2–3 <i class="t3"></i>4–5 <i class="t4"></i>6+</div></div><div id="dash-map"></div></section>
-<section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>TENANT &amp; CONTRACT</strong><small>Customer-facing contract profile.</small></div></div><div class="dash-panel-content" id="dash-tenant"></div></section>
-</div>
-<div class="dash-grid-3">
-<section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>LAND &amp; LEASE</strong><small>Expiry health from Site Master.</small></div></div><div class="dash-panel-content" id="dash-lease"></div></section>
-<section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LEGAL &amp; DOCUMENT</strong><small>PKS · PBG/IMB · SLF · SDA.</small></div></div><div class="dash-panel-content" id="dash-legal"></div></section>
-<section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>POWER EXISTING</strong><small>Tenant-level power profile.</small></div></div><div class="dash-panel-content" id="dash-power"></div></section>
-</div>
-<div class="dash-grid-3">
-<section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>MAINTENANCE</strong><small>Maintenance links and status.</small></div></div><div class="dash-panel-content" id="dash-maintenance"></div></section>
-<section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>DATA QUALITY</strong><small>Completeness and information gaps.</small></div></div><div class="dash-panel-content" id="dash-quality"></div></section>
-<section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>GEOGRAPHY</strong><small>Portfolio distribution.</small></div></div><div class="dash-panel-content" id="dash-geo"></div></section>
-</div>
-</div>
+
+<section id="dashboardView" class="dashboard-view" style="display:none">
+  <div class="dash-shell">
+    <div class="dash-head" id="dash-head">
+      <div><div class="dash-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="dash-title">ASSET <b>PROFILE DASHBOARD</b></div><div class="dash-sub">Portfolio view — what assets we have, where they are, and how complete the asset profile is.</div></div>
+      <div class="dash-actions"><button id="dash-refresh" class="dash-btn primary">↻ REFRESH</button><button id="dash-open-site" class="dash-btn">OPEN SITE PROFILE</button></div>
+    </div>
+    <div class="dash-filterbar"><label>REGIONAL<select id="dash-regional"><option value="">ALL REGIONAL</option></select></label><label>PROVINCE<select id="dash-province"><option value="">ALL PROVINCE</option></select></label><label>KABUPATEN / KOTA<select id="dash-city"><option value="">ALL KABUPATEN / KOTA</option></select></label><label>SEARCH SITE<input id="dash-search" placeholder="Site ID / Site Name"></label></div>
+    <div class="dash-kpis" id="dash-kpis"></div>
+    <div class="dash-grid-top">
+      <section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Marker color follows tenant count when tenant data is available.</small></div><div class="dash-map-legend"><i class="t1"></i>1 <i class="t2"></i>2–3 <i class="t3"></i>4–5 <i class="t4"></i>6+</div></div><div id="dash-map"></div></section>
+      <section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>TENANT &amp; CONTRACT</strong><small>Customer-facing contract profile.</small></div></div><div id="dash-tenant" class="dash-panel-content"></div></section>
+    </div>
+    <div class="dash-grid-3">
+      <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>LAND &amp; LEASE</strong><small>Expiry health from Site Master.</small></div></div><div id="dash-lease" class="dash-panel-content"></div></section>
+      <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LEGAL &amp; DOCUMENT</strong><small>PKS · PBG/IMB · SLF · SDA.</small></div></div><div id="dash-legal" class="dash-panel-content"></div></section>
+      <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>POWER EXISTING</strong><small>Tenant-level power profile.</small></div></div><div id="dash-power" class="dash-panel-content"></div></section>
+    </div>
+    <div class="dash-grid-3">
+      <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>MAINTENANCE</strong><small>Maintenance links and status.</small></div></div><div id="dash-maintenance" class="dash-panel-content"></div></section>
+      <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>DATA QUALITY</strong><small>Completeness and information gaps.</small></div></div><div id="dash-quality" class="dash-panel-content"></div></section>
+      <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>GEOGRAPHY</strong><small>Portfolio distribution.</small></div></div><div id="dash-geo" class="dash-panel-content"></div></section>
+    </div>
+  </div>
 </section>
-<section class="site-profile-view" id="siteProfileView" style="display:none">
-<div class="sp-shell">
-<div class="sp-head"><div><div class="dash-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="dash-title">SITE <b>PROFILE</b></div><div class="dash-sub">One site, one consolidated view. Tenant, power, land, legal and maintenance stay separated from DRM analysis.</div></div><div class="sp-actions"><button class="dash-btn primary" id="sp-search-btn">SEARCH</button><button class="dash-btn" id="sp-open-analysis">OPEN SINGLE SITE ANALYSIS</button></div></div>
-<div class="sp-search"><div class="sp-picker"><input autocomplete="off" id="sp-search" placeholder="Search Site ID / Site Name / Kabupaten"/><div class="sp-search-results" id="sp-search-results" style="display:none"></div></div><span id="sp-search-status">Type to search site, then select a result.</span></div>
-<div class="sp-empty" id="sp-empty">Search Site ID / Site Name, or open a site directly from the Dashboard map.</div>
-<div class="sp-content" id="sp-content" style="display:none">
-<section class="sp-hero"><div><div class="sp-label">SITE ID</div><h2 id="sp-site-id">—</h2><div class="sp-site-name" id="sp-site-name">—</div><div class="sp-location" id="sp-location">—</div></div><div class="sp-badges" id="sp-badges"></div></section>
-<div class="sp-grid">
-<section class="sp-card"><h3>01 · ASSET</h3><div class="sp-kv" id="sp-asset"></div></section>
-<section class="sp-card"><h3>02 · TENANT &amp; CONTRACT</h3><div class="sp-kv" id="sp-tenant"></div></section>
-<section class="sp-card"><h3>03 · POWER EXISTING</h3><div class="sp-kv" id="sp-power"></div></section>
-<section class="sp-card"><h3>04 · LAND &amp; LEASE</h3><div class="sp-kv" id="sp-land"></div></section>
-<section class="sp-card"><h3>05 · LEGAL &amp; DOCUMENT</h3><div class="sp-kv" id="sp-legal"></div></section>
-<section class="sp-card"><h3>06 · MAINTENANCE</h3><div class="sp-kv" id="sp-maintenance"></div></section>
-</div>
-<section class="sp-card sp-attention"><h3>07 · DATA / ATTENTION</h3><div class="sp-kv" id="sp-attention"></div></section>
-</div>
-</div>
+<section id="siteProfileView" class="site-profile-view" style="display:none">
+  <div class="sp-shell">
+    <div class="sp-head"><div><div class="dash-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="dash-title">SITE <b>PROFILE</b></div><div class="dash-sub">One site, one consolidated view. Tenant, power, land, legal and maintenance stay separated from DRM analysis.</div></div><div class="sp-actions"><button id="sp-search-btn" class="dash-btn primary">SEARCH</button><button id="sp-open-analysis" class="dash-btn">OPEN SINGLE SITE ANALYSIS</button></div></div>
+    <div class="sp-search"><div class="sp-picker"><input id="sp-search" autocomplete="off" placeholder="Search Site ID / Site Name / Kabupaten"><div id="sp-search-results" class="sp-search-results" style="display:none"></div></div><span id="sp-search-status">Type to search site, then select a result.</span></div>
+    <div id="sp-empty" class="sp-empty">Search Site ID / Site Name, or open a site directly from the Dashboard map.</div>
+    <div id="sp-content" class="sp-content" style="display:none">
+      <section class="sp-hero"><div><div class="sp-label">SITE ID</div><h2 id="sp-site-id">—</h2><div id="sp-site-name" class="sp-site-name">—</div><div id="sp-location" class="sp-location">—</div></div><div class="sp-badges" id="sp-badges"></div></section>
+      <div class="sp-grid">
+        <section class="sp-card"><h3>01 · ASSET</h3><div id="sp-asset" class="sp-kv"></div></section>
+        <section class="sp-card"><h3>02 · TENANT &amp; CONTRACT</h3><div id="sp-tenant" class="sp-kv"></div></section>
+        <section class="sp-card"><h3>03 · POWER EXISTING</h3><div id="sp-power" class="sp-kv"></div></section>
+        <section class="sp-card"><h3>04 · LAND &amp; LEASE</h3><div id="sp-land" class="sp-kv"></div></section>
+        <section class="sp-card"><h3>05 · LEGAL &amp; DOCUMENT</h3><div id="sp-legal" class="sp-kv"></div></section>
+        <section class="sp-card"><h3>06 · MAINTENANCE</h3><div id="sp-maintenance" class="sp-kv"></div></section>
+      </div>
+      <section class="sp-card sp-attention"><h3>07 · DATA / ATTENTION</h3><div id="sp-attention" class="sp-kv"></div></section>
+    </div>
+  </div>
 </section>
-<section class="bulk-view" id="bulkView" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input accept=".xlsx,.xls,.csv" class="file" id="bulk-file" type="file"/></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" disabled="" id="bulk-analyze">RUN BULK ANALYSIS →</button><button class="btn" disabled="" id="bulk-export">EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div class="error" id="bulk-error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
-<section class="drm-view" id="drmView">
+<section id="bulkView" class="bulk-view" style="display:none"><header class="top"><div><div class="kicker">PMNO · MASS ANALYSIS</div><div class="title">PMNO <b>Bulk Analyzer</b></div></div><div class="status"><i class="dot"></i>PMNO ENGINE ONLINE</div></header><main class="wrap"><div class="toolbar"><label class="btn">UPLOAD TEMPLATE <input id="bulk-file" class="file" type="file" accept=".xlsx,.xls,.csv"></label><button class="btn" id="bulk-template">DOWNLOAD TEMPLATE</button><button class="btn primary" id="bulk-analyze" disabled>RUN BULK ANALYSIS →</button><button class="btn" id="bulk-export" disabled>EXPORT RESULTS</button><span class="progress" id="bulk-progress"></span></div><div class="hint">Template: <b>Site ID</b> · <b>Site Name</b> (optional) · <b>Latitude</b> · <b>Longitude</b> · <b>Target Tenant</b></div><div id="bulk-error" class="error"></div><section class="summary"><div class="kpi"><span>INPUT SITES</span><b id="bulk-kInput">0</b></div><div class="kpi"><span>ANALYZED</span><b id="bulk-kAnalyzed">0</b></div><div class="kpi"><span>COLLO</span><b id="bulk-kCollo">0</b></div><div class="kpi"><span>B2S</span><b id="bulk-kB2s">0</b></div><div class="kpi"><span>FEASIBLE</span><b id="bulk-kFeasible">0</b></div><div class="kpi"><span>AVG IRR BULK</span><b id="bulk-kIrr">—</b></div></section><div class="bulk-table-wrap" id="bulk-table-wrap"><div class="empty" id="bulk-empty">Upload the PMNO bulk template to start.</div></div></main></section>
+
+<section id="drmView" class="drm-view">
 <div class="drm-shell">
-<div class="drm-head">
-<div><div class="drm-kicker">DESIGN REVIEW MEETING</div><div class="drm-title">DRM <b>Workspace</b></div><div class="drm-sub">Kelola analisis site dari awal sampai hasil review tenant.</div></div>
-<div class="drm-context" id="drm-context">Belum ada project</div>
-</div>
-<section class="drm-workspace-home" id="drm-home">
-<div class="drm-card drm-hero">
-<div class="drm-welcome-title">Project DRM</div>
-<p>Buat project terlebih dahulu. Setelah itu site dapat ditambah, diedit, dihapus, lalu dijalankan satu atau sekaligus.</p>
-<button class="drm-big-btn primary" id="drm-start-new"><strong>＋ BUAT PROJECT</strong><span>1 project hanya untuk 1 SOW dan 1 tenant.</span></button>
-</div>
-<div class="drm-card drm-project-list">
-<h3>Project Tersimpan</h3><p>Buka project untuk mengelola Site List dan menjalankan analisis.</p>
-<div id="drm-projects"><div class="drm-empty">Belum ada project tersimpan.</div></div>
-</div>
-</section>
-<section class="hidden" id="drm-project-workspace">
-<div class="drm-card drm-project-header-card">
-<div>
-<div class="drm-section-no">PROJECT</div>
-<div class="drm-project-title" id="drm-project-title">—</div>
-<div class="drm-project-meta" id="drm-project-meta">—</div>
-</div>
-<div class="drm-project-header-actions"><button class="drm-mini-btn" id="drm-edit-project">EDIT PROJECT</button><button class="drm-mini-btn" id="drm-back-home">PROJECT LIST</button></div>
-</div>
-<section class="drm-card drm-section">
-<div class="drm-section-head"><div><div class="drm-section-no">SITE LIST</div><div class="drm-section-title">Daftar Site Project</div><div class="drm-section-help" id="drm-site-help">—</div></div></div>
-<div class="drm-empty-project hidden" id="drm-empty-project"><div class="drm-empty-project-title">Project belum memiliki Site List</div><div class="drm-empty-project-copy">Tambahkan Site List dan analisis akan langsung dijalankan untuk pertama kali.</div><button class="drm-btn primary" id="drm-add-run-first">＋ ADD SITE LIST &amp; RUN</button></div>
-<div class="drm-site-toolbar hidden" id="drm-site-toolbar"><div class="drm-toolbar-left"><button class="drm-btn primary" id="drm-add-sites">＋ ADD SITE</button><button class="drm-btn" id="drm-select-all-sites">SELECT ALL</button></div><div class="drm-toolbar-right"><div class="drm-site-selection-actions hidden" id="drm-site-selection-actions"><button class="drm-btn" id="drm-edit-site">EDIT</button><button class="drm-btn" id="drm-delete-sites">DELETE</button></div><span class="drm-site-count-badge" id="drm-selected-count">0 selected</span><div class="drm-run-selected-wrap"><button class="drm-btn primary" disabled="" id="drm-run-selected">▶ RUN SELECTED</button></div></div></div>
-<div class="drm-table-wrap" id="drm-site-table-wrap"></div>
-</section>
-<section class="drm-card drm-section"><div class="drm-section-head"><div><div class="drm-section-no">ANALYSIS HISTORY</div><div class="drm-section-title">Hasil Analisis Project</div></div><button class="drm-mini-btn" id="drm-run-history-refresh">REFRESH</button></div><div class="drm-history" id="drm-history"><div class="drm-empty">Belum ada hasil analisis.</div></div></section>
-</section>
-<div aria-labelledby="drm-modal-title" aria-modal="true" class="drm-modal hidden" id="drm-project-modal" role="dialog">
-<div class="drm-modal-card">
-<div class="drm-modal-head"><div><div class="drm-section-no">PROJECT</div><div class="drm-modal-title" id="drm-modal-title">Buat Project</div></div><button class="drm-mini-btn" id="drm-modal-close">TUTUP</button></div>
-<label class="drm-field"><span>SOW <b>*</b></span><select class="drm-input" id="drm-sow"><option value="">Pilih SOW</option><option>Add Perangkat</option><option>Collocation</option><option>Relocation</option><option>Solution</option><option>Reuse</option></select></label>
-<label class="drm-field"><span>Tenant <b>*</b></span><select class="drm-input" id="drm-tenant"><option value="">Pilih Tenant</option><option>TSEL</option><option>IOH</option><option>XLS</option><option>SURGE</option><option>Mora Republik</option><option>Other</option></select></label>
-<label class="drm-field hidden" id="drm-other-tenant-field"><span>Nama Tenant</span><input class="drm-input" id="drm-other-tenant" placeholder="Tulis nama tenant"/></label>
-<label class="drm-field"><span>Nama Program <small>(opsional)</small></span><input class="drm-input" id="drm-program-name" placeholder="Boleh dikosongkan"/></label>
-<div class="drm-toast" id="drm-project-msg"></div>
-<div class="drm-modal-actions"><button class="drm-btn" id="drm-modal-cancel">BATAL</button><button class="drm-btn primary" id="drm-create-project">BUAT PROJECT →</button></div>
-</div>
-</div>
-<div aria-labelledby="drm-site-modal-title" aria-modal="true" class="drm-modal hidden" id="drm-site-modal" role="dialog">
-<div class="drm-modal-card">
-<div class="drm-modal-head"><div><div class="drm-section-no">SITE LIST</div><div class="drm-modal-title" id="drm-site-modal-title">Add Site List</div></div><button class="drm-mini-btn" id="drm-site-modal-close">TUTUP</button></div>
-<label class="drm-file-label drm-file-large">UPLOAD EXCEL / CSV<input accept=".xlsx,.xls,.csv" class="drm-file" id="drm-site-file" type="file"/></label>
-<div class="drm-file-name" id="drm-site-file-name">Belum ada file</div><div class="drm-toast" id="drm-site-modal-msg"></div>
-<div class="drm-modal-divider">atau tambah manual</div>
-<div class="drm-manual-grid"><input class="drm-input" id="drm-manual-site-id" placeholder="Site ID"/><input class="drm-input" id="drm-manual-site-name" placeholder="Site Name"/><input class="drm-input" id="drm-manual-lat" placeholder="Latitude"/><input class="drm-input" id="drm-manual-lon" placeholder="Longitude"/></div>
-<div class="drm-modal-actions"><button class="drm-btn" id="drm-site-modal-cancel">BATAL</button><button class="drm-btn primary" id="drm-add-sites-confirm">TAMBAHKAN SITE</button></div>
-</div>
-</div>
-<section aria-live="polite" class="drm-run-progress hidden" id="drm-run-progress">
-<div class="drm-run-progress-head"><div><div class="drm-run-progress-kicker">ANALYSIS PROGRESS</div><div class="drm-run-progress-title" id="drm-progress-title">Menyiapkan analisis...</div></div><div class="drm-run-progress-count" id="drm-progress-count">0 <small>/ 0 site</small></div></div>
-<div class="drm-progress-track"><div class="drm-progress-bar" id="drm-progress-bar"></div></div>
-<div class="drm-run-progress-meta"><div class="drm-progress-stat"><span>SELESAI</span><b id="drm-progress-completed">0</b></div><div class="drm-progress-stat"><span>SEDANG DIPROSES</span><b id="drm-progress-processing">0</b></div><div class="drm-progress-stat"><span>TERSISA</span><b id="drm-progress-remaining">0</b></div></div>
-<div class="drm-progress-current" id="drm-progress-site">Menunggu...</div>
-</section>
-<section class="hidden" id="drm-results">
-<div class="drm-kpis"><div class="drm-kpi"><span>TOTAL SITE</span><b id="drm-k-total">0</b></div><div class="drm-kpi"><span>APPROVED</span><b id="drm-k-approved">0</b></div><div class="drm-kpi"><span>NEED REVIEW</span><b id="drm-k-review">0</b></div><div class="drm-kpi"><span>REJECTED</span><b id="drm-k-rejected">0</b></div></div>
-<section class="drm-card drm-section"><div class="drm-result-head"><div><div class="drm-section-no">HASIL ANALISIS</div><div class="drm-section-title">Review Hasil Analisis</div><div class="drm-section-help" id="drm-result-state">Belum ada hasil.</div></div><div class="drm-filter"><button class="active" data-filter="ALL">SEMUA</button><button data-filter="APPROVED">APPROVED</button><button data-filter="NEED REVIEW">NEED REVIEW</button><button data-filter="REJECTED">REJECTED</button></div></div>
-<div class="drm-table-wrap" id="drm-table-wrap"><div class="drm-empty">Hasil analisis akan muncul di sini.</div></div>
-<div class="drm-save-row"><button class="drm-btn primary" disabled="" id="drm-save-run">SIMPAN HASIL</button></div><div class="drm-toast" id="drm-save-msg"></div>
-</section>
-</section>
+  <div class="drm-head">
+    <div><div class="drm-kicker">DESIGN REVIEW MEETING</div><div class="drm-title">DRM <b>Workspace</b></div><div class="drm-sub">Kelola analisis site dari awal sampai hasil review tenant.</div></div>
+    <div id="drm-context" class="drm-context">Belum ada project</div>
+  </div>
+
+  <section id="drm-home" class="drm-workspace-home">
+    <div class="drm-card drm-hero">
+      <div class="drm-welcome-title">Project DRM</div>
+      <p>Buat project terlebih dahulu. Setelah itu site dapat ditambah, diedit, dihapus, lalu dijalankan satu atau sekaligus.</p>
+      <button id="drm-start-new" class="drm-big-btn primary"><strong>＋ BUAT PROJECT</strong><span>1 project hanya untuk 1 SOW dan 1 tenant.</span></button>
+    </div>
+    <div class="drm-card drm-project-list">
+      <h3>Project Tersimpan</h3><p>Buka project untuk mengelola Site List dan menjalankan analisis.</p>
+      <div id="drm-projects"><div class="drm-empty">Belum ada project tersimpan.</div></div>
+    </div>
+  </section>
+
+  <section id="drm-project-workspace" class="hidden">
+    <div class="drm-card drm-project-header-card">
+      <div>
+        <div class="drm-section-no">PROJECT</div>
+        <div id="drm-project-title" class="drm-project-title">—</div>
+        <div id="drm-project-meta" class="drm-project-meta">—</div>
+      </div>
+      <div class="drm-project-header-actions"><button id="drm-edit-project" class="drm-mini-btn">EDIT PROJECT</button><button id="drm-back-home" class="drm-mini-btn">PROJECT LIST</button></div>
+    </div>
+    <section class="drm-card drm-section">
+      <div class="drm-section-head"><div><div class="drm-section-no">SITE LIST</div><div class="drm-section-title">Daftar Site Project</div><div id="drm-site-help" class="drm-section-help">—</div></div></div>
+      <div id="drm-empty-project" class="drm-empty-project hidden"><div class="drm-empty-project-title">Project belum memiliki Site List</div><div class="drm-empty-project-copy">Tambahkan Site List dan analisis akan langsung dijalankan untuk pertama kali.</div><button id="drm-add-run-first" class="drm-btn primary">＋ ADD SITE LIST &amp; RUN</button></div>
+      <div id="drm-site-toolbar" class="drm-site-toolbar hidden"><div class="drm-toolbar-left"><button id="drm-add-sites" class="drm-btn primary">＋ ADD SITE</button><button id="drm-select-all-sites" class="drm-btn">SELECT ALL</button></div><div class="drm-toolbar-right"><div id="drm-site-selection-actions" class="drm-site-selection-actions hidden"><button id="drm-edit-site" class="drm-btn">EDIT</button><button id="drm-delete-sites" class="drm-btn">DELETE</button></div><span id="drm-selected-count" class="drm-site-count-badge">0 selected</span><div class="drm-run-selected-wrap"><button id="drm-run-selected" class="drm-btn primary" disabled>▶ RUN SELECTED</button></div></div></div>
+      <div id="drm-site-table-wrap" class="drm-table-wrap"></div>
+    </section>
+    <section class="drm-card drm-section"><div class="drm-section-head"><div><div class="drm-section-no">ANALYSIS HISTORY</div><div class="drm-section-title">Hasil Analisis Project</div></div><button id="drm-run-history-refresh" class="drm-mini-btn">REFRESH</button></div><div id="drm-history" class="drm-history"><div class="drm-empty">Belum ada hasil analisis.</div></div></section>
+  </section>
+
+  <div id="drm-project-modal" class="drm-modal hidden" role="dialog" aria-modal="true" aria-labelledby="drm-modal-title">
+    <div class="drm-modal-card">
+      <div class="drm-modal-head"><div><div class="drm-section-no">PROJECT</div><div id="drm-modal-title" class="drm-modal-title">Buat Project</div></div><button id="drm-modal-close" class="drm-mini-btn">TUTUP</button></div>
+      <label class="drm-field"><span>SOW <b>*</b></span><select id="drm-sow" class="drm-input"><option value="">Pilih SOW</option><option>Add Perangkat</option><option>Collocation</option><option>Relocation</option><option>Solution</option><option>Reuse</option></select></label>
+      <label class="drm-field"><span>Tenant <b>*</b></span><select id="drm-tenant" class="drm-input"><option value="">Pilih Tenant</option><option>TSEL</option><option>IOH</option><option>XLS</option><option>SURGE</option><option>Mora Republik</option><option>Other</option></select></label>
+      <label id="drm-other-tenant-field" class="drm-field hidden"><span>Nama Tenant</span><input id="drm-other-tenant" class="drm-input" placeholder="Tulis nama tenant"></label>
+      <label class="drm-field"><span>Nama Program <small>(opsional)</small></span><input id="drm-program-name" class="drm-input" placeholder="Boleh dikosongkan"></label>
+      <div id="drm-project-msg" class="drm-toast"></div>
+      <div class="drm-modal-actions"><button id="drm-modal-cancel" class="drm-btn">BATAL</button><button id="drm-create-project" class="drm-btn primary">BUAT PROJECT →</button></div>
+    </div>
+  </div>
+
+  <div id="drm-site-modal" class="drm-modal hidden" role="dialog" aria-modal="true" aria-labelledby="drm-site-modal-title">
+    <div class="drm-modal-card">
+      <div class="drm-modal-head"><div><div class="drm-section-no">SITE LIST</div><div id="drm-site-modal-title" class="drm-modal-title">Add Site List</div></div><button id="drm-site-modal-close" class="drm-mini-btn">TUTUP</button></div>
+      <label class="drm-file-label drm-file-large">UPLOAD EXCEL / CSV<input id="drm-site-file" class="drm-file" type="file" accept=".xlsx,.xls,.csv"></label>
+      <div id="drm-site-file-name" class="drm-file-name">Belum ada file</div><div id="drm-site-modal-msg" class="drm-toast"></div>
+      <div class="drm-modal-divider">atau tambah manual</div>
+      <div class="drm-manual-grid"><input id="drm-manual-site-id" class="drm-input" placeholder="Site ID"><input id="drm-manual-site-name" class="drm-input" placeholder="Site Name"><input id="drm-manual-lat" class="drm-input" placeholder="Latitude"><input id="drm-manual-lon" class="drm-input" placeholder="Longitude"></div>
+      <div class="drm-modal-actions"><button id="drm-site-modal-cancel" class="drm-btn">BATAL</button><button id="drm-add-sites-confirm" class="drm-btn primary">TAMBAHKAN SITE</button></div>
+    </div>
+  </div>
+
+  <section id="drm-run-progress" class="drm-run-progress hidden" aria-live="polite">
+    <div class="drm-run-progress-head"><div><div class="drm-run-progress-kicker">ANALYSIS PROGRESS</div><div id="drm-progress-title" class="drm-run-progress-title">Menyiapkan analisis...</div></div><div id="drm-progress-count" class="drm-run-progress-count">0 <small>/ 0 site</small></div></div>
+    <div class="drm-progress-track"><div id="drm-progress-bar" class="drm-progress-bar"></div></div>
+    <div class="drm-run-progress-meta"><div class="drm-progress-stat"><span>SELESAI</span><b id="drm-progress-completed">0</b></div><div class="drm-progress-stat"><span>SEDANG DIPROSES</span><b id="drm-progress-processing">0</b></div><div class="drm-progress-stat"><span>TERSISA</span><b id="drm-progress-remaining">0</b></div></div>
+    <div id="drm-progress-site" class="drm-progress-current">Menunggu...</div>
+  </section>
+
+  <section id="drm-results" class="hidden">
+    <div class="drm-kpis"><div class="drm-kpi"><span>TOTAL SITE</span><b id="drm-k-total">0</b></div><div class="drm-kpi"><span>APPROVED</span><b id="drm-k-approved">0</b></div><div class="drm-kpi"><span>NEED REVIEW</span><b id="drm-k-review">0</b></div><div class="drm-kpi"><span>REJECTED</span><b id="drm-k-rejected">0</b></div></div>
+    <section class="drm-card drm-section"><div class="drm-result-head"><div><div class="drm-section-no">HASIL ANALISIS</div><div class="drm-section-title">Review Hasil Analisis</div><div id="drm-result-state" class="drm-section-help">Belum ada hasil.</div></div><div class="drm-filter"><button data-filter="ALL" class="active">SEMUA</button><button data-filter="APPROVED">APPROVED</button><button data-filter="NEED REVIEW">NEED REVIEW</button><button data-filter="REJECTED">REJECTED</button></div></div>
+      <div id="drm-table-wrap" class="drm-table-wrap"><div class="drm-empty">Hasil analisis akan muncul di sini.</div></div>
+      <div class="drm-save-row"><button id="drm-save-run" class="drm-btn primary" disabled>SIMPAN HASIL</button></div><div id="drm-save-msg" class="drm-toast"></div>
+    </section>
+  </section>
 </div></section>
 <!-- PMNO MASTER DATA ADDITION: START HTML -->
-<section class="master-view" id="masterDataView">
-<div class="master-shell">
-<div class="master-head"><div><div class="master-kicker">PMNO · PREDICTIVE ENGINE CONTROL CENTER</div><div class="master-title">MASTER DATA MANAGEMENT</div><div class="master-sub">Control point for predictive inputs — static master, historical evidence, and business assumptions.</div></div><div class="master-engine"><i></i> ENGINE STATUS · READY</div></div>
-<div id="masterSections"></div>
-<div class="master-note"><b>VERSION STATUS: ACTIVE · ARCHIVED</b><br/><b>Governance:</b> Master Data controls inputs only. CALCULATED OUTPUT: Technical results such as Need STR, Reinforcement Ton, predictive design, CAPEX result, IRR, NPV and investment decision remain system-calculated and are never uploaded as master data.</div>
-</div>
+<section id="masterDataView" class="master-view">
+ <div class="master-shell">
+  <div class="master-head"><div><div class="master-kicker">PMNO · PREDICTIVE ENGINE CONTROL CENTER</div><div class="master-title">MASTER DATA MANAGEMENT</div><div class="master-sub">Control point for predictive inputs — static master, historical evidence, and business assumptions.</div></div><div class="master-engine"><i></i> ENGINE STATUS · READY</div></div>
+  <div id="masterSections"></div>
+  <div class="master-note"><b>VERSION STATUS: ACTIVE · ARCHIVED</b><br><b>Governance:</b> Master Data controls inputs only. CALCULATED OUTPUT: Technical results such as Need STR, Reinforcement Ton, predictive design, CAPEX result, IRR, NPV and investment decision remain system-calculated and are never uploaded as master data.</div>
+ </div>
 </section>
-<div class="master-modal" id="masterModal"><div class="master-dialog"><div class="master-dialog-head"><div><h2 id="masterModalTitle">Master Module</h2><p id="masterModalSub">Export → Edit → Upload → Validate → Impact → Publish</p></div><button class="master-close" id="masterClose">×</button></div><div class="master-toolbar"><button id="masterExport">EXPORT CURRENT</button><label class="master-upload-btn" style="display:inline-flex;align-items:center;cursor:pointer">UPLOAD NEW VERSION<input accept=".xlsx,.xls,.csv" id="masterFile" style="display:none" type="file"/></label><select id="masterOperation" style="border:1px solid #294b64;background:#0a2234;color:#a8c4d5;border-radius:7px;padding:7px 9px;font-size:7px;font-weight:950;letter-spacing:.8px"><option value="REPLACE">REPLACE</option><option value="APPEND">APPEND</option></select><button id="masterValidate">VALIDATE</button><button class="primary" disabled="" id="masterPublish">PUBLISH</button></div><div class="master-upload-info" id="masterUploadInfo">No file uploaded. Export the official template or upload an edited workbook.</div><div class="master-validation"><div><strong>STRUCTURE VALIDATION</strong><span id="masterStructure">PENDING</span></div><div><strong>BUSINESS VALIDATION</strong><span id="masterBusiness">PENDING</span></div></div><div class="master-impact"><strong>IMPACT PREVIEW</strong><p id="masterImpact">Open a module, export its template, upload a workbook, then validate.</p></div><div class="master-history"><table><thead><tr><th>VERSION</th><th>STATUS</th><th>ROWS</th><th>CREATED</th></tr></thead><tbody id="masterHistoryBody"><tr><td colspan="4">No version history.</td></tr></tbody></table></div></div>
+<div id="masterModal" class="master-modal"><div class="master-dialog"><div class="master-dialog-head"><div><h2 id="masterModalTitle">Master Module</h2><p id="masterModalSub">Export → Edit → Upload → Validate → Impact → Publish</p></div><button class="master-close" id="masterClose">×</button></div><div class="master-toolbar"><button id="masterExport">EXPORT CURRENT</button><label class="master-upload-btn" style="display:inline-flex;align-items:center;cursor:pointer">UPLOAD NEW VERSION<input id="masterFile" type="file" accept=".xlsx,.xls,.csv" style="display:none"></label><select id="masterOperation" style="border:1px solid #294b64;background:#0a2234;color:#a8c4d5;border-radius:7px;padding:7px 9px;font-size:7px;font-weight:950;letter-spacing:.8px"><option value="REPLACE">REPLACE</option><option value="APPEND">APPEND</option></select><button id="masterValidate">VALIDATE</button><button id="masterPublish" class="primary" disabled>PUBLISH</button></div><div class="master-upload-info" id="masterUploadInfo">No file uploaded. Export the official template or upload an edited workbook.</div><div class="master-validation"><div><strong>STRUCTURE VALIDATION</strong><span id="masterStructure">PENDING</span></div><div><strong>BUSINESS VALIDATION</strong><span id="masterBusiness">PENDING</span></div></div><div class="master-impact"><strong>IMPACT PREVIEW</strong><p id="masterImpact">Open a module, export its template, upload a workbook, then validate.</p></div><div class="master-history"><table><thead><tr><th>VERSION</th><th>STATUS</th><th>ROWS</th><th>CREATED</th></tr></thead><tbody id="masterHistoryBody"><tr><td colspan="4">No version history.</td></tr></tbody></table></div></div>
 <!-- PMNO MASTER DATA ADDITION: END HTML -->
-<nav class="mobile-nav"><button data-target="input">⌂<br/>INPUT</button><button class="active" data-target="map">◎<br/>MAP</button><button data-target="decision">◈<br/>DECISION</button></nav>
+<nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button></nav>
 </div>
-<script crossorigin="" src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
 const SUPABASE_URL='https://lsiiruhnitbrqfwbmdor.supabase.co';
 const SUPABASE_KEY='sb_publishable_jMejG4S6En6Lszel0jJhhQ_9APEtdCr';
@@ -1903,7 +1923,7 @@ let initialized=false;
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function uniq(key){return [...new Set(rows.map(r=>String(val(r,key)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function setOptions(id,values,all){const el=$(id),old=el.value;el.innerHTML='<option value="">'+all+'</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(old))el.value=old}
-function tenantCount(r){const n=Number(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));return Number.isFinite(n)?Math.max(0,n):0}
+function tenantCount(r){const n=Number(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));if(Number.isFinite(n)&&n>0)return Math.max(0,n);const sid=String(val(r,'site_id','site_id_dmt')).trim();return sid&&Array.isArray(demoTenants[sid])?demoTenants[sid].length:0}
 function demoRows(count=40000){
  const base=[
  ['ACE','Banda Aceh','Aceh',5.55,95.32,'SUMATERA'],['SUM','Medan','North Sumatra',3.59,98.67,'SUMATERA'],['RKB','Pekanbaru','Riau',0.51,101.45,'SUMATERA'],['PDG','Padang','West Sumatra',-0.95,100.35,'SUMATERA'],['JMB','Jambi','Jambi',-1.59,103.61,'SUMATERA'],['PLM','Palembang','South Sumatra',-2.99,104.76,'SUMATERA'],['BKL','Bengkulu','Bengkulu',-3.79,102.27,'SUMATERA'],['LPG','Bandar Lampung','Lampung',-5.43,105.26,'SUMATERA'],['BKA','Pangkalpinang','Bangka Belitung',-2.13,106.11,'SUMATERA'],['TJK','Tanjungpinang','Riau Islands',0.92,104.45,'SUMATERA'],
@@ -1925,7 +1945,10 @@ function demoRows(count=40000){
  }
  return rows
 }
-function buildDemoChildren(rs){rs.forEach((r,i)=>{const n=tenantCount(r), arr=[];for(let j=0;j<n;j++){const tid=r.site_id+'-T'+(j+1), status=(i+j)%11===0?'EXPIRING':((i+j)%17===0?'EXPIRED':'ACTIVE');arr.push({tenant_id:tid,tenant_name:['IOH','TSEL','XLS','SFN'][j%4],tenant_status:status,contract_end_date:new Date(Date.now()+((status==='EXPIRING'?55:status==='EXPIRED'?-40:420+j*90))*86400000).toISOString().slice(0,10),revenue_month:8500000+(j*1750000),contract_no:'CTR-'+tid,contract_link:'https://demo.local/contract/'+tid,power_configuration:j%3===0?'ON GRID':j%3===1?'HYBRID':'OFF GRID',power_source:j%3===0?'PLN':j%3===1?'PLN + BATTERY':'SPS + BATTERY',pln_id:j%3===0||j%3===1?'PLN-'+String(100000+i*10+j):'',pln_capacity:j%3===0?23:(j%3===1?16.5:''),sps_capacity:j%3===2?8:(j%3===1?5:''),battery_capacity:j%3===1||j%3===2?20:'',power_capacity:j%3===0?20:(j%3===1?18:8)});}demoTenants[r.site_id]=arr;demoPower[r.site_id]=arr;demoMaintenance[r.site_id]={status:i%9===0?'OVERDUE':'ACTIVE',last:new Date(Date.now()-(i%6)*45*86400000).toISOString().slice(0,10),next:new Date(Date.now()+((i%6)+1)*45*86400000).toISOString().slice(0,10),ticket:'https://demo.local/ticket/'+r.site_id,report:'https://demo.local/maintenance/'+r.site_id};})}
+function buildDemoChildren(rs){demoTenants={};demoPower={};demoMaintenance={};rs.forEach((r,i)=>{const n=Number(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'))||((i%13===0)?0:(i%7===0?1:(i%5===0?4:(i%11===0?6:(i%3)+1))));const arr=[];for(let j=0;j<n;j++){const tid=r.site_id+'-T'+(j+1),status=(i+j)%11===0?'EXPIRING':((i+j)%17===0?'EXPIRED':'ACTIVE');arr.push({tenant_id:tid,tenant_name:['IOH','TSEL','XLS','SFN'][j%4],tenant_status:status,contract_end_date:new Date(Date.now()+((status==='EXPIRING'?55:status==='EXPIRED'?-40:420+j*90))*86400000).toISOString().slice(0,10),revenue_month:8500000+(j*1750000),contract_no:'CTR-'+tid,contract_link:'https://demo.local/contract/'+tid,power_configuration:j%3===0?'ON GRID':j%3===1?'HYBRID':'OFF GRID',power_source:j%3===0?'PLN':j%3===1?'PLN + BATTERY':'SPS + BATTERY',pln_id:j%3===0||j%3===1?'PLN-'+String(100000+i*10+j):'',pln_capacity:j%3===0?23:(j%3===1?16.5:''),sps_capacity:j%3===2?8:(j%3===1?5:''),battery_capacity:j%3===1||j%3===2?20:'',power_capacity:j%3===0?20:(j%3===1?18:8)});}demoTenants[r.site_id]=arr;demoPower[r.site_id]=arr;demoMaintenance[r.site_id]={status:i%9===0?'OVERDUE':'ACTIVE',last:new Date(Date.now()-(i%6)*45*86400000).toISOString().slice(0,10),next:new Date(Date.now()+((i%6)+1)*45*86400000).toISOString().slice(0,10),ticket:'https://demo.local/ticket/'+r.site_id,report:'https://demo.local/maintenance/'+r.site_id};})}
+function setLiveChildren(tenantRows,powerRows,maintenanceRows){demoTenants={};demoPower={};demoMaintenance={};const powers={};(Array.isArray(powerRows)?powerRows:[]).forEach(p=>{const sid=String(p.site_id||'').trim(),tid=String(p.tenant_id||'').trim();if(!sid)return;(powers[sid]??=[]).push(p)});(Array.isArray(tenantRows)?tenantRows:[]).forEach(t=>{const sid=String(t.site_id||'').trim();if(!sid)return;const tid=String(t.tenant_id||'').trim();const p=(powers[sid]||[]).find(x=>String(x.tenant_id||'').trim()===tid)||(powers[sid]||[])[0]||{};const row={...t,power_configuration:t.power_configuration||p.power_configuration||'',power_source:t.power_source||p.power_source||'',pln_id:t.pln_id||p.pln_id||'',pln_capacity:t.pln_capacity??p.pln_capacity??'',sps_capacity:t.sps_capacity??p.sps_capacity??'',battery_capacity:t.battery_capacity??p.battery_capacity??'',power_capacity:t.power_capacity??p.existing_power_capacity??p.pln_capacity??'',contract_link:t.tenant_document_link||'',power_document_link:p.power_document_link||''};(demoTenants[sid]??=[]).push(row)});Object.entries(powers).forEach(([sid,ps])=>{demoPower[sid]=ps});(Array.isArray(maintenanceRows)?maintenanceRows:[]).forEach(m=>{const sid=String(m.site_id||'').trim();if(!sid)return;demoMaintenance[sid]={status:m.maintenance_status||'ACTIVE',last:m.last_maintenance_date||'',next:m.next_maintenance_date||'',ticket:m.maintenance_ticket_link||'',report:m.maintenance_document_link||'',type:m.maintenance_type||'',vendor:m.maintenance_vendor||'',note:m.maintenance_note||''}});return {tenantCount:Object.values(demoTenants).reduce((n,a)=>n+a.length,0),powerCount:Object.values(demoPower).reduce((n,a)=>n+a.length,0),maintenanceCount:Object.keys(demoMaintenance).length}}
+function regionFromProvince(v){const p=String(v||'').toUpperCase();if(/ACEH|SUMATERA|RIAU|JAMBI|BENGKULU|LAMPUNG|BANGKA|BELITUNG|KEPULAUAN RIAU/.test(p))return 'SUMATERA';if(/JAKARTA|BANTEN|JAWA BARAT|JAWA TENGAH|YOGYAKARTA|JAWA TIMUR/.test(p))return 'JAWA';if(/BALI|NUSA TENGGARA/.test(p))return 'BALI NUSRA';if(/KALIMANTAN/.test(p))return 'KALIMANTAN';if(/SULAWESI/.test(p))return 'SULAWESI';if(/MALUKU/.test(p))return 'MALUKU';if(/PAPUA/.test(p))return 'PAPUA';return ''}
+function normalizeMasterRows(pmnoRows,siteRows){const legacy=new Map((Array.isArray(siteRows)?siteRows:[]).map(x=>[String(x.site_id_dmt||'').trim(),x]));return (Array.isArray(pmnoRows)?pmnoRows:[]).map(x=>{const sid=String(x.site_id||'').trim(),l=legacy.get(sid)||{};return {...l,...x,site_id:sid||String(l.site_id_dmt||'').trim(),site_name:x.site_name||l.site_name||'',city:x.city||l.kabupaten||'',province:x.province||'',regional:x.regional||regionFromProvince(x.province||''),latitude:x.latitude??x.lat,longitude:x.longitude??x.lon,lease_expiry_date:x.lease_expiry_date||l.end_sewa,land_status:x.land_status||l.land_status,land_owner_name:x.land_owner_name||l.land_owner_name,land_category:x.land_category||l.land_category,pks_baru_document_link:x.pks_baru_document_link||l.pks_baru_document_link,pbg_document_link:x.pbg_document_link||l.pbg_document_link,imb_document_link:x.imb_document_link||l.imb_document_link,slf_document_link:x.slf_document_link||l.slf_document_link,sda_document_link:x.sda_document_link||l.sda_document_link};});}
 
 function markerColor(n){return n<=1?'#43e0a0':n<=3?'#d8d85b':n<=5?'#f5a64f':'#ff5570'}
 function markerIcon(n){return L.divIcon({className:'',html:`<div style="width:18px;height:18px;border-radius:50%;background:${markerColor(n)};border:2px solid rgba(255,255,255,.9);box-shadow:0 3px 10px rgba(0,0,0,.35);display:flex;align-items:center;justify-content:center;color:#06111f;font-size:7px;font-weight:900">${n||'1'}</div>`,iconSize:[18,18],iconAnchor:[9,9]})}
@@ -1948,42 +1971,7 @@ function renderDashboardSource(sourceLabel){
   head?.insertAdjacentHTML('beforeend',`<span class="dash-demo">${sourceLabel} · ${rows.length.toLocaleString('id-ID')} SITES</span>`);
   head?.classList.remove('loading');
 }
-async function load(){
-  if(loading)return;
-  loading=true;
-  const head=$('dash-head');
-  try{
-    // Render a usable portfolio immediately. Network access must never leave Dashboard blank.
-    if(!rows.length)renderDashboardSource('DEMO BASELINE');
-    let liveRows=[];
-    const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),8000);
-    try{
-      const pageSize=1000; let from=0;
-      while(true){
-        const r=await fetch(URL+'/rest/v1/pmno_site_master?select=*&offset='+from+'&limit='+pageSize,{headers:H,signal:controller.signal});
-        if(!r.ok)break;
-        const batch=await r.json();
-        if(!Array.isArray(batch)||!batch.length)break;
-        liveRows.push(...batch);
-        if(batch.length<pageSize)break;
-        from+=pageSize;
-      }
-    }catch(e){console.warn('Dashboard live data unavailable; keeping rendered baseline.',e)}
-    finally{clearTimeout(timer)}
-    if(liveRows.length){
-      rows=liveRows;
-      // Child domains remain demo-backed until the corresponding Master Data tables are provisioned.
-      buildDemoChildren(rows);
-      renderDashboardSource('MASTER DATA');
-    }else{
-      renderDashboardSource('DEMO BASELINE');
-    }
-  }catch(e){
-    console.error('PMNO Dashboard load error',e);
-    try{if(!rows.length){rows=demoRows(40000);buildDemoChildren(rows)}renderDashboardSource('DEMO BASELINE')}catch(x){console.error('PMNO Dashboard render error',x)}
-  }finally{loading=false}
-}
+async function load(){if(loading)return;loading=true;const head=$('dash-head');try{if(!rows.length)renderDashboardSource('DEMO BASELINE');const getAll=async(table,select='*')=>{const out=[],pageSize=1000;let from=0;while(true){const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&offset='+from+'&limit='+pageSize,{headers:H});if(!r.ok)break;const batch=await r.json();if(!Array.isArray(batch)||!batch.length)break;out.push(...batch);if(batch.length<pageSize)break;from+=pageSize}return out};const [pmnoRows,siteRows,tenantRows,powerRows,maintenanceRows]=await Promise.all([getAll('pmno_site_master'),getAll('site_master'),getAll('tenant_contract'),getAll('tenant_power'),getAll('maintenance')]);if(pmnoRows.length){rows=normalizeMasterRows(pmnoRows,siteRows);setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>{r.tenant_count=(demoTenants[r.site_id]||[]).length});renderDashboardSource('MASTER DATA · PMNO');}else if(siteRows.length){rows=siteRows.map(x=>({...x,site_id:x.site_id_dmt,site_name:x.site_name||'',city:x.kabupaten||'',province:x.province||'',regional:regionFromProvince(x.province||''),latitude:x.latitude??x.lat,longitude:x.longitude??x.lon,lease_expiry_date:x.lease_expiry_date||x.end_sewa}));setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>{r.tenant_count=(demoTenants[r.site_id]||[]).length});if(!tenantRows.length&&!powerRows.length&&!maintenanceRows.length)buildDemoChildren(rows);renderDashboardSource('MASTER DATA');}else{renderDashboardSource('DEMO BASELINE');}}catch(e){console.error('PMNO Dashboard load error',e);try{if(!rows.length){rows=demoRows(40000);buildDemoChildren(rows)}renderDashboardSource('DEMO BASELINE')}catch(x){console.error('PMNO Dashboard render error',x)}}finally{loading=false}}
 function init(){
   if(!initialized){
     initialized=true;
@@ -2017,6 +2005,7 @@ window.pmnoDashboardInit=init;window.pmnoSiteProfileInit=function(){if(!initiali
 try{const initialHash=String(location.hash||'').replace(/^#/, '').toLowerCase();if(initialHash==='dashboard')init();else if(initialHash==='siteprofile')window.pmnoSiteProfileInit();}catch(e){}
 })();
 </script>
+
 <!-- PMNO MASTER DATA ADDITION: START CONTROLLER -->
 <script id="master-data-controller">
 (function(){
@@ -2058,27 +2047,7 @@ async function getModules(){
  try{const r=await fetch(URL+'/rest/v1/pmno_master_module?select=module_code,module_name,data_category,upload_mode,target_table&active=eq.true&order=module_code',{headers:apiHeaders()});if(!r.ok)throw Error();const db=await r.json();const byCode=Object.fromEntries(db.map(x=>[x.module_code,x]));return fallback.map(x=>byCode[x.module_code]?{...x,...byCode[x.module_code]}:x)}catch(e){return fallback}
 }
 async function rowCount(table){try{const r=await fetch(URL+'/rest/v1/'+table+'?select=id&limit=1',{headers:{...apiHeaders(),'Prefer':'count=exact'}});const cr=r.headers.get('content-range');if(cr&&cr.includes('/'))return Number(cr.split('/')[1]);return '—'}catch(e){return '—'}}
-async function render(){
- const box=$('masterSections'); if(!box)return;
- // Always paint the complete module catalog first. Backend metadata/counts must never block the upload UI.
- const fallback=Object.entries(codeByName).map(([module_name,module_code])=>({module_code,module_name,data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',target_table:({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()}));
- const paint=(mods)=>{
-  const byCode=Object.fromEntries(mods.map(x=>[x.module_code,x]));
-  box.innerHTML=modules.map(g=>`<section class="master-section"><div class="master-section-head"><strong>${g[1]}</strong><span>${g[2].length} MODULES</span></div><div class="master-grid">${g[2].map(name=>{const c=codeByName[name],x=byCode[c]||{};return `<article class="master-card"><div class="master-card-top"><div><h3>${esc(name)}</h3><div class="master-type">${esc(x.upload_mode||'REPLACE')} · ${esc(x.data_category||g[0])}</div></div><span class="master-type">ACTIVE</span></div><div class="master-stat"><div><b id="count-${esc(c)}">—</b><small> records</small></div><small>version controlled</small></div><div class="master-actions"><button data-md="${esc(c)}">MANAGE</button><button data-up="${esc(c)}">UPLOAD</button><button class="primary" data-exp="${esc(c)}">EXPORT</button></div></article>`}).join('')}</div></section>`).join('');
-  box.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>openModule(b.dataset.md));
-  box.querySelectorAll('[data-up]').forEach(b=>b.onclick=async()=>{await openModule(b.dataset.up);$('masterFile')?.click()});
-  box.querySelectorAll('[data-exp]').forEach(b=>b.onclick=()=>exportModule(b.dataset.exp));
- };
- paint(fallback);
- try{
-  const mods=await Promise.race([getModules(),new Promise((_,rej)=>setTimeout(()=>rej(Error('metadata timeout')),5000))]);
-  paint(mods);
-  for(const m of mods){
-   const n=await Promise.race([rowCount(m.target_table),new Promise(resolve=>setTimeout(()=>resolve('—'),2500))]);
-   const el=$('count-'+m.module_code);if(el)el.textContent=typeof n==='number'?n.toLocaleString('id-ID'):n;
-  }
- }catch(e){console.warn('Master metadata unavailable; keeping fallback module catalog.',e)}
-}
+async function render(){const box=$('masterSections');if(!box)return;const mods=await getModules();const byCode=Object.fromEntries(mods.map(x=>[x.module_code,x]));box.innerHTML=modules.map(g=>`<section class="master-section"><div class="master-section-head"><strong>${g[1]}</strong><span>${g[2].length} MODULES</span></div><div class="master-grid">${g[2].map(name=>{const c=codeByName[name],x=byCode[c]||{};return `<article class="master-card"><div class="master-card-top"><div><h3>${esc(name)}</h3><div class="master-type">${esc(x.upload_mode||'REPLACE')} · ${esc(x.data_category||g[0])}</div></div><span class="master-type">ACTIVE</span></div><div class="master-stat"><div><b id="count-${esc(c)}">—</b><small> records</small></div><small>version controlled</small></div><div class="master-actions"><button data-md="${esc(c)}">MANAGE</button><button class="primary" data-exp="${esc(c)}">EXPORT</button></div></article>`}).join('')}</div></section>`).join('');box.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>openModule(b.dataset.md));box.querySelectorAll('[data-exp]').forEach(b=>b.onclick=()=>exportModule(b.dataset.exp));for(const m of mods){const n=await rowCount(m.target_table);const el=$('count-'+m.module_code);if(el)el.textContent=typeof n==='number'?n.toLocaleString('id-ID'):n}}
 function moduleName(code){return Object.entries(codeByName).find(x=>x[1]===code)?.[0]||code}
 async function openModule(code){selected=code;parsed=null;$('masterModalTitle').textContent=moduleName(code);$('masterModalSub').textContent=`${code} · Export → Edit → Upload → Validate → Impact → Publish`;$('masterUploadInfo').textContent='No file uploaded. Export the official template or upload an edited workbook.';$('masterStructure').textContent='PENDING';$('masterBusiness').textContent='PENDING';$('masterImpact').textContent='Upload and validate a version to preview affected engines.';$('masterPublish').disabled=true;const hist=['LEASE_HISTORY','SITAC_HISTORY','PERMIT_HISTORY','CONSTRUCTION_HISTORY','DELIVERY_HISTORY','COMMUNITY_HISTORY'].includes(code);$('masterOperation').value=hist?'APPEND':'REPLACE';$('masterOperation').disabled=!hist;$('masterModal').classList.add('show');await renderHistory(code)}
 function exportRows(rows,name){const ws=XLSX.utils.json_to_sheet(rows);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master Data');XLSX.writeFile(wb,name)}
@@ -2093,31 +2062,17 @@ $('masterPublish').onclick=async()=>{
   const op=$('masterOperation').value;
   const uploadRows=parsed.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
   if(op==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
-  const publishable=['SITE_MASTER','TENANT_CONTRACT','TENANT_POWER','MAINTENANCE'];
-  if(!publishable.includes(selected)){alert(`${moduleName(selected)} belum memiliki publish handler backend. Module ini saat ini template/export only.`);return}
   try{
     const impact={row_count:uploadRows.length,operation:op,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
     $('masterPublish').disabled=true;
-    $('masterPublish').textContent='PREPARING…';
-    const batchId=(crypto?.randomUUID?crypto.randomUUID():'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g,c=>{const r=Math.random()*16|0,v=c==='x'?r:(r&3)|8;return v.toString(16)}));
-    const chunkSize=1000;
-    for(let i=0;i<uploadRows.length;i+=chunkSize){
-      const chunk=uploadRows.slice(i,i+chunkSize);
-      $('masterPublish').textContent=`UPLOADING ${Math.min(i+chunk.length,uploadRows.length).toLocaleString('id-ID')} / ${uploadRows.length.toLocaleString('id-ID')}…`;
-      const r=await fetch(URL+'/rest/v1/rpc/pmno_master_stage_chunk',{method:'POST',headers:apiHeaders(),body:JSON.stringify({p_batch_id:batchId,p_module_code:selected,p_rows:chunk,p_start_row:i,p_reset:i===0})});
-      const raw=await r.text();
-      if(!r.ok)throw Error(raw||('Stage upload HTTP '+r.status));
-    }
     $('masterPublish').textContent='PUBLISHING…';
-    const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish_staged',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_batch_id:batchId,p_module_code:selected,p_operation:op,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_impact_preview:impact})});
+    const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_module_code:selected,p_operation:op,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:uploadRows,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact})});
     const raw=await r.text();
-    if(!r.ok)throw Error(raw||('Publish HTTP '+r.status));
-    let result={};try{result=JSON.parse(raw)}catch(e){} if(Array.isArray(result))result=result[0]||{};
-    $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · v${result.version_no??'—'} · ${uploadRows.length.toLocaleString('id-ID')} rows`;
-    $('masterStructure').textContent='PASS';$('masterBusiness').textContent='PUBLISHED';
-    $('masterImpact').textContent=`Active version v${result.version_no??'—'} · ${op} · ${uploadRows.length.toLocaleString('id-ID')} rows published successfully.`;
-    $('masterPublish').disabled=true;await renderHistory(selected);await render();
-  }catch(e){console.error('Master publish error',e);$('masterPublish').disabled=false;alert('Publish failed: '+(e?.message||e))}
+    if(!r.ok)throw Error(raw||('HTTP '+r.status));
+    let result={}; try{result=JSON.parse(raw)}catch(e){}
+    if(Array.isArray(result)) result=result[0]||{};
+    $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · v${result.version_no??'—'} · ${uploadRows.length.toLocaleString('id-ID')} rows`;$('masterStructure').textContent='PASS';$('masterBusiness').textContent='PUBLISHED';$('masterImpact').textContent=`Active version v${result.version_no} · ${op} · source data updated successfully.`;$('masterPublish').disabled=true;await renderHistory(selected);await render();
+  }catch(e){$('masterPublish').disabled=false;$('masterPublish').textContent='PUBLISH';alert('Publish failed: '+e.message)}
   finally{$('masterPublish').textContent='PUBLISH'}
 };
 async function renderHistory(code){const b=$('masterHistoryBody');try{const r=await fetch(URL+'/rest/v1/pmno_master_version?select=version_no,status,row_count,created_at&module_code=eq.'+encodeURIComponent(code)+'&order=created_at.desc&limit=8',{headers:apiHeaders()});const rows=r.ok?await r.json():[];b.innerHTML=rows.length?rows.map(x=>`<tr><td><b>v${esc(x.version_no)}</b></td><td>${esc(x.status)}</td><td>${esc(x.row_count)}</td><td>${new Date(x.created_at).toLocaleString('id-ID')}</td></tr>`).join(''):'<tr><td colspan="4">No staged versions yet.</td></tr>'}catch(e){b.innerHTML='<tr><td colspan="4">History unavailable.</td></tr>'}}
@@ -2125,5 +2080,5 @@ window.pmnoMasterInit=render;render();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-</div></body>
+</body>
 </html>
