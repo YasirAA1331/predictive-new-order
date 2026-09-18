@@ -619,6 +619,93 @@ body.bulk-page .mobile-nav{
   .topbar .mode-menu button{width:100%!important;min-width:0!important;height:auto!important;min-height:42px!important}
 }
 </style>
+
+<style id="pmno-nav-v15">
+/* V15 — compact professional navigation: horizontal groups on mobile/tablet, no giant stacked cards */
+@media(max-width:760px){
+  .topbar{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"brand status" "nav nav"!important;
+    gap:10px!important;
+    padding:14px 14px 12px!important;
+    background:#071321!important;
+  }
+  .topbar>div:first-child{grid-area:brand!important;min-width:0!important}
+  .topbar>.status{grid-area:status!important;align-self:center!important;justify-self:end!important}
+  .brand-kicker{font-size:7px!important;letter-spacing:1.6px!important}
+  .brand-title{font-size:19px!important;line-height:1.08!important;white-space:nowrap!important}
+  .mode-menu{
+    grid-area:nav!important;
+    width:100%!important;
+    display:flex!important;
+    align-items:stretch!important;
+    justify-content:flex-start!important;
+    gap:7px!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    padding:2px 0 3px!important;
+    margin:0!important;
+    scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch!important;
+  }
+  .mode-menu::-webkit-scrollbar{display:none!important}
+  .nav-group{
+    flex:0 0 auto!important;
+    display:flex!important;
+    flex-direction:column!important;
+    align-items:stretch!important;
+    gap:4px!important;
+    min-width:0!important;
+    padding:0!important;
+  }
+  .nav-group-label{
+    justify-content:flex-start!important;
+    padding:0 3px!important;
+    min-height:10px!important;
+    line-height:10px!important;
+    font-size:6px!important;
+    letter-spacing:1.8px!important;
+    opacity:.8!important;
+  }
+  .nav-group:first-child{width:184px!important}
+  .nav-group:nth-child(2){width:274px!important}
+  .nav-group:nth-child(3){width:132px!important}
+  .nav-group:first-child,.nav-group:nth-child(2){
+    display:grid!important;
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:10px 42px!important;
+    column-gap:5px!important;
+  }
+  .nav-group:nth-child(2){grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  .nav-group:first-child .nav-group-label,.nav-group:nth-child(2) .nav-group-label{grid-column:1/-1!important}
+  .nav-group:nth-child(3){
+    display:grid!important;
+    grid-template-rows:10px 42px!important;
+  }
+  .mode-menu button{
+    width:100%!important;
+    min-width:0!important;
+    min-height:42px!important;
+    height:42px!important;
+    padding:0 8px!important;
+    border-radius:10px!important;
+    font-size:8px!important;
+    letter-spacing:.75px!important;
+    line-height:1!important;
+  }
+  .status{font-size:7px!important;letter-spacing:.8px!important;white-space:nowrap!important}
+}
+@media(max-width:420px){
+  .topbar{padding:12px 11px 10px!important}
+  .brand-title{font-size:17px!important}
+  .status{font-size:6px!important}
+  .nav-group:first-child{width:168px!important}
+  .nav-group:nth-child(2){width:252px!important}
+  .nav-group:nth-child(3){width:122px!important}
+  .mode-menu button{font-size:7px!important;padding:0 5px!important}
+}
+</style>
 </head>
 <body>
 <div class="app">
