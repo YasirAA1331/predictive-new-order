@@ -4,6 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>PMNO — Predictive Mapping New Order</title>
+<!-- PMNO BUILD 2026-09-18-MASTER-PUBLISH-FIX-V36 -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
 :root{--bg:#06111f;--panel:#0a1727;--panel2:#0d1d31;--line:#20364f;--text:#edf5fb;--muted:#7e93a8;--cyan:#35c8ff;--green:#43e0a0;--red:#ff5570;--amber:#f5bf5c;--shadow:0 18px 50px rgba(0,0,0,.38)}
@@ -2079,17 +2080,28 @@ $('masterPublish').onclick=async()=>{
       const operation=isFirst?originalOp:'APPEND';
       const impact={row_count:chunk.length,total_rows:total,operation:originalOp,chunk_start:start,chunk_end:start+chunk.length-1,final_chunk:isFinal,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
       let last='';
-      for(let attempt=1;attempt<=4;attempt++){
+      const publishUrl=URL+'/functions/v1/pmno-master-publish-direct';
+      const payload=JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact});
+      for(let attempt=1;attempt<=6;attempt++){
         try{
-          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),25000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact}),signal:ctl.signal})}finally{clearTimeout(kill)}
+          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),45000);
+          let r;
+          try{
+            r=await fetch(publishUrl,{method:'POST',mode:'cors',cache:'no-store',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:payload,signal:ctl.signal});
+          }finally{clearTimeout(kill)}
           const raw=await r.text();
           if(r.ok){last='';break}
-          last=`HTTP ${r.status}: ${raw||'empty response'}`;
-          if(!/PGRST002|upstream|reset|timeout|502|503|504/i.test(last)||attempt===4)break;
-        }catch(e){last=e.message;if(attempt===4)break}
-        await new Promise(r=>setTimeout(r,700*attempt));
+          let detail=raw||'empty response';
+          try{const j=raw?JSON.parse(raw):null;if(j?.error)detail=j.error}catch(_){}
+          last=`HTTP ${r.status}: ${detail}`;
+          if(!/PGRST002|upstream|reset|timeout|502|503|504|temporar|fetch/i.test(last)||attempt===6)break;
+        }catch(e){
+          last=e?.name==='AbortError'?'Request timeout after 45s':(e?.message||String(e));
+          if(attempt===6)break;
+        }
+        await new Promise(r=>setTimeout(r,1000*attempt));
       }
-      if(last)throw Error(`Commit chunk ${start+1}-${start+chunk.length} failed after 4 attempts: ${last}`);
+      if(last)throw Error(`Commit chunk ${start+1}-${start+chunk.length} failed after 6 attempts: ${last}`);
       committed+=chunk.length;completedChunks++;
       paintProgress(committed,isFinal?'Finalizing publish…':`Committed rows ${(start+1).toLocaleString('id-ID')}–${(start+chunk.length).toLocaleString('id-ID')}`);
       $('masterUploadInfo').textContent=`COMMITTED ${committed.toLocaleString('id-ID')} / ${total.toLocaleString('id-ID')} rows · chunk ${completedChunks}/${totalChunks}`;
