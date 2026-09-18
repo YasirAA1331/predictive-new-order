@@ -4,7 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover" />
 <title>PMNO — Predictive Mapping New Order</title>
-<!-- PMNO BUILD 2026-09-18-MASTER-PUBLISH-FIX-V36 -->
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
 <style>
 :root{--bg:#06111f;--panel:#0a1727;--panel2:#0d1d31;--line:#20364f;--text:#edf5fb;--muted:#7e93a8;--cyan:#35c8ff;--green:#43e0a0;--red:#ff5570;--amber:#f5bf5c;--shadow:0 18px 50px rgba(0,0,0,.38)}
@@ -2056,12 +2055,40 @@ async function fetchAllRows(table){const out=[];const page=1000;for(let from=0;;
 async function exportModule(code){try{if(typeof XLSX==='undefined')throw Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');const mods=await getModules(),m=mods.find(x=>x.module_code===code);if(!m)throw Error('Module tidak ditemukan: '+code);const schema=headersFor(code)||[];let data=[];let backendAvailable=true;try{data=await fetchAllRows(m.target_table)}catch(e){backendAvailable=false}if(!data.length&&schema.length){const aoa=[schema,schema.map(()=> '')];const ws=XLSX.utils.aoa_to_sheet(aoa);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master Data');XLSX.writeFile(wb,`PMNO_${code}_Template.xlsx`);$('masterUploadInfo').textContent=`Template exported · ${schema.length} columns · ${moduleName(code)}${backendAvailable?' · no records yet':' · backend table belum tersedia, template siap digunakan'}.`;return}const clean=data.map(row=>{const x={...row};delete x.id;delete x.created_at;delete x.updated_at;return x});exportRows(clean,`PMNO_${code}_Current.xlsx`);$('masterUploadInfo').textContent=`Exported · ${clean.length.toLocaleString('id-ID')} rows · ${moduleName(code)}.`}catch(e){console.error(e);alert('Export failed: '+e.message)}}
 $('masterClose').onclick=()=>$('masterModal').classList.remove('show');
 $('masterExport').onclick=()=>{if(!selected){alert('Pilih module terlebih dahulu.');return}exportModule(selected)};
-$('masterFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;parsed=null;try{if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');const wb=XLSX.read(await file.arrayBuffer(),{type:'array'});if(!wb.SheetNames?.length)throw new Error('Workbook tidak memiliki sheet.');const ws=wb.Sheets[wb.SheetNames[0]];parsed=XLSX.utils.sheet_to_json(ws,{defval:''});if(!parsed.length)throw new Error('Workbook kosong atau header tidak terbaca.');$('masterUploadInfo').innerHTML=`<b>${esc(file.name)}</b> · ${parsed.length.toLocaleString('id-ID')} rows`;$('masterStructure').textContent='READY FOR VALIDATION';$('masterBusiness').textContent='READY FOR VALIDATION';$('masterPublish').disabled=true}catch(err){$('masterUploadInfo').textContent='Unable to read workbook: '+err.message}};
+// Excel date hardening: SheetJS can expose date cells as Excel serial numbers (e.g. 52076).
+// Convert date/timestamp columns to ISO strings before validation and publish.
+function normalizeMasterDateValue(key,v){
+  if(v===null||v===undefined||v==='')return v;
+  const k=String(key||'').toLowerCase();
+  const isDate=/date|last_update|created_at|updated_at/.test(k);
+  if(!isDate)return v;
+  if(v instanceof Date && !Number.isNaN(v.getTime())){
+    return k.includes('update')||k.includes('created_at')||k.includes('updated_at')
+      ?v.toISOString():v.toISOString().slice(0,10);
+  }
+  const str=String(v).trim();
+  if(/^[0-9]+(?:\.[0-9]+)?$/.test(str)){
+    const n=Number(str);
+    if(Number.isFinite(n)&&n>=1&&n<=100000){
+      const ms=(n-25569)*86400000;
+      const d=new Date(ms);
+      if(!Number.isNaN(d.getTime())){
+        return k.includes('update')||k.includes('created_at')||k.includes('updated_at')
+          ?d.toISOString():d.toISOString().slice(0,10);
+      }
+    }
+  }
+  return v;
+}
+function normalizeMasterRows(rows){
+  return (Array.isArray(rows)?rows:[]).map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,normalizeMasterDateValue(k,v)])));
+}
+$('masterFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;parsed=null;try{if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});if(!wb.SheetNames?.length)throw new Error('Workbook tidak memiliki sheet.');const ws=wb.Sheets[wb.SheetNames[0]];parsed=normalizeMasterRows(XLSX.utils.sheet_to_json(ws,{defval:''}));if(!parsed.length)throw new Error('Workbook kosong atau header tidak terbaca.');$('masterUploadInfo').innerHTML=`<b>${esc(file.name)}</b> · ${parsed.length.toLocaleString('id-ID')} rows · dates normalized`;$('masterStructure').textContent='READY FOR VALIDATION';$('masterBusiness').textContent='READY FOR VALIDATION';$('masterPublish').disabled=true}catch(err){$('masterUploadInfo').textContent='Unable to read workbook: '+err.message}};
 $('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook first.');return}const req=headersFor(selected),cols=parsed.length?Object.keys(parsed[0]):[];const missing=req?req.filter(x=>!cols.includes(x)):[];const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));const keyRules={TENANT_CONTRACT:['site_id','tenant_id','tenant_name'],TENANT_POWER:['site_id','tenant_id','power_id'],MAINTENANCE:['site_id','maintenance_id']};const keyCols=keyRules[selected]||[];const missingKeys=keyCols.filter(k=>!cols.includes(k));const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;const ok=!missing.length&&!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!suppliedCalculated.length&&!reinforcementOutput.length;$('masterStructure').textContent=ok?'PASS':'FAILED';$('masterBusiness').textContent=ok?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;$('masterImpact').textContent=ok?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`Missing columns: ${missing.join(', ')||'invalid business data'}`;$('masterPublish').disabled=!ok};
 $('masterPublish').onclick=async()=>{
   if(!selected||!parsed)return;
   const originalOp=$('masterOperation').value;
-  const uploadRows=parsed.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
+  const uploadRows=normalizeMasterRows(parsed).map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
   if(originalOp==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
   try{
     $('masterPublish').disabled=true;$('masterPublish').textContent='PUBLISHING…';
@@ -2080,26 +2107,15 @@ $('masterPublish').onclick=async()=>{
       const operation=isFirst?originalOp:'APPEND';
       const impact={row_count:chunk.length,total_rows:total,operation:originalOp,chunk_start:start,chunk_end:start+chunk.length-1,final_chunk:isFinal,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
       let last='';
-      const publishUrl=URL+'/functions/v1/pmno-master-publish-direct';
-      const payload=JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact});
       for(let attempt=1;attempt<=6;attempt++){
         try{
-          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),45000);
-          let r;
-          try{
-            r=await fetch(publishUrl,{method:'POST',mode:'cors',cache:'no-store',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:payload,signal:ctl.signal});
-          }finally{clearTimeout(kill)}
+          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),25000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact}),signal:ctl.signal})}finally{clearTimeout(kill)}
           const raw=await r.text();
           if(r.ok){last='';break}
-          let detail=raw||'empty response';
-          try{const j=raw?JSON.parse(raw):null;if(j?.error)detail=j.error}catch(_){}
-          last=`HTTP ${r.status}: ${detail}`;
-          if(!/PGRST002|upstream|reset|timeout|502|503|504|temporar|fetch/i.test(last)||attempt===6)break;
-        }catch(e){
-          last=e?.name==='AbortError'?'Request timeout after 45s':(e?.message||String(e));
-          if(attempt===6)break;
-        }
-        await new Promise(r=>setTimeout(r,1000*attempt));
+          last=`HTTP ${r.status}: ${raw||'empty response'}`;
+          if(!/PGRST002|upstream|reset|timeout|502|503|504/i.test(last)||attempt===6)break;
+        }catch(e){last=e.message;if(attempt===6)break}
+        await new Promise(r=>setTimeout(r,700*attempt));
       }
       if(last)throw Error(`Commit chunk ${start+1}-${start+chunk.length} failed after 6 attempts: ${last}`);
       committed+=chunk.length;completedChunks++;
