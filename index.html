@@ -705,6 +705,99 @@ body.bulk-page .mobile-nav{
   .nav-group:nth-child(3){width:122px!important}
   .mode-menu button{font-size:7px!important;padding:0 5px!important}
 }
+
+/* PMNO NAV V16 — single-row horizontal navigation */
+.topbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:"brand status" "nav nav"!important;
+  align-items:center!important;
+  gap:18px 24px!important;
+  height:auto!important;
+  min-height:118px!important;
+  padding:22px 28px 16px!important;
+  overflow:visible!important;
+}
+.topbar>div:first-child{grid-area:brand!important;min-width:0!important}
+.topbar>.status{grid-area:status!important;justify-self:end!important}
+.mode-menu{
+  grid-area:nav!important;
+  width:100%!important;
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:8px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow-x:auto!important;
+  overflow-y:hidden!important;
+  scrollbar-width:none!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.mode-menu::-webkit-scrollbar{display:none!important}
+.nav-group{
+  flex:0 0 auto!important;
+  display:flex!important;
+  flex-direction:row!important;
+  align-items:center!important;
+  gap:6px!important;
+  min-width:max-content!important;
+  padding:0!important;
+  margin:0!important;
+}
+.nav-group + .nav-group{padding-left:12px!important;border-left:1px solid #203b52!important}
+.nav-group-label{
+  flex:0 0 auto!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:38px!important;
+  padding:0 5px!important;
+  margin:0 2px 0 0!important;
+  color:#71879a!important;
+  font-size:8px!important;
+  font-weight:950!important;
+  letter-spacing:2px!important;
+  white-space:nowrap!important;
+}
+.mode-menu button{
+  flex:0 0 auto!important;
+  width:auto!important;
+  min-width:108px!important;
+  height:38px!important;
+  min-height:38px!important;
+  padding:0 15px!important;
+  border-radius:10px!important;
+  font-size:8px!important;
+  letter-spacing:.9px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+.nav-group:nth-child(2) .mode-menu button{}
+@media(max-width:760px){
+  .topbar{
+    grid-template-columns:minmax(0,1fr) auto!important;
+    grid-template-areas:"brand status" "nav nav"!important;
+    gap:14px 10px!important;
+    padding:14px 14px 12px!important;
+    min-height:0!important;
+  }
+  .brand-title{font-size:19px!important;line-height:1.08!important;white-space:nowrap!important}
+  .brand-kicker{font-size:7px!important;letter-spacing:1.7px!important}
+  .status{font-size:7px!important;white-space:nowrap!important}
+  .mode-menu{gap:5px!important;padding:1px 0 4px!important}
+  .nav-group{gap:4px!important}
+  .nav-group + .nav-group{padding-left:9px!important}
+  .nav-group-label{min-height:36px!important;font-size:6.5px!important;letter-spacing:1.6px!important;padding:0 3px!important}
+  .mode-menu button{min-width:112px!important;height:36px!important;min-height:36px!important;padding:0 12px!important;font-size:7.5px!important;border-radius:9px!important}
+}
+@media(max-width:420px){
+  .topbar{padding:12px 11px 10px!important}
+  .brand-title{font-size:17px!important}
+  .status{font-size:6px!important}
+  .mode-menu button{min-width:105px!important;padding:0 10px!important;font-size:7px!important}
+}
 </style>
 </head>
 <body>
