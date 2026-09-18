@@ -2074,14 +2074,14 @@ $('masterPublish').onclick=async()=>{
       const chunk=uploadRows.slice(start,start+chunkSize);
       const isFirst=start===0;
       const isFinal=start+chunk.length>=total;
-      // Use the established pmno_master_publish RPC only. Each request is small;
+      // Use the direct database Edge Function. This bypasses the unstable PostgREST schema-cache path.
       // REPLACE happens once on the first chunk, APPEND thereafter.
       const operation=isFirst?originalOp:'APPEND';
       const impact={row_count:chunk.length,total_rows:total,operation:originalOp,chunk_start:start,chunk_end:start+chunk.length-1,final_chunk:isFinal,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
       let last='';
       for(let attempt=1;attempt<=4;attempt++){
         try{
-          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),25000);let r;try{r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact}),signal:ctl.signal})}finally{clearTimeout(kill)}
+          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),25000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact}),signal:ctl.signal})}finally{clearTimeout(kill)}
           const raw=await r.text();
           if(r.ok){last='';break}
           last=`HTTP ${r.status}: ${raw||'empty response'}`;
