@@ -2033,11 +2033,16 @@ $('masterPublish').onclick=async()=>{
   if(op==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
   try{
     const impact={row_count:uploadRows.length,operation:op,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
-    const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:apiHeaders(),body:JSON.stringify({p_module_code:selected,p_operation:op,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:uploadRows,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact})});
-    if(!r.ok)throw Error(await r.text());
-    const result=await r.json();
-    $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · v${result.version_no} · ${uploadRows.length.toLocaleString('id-ID')} rows`;$('masterStructure').textContent='PASS';$('masterBusiness').textContent='PUBLISHED';$('masterImpact').textContent=`Active version v${result.version_no} · ${op} · source data updated successfully.`;$('masterPublish').disabled=true;await renderHistory(selected);await render();
-  }catch(e){alert('Publish failed: '+e.message)}
+    $('masterPublish').disabled=true;
+    $('masterPublish').textContent='PUBLISHING…';
+    const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_module_code:selected,p_operation:op,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:uploadRows,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact})});
+    const raw=await r.text();
+    if(!r.ok)throw Error(raw||('HTTP '+r.status));
+    let result={}; try{result=JSON.parse(raw)}catch(e){}
+    if(Array.isArray(result)) result=result[0]||{};
+    $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · v${result.version_no??'—'} · ${uploadRows.length.toLocaleString('id-ID')} rows`;$('masterStructure').textContent='PASS';$('masterBusiness').textContent='PUBLISHED';$('masterImpact').textContent=`Active version v${result.version_no} · ${op} · source data updated successfully.`;$('masterPublish').disabled=true;await renderHistory(selected);await render();
+  }catch(e){$('masterPublish').disabled=false;$('masterPublish').textContent='PUBLISH';alert('Publish failed: '+e.message)}
+  finally{$('masterPublish').textContent='PUBLISH'}
 };
 async function renderHistory(code){const b=$('masterHistoryBody');try{const r=await fetch(URL+'/rest/v1/pmno_master_version?select=version_no,status,row_count,created_at&module_code=eq.'+encodeURIComponent(code)+'&order=created_at.desc&limit=8',{headers:apiHeaders()});const rows=r.ok?await r.json():[];b.innerHTML=rows.length?rows.map(x=>`<tr><td><b>v${esc(x.version_no)}</b></td><td>${esc(x.status)}</td><td>${esc(x.row_count)}</td><td>${new Date(x.created_at).toLocaleString('id-ID')}</td></tr>`).join(''):'<tr><td colspan="4">No staged versions yet.</td></tr>'}catch(e){b.innerHTML='<tr><td colspan="4">History unavailable.</td></tr>'}}
 window.pmnoMasterInit=render;render();
