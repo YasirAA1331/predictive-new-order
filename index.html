@@ -2059,58 +2059,40 @@ $('masterFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)retur
 $('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook first.');return}const req=headersFor(selected),cols=parsed.length?Object.keys(parsed[0]):[];const missing=req?req.filter(x=>!cols.includes(x)):[];const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));const keyRules={TENANT_CONTRACT:['site_id','tenant_id','tenant_name'],TENANT_POWER:['site_id','tenant_id','power_id'],MAINTENANCE:['site_id','maintenance_id']};const keyCols=keyRules[selected]||[];const missingKeys=keyCols.filter(k=>!cols.includes(k));const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;const ok=!missing.length&&!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!suppliedCalculated.length&&!reinforcementOutput.length;$('masterStructure').textContent=ok?'PASS':'FAILED';$('masterBusiness').textContent=ok?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;$('masterImpact').textContent=ok?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`Missing columns: ${missing.join(', ')||'invalid business data'}`;$('masterPublish').disabled=!ok};
 $('masterPublish').onclick=async()=>{
   if(!selected||!parsed)return;
-  const op=$('masterOperation').value;
+  const originalOp=$('masterOperation').value;
   const uploadRows=parsed.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
-  if(op==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
-  const targetByModule={SITE_MASTER:'pmno_site_master',TENANT_CONTRACT:'tenant_contract',TENANT_POWER:'tenant_power',MAINTENANCE:'maintenance'};
-  const conflictByModule={SITE_MASTER:'site_id',TENANT_CONTRACT:'site_id,tenant_id,contract_no',TENANT_POWER:'site_id,tenant_id,power_id',MAINTENANCE:'site_id,maintenance_id'};
-  const target=targetByModule[selected];
-  if(!target){alert('Publish handler belum tersedia untuk module '+selected);return}
-  const sleep=ms=>new Promise(r=>setTimeout(r,ms));
-  async function requestWithRetry(url,opts,label){
-    let last='';
-    for(let attempt=1;attempt<=4;attempt++){
-      try{
-        const r=await fetch(url,opts); const raw=await r.text();
-        if(r.ok)return raw;
-        last=raw||('HTTP '+r.status);
-        if(!/PGRST002|upstream|reset|timeout|502|503|504/i.test(last)||attempt===4)break;
-      }catch(e){last=e.message;if(attempt===4)break}
-      await sleep(700*attempt);
-    }
-    throw Error(label+': '+last);
-  }
+  if(originalOp==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
   try{
     $('masterPublish').disabled=true;$('masterPublish').textContent='PUBLISHING…';
-    $('masterUploadInfo').textContent=`Preparing ${uploadRows.length.toLocaleString('id-ID')} rows…`;
-    const base=URL+'/rest/v1/'+target;
-    const headers={...apiHeaders(),'Prefer':'return=minimal'};
-    // IMPORTANT: bypass the broken PostgREST RPC schema-cache path. The REST tables
-    // are already exposed and tested; publish directly in small batches instead.
-    if(op==='REPLACE'){
-      await requestWithRetry(base+'?site_id=not.is.null',{method:'DELETE',headers},'Clear existing '+moduleName(selected)+' data');
-    }
-    const chunkSize=500;
+    const chunkSize=500,total=uploadRows.length;
     let committed=0;
-    const conflict=conflictByModule[selected];
-    for(let start=0;start<uploadRows.length;start+=chunkSize){
+    for(let start=0;start<total;start+=chunkSize){
       const chunk=uploadRows.slice(start,start+chunkSize);
-      const qs=op==='APPEND'?'?on_conflict='+encodeURIComponent(conflict):'';
-      await requestWithRetry(base+qs,{method:'POST',headers:{...headers,'Prefer':'resolution=merge-duplicates,return=minimal'},body:JSON.stringify(chunk)},`Commit rows ${start+1}-${Math.min(start+chunkSize,uploadRows.length)}`);
+      const isFirst=start===0;
+      const isFinal=start+chunk.length>=total;
+      // Use the established pmno_master_publish RPC only. Each request is small;
+      // REPLACE happens once on the first chunk, APPEND thereafter.
+      const operation=isFirst?originalOp:'APPEND';
+      const impact={row_count:chunk.length,total_rows:total,operation:originalOp,chunk_start:start,chunk_end:start+chunk.length-1,final_chunk:isFinal,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
+      let last='';
+      for(let attempt=1;attempt<=4;attempt++){
+        try{
+          const r=await fetch(URL+'/rest/v1/rpc/pmno_master_publish',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=representation'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact})});
+          const raw=await r.text();
+          if(r.ok){last='';break}
+          last=raw||('HTTP '+r.status);
+          if(!/PGRST002|upstream|reset|timeout|502|503|504/i.test(last)||attempt===4)break;
+        }catch(e){last=e.message;if(attempt===4)break}
+        await new Promise(r=>setTimeout(r,700*attempt));
+      }
+      if(last)throw Error(`Commit chunk ${start+1}-${start+chunk.length} failed after 4 attempts: ${last}`);
       committed+=chunk.length;
-      $('masterUploadInfo').textContent=`COMMITTED ${committed.toLocaleString('id-ID')} / ${uploadRows.length.toLocaleString('id-ID')} rows…`;
+      $('masterUploadInfo').textContent=`COMMITTED ${committed.toLocaleString('id-ID')} / ${total.toLocaleString('id-ID')} rows…`;
     }
-    // Write version history through the table endpoint as well, avoiding RPC schema-cache issues.
-    let version=1;
-    try{
-      const vr=await fetch(URL+'/rest/v1/pmno_master_version?select=version_no&module_code=eq.'+encodeURIComponent(selected)+'&order=version_no.desc&limit=1',{headers:apiHeaders()});
-      if(vr.ok){const a=await vr.json();if(a?.[0]?.version_no)version=Number(a[0].version_no)+1}
-    }catch(e){}
-    const impact={row_count:uploadRows.length,operation:op,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
-    await requestWithRetry(URL+'/rest/v1/pmno_master_version',{method:'POST',headers:{...headers,'Prefer':'return=minimal'},body:JSON.stringify({module_code:selected,version_no:version,status:'ACTIVE',row_count:uploadRows.length,source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',operation:op,impact_preview:impact})},'Save publish history');
-    $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · v${version} · ${uploadRows.length.toLocaleString('id-ID')} rows`;
+    $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · ${total.toLocaleString('id-ID')} rows`;
     $('masterStructure').textContent='PASS';$('masterBusiness').textContent='PUBLISHED';
-    $('masterImpact').textContent=`Active version v${version} · ${op} · source data updated successfully.`;
+    $('masterImpact').textContent=`Active version recorded · ${originalOp} · ${total.toLocaleString('id-ID')} rows · source data updated successfully.`;
+    $('masterPublish').disabled=true;
     await renderHistory(selected);await render();
   }catch(e){
     console.error('Publish failed',e);
