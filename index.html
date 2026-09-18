@@ -799,6 +799,159 @@ body.bulk-page .mobile-nav{
   .mode-menu button{min-width:105px!important;padding:0 10px!important;font-size:7px!important}
 }
 </style>
+
+<style id="pmno-nav-stack-v17">
+/* V17: deliberately simple navigation — stacked, no overlap in portrait/landscape */
+.topbar{height:auto!important;min-height:0!important;display:flex!important;align-items:flex-start!important;flex-wrap:wrap!important;gap:14px!important;padding:18px 22px!important;overflow:visible!important}
+.topbar>div:first-child{flex:1 1 100%!important;min-width:0!important}
+.topbar>.status{margin-left:auto!important;flex:0 0 auto!important}
+.mode-menu{order:3!important;flex:1 1 100%!important;width:100%!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:10px!important;margin:0!important;min-width:0!important;overflow:visible!important}
+.nav-group{width:100%!important;display:flex!important;flex-direction:column!important;align-items:stretch!important;gap:6px!important;min-width:0!important}
+.nav-group-label{width:100%!important;justify-content:flex-start!important;padding:0 4px!important;min-height:16px!important;font-size:8px!important;line-height:16px!important;letter-spacing:2px!important}
+.mode-menu button{width:100%!important;min-width:0!important;min-height:42px!important;height:42px!important;padding:10px 12px!important;border-radius:9px!important;font-size:9px!important;line-height:1!important;white-space:nowrap!important;flex:0 0 auto!important}
+/* Every navigation item is a normal block; no horizontal sliding, no absolute positioning. */
+@media(max-width:760px){
+  .topbar{padding:16px 14px 18px!important;gap:10px!important}
+  .topbar>div:first-child{flex-basis:100%!important}
+  .topbar>.status{margin-left:0!important;align-self:flex-start!important}
+  .mode-menu{gap:12px!important}
+  .nav-group{gap:6px!important}
+  .nav-group-label{font-size:7px!important;line-height:14px!important;min-height:14px!important}
+  .mode-menu button{min-height:44px!important;height:44px!important;font-size:8px!important;padding:10px 10px!important}
+}
+@media(orientation:landscape) and (max-width:900px){
+  .topbar{height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;align-items:stretch!important}
+  .topbar>div:first-child,.topbar>.status,.mode-menu{width:100%!important;flex-basis:auto!important}
+  .topbar>.status{align-self:flex-start!important}
+  .mode-menu{display:flex!important;flex-direction:column!important}
+  .workspace{min-height:0!important}
+}
+</style>
+
+<style id="pmno-nav-v19-clean">
+/* V19 — one clean responsive navigation system. Overrides the previous nav patches. */
+.topbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) auto!important;
+  grid-template-areas:"brand status" "nav nav"!important;
+  align-items:end!important;
+  gap:16px 24px!important;
+  height:auto!important;
+  min-height:0!important;
+  padding:24px 28px 18px!important;
+  overflow:visible!important;
+}
+.topbar>div:first-child{grid-area:brand!important;min-width:0!important}
+.topbar>.status{grid-area:status!important;align-self:center!important;justify-self:end!important;margin:0!important}
+.brand-kicker{font-size:9px!important;letter-spacing:2.2px!important}
+.brand-title{font-size:26px!important;line-height:1.05!important;white-space:nowrap!important}
+.mode-menu{
+  grid-area:nav!important;
+  width:100%!important;
+  min-width:0!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1.5fr) minmax(0,1fr)!important;
+  gap:14px!important;
+  margin:0!important;
+  padding:0!important;
+  overflow:visible!important;
+}
+.nav-group{
+  width:auto!important;
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  align-items:stretch!important;
+  gap:7px!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+}
+.nav-group + .nav-group{padding-left:0!important;border-left:0!important}
+.nav-group-label{
+  width:auto!important;
+  min-height:18px!important;
+  padding:0 2px!important;
+  margin:0!important;
+  justify-content:flex-start!important;
+  color:#7890a4!important;
+  font-size:8px!important;
+  line-height:18px!important;
+  letter-spacing:2.4px!important;
+  white-space:nowrap!important;
+}
+.mode-menu button{
+  width:100%!important;
+  min-width:0!important;
+  height:44px!important;
+  min-height:44px!important;
+  flex:0 0 auto!important;
+  padding:0 14px!important;
+  border-radius:10px!important;
+  font-size:9px!important;
+  letter-spacing:1px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+/* Landscape/tablet: each domain is a clean vertical stack, domains sit side-by-side. */
+@media (orientation:landscape){
+  .topbar{padding:20px 24px 16px!important;gap:14px 20px!important}
+  .brand-title{font-size:24px!important}
+  .mode-menu{grid-template-columns:minmax(0,1fr) minmax(0,1.55fr) minmax(0,1fr)!important;gap:12px!important}
+  .nav-group{gap:6px!important}
+  .nav-group-label{min-height:16px!important;line-height:16px!important;font-size:7px!important}
+  .mode-menu button{height:40px!important;min-height:40px!important;font-size:8px!important}
+}
+
+/* Portrait: domains stack vertically. Buttons share the same width, so nothing can drift or overlap. */
+@media (orientation:portrait){
+  .topbar{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-areas:"brand" "status" "nav"!important;
+    gap:12px!important;
+    padding:18px 18px 20px!important;
+    align-items:start!important;
+  }
+  .topbar>div:first-child{width:100%!important}
+  .topbar>.status{justify-self:start!important;align-self:start!important;font-size:7px!important;margin:0!important}
+  .brand-kicker{font-size:7px!important;letter-spacing:1.8px!important}
+  .brand-title{font-size:21px!important;line-height:1.08!important;white-space:normal!important}
+  .mode-menu{
+    display:flex!important;
+    flex-direction:column!important;
+    width:100%!important;
+    gap:12px!important;
+    overflow:visible!important;
+  }
+  .nav-group{
+    width:100%!important;
+    display:flex!important;
+    flex-direction:column!important;
+    gap:7px!important;
+  }
+  .nav-group-label{font-size:7px!important;line-height:15px!important;min-height:15px!important;letter-spacing:2px!important}
+  .mode-menu button{
+    width:100%!important;
+    height:42px!important;
+    min-height:42px!important;
+    font-size:8px!important;
+    border-radius:9px!important;
+  }
+}
+
+/* Very narrow phones: keep the same structure, only reduce dimensions slightly. */
+@media (orientation:portrait) and (max-width:430px){
+  .topbar{padding:15px 13px 16px!important;gap:10px!important}
+  .brand-title{font-size:18px!important}
+  .mode-menu{gap:10px!important}
+  .nav-group{gap:5px!important}
+  .nav-group-label{font-size:6.5px!important;line-height:13px!important;min-height:13px!important}
+  .mode-menu button{height:38px!important;min-height:38px!important;font-size:7px!important;padding:0 10px!important}
+}
+</style>
+
 </head>
 <body>
 <div class="app">
