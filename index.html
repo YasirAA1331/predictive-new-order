@@ -1924,9 +1924,17 @@ function pct(a,b){return b?((Number(a||0)/Number(b))*100).toFixed(1):'0.0'}
 function siteId(r){return String(val(r,'site_id','site_id_dmt')).trim()}
 function uniq(key){return [...new Set(rows.map(r=>String(val(r,key)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function setOptions(id,values,all){const el=$(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+all+'</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(old))el.value=old}
+function normalizeCoord(v,kind){
+ const n=Number(v); if(!Number.isFinite(n)) return null;
+ if(kind==='lat' && n>=-90 && n<=90) return n;
+ if(kind==='lon' && n>=-180 && n<=180) return n;
+ const scales=[1e4,1e5,1e6,1e7];
+ for(const d of scales){const x=n/d;if(kind==='lat'&&x>=-11&&x<=6)return x;if(kind==='lon'&&x>=95&&x<=141)return x}
+ return null;
+}
 function normalizeMasterRows(pmnoRows,siteRows){
  const legacy=new Map((siteRows||[]).map(r=>[String(val(r,'site_id_dmt','site_id')).trim(),r]));
- return (pmnoRows||[]).map(r=>{const sid=siteId(r), old=legacy.get(sid)||{};return {...old,...r,site_id:sid,site_name:val(r,'site_name')||val(old,'site_name'),city:val(r,'city')||val(old,'kabupaten'),lease_expiry_date:val(r,'lease_expiry_date')||val(old,'end_sewa'),land_status:val(r,'land_status')||val(old,'land_status')};}).filter(r=>siteId(r))
+ return (pmnoRows||[]).map(r=>{const sid=siteId(r), old=legacy.get(sid)||{};return {...old,...r,site_id:sid,site_name:val(r,'site_name')||val(old,'site_name'),city:val(r,'city')||val(old,'kabupaten'),lease_expiry_date:val(r,'lease_expiry_date')||val(old,'end_sewa'),land_status:val(r,'land_status')||val(old,'land_status'),latitude:normalizeCoord(val(r,'latitude')||val(old,'latitude'),'lat'),longitude:normalizeCoord(val(r,'longitude')||val(old,'longitude'),'lon')};}).filter(r=>siteId(r))
 }
 function setLiveChildren(tenantRows,powerRows,maintenanceRows){
  liveTenants={};livePower={};liveMaintenance={};
@@ -1958,8 +1966,7 @@ function renderKpis(){
   ['POTENTIAL ANOMALY',anomaly,'unique Site ID','red'],
   ['LEASE < 6 BULAN',a.leaseRisk+a.leaseExpired,`${a.leaseExpired} expired`,'amber'],
   ['LEGAL GAP',a.legalGap,`${pct(a.total-a.legalGap,a.total)}% complete`,'amber']
- ].map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${fmtInt(x[1])}</b><small>${esc(x[2])}</small></div>`).join('')+
- `<div class="dash-source-strip"><span>Audit basis: <b>Site ID</b></span><span>Tenant / Revenue / Power: <b>site-level correlation</b></span><span>Device / Cost: <b>site-level evidence not mapped</b></span></div>`;
+ ].map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${fmtInt(x[1])}</b><small>${esc(x[2])}</small></div>`).join('');
 }
 function applyFilters(){
  const reg=String($('dash-regional')?.value||''),prov=String($('dash-province')?.value||''),city=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim().toLowerCase();
@@ -1987,38 +1994,36 @@ function renderMap(list){
  const el=$('dash-map');if(!el)return;
  if(typeof L==='undefined'){el.innerHTML='<div class="dash-empty-note" style="margin:14px">Map library belum termuat. Data dashboard tetap tersedia.</div>';return}
  if(!dashMap){
-   dashMap=L.map(el,{preferCanvas:true,zoomControl:true,attributionControl:true});
+   dashMap=L.map(el,{preferCanvas:true,zoomControl:true,attributionControl:true,renderer:L.canvas({padding:.5})});
    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(dashMap);
    dashMap.setView([-2.5,118],5);
  }
  dashMarkers.forEach(m=>dashMap.removeLayer(m));dashMarkers=[];
- const valid=list.filter(r=>Number.isFinite(Number(val(r,'latitude')))&&Number.isFinite(Number(val(r,'longitude'))));
- // Render a bounded subset for mobile performance, but calculate viewport from ALL valid sites.
- const maxMarkers=2500;
- let shown=valid;
- if(valid.length>maxMarkers){
-   const step=(valid.length-1)/(maxMarkers-1);
-   shown=Array.from({length:maxMarkers},(_,i)=>valid[Math.round(i*step)]);
- }
- for(const r of shown){
+ const valid=list.filter(r=>Number.isFinite(Number(r.latitude))&&Number.isFinite(Number(r.longitude)));
+ // Display every valid site marker. Canvas rendering keeps the 40k-site universe feasible on mobile.
+ for(const r of valid){
    const n=activeTenants(r).length;
    const color=n>=6?'#ff5570':n>=4?'#f5a64f':n>=2?'#d8d85b':'#43e0a0';
-   const m=L.circleMarker([Number(r.latitude),Number(r.longitude)],{radius:n>=6?6:n>=4?5:n>=2?4:3,weight:1,color,fillColor:color,fillOpacity:.72});
-   m.bindTooltip(`<b>${esc(siteId(r))}</b><br>${esc(val(r,'site_name'))}<br>${n} active tenant`,{direction:'top'});
-   m.on('click',()=>window.pmnoOpenSiteProfile(r));m.addTo(dashMap);dashMarkers.push(m);
+   const m=L.circleMarker([Number(r.latitude),Number(r.longitude)],{radius:n>=6?5:n>=4?4:n>=2?3:2,weight:0.7,color,fillColor:color,fillOpacity:.65,interactive:false});
+   m.addTo(dashMap);dashMarkers.push(m);
  }
- if(valid.length){
-   const b=L.latLngBounds(valid.map(r=>[Number(r.latitude),Number(r.longitude)]));
-   dashMap.fitBounds(b,{padding:[28,28],maxZoom:9,animate:false});
+ // Do not let malformed/outlier coordinates zoom the national view to the whole world.
+ const hasGeoFilter=Boolean($('dash-regional')?.value||$('dash-province')?.value||$('dash-city')?.value||$('dash-search')?.value);
+ const indonesiaBounds=L.latLngBounds([[-11,95],[6,141]]);
+ const inIndonesia=valid.filter(r=>Number(r.latitude)>=-11&&Number(r.latitude)<=6&&Number(r.longitude)>=95&&Number(r.longitude)<=141);
+ if(hasGeoFilter&&inIndonesia.length){
+   dashMap.fitBounds(L.latLngBounds(inIndonesia.map(r=>[Number(r.latitude),Number(r.longitude)])),{padding:[28,28],maxZoom:12,animate:false});
+ }else if(valid.length){
+   dashMap.fitBounds(indonesiaBounds,{padding:[12,12],maxZoom:6,animate:false});
  }else{
-   dashMap.setView([-2.5,118],5);
+   dashMap.fitBounds(indonesiaBounds,{padding:[12,12],animate:false});
  }
  setTimeout(()=>dashMap.invalidateSize(),100);
  const card=el.closest('.dash-map-card');
  if(card){
-   const old=card.querySelector('.dash-map-note');old?.remove();
+   card.querySelector('.dash-map-note')?.remove();
    const note=document.createElement('div');note.className='dash-map-note';
-   note.textContent=`Showing ${fmtInt(shown.length)} of ${fmtInt(valid.length)} sites with coordinates · viewport based on all filtered sites`;
+   note.textContent=`Showing ${fmtInt(valid.length)} sites with coordinates`;
    note.style.cssText='padding:6px 12px;color:#71899c;font-size:8px;border-top:1px solid #1a3047';card.appendChild(note);
  }
 }
