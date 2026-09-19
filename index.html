@@ -844,6 +844,41 @@ body.pmno-page-master .workspace,body.pmno-page-master #dashboardView,body.pmno-
   body.pmno-page-dashboard #dashboardView,body.pmno-page-siteprofile #siteProfileView,body.pmno-page-bulk #bulkView,body.pmno-page-drm #drmView,body.pmno-page-master #masterDataView{min-height:0!important;}
 }
 </style>
+
+<style id="pmno-navigation-final-v45">
+/* V45 — FIX ROOT CAUSE: non-Single pages live after .app in the DOM.
+   .app must not retain a viewport-height row when those pages are active. */
+body.pmno-page-dashboard .app,
+body.pmno-page-siteprofile .app,
+body.pmno-page-bulk .app,
+body.pmno-page-drm .app,
+body.pmno-page-master .app{
+  display:block!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+body.pmno-page-dashboard .topbar,
+body.pmno-page-siteprofile .topbar,
+body.pmno-page-bulk .topbar,
+body.pmno-page-drm .topbar,
+body.pmno-page-master .topbar{
+  height:auto!important;
+  min-height:72px!important;
+}
+body.pmno-page-single .app{
+  display:flex!important;
+  flex-direction:column!important;
+  height:100dvh!important;
+  min-height:100dvh!important;
+  overflow:hidden!important;
+}
+body.pmno-page-single .workspace{
+  display:grid!important;
+}
+</style>
 </head>
 <body>
 <div class="app">
