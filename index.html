@@ -2018,7 +2018,9 @@ function renderMap(){
    el.appendChild(mapEl);
    window.__pmnoDashMap=L.map(mapEl,{zoomControl:true,preferCanvas:true,attributionControl:true,minZoom:4,maxZoom:12,worldCopyJump:false,maxBounds:[[ -12,94],[7,142]],maxBoundsViscosity:.85});
    window.__pmnoDashMap.fitBounds([[-11.5,94.5],[6.5,141.5]],{padding:[18,18],maxZoom:5});
-   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,crossOrigin:true,opacity:.96,attribution:'© OpenStreetMap © CARTO'}).addTo(window.__pmnoDashMap);
+   const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true,opacity:.34,attribution:'© OpenStreetMap contributors'}).addTo(window.__pmnoDashMap);
+   // Keep the basemap subtle: geographic context without overpowering the site layer.
+   tiles.getContainer().style.filter='brightness(.72) saturate(.62) contrast(1.05)';
    const pane=window.__pmnoDashMap.createPane('pmno-sites');pane.style.zIndex=450;pane.style.pointerEvents='none';
    const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;';pane.appendChild(canvas);
    window.__pmnoDashCanvas=canvas;
@@ -2053,12 +2055,12 @@ function drawDashMap(){
      if(b.sites.length<12)b.sites.push(p.row);
    }
    for(const b of bins.values()){
-     const x=b.x/b.n,y=b.y/b.n,r=Math.min(18,5+Math.sqrt(b.n)*1.15);
+     const x=b.x/b.n,y=b.y/b.n,r=Math.min(13,4+Math.sqrt(b.n)*.72);
      const dominant=b.maxTenant;
-     ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.fillStyle='rgba(4,13,23,.78)';ctx.fill();
-     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color(dominant);ctx.fill();
-     ctx.strokeStyle='rgba(255,255,255,.38)';ctx.lineWidth=1;ctx.stroke();
-     if(b.n>1){ctx.fillStyle='#071321';ctx.font='800 8px Poppins,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.n.toLocaleString('id-ID'),x,y);}
+     ctx.beginPath();ctx.arc(x,y,r+2,0,Math.PI*2);ctx.fillStyle='rgba(5,16,29,.92)';ctx.fill();
+     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color(dominant);ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
+     ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.stroke();
+     if(b.n>1){ctx.fillStyle='#081522';ctx.font='800 7px Poppins,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.n.toLocaleString('id-ID'),x,y);}
    }
  }else{
    for(const p of valid){
