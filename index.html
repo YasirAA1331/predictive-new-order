@@ -2169,7 +2169,7 @@ $('masterPublish').onclick=async()=>{
       const isFinal=start+chunk.length>=total;
       // Use the direct database Edge Function. This bypasses the unstable PostgREST schema-cache path.
       // REPLACE happens once on the first chunk, APPEND thereafter.
-      const operation=isFirst?originalOp:'APPEND';
+      const operation=isFinal?originalOp:(isFirst?originalOp:'APPEND');
       const impact={row_count:chunk.length,total_rows:total,operation:originalOp,chunk_start:start,chunk_end:start+chunk.length-1,final_chunk:isFinal,affected_engines:selected==='CAPEX_CATALOG'?['CAPEX','COLLO_FINANCIAL','B2S_FINANCIAL']:selected==='INVESTMENT_ASSUMPTION'?['FINANCIAL','IRR','NPV','DECISION']:['PREDICTIVE_DEPENDENCY']};
       let last='';
       for(let attempt=1;attempt<=4;attempt++){
