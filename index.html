@@ -2022,7 +2022,7 @@ function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;wind
 window.pmnoDashboardInit=init;window.pmnoSiteProfileInit=function(){if(!initialized)init();else setTimeout(()=>{if(window._pmnoSelectedSite)renderSiteProfile(window._pmnoSelectedSite);},20)};
 // Initial-route bootstrap: the navigation router is declared earlier in the document,
 // so a direct #dashboard/#siteprofile load must initialize after this controller exists.
-try{const initialHash=String(location.hash||'').replace(/^#/, '').toLowerCase();if(initialHash==='dashboard')init();else if(initialHash==='siteprofile')window.pmnoSiteProfileInit();}catch(e){}
+try{const initialHash=String(location.hash||'').replace(/^#/, '').toLowerCase();if(initialHash==='dashboard')setTimeout(init,0);else if(initialHash==='siteprofile')setTimeout(window.pmnoSiteProfileInit,0);}catch(e){console.error('PMNO Dashboard bootstrap error',e)}
 })();
 </script>
 
