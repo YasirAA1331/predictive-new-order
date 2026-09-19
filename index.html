@@ -723,7 +723,7 @@ body.bulk-page .mobile-nav{
   .mode-menu button{height:38px !important;min-height:38px !important;font-size:7px !important;padding:0 5px !important;letter-spacing:.55px !important}
 }
 </style>
-<style id="pmno-dashboard-fix-css">.dash-map-card #dash-map{min-height:420px}.dash-map-note{background:#081522}</style></head>
+<style id="pmno-dashboard-fix-css">.dash-map-card #dash-map{min-height:420px}.dash-map-note{background:#081522}.dash-refresh[aria-busy="true"]{opacity:.7}.dash-refresh[aria-busy="true"]::after{content:" · LOADING"}</style></head>
 <body>
 <div class="app">
 <header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
@@ -1993,19 +1993,36 @@ function renderMap(list){
  const card=el.closest('.dash-map-card');if(card){const old=card.querySelector('.dash-map-note');old?.remove();const note=document.createElement('div');note.className='dash-map-note';note.textContent=`Showing ${fmtInt(shown.length)} of ${fmtInt(valid.length)} sites with coordinates`;note.style.cssText='padding:6px 12px;color:#71899c;font-size:8px;border-top:1px solid #1a3047';card.appendChild(note)}
 }
 async function getAll(table,select='*'){
- const out=[],pageSize=1000;for(let from=0;;from+=pageSize){const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&offset='+from+'&limit='+pageSize,{headers:H});if(!r.ok)throw new Error(`${table}: HTTP ${r.status}`);const batch=await r.json();if(!Array.isArray(batch))throw new Error(`${table}: invalid response`);out.push(...batch);if(batch.length<pageSize)break}return out
+ const pageSize=1000;
+ async function page(from){const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&offset='+from+'&limit='+pageSize,{headers:H});if(!r.ok)throw new Error(`${table}: HTTP ${r.status}`);const batch=await r.json();if(!Array.isArray(batch))throw new Error(`${table}: invalid response`);return batch}
+ const first=await page(0);if(first.length<pageSize)return first;
+ const out=[...first];
+ // Pull remaining pages concurrently in controlled batches so 90k+ child rows don't block the dashboard for minutes.
+ let from=pageSize;
+ while(true){
+   const starts=Array.from({length:8},(_,i)=>from+i*pageSize);
+   const batches=await Promise.all(starts.map(page));
+   let stop=false;for(const batch of batches){out.push(...batch);if(batch.length<pageSize){stop=true;break}}
+   if(stop)break;from+=8*pageSize;
+ }
+ return out
 }
 async function optional(table,select='*'){try{return await getAll(table,select)}catch(e){console.warn('PMNO optional source failed',table,e);return []}}
-async function load(){if(loading)return;loading=true;$('dash-head')?.classList.add('loading');try{
- const [pmnoRows,siteRows,tenantRows,powerRows,maintenanceRows]=await Promise.all([
-   getAll('pmno_site_master'),optional('site_master'),optional('tenant_contract','site_id,tenant_id,tenant_name,tenant_status,contract_start_date,contract_end_date,revenue_month,revenue_year'),optional('tenant_power','site_id,tenant_id,power_id,power_configuration,power_source,pln_id,existing_power_capacity,power_status'),optional('maintenance','site_id,maintenance_id,maintenance_status,last_maintenance_date,next_maintenance_date')
- ]);
- rows=normalizeMasterRows(pmnoRows,siteRows);setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>r.tenant_count=tenantCount(r));
+async function load(){if(loading)return;loading=true;$('dash-refresh')?.setAttribute('aria-busy','true');try{
+ const [pmnoRows,siteRows]=await Promise.all([getAll('pmno_site_master'),optional('site_master')]);
+ rows=normalizeMasterRows(pmnoRows,siteRows);filtered=rows.slice();
  const regs=[...new Set(rows.map(r=>String(val(r,'regional','region','regional_name')).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b));setOptions('dash-regional',regs,'ALL REGIONAL');
- filtered=rows.slice();renderDashboardSource('MASTER DATA · PMNO');
- $('dash-head')?.classList.remove('loading');
+ renderDashboardSource('MASTER DATA · PMNO');
+ $('dash-refresh')?.removeAttribute('aria-busy');
+ // Child datasets load after the dashboard shell is already usable.
+ const [tenantRows,powerRows,maintenanceRows]=await Promise.all([
+   optional('tenant_contract','site_id,tenant_id,tenant_name,tenant_status,contract_start_date,contract_end_date,revenue_month,revenue_year'),
+   optional('tenant_power','site_id,tenant_id,power_id,power_configuration,power_source,pln_id,existing_power_capacity,power_status'),
+   optional('maintenance','site_id,maintenance_id,maintenance_status,last_maintenance_date,next_maintenance_date')
+ ]);
+ setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>r.tenant_count=tenantCount(r));renderDashboardSource('MASTER DATA · PMNO + LIVE CHILD DATA');
  $('dash-refresh')?.setAttribute('title',`Loaded ${fmtInt(rows.length)} sites`);
- }catch(e){console.error('PMNO Dashboard load error',e);rows=[];filtered=[];for(const id of ['dash-kpis','dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo']){const el=$(id);if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard gagal memuat data.</b><br>${esc(e.message||e)}</div>`}$('dash-head')?.classList.remove('loading');}finally{loading=false}}
+ }catch(e){console.error('PMNO Dashboard load error',e);rows=[];filtered=[];for(const id of ['dash-kpis','dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo']){const el=$(id);if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard gagal memuat data.</b><br>${esc(e.message||e)}</div>`}$('dash-refresh')?.removeAttribute('aria-busy');}finally{loading=false}}
 function closeSiteSearch(){const el=$('sp-search-results');if(el)el.style.display='none'}
 function siteSearchRows(q){const needle=String(q||'').trim().toLowerCase();if(!needle)return rows.slice(0,20);return rows.filter(r=>siteId(r).toLowerCase().includes(needle)||String(val(r,'site_name')).toLowerCase().includes(needle)).slice(0,20)}
 function renderSiteSearchResults(q){const box=$('sp-search-results');if(!box)return;const hits=siteSearchRows(q);box.innerHTML=hits.length?hits.map(r=>`<div class="sp-search-result"><b>${esc(siteId(r))} · ${esc(val(r,'site_name'))}</b><span>${esc([val(r,'province'),val(r,'city')].filter(Boolean).join(' · '))}</span></div>`).join(''):'<div class="sp-search-empty">Site tidak ditemukan di Site Master.</div>';box.style.display='block';box.querySelectorAll('.sp-search-result').forEach((el,i)=>el.onclick=()=>{closeSiteSearch();window.pmnoOpenSiteProfile(hits[i])})}
