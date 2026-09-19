@@ -2591,11 +2591,34 @@ async function load(){
   // Paged server-side reads. Never request the entire 40k+ dataset as one JSON payload.
   rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
   const pageSize=1000;
+  // Supporting metrics come from the same paged snapshot RPC. Keep this helper
+  // declared before fetchPage: fetchPage is invoked immediately on the first page.
+  liveLegalStats={};
+  liveNbv={};
+  liveFinancial={};
+  const applySnapshotSupport=(snap)=>{
+   for(const x of (Array.isArray(snap.legal)?snap.legal:[])){
+    const id=String(x?.site_id||'').trim();
+    if(id)liveLegalStats[id]={required:Number(x?.required_count)||0,verified:Number(x?.verified_count)||0,pending:Number(x?.pending_count)||0,review:Number(x?.review_count)||0};
+   }
+   for(const x of (Array.isArray(snap.nbv)?snap.nbv:[])){
+    const id=String(x?.site_id||'').trim(),n=Number(x?.nbv);
+    if(id&&Number.isFinite(n))liveNbv[id]=n;
+   }
+   for(const x of (Array.isArray(snap.tenants)?snap.tenants:[])){
+    const id=String(x?.site_id||'').trim(); if(!id)continue;
+    const rec=liveFinancial[id]||(liveFinancial[id]={revenue_month:0,revenue_year:0,tenant_rows:0});
+    rec.revenue_month=Number(x?.revenue_month)||0;
+    rec.revenue_year=Number(x?.revenue_year)||0;
+    rec.tenant_rows=Number(x?.active_count)||0;
+   }
+  };
   const fetchPage=async(offset)=>{
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
    if(!r.ok)throw new Error('pmno_dashboard_site_page HTTP '+r.status+': '+(await r.text()).slice(0,240));
    const snap=await r.json();
    if(!snap||!Array.isArray(snap.sites))throw new Error('Dashboard page response invalid.');
+   applySnapshotSupport(snap);
    return snap;
   };
   const mergePage=(snap)=>{
@@ -2621,28 +2644,13 @@ async function load(){
 
   // First page renders quickly, then remaining pages are loaded in small parallel batches.
   const first=await fetchPage(0); mergePage(first);
-  const legalRows=await optional(()=>getAll('v_document_completion'),[]);
-  liveLegalStats={};
-  for(const x of legalRows){const id=String(x?.site_id_dmt||'').trim();if(id)liveLegalStats[id]={required:Number(x?.required_count)||0,verified:Number(x?.verified_count)||0,pending:Number(x?.pending_count)||0,review:Number(x?.review_count)||0};}
-  // NBV is currently sourced from legacy public.site_master and may only cover a subset of Site Master.
-  const nbvRows=await optional(()=>getAll('site_master'),[]);
-  liveNbv={};
-  for(const x of nbvRows){const id=String(x?.site_id_dmt||'').trim();if(id && x?.nbv!==null && x?.nbv!==undefined && String(x.nbv).trim()!==''){const n=Number(x.nbv);if(Number.isFinite(n))liveNbv[id]=n;}}
-  const tenantContractRows=await optional(()=>getAll('tenant_contract'),[]);
-  liveFinancial={};
-  for(const x of tenantContractRows){
-    const id=String(x?.site_id||'').trim(); if(!id) continue;
-    const active=String(x?.tenant_status||'').toUpperCase()==='ACTIVE' || String(x?.contract_status||'').toUpperCase()==='ACTIVE';
-    if(!active) continue;
-    const rm=Number(x?.revenue_month)||0, ry=Number(x?.revenue_year)||0;
-    const rec=liveFinancial[id]||(liveFinancial[id]={revenue_month:0,revenue_year:0,tenant_rows:0});
-    rec.revenue_month+=rm; rec.revenue_year+=ry>0?ry:rm*12; rec.tenant_rows++;
-  }
   const total=Number(first.total_sites)||0;
   const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
-  for(let i=0;i<offsets.length;i+=4){
-   const batch=await Promise.all(offsets.slice(i,i+4).map(fetchPage));
-   batch.forEach(mergePage);
+  // Load the remaining pages sequentially. The snapshot RPC is fast enough,
+  // and this avoids four concurrent aggregate queries competing for DB resources.
+  for(const offset of offsets){
+   const snap=await fetchPage(offset);
+   mergePage(snap);
   }
   filtered=rows.slice();
   window.__pmnoDashboardLoadingPages=false;
@@ -2717,6 +2725,7 @@ function init(){
  load();
 }
 window.pmnoDashboardInit=init;
+window.pmnoDashboardRefresh=async()=>{if(!initialized)init();return await load();};
 window.pmnoSiteProfileInit=function(){
  if(!initialized)init();
  else if(window._pmnoSelectedSite){
@@ -3015,6 +3024,11 @@ $('masterPublish').onclick=async()=>{
     $('masterImpact').textContent=`Active version recorded · ${originalOp} · ${total.toLocaleString('id-ID')} rows · source data updated successfully.`;
     $('masterPublish').disabled=true;
     await renderHistory(selected);await render();
+    // Master publish is the source-of-truth update. Refresh the dashboard snapshot immediately
+    // so SHOW DATA / AUDIT DATA cannot remain on the previous in-memory dataset.
+    if(typeof window.pmnoDashboardRefresh==='function'){
+      try{await window.pmnoDashboardRefresh()}catch(refreshErr){console.warn('Dashboard refresh after publish failed:',refreshErr)}
+    }
   }catch(e){
     console.error('Publish failed',e);
     const progress=$('masterPublishProgress');progress.style.display='block';progress.classList.add('is-error');$('masterPublishProgressChunk').textContent='Publish stopped — last successful progress is shown above.';
