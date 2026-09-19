@@ -1953,10 +1953,8 @@ function hasPower(id){
  return (liveTenants[id]||[]).some(t=>String(val(t,'power_source','power_configuration','pln_id','existing_power_capacity','power_capacity')).trim()!=='');
 }
 function legalComplete(r){
- const keys=['pks_lama_document_link','pks_baru_document_link','imb_document_link','pbg_document_link','slf_document_link','sda_document_link'];
- const any=keys.some(k=>String(val(r,k)).trim()!=='');
- if(any)return keys.filter(k=>String(val(r,k)).trim()!=='').length>=2;
- return ['pks_lama','pks_baru','imb','pbg','slf','sda'].some(k=>String(val(r,k)).trim()!=='');
+ const keys=['pks_lama_document_link','pks_baru_document_link','imb_document_link','pbg_document_link','slf_document_link','sda_document_link','pks_lama','pks_baru','imb','pbg','slf','sda'];
+ return keys.some(k=>Object.prototype.hasOwnProperty.call(r||{},k));
 }
 function basicComplete(r){return ['site_id','site_name'].every(k=>String(val(r,k)).trim()!=='')&&['latitude','longitude'].every(k=>String(val(r,k)).trim()!=='')}
 function leaseState(r){
@@ -2023,7 +2021,7 @@ function renderMap(){
  if(!dashMap){dashMap=L.map(el,{zoomControl:true}).setView([-2.5,118],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(dashMap)}
  dashMap.eachLayer(x=>{if(x instanceof L.Marker||x instanceof L.CircleMarker)x.remove()});
  const pts=[];
- for(const r of filtered){const lat=Number(val(r,'latitude','lat')),lon=Number(val(r,'longitude','lon','lng'));if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;pts.push([lat,lon]);L.circleMarker([lat,lon],{radius:2,weight:0.6,fillOpacity:.72,renderer:L.canvas()}).addTo(dashMap).bindTooltip(`${esc(sid(r))}<br>${esc(val(r,'site_name'))}`)}
+ for(const r of filtered){const lat=Number(val(r,'latitude','lat')),lon=Number(val(r,'longitude','lon','lng'));if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;pts.push([lat,lon]);L.circleMarker([lat,lon],{radius:2,weight:0.6,fillOpacity:.72,renderer:L.canvas()}).addTo(dashMap).bindTooltip(`${esc(sid(r))}<br>${esc(val(r,'site_name'))}`).on('click',()=>window.pmnoOpenSiteProfile(r))}
  if(pts.length===1)dashMap.setView(pts[0],13);else if(pts.length>1)dashMap.fitBounds(pts,{padding:[30,30],maxZoom:10});
  setTimeout(()=>dashMap.invalidateSize(),50);
 }
@@ -2097,7 +2095,7 @@ async function load(){
   window.__pmnoDashboardLoadingPages=false;
   renderDashboardSource('MASTER DATA · PMNO');
   if(window._pmnoSelectedSite){
-   const selectedId=sid(window._pmnoSelectedSite);const fresh=rows.find(x=>sid(x)===selectedId);if(fresh)renderSiteProfile(fresh);
+   const selectedId=sid(window._pmnoSelectedSite);const fresh=rows.find(x=>sid(x)===selectedId);if(fresh)await renderSiteProfile(fresh);
   }
  }catch(e){
   window.__pmnoDashboardLoadingPages=false;
@@ -2115,26 +2113,38 @@ function searchSite(q){const r=siteSearchRows(q)[0];if(r)window.pmnoOpenSiteProf
 window.pmnoOpenSiteProfile=function(r){
  window._pmnoSelectedSite=r||null;
  location.hash='#siteprofile';
- setTimeout(()=>{
-  const id=sid(r||{}), fresh=rows.find(x=>sid(x)===id)||r;
-  if(fresh)renderSiteProfile(fresh);
- },80);
+ setTimeout(async()=>{const id=sid(r||{}),fresh=rows.find(x=>sid(x)===id)||r;if(fresh)await renderSiteProfile(fresh);},80);
 }
 function kv(items){return items.map(([a,b])=>`<div class="kvitem"><span>${esc(a)}</span><b>${esc(b||'—')}</b></div>`).join('')}
-function renderSiteProfile(r){
+async function loadSiteProfileDetails(id){
+ const clean=encodeURIComponent(String(id||''));
+ const get=async(table)=>{const r=await fetch(URL+'/rest/v1/'+table+'?site_id=eq.'+clean+'&select=*',{headers:H});if(!r.ok)throw new Error(table+' HTTP '+r.status);return await r.json()};
+ const [ts,ps,ms]=await Promise.all([get('tenant_contract'),get('tenant_power'),get('maintenance')]);
+ if(id){liveTenants[id]=Array.isArray(ts)?ts:[];livePower[id]=Array.isArray(ps)?ps:[];liveMaintenance[id]=Array.isArray(ms)&&ms.length?ms[ms.length-1]:null;}
+ return {ts:Array.isArray(ts)?ts:[],ps:Array.isArray(ps)?ps:[],ms:Array.isArray(ms)?ms:[]};
+}
+async function renderSiteProfile(r){
  if(!r){ $('sp-empty')?.style.setProperty('display','block'); $('sp-content')?.style.setProperty('display','none'); return; }
- const id=sid(r),ts=liveTenants[id]||[];
- window._pmnoSelectedSite=r;
+ const id=sid(r); window._pmnoSelectedSite=r;
  $('sp-empty')?.style.setProperty('display','none');$('sp-content')?.style.setProperty('display','block');
  if($('sp-site-id'))$('sp-site-id').textContent=id||'—';if($('sp-site-name'))$('sp-site-name').textContent=val(r,'site_name')||'—';
  if($('sp-location'))$('sp-location').textContent=[val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten'),val(r,'district'),val(r,'village')].filter(Boolean).join(' · ')||'Location not available';
- if($('sp-badges'))$('sp-badges').innerHTML=`<span class="sp-badge">TENANT · ${ts.length}</span>`;
- if($('sp-asset'))$('sp-asset').innerHTML=kv([['Site ID',id],['Status',val(r,'site_status')],['Tower Type',val(r,'tower_type')],['Latitude',val(r,'latitude')],['Longitude',val(r,'longitude')]]);
- if($('sp-tenant'))$('sp-tenant').innerHTML=ts.length?`<table class="sp-tenant-table"><thead><tr><th>TENANT</th><th>STATUS</th><th>CONTRACT END</th><th>REVENUE/MO</th></tr></thead><tbody>${ts.map(t=>`<tr><td><b>${esc(val(t,'tenant_name'))}</b></td><td>${esc(val(t,'tenant_status','status'))}</td><td>${esc(val(t,'contract_end_date','end_date'))}</td><td>Rp ${fmtInt(val(t,'revenue_month','revenue_mo','revenue'))}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty-note">No tenant record.</div>';
- if($('sp-power'))$('sp-power').innerHTML=metricRows([['Power records',fmtInt((livePower[id]||[]).length)],['Tenant power records',fmtInt(ts.filter(t=>val(t,'power_source','power_configuration','pln_id','power_capacity')).length)]]);
- if($('sp-land'))$('sp-land').innerHTML=kv([['Land Status',val(r,'land_status')],['Land Owner',val(r,'land_owner_name')],['Lease Expiry',val(r,'lease_expiry_date','end_sewa')]]);
- if($('sp-legal'))$('sp-legal').innerHTML=kv([['PKS Lama',val(r,'pks_lama_document_link')?'Available':'Missing'],['PKS Baru',val(r,'pks_baru_document_link')?'Available':'Missing'],['IMB/PBG',(val(r,'imb_document_link')||val(r,'pbg_document_link'))?'Available':'Missing'],['SLF',val(r,'slf_document_link')?'Available':'Missing']]);
- const mt=liveMaintenance[id]||{};if($('sp-maintenance'))$('sp-maintenance').innerHTML=kv([['Status',val(mt,'status')],['Last Maintenance',val(mt,'last','last_maintenance')],['Next Maintenance',val(mt,'next','next_maintenance')]]);
+ if($('sp-badges'))$('sp-badges').innerHTML='<span class="sp-badge">LOADING SITE DATA…</span>';
+ try{
+  const detail=await loadSiteProfileDetails(id),ts=detail.ts,ps=detail.ps,ms=detail.ms;
+  if($('sp-badges'))$('sp-badges').innerHTML=`<span class="sp-badge">TENANT · ${ts.length}</span><span class="sp-badge">POWER · ${ps.length}</span><span class="sp-badge">MAINTENANCE · ${ms.length}</span>`;
+  if($('sp-asset'))$('sp-asset').innerHTML=kv([['Site ID',id],['Status',val(r,'site_status')],['Tower Type',val(r,'tower_type')],['Tower Height',val(r,'tower_height_m')],['Latitude',val(r,'latitude')],['Longitude',val(r,'longitude')],['Province',val(r,'province')],['City',val(r,'city')],['District',val(r,'district')],['Village',val(r,'village')]]);
+  if($('sp-tenant'))$('sp-tenant').innerHTML=ts.length?`<table class="sp-tenant-table"><thead><tr><th>TENANT</th><th>STATUS</th><th>CONTRACT END</th><th>REVENUE/MO</th></tr></thead><tbody>${ts.map(t=>`<tr><td><b>${esc(val(t,'tenant_name'))}</b></td><td>${esc(val(t,'tenant_status','status'))}</td><td>${esc(val(t,'contract_end_date','end_date'))}</td><td>Rp ${fmtInt(val(t,'revenue_month','revenue_mo','revenue'))}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty-note">No tenant record.</div>';
+  if($('sp-power'))$('sp-power').innerHTML=ps.length?`<table class="sp-tenant-table"><thead><tr><th>POWER ID</th><th>SOURCE</th><th>STATUS</th><th>CAPACITY</th></tr></thead><tbody>${ps.map(x=>`<tr><td><b>${esc(val(x,'power_id'))}</b></td><td>${esc(val(x,'power_source','power_configuration'))}</td><td>${esc(val(x,'power_status'))}</td><td>${esc(val(x,'existing_power_capacity','pln_capacity','sps_capacity'))} ${esc(val(x,'power_unit'))}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty-note">No power record.</div>';
+  if($('sp-land'))$('sp-land').innerHTML=kv([['Land Status',val(r,'land_status')],['Lease Expiry',val(r,'lease_expiry_date','end_sewa')],['Area Type',val(r,'area_type')],['Terrain',val(r,'terrain_class')],['Access',val(r,'access_level')],['Roadhead Distance',val(r,'roadhead_distance_m')]]);
+  if($('sp-legal'))$('sp-legal').innerHTML='<div class="dash-empty-note">Legal document fields are not present in the current Site Master schema. No legal status is inferred from missing columns.</div>';
+  if($('sp-maintenance'))$('sp-maintenance').innerHTML=ms.length?`<table class="sp-tenant-table"><thead><tr><th>STATUS</th><th>TYPE</th><th>LAST</th><th>NEXT</th></tr></thead><tbody>${ms.slice(0,10).map(x=>`<tr><td>${esc(val(x,'maintenance_status'))}</td><td>${esc(val(x,'maintenance_type'))}</td><td>${esc(val(x,'last_maintenance_date'))}</td><td>${esc(val(x,'next_maintenance_date'))}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty-note">No maintenance record.</div>';
+  if($('sp-attention'))$('sp-attention').innerHTML=kv([['Site Master','Available'],['Tenant Contract',ts.length?'Available':'No record'],['Power Existing',ps.length?'Available':'No record'],['Maintenance',ms.length?'Available':'No record'],['Legal','Not in current Site Master schema']]);
+ }catch(e){
+  console.error('Site profile detail load failed',e);
+  if($('sp-badges'))$('sp-badges').innerHTML='<span class="sp-badge">DETAIL LOAD ERROR</span>';
+  if($('sp-attention'))$('sp-attention').innerHTML='<div class="dash-empty-note">Site Master loaded, but child data could not be read: '+esc(e.message)+'</div>';
+ }
 }
 function navigateSite(){const q=$('dash-search')?.value?.trim();if(q)searchSite(q);else location.hash='#siteprofile'}
 function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;location.hash='#single';setTimeout(()=>{$('lat')&&($('lat').value=val(r,'latitude'));$('lon')&&($('lon').value=val(r,'longitude'))},40)}
