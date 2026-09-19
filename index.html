@@ -2322,13 +2322,18 @@ function renderDashboardSource(label){
     ${group('OPERATING COST',sourceRow('Cost OM / Site',na,'Sumber OM site-level belum terhubung')+sourceRow('Cost OM / Site / Tahun',na,'Sumber OM site-level belum terhubung')+sourceRow('Cost Sewa Lahan / Site',na,'Sumber sewa lahan site-level belum terhubung')+sourceRow('Cost Sewa Lahan / Site / Tahun',na,'Sumber sewa tahunan site-level belum terhubung'))}
     ${group('TAX',sourceRow('Tax / Site / Tahun',na,'Sumber tax site-level belum terhubung'))}
    </div>
-   <div class="fin-profitability"><div class="fin-profit-title">PROFITABILITY BUILD-UP</div><div class="fin-profit-grid">
-      <div class="fin-profit-card"><span>EBITDA</span><b>${na}</b><small>Revenue − operating cost</small></div>
-      <div class="fin-profit-card"><span>EBIT</span><b>${na}</b><small>EBITDA − depreciation</small></div>
-      <div class="fin-profit-card"><span>CASHFLOW</span><b>${na}</b><small>Monthly cashflow dari engine PMNO</small></div>
-      <div class="fin-profit-card"><span>IRR / SITE</span><b>${na}</b><small>Menggunakan engine IRR PMNO yang sama</small></div>
-   </div><div class="fin-formula"><strong>KOMPONEN PEMBENTUK</strong><span>Revenue → OM Cost → Sewa Lahan → EBITDA → Depreciation → EBIT → Tax → Cashflow → IRR</span></div></div>
-   <div class="fin-asset-value">${metricRows([['Total NBV',formatMoney(totalNbv),mappedRows.length?'good':'neutral'],['Avg NBV / Site',mappedRows.length?formatMoney(totalNbv/mappedRows.length):na,mappedRows.length?'good':'neutral'],['NBV pada Site NPA',formatMoney(npaNbv),npaNbv?'warn':'good'],['Porsi NBV pada Site NPA',npaExposurePct.toFixed(1)+'%',npaNbv?'warn':'good']])}<div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div></div>`;
+    ${group('PROFITABILITY BUILD-UP',
+      sourceRow('EBITDA',na,'Revenue − OM Cost − Sewa Lahan − biaya operasional lainnya')+
+      sourceRow('EBIT',na,'EBITDA − depreciation')+
+      sourceRow('Cashflow / Site / Bulan',na,'Monthly cashflow dari engine PMNO')+
+      sourceRow('IRR / Site',na,'Menggunakan engine IRR PMNO yang sama'))}
+    ${group('ASSET VALUE',
+      sourceRow('Total NBV',mappedRows.length?formatMoney(totalNbv):na,mappedRows.length?'NBV yang terpetakan ke Site ID':'Data NBV belum tersedia')+
+      sourceRow('Avg NBV / Site',mappedRows.length?formatMoney(totalNbv/mappedRows.length):na,mappedRows.length?'Total NBV ÷ site dengan NBV':'Data NBV belum tersedia')+
+      sourceRow('NBV pada Site NPA',npaNbv?formatMoney(npaNbv):formatMoney(0),npaNbv?'NBV pada site tanpa tenant aktif':'Tidak ada NBV terpetakan pada NPA')+
+      sourceRow('Porsi NBV pada Site NPA',npaExposurePct.toFixed(1)+'%',npaNbv?'NBV NPA ÷ Total NBV':'Tidak ada NBV NPA terpetakan'))}
+   </div>
+   <div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div>`;
  };
  const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(npa),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  renderDashboardMap(filtered);
