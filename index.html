@@ -932,12 +932,12 @@ body.pmno-page-single .workspace{
     </div>
     <div id="dash-show-layer" class="dash-layer">
       <div class="dash-grid-top">
-        <section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t1"></i>1 <i class="t2"></i>2–3 <i class="t3"></i>4–5 <i class="t4"></i>6+</div></div><div id="dash-map"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>ASSET PROFILE</strong><small>What assets we have and where they are.</small></div></div><div id="dash-asset" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET PROFILE</strong><small>What assets we have and where they are.</small></div></div><div id="dash-asset" class="dash-panel-content"></div></section>
+        <section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>02</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t0"></i>0 / NPA <i class="t1"></i>1 <i class="t2"></i>2 <i class="t3"></i>3 <i class="t4"></i>&gt;3</div></div><div id="dash-map"></div></section>
       </div>
       <div class="show-section-title">PORTFOLIO PROFILE</div>
       <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>CUSTOMER PROFILE</strong><small>Tenant base, tenancy depth and site productivity.</small></div></div><div id="dash-tenant" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>CUSTOMER PROFILE</strong><small>Tenant base and site distribution by tenant count.</small></div></div><div id="dash-tenant" class="dash-panel-content"></div></section>
         <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LAND &amp; LEGAL PROFILE</strong><small>Land tenure and legal status.</small></div></div><div id="dash-lease" class="dash-panel-content"></div></section>
         <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>TECHNICAL PROFILE</strong><small>Tower, access, terrain and power.</small></div></div><div id="dash-power" class="dash-panel-content"></div></section>
       </div>
@@ -2174,7 +2174,7 @@ function renderKpis(){
   ['ADA REVENUE',fmtInt(a.revenueSites),`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
   ['ADA POWER',fmtInt(a.powerSites),`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
   ['LEASE < 6 BULAN',fmtInt(a.leaseRisk+a.leaseExpired),`${fmtInt(a.leaseExpired)} expired`,'amber'],
-  ['LEGAL ASSESSED',fmtInt(a.legalAssessed),`${pct(a.legalAssessed,a.total)}% of sites assessed`,'cyan']
+  ['NPA / 0 TENANT',fmtInt(Math.max(0,a.total-a.activeSites)),`${pct(Math.max(0,a.total-a.activeSites),a.total)} of sites`,'amber']
  ];
  const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${esc(x[1])}</b><small>${esc(x[2])}</small></div>`).join('');
 }
@@ -2190,8 +2190,8 @@ function initDashboardMap(){
  setTimeout(()=>dashMap.invalidateSize({animate:false}),60);
  return dashMap;
 }
-function tenantBucket(n){n=Number(n)||0;return n<=1?'t1':n<=3?'t2':n<=5?'t3':'t4'}
-function tenantColor(n){return ({t1:'#43e0a0',t2:'#d8d85b',t3:'#f5a64f',t4:'#ff5570'})[tenantBucket(n)]}
+function tenantBucket(n){n=Number(n)||0;return n===0?'t0':n===1?'t1':n===2?'t2':n===3?'t3':'t4'}
+function tenantColor(n){return ({t0:'#7b8494',t1:'#43e0a0',t2:'#d8d85b',t3:'#f5a64f',t4:'#ff5570'})[tenantBucket(n)]}
 function dashboardMapPopup(r){
  const id=sid(r), name=val(r,'site_name')||'—', city=val(r,'city','kabupaten')||'—', province=val(r,'province')||'—', t=tenantCount(r);
  return `<div style="min-width:180px"><b>${esc(id)}</b><br><span>${esc(name)}</span><br><small>${esc(city)} · ${esc(province)}</small><br><strong>${fmtInt(t)} tenant</strong><br><button type="button" class="dash-site-open" data-site="${esc(id)}" style="margin-top:7px;padding:5px 8px;border:0;border-radius:5px;background:#35c4ff;color:#04111c;font-weight:800">OPEN SITE PROFILE</button></div>`;
@@ -2251,16 +2251,16 @@ function renderDashboardSource(label){
  const active=a.activeSites, npa=Math.max(0,a.total-active);
  const ratio=dashboardTenancyRatio(filtered);
  const t=$('dash-tenant');if(t)t.innerHTML=metricRows([
-  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Sites with active tenant',fmtInt(active)],['Site NPA',fmtInt(npa),'warn'],['Tenant mix · 1 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===1).length)],['Tenant mix · 2+ tenants',fmtInt(filtered.filter(r=>tenantCount(r)>=2).length)]
- ])+`<div class="audit-note" style="margin-top:8px">Tenancy Ratio = ${fmtInt(tenantTotal)} tenant ÷ ${fmtInt(a.total)} tower = ${ratio.toFixed(2)}x</div>`;
- const asset=$('dash-asset');if(asset)asset.innerHTML=metricRows([
-  ['Total site / tower',fmtInt(a.total)],['Province coverage',fmtInt(new Set(filtered.map(r=>val(r,'province')).filter(Boolean)).size)],['City / kabupaten coverage',fmtInt(new Set(filtered.map(r=>val(r,'city','kabupaten')).filter(Boolean)).size)],['Tower type populated',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Coordinate populated',fmtInt(filtered.filter(r=>String(val(r,'latitude')).trim()!==''&&String(val(r,'longitude')).trim()!=='').length)]
+  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Site NPA · 0 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===0).length),'warn'],['Site · 1 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===1).length)],['Site · 2 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===2).length)],['Site · 3 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===3).length)],['Site · >3 tenant',fmtInt(filtered.filter(r=>tenantCount(r)>3).length)]
  ]);
- const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Leased / with expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral'],['Legal checklist assessed',fmtInt(a.legalAssessed)]]);
- const p=$('dash-power');if(p)p.innerHTML=metricRows([['Sites with power',fmtInt(a.powerSites)],['Active tenant sites without power',fmtInt(a.tenantNoPower),'warn'],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Height populated',fmtInt(filtered.filter(r=>val(r,'tower_height_m')).length)],['Access level populated',fmtInt(filtered.filter(r=>val(r,'access_level')).length)],['Terrain class populated',fmtInt(filtered.filter(r=>val(r,'terrain_class')).length)]]);
- const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Sites with active tenant',fmtInt(active)],['Sites with revenue',fmtInt(a.revenueSites)],['Site NPA',fmtInt(npa),'warn'],['Active tenant sites without revenue',fmtInt(a.tenantNoRevenue),'warn'],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
- const fin=$('dash-financial');if(fin)fin.innerHTML=metricRows([['Sites with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%'],['Revenue source', 'Tenant contract / revenue mapping'],['Cost profile','Not mapped in current dashboard source','neutral']]);
- const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Productive · active tenant',fmtInt(active),'good'],['NPA · no active tenant',fmtInt(npa),'warn'],['Lease risk < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
+ const asset=$('dash-asset');if(asset)asset.innerHTML=metricRows([
+  ['Total site / tower',fmtInt(a.total)],['Province',fmtInt(new Set(filtered.map(r=>val(r,'province')).filter(Boolean)).size)],['Kabupaten / kota',fmtInt(new Set(filtered.map(r=>val(r,'city','kabupaten')).filter(Boolean)).size)],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Site with coordinate',fmtInt(filtered.filter(r=>String(val(r,'latitude')).trim()!==''&&String(val(r,'longitude')).trim()!=='').length)]
+ ]);
+ const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
+ const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(filtered.filter(r=>val(r,'terrain_class')).length)]]);
+ const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Productive site · active tenant',fmtInt(active),'good'],['Site with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
+ const fin=$('dash-financial');if(fin){const npaRows=filtered.filter(r=>activeTenantCount(sid(r))===0&&hasNbv(sid(r)));const mappedRows=filtered.filter(r=>hasNbv(sid(r)));const totalNbv=mappedRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);const npaNbv=npaRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);fin.innerHTML=metricRows([['Mapped NBV sites',fmtInt(mappedRows.length)+' / '+fmtInt(a.total),mappedRows.length<a.total?'warn':'good'],['Mapped NBV',formatMoney(totalNbv)],['NPA sites with NBV',fmtInt(npaRows.length),npaRows.length?'warn':'good'],['NPA NBV exposure',formatMoney(npaNbv),npaNbv?'warn':'good'],['Cost source','Not mapped','neutral']])};
+ const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Productive site · active tenant',fmtInt(active),'good'],['NPA · 0 tenant',fmtInt(npa),'warn'],['Lease risk < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  renderDashboardMap(filtered);
  const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
  renderAuditData();
