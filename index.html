@@ -2162,6 +2162,9 @@ function setOptions(id,values,all){const el=$(id);if(!el)return;const old=el.val
 function tenantCount(r){const id=sid(r), n=num(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));return n||Number(liveTenantStats[id]?.total||0)}
 function dashboardTenantTotal(list){return (list||[]).reduce((n,r)=>n+tenantCount(r),0)}
 function dashboardTenancyRatio(list){const towers=(list||[]).length, tenants=dashboardTenantTotal(list);return towers?tenants/towers:0}
+function siteNpa(r){return tenantCount(r)===0;}
+function siteNpaCount(list){return (list||[]).filter(siteNpa).length;}
+function revenueSiteCount(r){return Number(liveTenantStats[sid(r)]?.revenue_total||0)>0;}
 function normalizeMasterRows(pmno,site){
  const source=(Array.isArray(pmno)&&pmno.length?pmno:site)||[];
  const map=new Map();
@@ -2177,6 +2180,7 @@ function setLiveChildren(tenantRows,powerRows,maintenanceRows){
 function activeTenants(id){ return liveTenants[id]||[]; }
 function activeTenantCount(id){ return Number(liveTenantStats[id]?.active||0); }
 function activeRevenueCount(id){ return Number(liveTenantStats[id]?.revenue||0); }
+function totalRevenueCount(id){ return Number(liveTenantStats[id]?.revenue_total||0); }
 function hasRevenue(t){
  return num(val(t,'revenue_month','revenue_mo','monthly_revenue','revenue','revenue_year','annual_revenue'))>0
 }
@@ -2196,13 +2200,13 @@ function siteAuditSnapshot(list){
  const total=list.length;
  let activeSites=0,revenueSites=0,powerSites=0,corePass=0,leaseRisk=0,leaseExpired=0,legalGap=0,legalAssessed=0,missingBasic=0,tenantNoRevenue=0,tenantNoPower=0;
  for(const r of list){
-  const id=sid(r), active=activeTenantCount(id)>0, rev=activeRevenueCount(id)>0, power=hasPower(id), legal=legalComplete(r), basic=!basicComplete(r), ls=leaseState(r);
+  const id=sid(r), active=activeTenantCount(id)>0, activeRev=activeRevenueCount(id)>0, rev=revenueSiteCount(r), power=hasPower(id), legal=legalComplete(r), basic=!basicComplete(r), ls=leaseState(r);
   if(active)activeSites++; if(rev)revenueSites++; if(power)powerSites++;
   if(legal!==null){legalAssessed++; if(!legal)legalGap++;}
   if(basic)missingBasic++; if(ls.risk)leaseRisk++; if(ls.expired)leaseExpired++;
-  if(active && !rev)tenantNoRevenue++;
+  if(active && !activeRev)tenantNoRevenue++;
   if(active && !power)tenantNoPower++;
-  if(active&&rev&&power&&!basic)corePass++;
+  if(active&&activeRev&&power&&!basic)corePass++;
  }
  return {total,activeSites,revenueSites,powerSites,corePass,coreGap:Math.max(0,total-corePass),leaseRisk,leaseExpired,legalGap,legalAssessed,missingBasic,tenantNoRevenue,tenantNoPower};
 }
@@ -2214,11 +2218,11 @@ function renderKpis(){
   ['TOTAL TOWER / SITE',fmtInt(a.total),'Site Master · site basis','cyan'],
   ['TOTAL TENANT',fmtInt(tenancyTotal),'Customer count · site basis','cyan'],
   ['TENANCY RATIO',tenancyRatio.toFixed(2)+'x',`${fmtInt(tenancyTotal)} tenant ÷ ${fmtInt(a.total)} tower`,'green'],
-  ['SITE NPA',fmtInt(Math.max(0,a.total-a.activeSites)),`${pct(Math.max(0,a.total-a.activeSites),a.total)} of sites without active tenant`,'amber'],
+  ['SITE NPA',fmtInt(siteNpaCount(filtered)),`${pct(siteNpaCount(filtered),a.total)} of sites without tenant record`,'amber'],
   ['ADA REVENUE',fmtInt(a.revenueSites),`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
   ['ADA POWER',fmtInt(a.powerSites),`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
   ['LEASE < 6 BULAN',fmtInt(a.leaseRisk+a.leaseExpired),`${fmtInt(a.leaseExpired)} expired`,'amber'],
-  ['NPA / 0 TENANT',fmtInt(Math.max(0,a.total-a.activeSites)),`${pct(Math.max(0,a.total-a.activeSites),a.total)} of sites`,'amber']
+  ['NPA / 0 TENANT',fmtInt(siteNpaCount(filtered)),`${pct(siteNpaCount(filtered),a.total)} of sites`,'amber']
  ];
  const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${esc(x[1])}</b><small>${esc(x[2])}</small></div>`).join('');
 }
@@ -2295,7 +2299,7 @@ function renderDashboardSource(label){
  const active=a.activeSites, npa=Math.max(0,a.total-active);
  const ratio=dashboardTenancyRatio(filtered);
  const t=$('dash-tenant');if(t)t.innerHTML=metricRows([
-  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Site NPA · 0 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===0).length),'warn'],['Site · 1 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===1).length)],['Site · 2 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===2).length)],['Site · 3 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===3).length)],['Site · >3 tenant',fmtInt(filtered.filter(r=>tenantCount(r)>3).length)]
+  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Site NPA · 0 tenant',fmtInt(siteNpaCount(filtered)),'warn'],['Site · 1 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===1).length)],['Site · 2 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===2).length)],['Site · 3 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===3).length)],['Site · >3 tenant',fmtInt(filtered.filter(r=>tenantCount(r)>3).length)]
  ]);
  const asset=$('dash-asset');if(asset)asset.innerHTML=metricRows([
   ['Total site / tower',fmtInt(a.total)],['Province',fmtInt(new Set(filtered.map(r=>val(r,'province')).filter(Boolean)).size)],['Kabupaten / kota',fmtInt(new Set(filtered.map(r=>val(r,'city','kabupaten')).filter(Boolean)).size)],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Site with coordinate',fmtInt(filtered.filter(r=>String(val(r,'latitude')).trim()!==''&&String(val(r,'longitude')).trim()!=='').length)]
@@ -2305,7 +2309,7 @@ function renderDashboardSource(label){
  const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Productive site · active tenant',fmtInt(active),'good'],['Site with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
  const fin=$('dash-financial');if(fin){
   const hasNbv=id=>Object.prototype.hasOwnProperty.call(liveNbv,id);
-  const npaRows=filtered.filter(r=>activeTenantCount(sid(r))===0&&hasNbv(sid(r)));
+  const npaRows=filtered.filter(r=>siteNpa(r)&&hasNbv(sid(r)));
   const mappedRows=filtered.filter(r=>hasNbv(sid(r)));
   const totalNbv=mappedRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
   const npaNbv=npaRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
@@ -2341,7 +2345,7 @@ function renderDashboardSource(label){
    </div>
    <div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div>`;
  };
- const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(npa),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
+ const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(siteNpaCount(filtered)),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  renderDashboardMap(filtered);
  const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
  renderAuditData();
@@ -2362,12 +2366,12 @@ function renderAuditData(){
  const hasNbv=id=>Object.prototype.hasOwnProperty.call(liveNbv,id);
  const active=list.filter(r=>activeTenantCount(sid(r))>0);
  const activeRevenue=active.filter(r=>activeRevenueCount(sid(r))>0);
- const revenueSites=list.filter(r=>activeRevenueCount(sid(r))>0);
- const revenueWithoutTenant=list.filter(r=>activeRevenueCount(sid(r))>0&&activeTenantCount(sid(r))===0);
+ const revenueSites=list.filter(r=>revenueSiteCount(r));
+ const revenueWithoutTenant=list.filter(r=>revenueSiteCount(r)&&tenantCount(r)===0);
  const customerMapped=list.filter(r=>hasTenantSource(sid(r))).length;
  const validCoords=list.filter(r=>{const la=Number(val(r,'latitude')),lo=Number(val(r,'longitude'));return Number.isFinite(la)&&Number.isFinite(lo)&&la>=-11.5&&la<=6.5&&lo>=94.5&&lo<=141.5}).length;
  const validTowerHeight=list.filter(r=>{const raw=val(r,'tower_height_m');if(String(raw).trim()==='')return true;const n=Number(raw);return Number.isFinite(n)&&n>=0&&n<=300}).length;
- const validTenantStats=list.filter(r=>{const x=liveTenantStats[sid(r)];if(!x)return false;return Number(x.total)>=Number(x.active)&&Number(x.active)>=0&&Number(x.revenue)>=0&&Number(x.revenue)<=Number(x.active)}).length;
+ const validTenantStats=list.filter(r=>{const x=liveTenantStats[sid(r)];if(!x)return false;return Number(x.total)>=Number(x.active)&&Number(x.total)>=Number(x.revenue_total||0)&&Number(x.active)>=0&&Number(x.revenue||0)>=0&&Number(x.revenue||0)<=Number(x.active)}).length;
  const validRevenueRelation=active.filter(r=>activeRevenueCount(sid(r))<=activeTenantCount(sid(r))).length;
  const validLease=list.filter(r=>{const raw=val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date');if(!String(raw).trim())return true;const d=Date.parse(raw);return Number.isFinite(d)}).length;
  const validPower=list.filter(r=>{const c=Number(livePowerCount[sid(r)]||0);return Number.isFinite(c)&&c>=0}).length;
@@ -2410,7 +2414,7 @@ function renderAuditData(){
 
    // Customer: source must exist; NPA (no tenant) is a portfolio condition, not an error.
    if(hasCustomer){
-     const customerOk=Number(x.total)>=Number(x.active)&&Number(x.active)>=Number(x.revenue)&&Number(x.revenue)>=0;
+     const customerOk=Number(x.total)>=Number(x.active)&&Number(x.total)>=Number(x.revenue_total||0)&&Number(x.active)>=Number(x.revenue||0)&&Number(x.revenue||0)>=0;
      profileChecks.customer.push(customerOk);
      if(!customerOk)pushEx(r,'Customer Profile','TENANT_COUNT_CONFLICT','Tenant totals do not reconcile: total ≥ active ≥ revenue');
    }
@@ -2418,10 +2422,10 @@ function renderAuditData(){
    // Productivity: active tenant site should have revenue; revenue without tenant is contradictory.
    if(hasCustomer){
      const assessable=true;
-     const prodOk=(at===0&&rev===0)||(at>0&&rev>0);
+     const prodOk=(at===0&&activeRevenueCount(id)===0)||(at>0&&activeRevenueCount(id)>0);
      profileChecks.productivity.push(prodOk);
-     if(at>0&&rev===0)pushEx(r,'Productivity Profile','TENANT_WITHOUT_REVENUE','Active tenant exists but no revenue relationship is mapped');
-     if(at===0&&rev>0)pushEx(r,'Productivity Profile','REVENUE_WITHOUT_TENANT','Revenue exists without an active tenant');
+     if(at>0&&activeRevenueCount(id)===0)pushEx(r,'Productivity Profile','TENANT_WITHOUT_REVENUE','Active tenant exists but no active-tenant revenue relationship is mapped');
+     if(tenantCount(r)===0&&rev)pushEx(r,'Productivity Profile','REVENUE_WITHOUT_TENANT','Revenue exists on a site with no tenant record');
    }
 
    // Land/legal: only contradictions are consistency findings; missing lease/legal is completeness.
@@ -2439,9 +2443,9 @@ function renderAuditData(){
    if(hasCustomer&&at>0&&!power)pushEx(r,'Technical Profile','TENANT_WITHOUT_POWER','Active tenant exists but no power relationship is mapped');
 
    // Financial: revenue/tenant contradiction is assessable. Cost is deliberately NOT scored until a site-level cost source is mapped.
-   const finOk=(at===0&&rev===0)||(at>0&&rev>0);
+   const finOk=(tenantCount(r)===0&&rev===false)||(tenantCount(r)>0&&rev===true);
    if(hasCustomer)profileChecks.financial.push(finOk);
-   if(hasCustomer&&at===0&&rev>0)pushEx(r,'Financial Profile','REVENUE_WITHOUT_TENANT','Revenue exists without an active tenant');
+   if(hasCustomer&&tenantCount(r)===0&&rev)pushEx(r,'Financial Profile','REVENUE_WITHOUT_TENANT','Revenue exists on a site with no tenant record');
 
    // Lifecycle: only assessable where customer source and lease signal exist.
    if(hasCustomer){
@@ -2469,7 +2473,7 @@ function renderAuditData(){
    {label:'Jenis tower & tinggi tower tidak lengkap bersamaan',count:list.filter(r=>{const a=String(val(r,'tower_type')).trim(),b=String(val(r,'tower_height_m')).trim();return (!!a!==!!b)}).length}
   ],
   'Customer Profile':[
-   {label:'Tanpa Tenant Aktif & Revenue',count:list.filter(r=>activeTenantCount(sid(r))===0&&activeRevenueCount(sid(r))>0).length},
+   {label:'Tanpa Tenant & Revenue',count:list.filter(r=>tenantCount(r)===0&&revenueSiteCount(r)).length},
    {label:'Jumlah Tenant Tidak Sesuai',count:exceptions.filter(e=>e.profile==='Customer Profile'&&e.code==='TENANT_COUNT_CONFLICT').length},
    {label:'Data Tenant Belum Tersedia',count:null,source:'Hanya site yang memiliki source tenant yang dinilai'}
   ],
@@ -2541,7 +2545,7 @@ function renderAuditData(){
  const rootCauses=Object.entries(byCode).sort((a,b)=>b[1]-a[1]);
  // Intersection view: intentionally overlaps criteria, so totals are NOT mutually exclusive.
  const anomalyRows=[
-   {label:'Tanpa Tenant Aktif & Revenue',count:list.filter(r=>activeTenantCount(sid(r))===0&&activeRevenueCount(sid(r))>0).length,assessable:true},
+   {label:'Tanpa Tenant & Revenue',count:list.filter(r=>tenantCount(r)===0&&revenueSiteCount(r)).length,assessable:true},
    {label:'Tanpa Tenant Aktif & Cost',count:null,assessable:false,source:'Cost site-level belum tersedia'},
    {label:'Tanpa Tenant Aktif & Perangkat',count:null,assessable:false,source:'Source perangkat site-level belum tersedia'},
    {label:'Tanpa Revenue & Cost',count:null,assessable:false,source:'Cost site-level belum tersedia'},
@@ -2610,7 +2614,9 @@ async function load(){
     const rec=liveFinancial[id]||(liveFinancial[id]={revenue_month:0,revenue_year:0,tenant_rows:0});
     rec.revenue_month=Number(x?.revenue_month)||0;
     rec.revenue_year=Number(x?.revenue_year)||0;
-    rec.tenant_rows=Number(x?.active_count)||0;
+    rec.tenant_rows=Number(x?.total_count)||0;
+    rec.revenue_total=Number(x?.revenue_count)||0;
+    rec.active_revenue=Number(x?.active_revenue_count)||0;
    }
   };
   const fetchPage=async(offset)=>{
@@ -2628,7 +2634,7 @@ async function load(){
    rows=Array.from(byId.values());
    for(const x of (Array.isArray(snap.tenants)?snap.tenants:[])){
     const id=String(x?.site_id||'').trim();if(!id)continue;
-    liveTenantStats[id]={total:Math.max(0,Number(x?.total_count)||0),active:Math.max(0,Number(x?.active_count)||0),revenue:Math.max(0,Number(x?.active_revenue_count)||0)};
+    liveTenantStats[id]={total:Math.max(0,Number(x?.total_count)||0),active:Math.max(0,Number(x?.active_count)||0),revenue:Math.max(0,Number(x?.active_revenue_count)||0),revenue_total:Math.max(0,Number(x?.revenue_count)||0)};
    }
    for(const x of (Array.isArray(snap.power)?snap.power:[])){
     const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id)livePowerCount[id]=cnt;
