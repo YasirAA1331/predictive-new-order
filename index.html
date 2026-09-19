@@ -761,6 +761,55 @@ body.pmno-page-single #bulkView,
 body.pmno-page-single #drmView,
 body.pmno-page-single #masterDataView{display:none!important;}
 </style>
+
+<style id="pmno-page-flow-v43">
+/* V43 — remove flex/grid reserved space when switching away from Single Site.
+   Active top-level page flows directly after the navigation; inactive views cannot reserve layout space. */
+body.pmno-page-dashboard .app,
+body.pmno-page-siteprofile .app,
+body.pmno-page-bulk .app,
+body.pmno-page-drm .app,
+body.pmno-page-master .app{
+  display:block!important;
+  height:auto!important;
+  min-height:100dvh!important;
+}
+body.pmno-page-dashboard .topbar,
+body.pmno-page-siteprofile .topbar,
+body.pmno-page-bulk .topbar,
+body.pmno-page-drm .topbar,
+body.pmno-page-master .topbar{
+  flex:none!important;
+}
+body.pmno-page-dashboard #dashboardView,
+body.pmno-page-siteprofile #siteProfileView,
+body.pmno-page-bulk #bulkView,
+body.pmno-page-drm #drmView,
+body.pmno-page-master #masterDataView{
+  display:block!important;
+  position:relative!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:0!important;
+  margin:0!important;
+  padding-top:0!important;
+  top:auto!important;
+  transform:none!important;
+}
+body.pmno-page-dashboard .workspace,
+body.pmno-page-siteprofile .workspace,
+body.pmno-page-bulk .workspace,
+body.pmno-page-drm .workspace,
+body.pmno-page-master .workspace{
+  display:none!important;
+  flex:none!important;
+  width:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+}
+</style>
 </head>
 <body>
 <div class="app">
