@@ -2065,6 +2065,11 @@ async function load(){
   rows.forEach(r=>r.tenant_count=(liveTenants[sid(r)]||[]).length);
   filtered=rows.slice();
   renderDashboardSource('MASTER DATA · PMNO');
+  if(window._pmnoSelectedSite){
+   const selectedId=sid(window._pmnoSelectedSite);
+   const fresh=rows.find(x=>sid(x)===selectedId);
+   if(fresh) renderSiteProfile(fresh);
+  }
  }catch(e){
   console.error('PMNO Dashboard load error',e);
   rows=[];filtered=[];liveTenants={};livePower={};liveMaintenance={};
@@ -2076,10 +2081,19 @@ function closeSiteSearch(){const el=$('sp-search-results');if(el)el.style.displa
 function siteSearchRows(q){const needle=String(q||'').trim().toLowerCase();if(!needle)return rows.slice(0,20);return rows.filter(r=>[sid(r),val(r,'site_name'),val(r,'city','kabupaten')].join(' ').toLowerCase().includes(needle)).slice(0,20)}
 function renderSiteSearchResults(q){const box=$('sp-search-results');if(!box)return;const hits=siteSearchRows(q);box.innerHTML=hits.length?hits.map(r=>`<div class="sp-search-result" data-site-index="${rows.indexOf(r)}"><b>${esc(sid(r))} · ${esc(val(r,'site_name'))}</b><span>${esc([val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten')].filter(Boolean).join(' · ')||'Location not available')}</span><em>${fmtInt(tenantCount(r))} tenant</em></div>`).join(''):'<div class="sp-search-empty">Site tidak ditemukan di Site Master.</div>';box.style.display='block';box.querySelectorAll('.sp-search-result').forEach(el=>el.onclick=()=>{const r=rows[Number(el.dataset.siteIndex)];if(r){closeSiteSearch();window.pmnoOpenSiteProfile(r)}})}
 function searchSite(q){const r=siteSearchRows(q)[0];if(r)window.pmnoOpenSiteProfile(r);else{const st=$('sp-search-status');if(st)st.textContent='Site tidak ditemukan di Site Master.'}}
-window.pmnoOpenSiteProfile=function(r){location.hash='#siteprofile';setTimeout(()=>renderSiteProfile(r),30)}
+window.pmnoOpenSiteProfile=function(r){
+ window._pmnoSelectedSite=r||null;
+ location.hash='#siteprofile';
+ setTimeout(()=>{
+  const id=sid(r||{}), fresh=rows.find(x=>sid(x)===id)||r;
+  if(fresh)renderSiteProfile(fresh);
+ },80);
+}
 function kv(items){return items.map(([a,b])=>`<div class="kvitem"><span>${esc(a)}</span><b>${esc(b||'—')}</b></div>`).join('')}
 function renderSiteProfile(r){
+ if(!r){ $('sp-empty')?.style.setProperty('display','block'); $('sp-content')?.style.setProperty('display','none'); return; }
  const id=sid(r),ts=liveTenants[id]||[];
+ window._pmnoSelectedSite=r;
  $('sp-empty')?.style.setProperty('display','none');$('sp-content')?.style.setProperty('display','block');
  if($('sp-site-id'))$('sp-site-id').textContent=id||'—';if($('sp-site-name'))$('sp-site-name').textContent=val(r,'site_name')||'—';
  if($('sp-location'))$('sp-location').textContent=[val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten'),val(r,'district'),val(r,'village')].filter(Boolean).join(' · ')||'Location not available';
@@ -2107,7 +2121,13 @@ function init(){
  load();
 }
 window.pmnoDashboardInit=init;
-window.pmnoSiteProfileInit=function(){if(!initialized)init();else if(window._pmnoSelectedSite)renderSiteProfile(window._pmnoSelectedSite)};
+window.pmnoSiteProfileInit=function(){
+ if(!initialized)init();
+ else if(window._pmnoSelectedSite){
+  const id=sid(window._pmnoSelectedSite), fresh=rows.find(x=>sid(x)===id)||window._pmnoSelectedSite;
+  renderSiteProfile(fresh);
+ }
+};
 try{const h=String(location.hash||'').replace(/^#/,'').toLowerCase();if(h==='dashboard'||h==='siteprofile')setTimeout(init,0)}catch(e){console.error(e)}
 })();
 </script>
