@@ -2174,7 +2174,7 @@ $('masterPublish').onclick=async()=>{
       let last='';
       for(let attempt=1;attempt<=4;attempt++){
         try{
-          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),60000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact,p_batch_id:batchId}),signal:ctl.signal})}finally{clearTimeout(kill)}
+          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),180000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact,p_batch_id:batchId}),signal:ctl.signal})}finally{clearTimeout(kill)}
           const raw=await r.text();
           if(r.ok){last='';break}
           last=`HTTP ${r.status}: ${raw||'empty response'}`;
