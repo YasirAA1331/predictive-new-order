@@ -1918,7 +1918,7 @@ const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let rows=[],filtered=[],dashMap=null,dashMarkers=[];
 // Demo child domains are intentionally separate from Site Master: Tenant -> Power and Maintenance.
-const demoTenants={}, demoPower={}, demoMaintenance={};
+let demoTenants={}, demoPower={}, demoMaintenance={};
 let initialized=false;
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function uniq(key){return [...new Set(rows.map(r=>String(val(r,key)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
