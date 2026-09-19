@@ -2008,67 +2008,183 @@ function renderDashboardSource(label){
  const head=$('dash-head');if(head)head.classList.remove('loading');
 }
 function renderMap(){
- const el=$('dash-map');if(!el||typeof L==='undefined')return;
+ const el=$('dash-map'); if(!el || typeof L==='undefined') return;
+
  if(!window.__pmnoDashMap){
    el.innerHTML='';
    el.style.position='relative';
-   window.__pmnoDashMap=L.map(el,{zoomControl:true,attributionControl:true,preferCanvas:true,zoomAnimation:true,minZoom:4,maxZoom:12,worldCopyJump:false,maxBounds:[[-12,94],[7,142]],maxBoundsViscosity:.9}).setView([-2.5,118],5);
-   window.__pmnoDashHome=()=>{window.__pmnoDashMap.fitBounds([[-11.5,94.5],[6.5,141.5]],{padding:[18,18],maxZoom:5});};
-   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:2,updateWhenZooming:true,updateWhenIdle:false,attribution:'© OpenStreetMap contributors'}).addTo(window.__pmnoDashMap);
+
+   const renderer=L.canvas({padding:0.25});
+   window.__pmnoDashRenderer=renderer;
+   window.__pmnoDashSiteLayer=L.layerGroup().addTo(
+     window.__pmnoDashMap=L.map(el,{
+       zoomControl:true,
+       attributionControl:true,
+       preferCanvas:true,
+       zoomAnimation:false,
+       fadeAnimation:false,
+       markerZoomAnimation:false,
+       minZoom:4,
+       maxZoom:13,
+       worldCopyJump:false,
+       maxBounds:[[-12,94],[7,142]],
+       maxBoundsViscosity:1
+     }).setView([-2.5,118],5)
+   );
+
+   const map=window.__pmnoDashMap;
+
+   window.__pmnoDashHome=()=>{
+     map.fitBounds([[-11.5,94.5],[6.5,141.5]],{
+       padding:[12,12],
+       maxZoom:5,
+       animate:false
+     });
+   };
+
+   L.tileLayer(
+     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+     {
+       maxZoom:19,
+       keepBuffer:2,
+       updateWhenZooming:false,
+       updateWhenIdle:true,
+       attribution:'© OpenStreetMap contributors'
+     }
+   ).addTo(map);
+
    const home=L.control({position:'topright'});
-   home.onAdd=()=>{const d=L.DomUtil.create('div','leaflet-control');d.innerHTML='<button type="button" title="Reset Indonesia view" style="width:34px;height:34px;border:1px solid #29445d;border-radius:4px;background:#071321;color:#53c8ff;font-weight:900;font-size:16px;cursor:pointer">⌂</button>';L.DomEvent.disableClickPropagation(d);d.querySelector('button').onclick=()=>window.__pmnoDashHome();return d;};home.addTo(window.__pmnoDashMap);
-   // Canvas is attached directly to the Leaflet map container so its pixel origin
-   // exactly matches latLngToContainerPoint(). Attaching it to overlayPane causes
-   // pane/container coordinate offsets and makes the site layer appear displaced.
-   const canvas=document.createElement('canvas');
-   canvas.className='pmno-dash-canvas';
-   canvas.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;z-index:450;pointer-events:auto;';
-   el.appendChild(canvas);
-   window.__pmnoDashCanvas=canvas;
-   canvas.addEventListener('click',ev=>{
-     const rect=canvas.getBoundingClientRect(),x=ev.clientX-rect.left,y=ev.clientY-rect.top;
-     let best=null,bd=window.__pmnoDashMap.getZoom()<6?22:14;
-     for(const pt of (window.__pmnoDashPoints||[])){const d=Math.hypot(pt.x-x,pt.y-y);if(d<bd){bd=d;best=pt;}}
-     if(best?.row)window.pmnoOpenSiteProfile(best.row);
-   });
-   window.__pmnoDashMap.on('zoomend moveend resize',drawDashMap);
-   setTimeout(()=>{window.__pmnoDashHome();window.__pmnoDashMap.invalidateSize({animate:false});drawDashMap();},80);
+   home.onAdd=()=>{
+     const d=L.DomUtil.create('div','leaflet-control');
+     d.innerHTML='<button type="button" title="Reset Indonesia view" style="width:34px;height:34px;border:1px solid #29445d;border-radius:4px;background:#071321;color:#53c8ff;font-weight:900;font-size:16px;cursor:pointer">⌂</button>';
+     L.DomEvent.disableClickPropagation(d);
+     d.querySelector('button').onclick=()=>window.__pmnoDashHome();
+     return d;
+   };
+   home.addTo(map);
+
+   // IMPORTANT:
+   // Site markers are native Leaflet layers, not a manually-positioned canvas.
+   // Therefore Leaflet itself owns the lat/lon -> pixel transformation.
+   window.__pmnoDashMap.on('zoomend moveend resize',()=>drawDashMap());
+
+   setTimeout(()=>{
+     map.invalidateSize({animate:false});
+     window.__pmnoDashHome();
+     drawDashMap();
+   },100);
  }else{
-   setTimeout(()=>{window.__pmnoDashMap.invalidateSize({animate:false});drawDashMap();},0);
+   setTimeout(()=>{
+     window.__pmnoDashMap.invalidateSize({animate:false});
+     drawDashMap();
+   },0);
  }
 }
+
 function drawDashMap(){
- const map=window.__pmnoDashMap,canvas=window.__pmnoDashCanvas;if(!map||!canvas)return;
- const size=map.getSize(),w=size.x,h=size.y,dpr=Math.min(window.devicePixelRatio||1,2);
- canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';
- const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
- const valid=filtered.map(r=>({row:r,lat:Number(val(r,'latitude','lat')),lon:Number(val(r,'longitude','lon','lng'))})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&p.lat>=-11.5&&p.lat<=6.5&&p.lon>=94.5&&p.lon<=141.5);
+ const map=window.__pmnoDashMap;
+ const layer=window.__pmnoDashSiteLayer;
+ const renderer=window.__pmnoDashRenderer;
+ if(!map||!layer||!renderer)return;
+
+ layer.clearLayers();
+
  const color=n=>n>=6?'#ff5c7a':n>=4?'#ffae52':n>=2?'#e2dc4c':'#43e0a0';
- const z=map.getZoom();window.__pmnoDashPoints=[];
- if(z<6){
-   const bins=new Map(),cell=52;
+ const valid=filtered.map(r=>({
+   row:r,
+   lat:Number(val(r,'latitude','lat')),
+   lon:Number(val(r,'longitude','lon','lng'))
+ })).filter(p=>
+   Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&
+   p.lat>=-11.5&&p.lat<=6.5&&
+   p.lon>=94.5&&p.lon<=141.5
+ );
+
+ const z=map.getZoom();
+ window.__pmnoDashPoints=[];
+
+ // National view: geographic grid clusters.
+ // Cluster location is ALWAYS an actual site's coordinate, never the average
+ // of points in pixel space. This prevents clusters floating in the sea.
+ if(z<=5){
+   const bins=new Map();
+   const latStep=0.55, lonStep=0.55;
+
    for(const p of valid){
-     const pt=map.latLngToContainerPoint([p.lat,p.lon]);
-     const bx=Math.floor(pt.x/cell),by=Math.floor(pt.y/cell),key=bx+':'+by;
-     let b=bins.get(key);if(!b)b={x:0,y:0,n:0,tenantMax:0,tenantSum:0,site:null};
-     b.x+=pt.x;b.y+=pt.y;b.n++;
-     const tc=Number(liveTenantStats[sid(p.row)]?.total||0);b.tenantSum+=tc;b.tenantMax=Math.max(b.tenantMax,tc);if(!b.site)b.site=p.row;
+     const bx=Math.floor((p.lon-94.5)/lonStep);
+     const by=Math.floor((p.lat+11.5)/latStep);
+     const key=bx+':'+by;
+
+     let b=bins.get(key);
+     if(!b){
+       b={n:0,tenantMax:0,site:p.row,lat:p.lat,lon:p.lon};
+       bins.set(key,b);
+     }
+     b.n++;
+     const tc=Number(liveTenantStats[sid(p.row)]?.total||0);
+     if(tc>b.tenantMax){
+       b.tenantMax=tc;
+       b.site=p.row;
+       b.lat=p.lat;
+       b.lon=p.lon;
+     }
    }
+
    for(const b of bins.values()){
-     const x=b.x/b.n,y=b.y/b.n,r=Math.min(15,5+Math.sqrt(b.n)*.65);
-     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle='rgba(5,16,29,.88)';ctx.fill();
-     ctx.beginPath();ctx.arc(x,y,r-1,0,Math.PI*2);ctx.fillStyle=color(b.tenantMax);ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
-     if(b.n>1){ctx.fillStyle='#071321';ctx.font='900 8px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.n.toLocaleString('id-ID'),x,y);}
-     window.__pmnoDashPoints.push({row:b.site,x,y});
+     const radius=Math.min(18,7+Math.sqrt(b.n)*0.72);
+     const marker=L.circleMarker([b.lat,b.lon],{
+       renderer,
+       radius,
+       color:'#071321',
+       weight:1.2,
+       opacity:.95,
+       fillColor:color(b.tenantMax),
+       fillOpacity:.88
+     });
+
+     if(b.n>1){
+       marker.bindTooltip(
+         `${b.n.toLocaleString('id-ID')} sites`,
+         {direction:'top',offset:[0,-radius],opacity:.95}
+       );
+       marker.on('click',()=>{
+         map.setView([b.lat,b.lon],Math.min(7,z+2),{animate:false});
+       });
+     }else{
+       marker.on('click',()=>window.pmnoOpenSiteProfile?.(b.site));
+     }
+
+     marker.addTo(layer);
    }
  }else{
+   // Detail view: native Leaflet Canvas renderer.
+   // 40k+ markers remain on the same geographic coordinate system as the map.
    for(const p of valid){
-     const pt=map.latLngToContainerPoint([p.lat,p.lon]),n=Number(liveTenantStats[sid(p.row)]?.total||0);
-     ctx.beginPath();ctx.arc(pt.x,pt.y,n>=6?3.2:2.5,0,Math.PI*2);ctx.fillStyle=color(n);ctx.globalAlpha=.92;ctx.fill();ctx.globalAlpha=1;
-     window.__pmnoDashPoints.push({row:p.row,x:pt.x,y:pt.y});
+     const n=Number(liveTenantStats[sid(p.row)]?.total||0);
+     const marker=L.circleMarker([p.lat,p.lon],{
+       renderer,
+       radius:n>=6?4.2:n>=4?3.8:n>=2?3.4:3,
+       color:'#071321',
+       weight:.65,
+       opacity:.9,
+       fillColor:color(n),
+       fillOpacity:.9
+     });
+
+     marker.on('click',()=>window.pmnoOpenSiteProfile?.(p.row));
+     marker.bindTooltip(
+       `${esc(sid(p.row))}${p.row?.site_name?' · '+esc(p.row.site_name):''}`,
+       {direction:'top',sticky:true,opacity:.95}
+     );
+     marker.addTo(layer);
    }
  }
- const title=$('dash-map-title');if(title)title.textContent=`SITE MAP · ${fmtInt(valid.length)} VALID COORDINATES`;const status=$('dash-map-status');if(status)status.textContent=`${fmtInt(valid.length)} sites mapped`;
+
+ const title=$('dash-map-title');
+ if(title)title.textContent=`SITE MAP · ${fmtInt(valid.length)} VALID COORDINATES`;
+
+ const status=$('dash-map-status');
+ if(status)status.textContent=`${fmtInt(valid.length)} sites mapped`;
 }
 
 function applyFilters(){
