@@ -2019,7 +2019,7 @@ const modules=[
 const codeByName={'Site Master':'SITE_MASTER','Device Catalog':'DEVICE_CATALOG','Tower Catalog':'TOWER_CATALOG','Mounting Catalog':'MOUNTING_CATALOG','CAPEX / Shopping List':'CAPEX_CATALOG','Power Cost':'POWER_COST','RF Parameter':'RF_PARAMETER','Area Classification':'AREA_CLASSIFICATION','Last Mile Access':'LAST_MILE_ACCESS','Land / Lease Benchmark':'LAND_LEASE_BENCHMARK','Lease History':'LEASE_HISTORY','SITAC History':'SITAC_HISTORY','Permit History':'PERMIT_HISTORY','Construction History':'CONSTRUCTION_HISTORY','Delivery History':'DELIVERY_HISTORY','Community History':'COMMUNITY_HISTORY','Investment Assumption':'INVESTMENT_ASSUMPTION','Tenant Contract':'TENANT_CONTRACT','Tenant Power Existing':'TENANT_POWER','Maintenance':'MAINTENANCE'};
 const schemas={
 'SITE_MASTER':['site_id','site_name','latitude','longitude','province','city','district','village','site_status','tower_type','tower_height_m','soil_category','land_status','lease_expiry_date','area_type','terrain_class','access_level','roadhead_distance_m','slope_pct'],
-'DEVICE_CATALOG':['vendor','family','model','category','port','band','height_m','width_m','depth_m','weight_kg','wind_load','wind_area_m2','power_consumption_w','max_power_consumption_w','input_voltage','operating_voltage','active','device_role'],
+'DEVICE_CATALOG':['vendor','family','model','category','port','band','height_m','width_m','depth_m','weight_kg','wind_load','wind_area_m2','power_consumption_w','max_power_consumption_w','input_voltage','operating_voltage','active','device_role','effective_from','effective_to'],
 'TOWER_CATALOG':['tower_type','description','standard_height_m','max_height_m','base_capacity_ton','typical_cost','active','effective_from','effective_to'],
 'MOUNTING_CATALOG':['mounting_type','max_device_count','max_load_kg','unit_cost','active'],
 'CAPEX_CATALOG':['category','subcategory','item_code','item_name','unit','base_unit_cost','specification','applicable_option','boq_group','boq_parent_code','boq_level','boq_description','quantity_driver','cost_driver','active','effective_from','effective_to'],
@@ -2062,16 +2062,16 @@ function exportModule(code){
  $('masterUploadInfo').textContent='Preparing server export…';
  // IMPORTANT: keep the browser's original click gesture. Do not await fetch() here.
  // iOS Safari/WebView may reject an anchor download triggered after async work.
- const url=URL+'/functions/v1/pmno-master-export-xlsx?module='+encodeURIComponent(code);
+ const url=URL+'/functions/v1/pmno-master-export?module='+encodeURIComponent(code);
  const a=document.createElement('a');
  a.href=url;
- a.download=`PMNO_${code}_Current.xlsx`;
+ a.download=`PMNO_${code}_Current.csv`;
  a.rel='noopener';
  a.style.display='none';
  document.body.appendChild(a);
  a.click();
  a.remove();
- $('masterUploadInfo').textContent=`Export started · ${moduleName(code)} · server-side Excel (.xlsx).`;
+ $('masterUploadInfo').textContent=`Export started · ${moduleName(code)} · server-side CSV.`;
  setTimeout(()=>{btn.disabled=false;btn.textContent='EXPORT CURRENT'},700);
 }
 $('masterClose').onclick=()=>$('masterModal').classList.remove('show');
