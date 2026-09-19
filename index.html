@@ -2311,54 +2311,96 @@ function renderAuditData(){
  const financialValid=active.length?validRevenueRelation/active.length*100:100;
  const lifecycleValid=auditPct([validLease/total*100,customerValid]);
 
- // Consistency is explicitly relationship-based, not a duplicate of completeness/validity.
- const assetConsistencyRows=list.filter(r=>{
+ // CONSISTENCY = site-level relationship testing. Completeness/validity do not count as consistency.
+ // A profile is scored only when the required source relationships are actually assessable.
+ const profileChecks={asset:[],customer:[],productivity:[],land:[],technical:[],financial:[],lifecycle:[]};
+ const exceptions=[];
+ const pushEx=(r,profile,code,detail)=>exceptions.push({site_id:sid(r),profile,code,detail});
+ for(const r of list){
+   const id=sid(r), x=liveTenantStats[id], hasCustomer=hasTenantSource(id), at=activeTenantCount(id), rev=activeRevenueCount(id), power=hasPower(id);
+   // Asset: internal site record coherence.
    const la=String(val(r,'latitude')).trim(),lo=String(val(r,'longitude')).trim();
    const coordPair=(!!la===!!lo);
    const tt=String(val(r,'tower_type')).trim(),th=String(val(r,'tower_height_m')).trim();
-   return coordPair && (!!tt===!!th || (!tt&&!th));
- }).length;
- const customerConsistencyRows=list.filter(r=>{const x=liveTenantStats[sid(r)];return x&&Number(x.total)>=Number(x.active)&&Number(x.active)>=Number(x.revenue)}).length;
- const productivityConsistencyRows=active.filter(r=>activeRevenueCount(sid(r))>0).length;
- const landConsistencyRows=list.filter(r=>{const lease=String(val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).trim();return !lease||Number.isFinite(Date.parse(lease))}).length;
- const technicalReview=active.filter(r=>!hasPower(sid(r))).length;
- const technicalConsistencyRows=Math.max(0,total-technicalReview);
- const financialConsistencyRows=Math.max(0,total-revenueWithoutTenant.length);
- const lifecycleConflictRows=list.filter(r=>{const ls=leaseState(r);return activeTenantCount(sid(r))>0&&ls.expired}).length;
- const consistencyScores=[
-   customerMapped?customerConsistencyRows/customerMapped*100:null,
-   active.length?productivityConsistencyRows/active.length*100:null,
-   total?assetConsistencyRows/total*100:null,
-   total?landConsistencyRows/total*100:null,
-   total?technicalConsistencyRows/total*100:null,
-   total?financialConsistencyRows/total*100:null,
-   total?Math.max(0,total-lifecycleConflictRows)/total*100:null
- ];
- const consistency=auditPct(consistencyScores);
+   const towerPair=(!!tt===!!th);
+   const assetOk=coordPair&&towerPair;
+   profileChecks.asset.push(assetOk);
+   if(!assetOk)pushEx(r,'Asset Profile','ASSET_INTERNAL_MISMATCH','Coordinate pair or tower attribute pairing is inconsistent');
+
+   // Customer: source must exist; NPA (no tenant) is a portfolio condition, not an error.
+   if(hasCustomer){
+     const customerOk=Number(x.total)>=Number(x.active)&&Number(x.active)>=Number(x.revenue)&&Number(x.revenue)>=0;
+     profileChecks.customer.push(customerOk);
+     if(!customerOk)pushEx(r,'Customer Profile','TENANT_COUNT_CONFLICT','Tenant totals do not reconcile: total ≥ active ≥ revenue');
+   }
+
+   // Productivity: active tenant site should have revenue; revenue without tenant is contradictory.
+   if(hasCustomer){
+     const assessable=true;
+     const prodOk=(at===0&&rev===0)||(at>0&&rev>0);
+     profileChecks.productivity.push(prodOk);
+     if(at>0&&rev===0)pushEx(r,'Productivity Profile','TENANT_WITHOUT_REVENUE','Active tenant exists but no revenue relationship is mapped');
+     if(at===0&&rev>0)pushEx(r,'Productivity Profile','REVENUE_WITHOUT_TENANT','Revenue exists without an active tenant');
+   }
+
+   // Land/legal: only contradictions are consistency findings; missing lease/legal is completeness.
+   const leaseRaw=String(val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).trim();
+   const ls=leaseState(r);
+   const landOk=!(at>0&&ls.expired);
+   profileChecks.land.push(landOk);
+   if(at>0&&ls.expired)pushEx(r,'Land & Legal Profile','ACTIVE_TENANT_EXPIRED_LEASE','Active tenant exists while lease is expired');
+
+   // Technical: tower relationship is always assessable; power relationship only if power source is mapped.
+   const techOk=assetOk;
+   if(power) profileChecks.technical.push(techOk && at===0?true:techOk);
+   else profileChecks.technical.push(techOk);
+   if(!techOk)pushEx(r,'Technical Profile','TECHNICAL_ATTRIBUTE_MISMATCH','Tower type/height relationship is inconsistent');
+   if(hasCustomer&&at>0&&!power)pushEx(r,'Technical Profile','TENANT_WITHOUT_POWER','Active tenant exists but no power relationship is mapped');
+
+   // Financial: revenue/tenant contradiction is assessable. Cost is deliberately NOT scored until a site-level cost source is mapped.
+   const finOk=(at===0&&rev===0)||(at>0&&rev>0);
+   if(hasCustomer)profileChecks.financial.push(finOk);
+   if(hasCustomer&&at===0&&rev>0)pushEx(r,'Financial Profile','REVENUE_WITHOUT_TENANT','Revenue exists without an active tenant');
+
+   // Lifecycle: only assessable where customer source and lease signal exist.
+   if(hasCustomer){
+     const lifecycleOk=!(at>0&&ls.expired);
+     profileChecks.lifecycle.push(lifecycleOk);
+     if(at>0&&ls.expired)pushEx(r,'Asset Lifecycle','ACTIVE_TENANT_EXPIRED_LEASE','Commercial activity conflicts with lease lifecycle state');
+   }
+ }
+ const scoreChecks=a=>a.length?(a.filter(Boolean).length/a.length*100):null;
+ const consistencyByProfile={};
+ for(const [k,a] of Object.entries(profileChecks))consistencyByProfile[k]=scoreChecks(a);
+ const assessableScores=Object.values(consistencyByProfile).filter(v=>v!==null);
+ const consistency=auditPct(assessableScores);
  const completeness=auditPct([assetComp,customerComp,productivityComp,landComp,technicalComp,financialComp,lifecycleComp]);
  const validity=auditPct([assetValid,customerValid,productivityValid,landValid,technicalValid,financialValid,lifecycleValid]);
  $('audit-completeness').textContent=completeness.toFixed(1)+'%';
  $('audit-validity').textContent=validity.toFixed(1)+'%';
  $('audit-consistency').textContent=consistency.toFixed(1)+'%';
  const setProfile=(id,items,note)=>{const el=$(id);if(el)el.innerHTML=auditProfileCard(items,note)};
+ const scoreLabel=v=>v===null?'NOT ASSESSABLE':v.toFixed(1)+'%';
+ const scoreCls=v=>v===null?'neutral':auditStatus(v);
+ const exceptionCount=profile=>exceptions.filter(e=>e.profile===profile).length;
  setProfile('audit-profile-asset',[
-  ['Completeness',assetComp.toFixed(1)+'%',auditStatus(assetComp)],['Validity',assetValid.toFixed(1)+'%',auditStatus(assetValid)],['Consistency',pct(assetConsistencyRows,total)+'%',auditStatus(pct(assetConsistencyRows,total))],['Site ID populated',fmtInt(auditFieldStats(list,['site_id']).filled)+' / '+fmtInt(total)],['Coordinates valid',fmtInt(validCoords)+' / '+fmtInt(total)],['Tower height valid',fmtInt(validTowerHeight)+' / '+fmtInt(total)],['Internal relationship anomalies',fmtInt(total-assetConsistencyRows),(total-assetConsistencyRows)?'warn':'good']
- ],'Consistency checks whether identity, coordinate pairs and core tower attributes describe one coherent site record.');
+  ['Completeness',assetComp.toFixed(1)+'%',auditStatus(assetComp)],['Validity',assetValid.toFixed(1)+'%',auditStatus(assetValid)],['Consistency',scoreLabel(consistencyByProfile.asset),scoreCls(consistencyByProfile.asset)],['Site ID populated',fmtInt(auditFieldStats(list,['site_id']).filled)+' / '+fmtInt(total)],['Coordinates valid',fmtInt(validCoords)+' / '+fmtInt(total)],['Tower height valid',fmtInt(validTowerHeight)+' / '+fmtInt(total)],['Consistency exceptions',fmtInt(exceptionCount('Asset Profile')),exceptionCount('Asset Profile')?'warn':'good']
+ ],'Consistency = site-level coherence of identity, coordinate pair and core tower attributes. Missing fields remain Completeness issues, not automatic Consistency failures.');
  setProfile('audit-profile-customer',[
-  ['Completeness',customerComp.toFixed(1)+'%',auditStatus(customerComp)],['Validity',customerValid.toFixed(1)+'%',auditStatus(customerValid)],['Consistency',customerMapped?pct(customerConsistencyRows,customerMapped)+'%':'PARTIAL','neutral'],['Tenant source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Tenant count',fmtInt(list.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0))],['Active tenant sites',fmtInt(active.length)],['Customer relationship anomalies',fmtInt(Math.max(0,customerMapped-customerConsistencyRows)),Math.max(0,customerMapped-customerConsistencyRows)?'warn':'good']
- ],'Site tanpa tenant tetap diklasifikasikan sebagai NPA, bukan data missing. Consistency customer menguji total ≥ active ≥ revenue pada source tenant.');
+  ['Completeness',customerComp.toFixed(1)+'%',auditStatus(customerComp)],['Validity',customerValid.toFixed(1)+'%',auditStatus(customerValid)],['Consistency',scoreLabel(consistencyByProfile.customer),scoreCls(consistencyByProfile.customer)],['Tenant source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Tenant count',fmtInt(list.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0))],['Active tenant sites',fmtInt(active.length)],['Consistency exceptions',fmtInt(exceptionCount('Customer Profile')),exceptionCount('Customer Profile')?'warn':'good']
+ ],'NPA (site without active tenant) is a portfolio condition, not a data-quality failure. Customer Consistency only flags relationships that contradict each other.');
  setProfile('audit-profile-productivity',[
-  ['Completeness',productivityComp.toFixed(1)+'%',auditStatus(productivityComp)],['Validity',productivityValid.toFixed(1)+'%',auditStatus(productivityValid)],['Consistency',active.length?pct(productivityConsistencyRows,active.length)+'%':'N/A','neutral'],['Active tenant sites',fmtInt(active.length)],['With revenue',fmtInt(activeRevenue.length)],['Active tenant without revenue',fmtInt(active.length-activeRevenue.length),active.length-activeRevenue.length?'warn':'good']
- ],'Consistency is site-based: an active-tenant site is expected to have a mapped revenue relationship; exceptions are review candidates.');
+  ['Completeness',productivityComp.toFixed(1)+'%',auditStatus(productivityComp)],['Validity',productivityValid.toFixed(1)+'%',auditStatus(productivityValid)],['Consistency',scoreLabel(consistencyByProfile.productivity),scoreCls(consistencyByProfile.productivity)],['Active tenant sites',fmtInt(active.length)],['With revenue',fmtInt(activeRevenue.length)],['Tenant without revenue',fmtInt(active.filter(r=>activeRevenueCount(sid(r))===0).length),active.filter(r=>activeRevenueCount(sid(r))===0).length?'warn':'good'],['Revenue without tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good']
+ ],'Productivity tests the site relationship: Tenant ↔ Revenue. A site with Tenant + Revenue is consistent; Tenant without Revenue or Revenue without Tenant is an exception.');
  setProfile('audit-profile-land',[
-  ['Completeness',landComp.toFixed(1)+'%',auditStatus(landComp)],['Validity',landValid.toFixed(1)+'%',auditStatus(landValid)],['Consistency',pct(landConsistencyRows,total)+'%',auditStatus(pct(landConsistencyRows,total))],['Lease expiry populated',fmtInt(leaseFilled)+' / '+fmtInt(total)],['Legal checklist assessed',fmtInt(legalAssessed)+' / '+fmtInt(total)],['Legal checklist complete',fmtInt(legalCompleteCount)+' / '+fmtInt(legalAssessed)],['Active tenant + expired lease',fmtInt(lifecycleConflictRows),lifecycleConflictRows?'bad':'good']
- ],'Land/legal consistency flags contradictions between lease dates, legal assessment and active commercial status.');
+  ['Completeness',landComp.toFixed(1)+'%',auditStatus(landComp)],['Validity',landValid.toFixed(1)+'%',auditStatus(landValid)],['Consistency',scoreLabel(consistencyByProfile.land),scoreCls(consistencyByProfile.land)],['Lease expiry populated',fmtInt(leaseFilled)+' / '+fmtInt(total)],['Legal checklist assessed',fmtInt(legalAssessed)+' / '+fmtInt(total)],['Legal checklist complete',fmtInt(legalCompleteCount)+' / '+fmtInt(legalAssessed)],['Active tenant + expired lease',fmtInt(exceptionCount('Land & Legal Profile')),exceptionCount('Land & Legal Profile')?'bad':'good']
+ ],'Consistency focuses on contradiction between commercial activity and lease lifecycle. Missing documents/dates are reported under Completeness.');
  setProfile('audit-profile-technical',[
-  ['Completeness',technicalComp.toFixed(1)+'%',auditStatus(technicalComp)],['Validity',technicalValid.toFixed(1)+'%',auditStatus(technicalValid)],['Consistency',pct(technicalConsistencyRows,total)+'%',auditStatus(pct(technicalConsistencyRows,total))],['Tower type populated',fmtInt(auditFieldStats(list,['tower_type']).filled)+' / '+fmtInt(total)],['Height populated',fmtInt(auditFieldStats(list,['tower_height_m']).filled)+' / '+fmtInt(total)],['Power source mapped',fmtInt(list.filter(r=>hasPower(sid(r))).length)+' / '+fmtInt(total)],['Active tenant without power',fmtInt(technicalReview),technicalReview?'warn':'good']
- ],'Technical consistency is currently assessed against the mapped power relationship. Device-level control remains PARTIAL because no transactional device source is mapped in the current dashboard.');
+  ['Completeness',technicalComp.toFixed(1)+'%',auditStatus(technicalComp)],['Validity',technicalValid.toFixed(1)+'%',auditStatus(technicalValid)],['Consistency',scoreLabel(consistencyByProfile.technical),scoreCls(consistencyByProfile.technical)],['Power source mapped',fmtInt(list.filter(r=>hasPower(sid(r))).length)+' / '+fmtInt(total)],['Active tenant without power',fmtInt(exceptions.filter(e=>e.code==='TENANT_WITHOUT_POWER').length),exceptions.filter(e=>e.code==='TENANT_WITHOUT_POWER').length?'warn':'good'],['Device source','NOT MAPPED','neutral']
+ ],'Device is intentionally not scored until a transactional device source is mapped. Source absence is NOT an inconsistency.');
  setProfile('audit-profile-financial',[
-  ['Completeness',financialComp.toFixed(1)+'%',auditStatus(financialComp)],['Validity',financialValid.toFixed(1)+'%',auditStatus(financialValid)],['Consistency',pct(financialConsistencyRows,total)+'%',auditStatus(pct(financialConsistencyRows,total))],['Revenue mapped to active tenant',fmtInt(activeRevenue.length)+' / '+fmtInt(active.length)],['Revenue without active tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],['Cost source','NOT MAPPED','neutral'],['NBV source coverage',fmtInt(Object.keys(liveNbv).length)+' / '+fmtInt(total),Object.keys(liveNbv).length<total?'warn':'good']
- ],'Financial consistency checks revenue ↔ tenant relationships. Cost is not scored because no site-level cost source is mapped. NBV is shown separately as an exposure lens.');
+  ['Completeness',financialComp.toFixed(1)+'%',auditStatus(financialComp)],['Validity',financialValid.toFixed(1)+'%',auditStatus(financialValid)],['Consistency',scoreLabel(consistencyByProfile.financial),scoreCls(consistencyByProfile.financial)],['Revenue mapped to active tenant',fmtInt(activeRevenue.length)+' / '+fmtInt(active.length)],['Revenue without active tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],['Cost source','NOT MAPPED','neutral'],['NBV source coverage',fmtInt(Object.keys(liveNbv).length)+' / '+fmtInt(total),Object.keys(liveNbv).length<total?'warn':'good']
+ ],'Financial Consistency tests revenue ↔ tenant. Cost is excluded from scoring until a site-level cost source is mapped. NBV is used as a separate NPA exposure lens.');
  const npaRows=list.filter(r=>activeTenantCount(sid(r))===0);
  const nbvRows=list.filter(r=>hasNbv(sid(r)));
  const npaNbvRows=npaRows.filter(r=>hasNbv(sid(r)));
@@ -2367,31 +2409,34 @@ function renderAuditData(){
  const npaNbv=npaNbvRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
  const productiveNbv=productiveNbvRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
  setProfile('audit-profile-lifecycle',[
-  ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Consistency',pct(Math.max(0,total-lifecycleConflictRows),total)+'%',auditStatus(pct(Math.max(0,total-lifecycleConflictRows),total))],['Customer source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Lease expiry available',fmtInt(leaseFilled)+' / '+fmtInt(total)],['NPA sites',fmtInt(npaRows.length)],['NPA + active lease/revenue conflict',fmtInt(lifecycleConflictRows),lifecycleConflictRows?'bad':'good']
- ],'Lifecycle consistency links NPA/tenant state with lease status and commercial activity.');
+  ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Consistency',scoreLabel(consistencyByProfile.lifecycle),scoreCls(consistencyByProfile.lifecycle)],['NPA sites',fmtInt(npaRows.length)],['Active tenant + expired lease',fmtInt(exceptionCount('Asset Lifecycle')),exceptionCount('Asset Lifecycle')?'bad':'good'],['NPA with NBV',fmtInt(npaNbvRows.length),npaNbvRows.length?'warn':'good']
+ ],'Lifecycle links Tenant/NPA state, lease state and NBV exposure. NPA itself is not an audit failure; NPA + NBV is an exposure lens.');
  const crossRows=[
-  ['Site → Tenant → Revenue',fmtInt(productivityConsistencyRows)+' / '+fmtInt(active.length),active.length?auditStatus(pct(productivityConsistencyRows,active.length)):'neutral'],
-  ['Revenue without tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],
-  ['Active tenant → Power',fmtInt(Math.max(0,active.length-technicalReview))+' / '+fmtInt(active.length),technicalReview?'warn':'good'],
-  ['Active tenant → Expired lease',fmtInt(lifecycleConflictRows),lifecycleConflictRows?'bad':'good'],
-  ['Site internal coherence',fmtInt(assetConsistencyRows)+' / '+fmtInt(total),auditStatus(pct(assetConsistencyRows,total))],
-  ['Device relationship','PARTIAL · source not mapped','neutral']
+  ['Consistent sites — assessable controls',fmtInt(list.filter(r=>{const es=exceptions.filter(e=>e.site_id===sid(r));return es.length===0}).length)+' / '+fmtInt(total),exceptions.length?'warn':'good'],
+  ['Tenant → Revenue',fmtInt(active.filter(r=>activeRevenueCount(sid(r))>0).length)+' / '+fmtInt(active.length),revenueWithoutTenant.length?'warn':'good'],
+  ['Revenue without Tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],
+  ['Tenant → Power',fmtInt(active.filter(r=>hasPower(sid(r))).length)+' / '+fmtInt(active.length),exceptions.some(e=>e.code==='TENANT_WITHOUT_POWER')?'warn':'good'],
+  ['Active Tenant → Expired Lease',fmtInt(exceptionCount('Land & Legal Profile')),exceptionCount('Land & Legal Profile')?'bad':'good'],
+  ['NPA → Revenue',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],
+  ['Device relationship','NOT ASSESSABLE · source not mapped','neutral'],
+  ['Cost relationship','NOT ASSESSABLE · source not mapped','neutral']
  ];
- $('audit-cross-profile').innerHTML=metricRows(crossRows)+'<div class="audit-note">Contoh anomaly: Site ✓ + Tenant ✓ + Revenue ✓ + Cost ✓ + Device ✕ hanya akan dinilai sebagai confirmed inconsistency setelah source Device tersedia. Saat ini ditandai PARTIAL, bukan dipaksakan menjadi angka audit.</div>';
+ $('audit-cross-profile').innerHTML=metricRows(crossRows)+'<div class="audit-note"><b>Rule:</b> Consistency is evaluated per site using only mapped relationships. Example <b>Site ✓ + Tenant ✓ + Revenue ✓ + Cost ✓ + Device ✕</b> becomes an inconsistency only when Device is an available source and the site truly has no device. If Device/Cost source is unavailable, it remains <b>NOT ASSESSABLE</b>, not FAIL.</div>';
  const npaShare=totalNbv>0?npaNbv/totalNbv*100:0;
- const nbvCoverage=total?nbvRows.length/total*100:0;
  $('audit-nbv').innerHTML=metricRows([
   ['NBV mapped',fmtInt(nbvRows.length)+' / '+fmtInt(total),nbvRows.length<total?'warn':'good'],
   ['Total mapped NBV',formatMoney(totalNbv)],
-  ['NPA with NBV mapped',fmtInt(npaNbvRows.length)],
-  ['NPA NBV exposure',formatMoney(npaNbv),npaNbv>0?'warn':'good'],
   ['Productive NBV',formatMoney(productiveNbv),'good'],
+  ['NPA with NBV mapped',fmtInt(npaNbvRows.length),npaNbvRows.length?'warn':'good'],
+  ['NPA NBV exposure',formatMoney(npaNbv),npaNbv>0?'warn':'good'],
   ['NPA share of mapped NBV',npaShare.toFixed(1)+'%',npaShare>0?'warn':'good']
- ])+`<div class="audit-note">NBV saat ini berasal dari <b>public.site_master</b> dan baru terisi pada ${fmtInt(nbvRows.length)} dari ${fmtInt(total)} site pada scope filter. Karena coverage belum penuh, angka NPA-vs-NBV diperlakukan sebagai exposure yang terpetakan, bukan total portfolio NBV.</div>`;
- setProfile('audit-coverage',[],'');
+ ])+`<div class="audit-note">NPA is a portfolio condition. The NBV view answers a separate question: <b>how much mapped book value sits on sites without an active tenant?</b> Current NBV coverage is ${fmtInt(nbvRows.length)} / ${fmtInt(total)} sites, so this is mapped exposure, not a complete portfolio NBV figure.</div>`;
+ const byCode={};exceptions.forEach(e=>{byCode[e.code]=(byCode[e.code]||0)+1});
+ const topExceptions=Object.entries(byCode).sort((a,b)=>b[1]-a[1]).slice(0,10).map(([code,count])=>[code,fmtInt(count),'warn']);
+ $('audit-exceptions').innerHTML=topExceptions.length?metricRows(topExceptions)+'<div class="audit-note">Exception counts are site-level findings. One site may have more than one finding across profiles.</div>':'<div class="audit-note good">No assessable consistency exception found in the current scope.</div>';
  $('audit-coverage').innerHTML=metricRows([
-  ['Asset Profile','ASSESSED','good'],['Customer Profile','ASSESSED','good'],['Productivity Profile','ASSESSED','good'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST NOT MAPPED','warn'],['Asset Lifecycle','ASSESSED','good'],['NBV comparison','PARTIAL · '+fmtInt(nbvRows.length)+' / '+fmtInt(total)+' mapped','warn']
- ])+'<div class="audit-note">Audit layer memisahkan Completeness, Validity dan Consistency. Consistency berbasis hubungan antar-data pada level site; source yang belum ter-mapping tidak dipaksakan menjadi PASS/FAIL.</div>';
+  ['Asset Profile','ASSESSED','good'],['Customer Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Productivity Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST SOURCE NOT MAPPED','warn'],['Asset Lifecycle',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['NBV comparison',fmtInt(nbvRows.length)+' / '+fmtInt(total)+' mapped',nbvRows.length<total?'warn':'good']
+ ])+'<div class="audit-note">Completeness = availability of required data. Validity = format/range/business-rule validity. Consistency = whether mapped fields/sources agree at site level. Source yang belum tersedia tidak dipaksa menjadi PASS/FAIL.</div>';
 }
 function setDashboardMode(mode){const show=mode!=='AUDIT';$('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
 function applyFilters(){
