@@ -966,6 +966,8 @@ body.pmno-page-single .workspace{
         <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>ASSET LIFECYCLE</strong><small>Tenant, lease and lifecycle signal consistency.</small></div></div><div id="audit-profile-lifecycle" class="dash-panel-content"></div></section>
         <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>EXCEPTION PROFILE</strong><small>Record-level issues requiring review.</small></div></div><div id="audit-exceptions" class="dash-panel-content"></div></section>
         <section class="dash-card"><div class="dash-card-head"><div><span>09</span><strong>AUDIT COVERAGE</strong><small>What is currently assessable from mapped sources.</small></div></div><div id="audit-coverage" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>10</span><strong>CROSS-PROFILE CONSISTENCY</strong><small>Site-based relationship checks across asset, customer, productivity, technical and financial data.</small></div></div><div id="audit-cross-profile" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>11</span><strong>FINANCIAL &amp; NPA · NBV</strong><small>NPA exposure compared with mapped Net Book Value.</small></div></div><div id="audit-nbv" class="dash-panel-content"></div></section>
       </div>
     </div>
     </div>
@@ -2107,7 +2109,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
 const fmtInt=v=>num(v).toLocaleString('id-ID');
 const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
-let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
+let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},liveNbv={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
 
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID')).trim()}
@@ -2276,9 +2278,11 @@ function renderAuditData(){
  const list=filtered,total=list.length;
  if(!total)return;
  const hasTenantSource=id=>Object.prototype.hasOwnProperty.call(liveTenantStats,id);
- const tenantRows=list.map(r=>liveTenantStats[sid(r)]||null);
+ const hasNbv=id=>Object.prototype.hasOwnProperty.call(liveNbv,id);
  const active=list.filter(r=>activeTenantCount(sid(r))>0);
  const activeRevenue=active.filter(r=>activeRevenueCount(sid(r))>0);
+ const revenueSites=list.filter(r=>activeRevenueCount(sid(r))>0);
+ const revenueWithoutTenant=list.filter(r=>activeRevenueCount(sid(r))>0&&activeTenantCount(sid(r))===0);
  const customerMapped=list.filter(r=>hasTenantSource(sid(r))).length;
  const validCoords=list.filter(r=>{const la=Number(val(r,'latitude')),lo=Number(val(r,'longitude'));return Number.isFinite(la)&&Number.isFinite(lo)&&la>=-11.5&&la<=6.5&&lo>=94.5&&lo<=141.5}).length;
  const validTowerHeight=list.filter(r=>{const raw=val(r,'tower_height_m');if(String(raw).trim()==='')return true;const n=Number(raw);return Number.isFinite(n)&&n>=0&&n<=300}).length;
@@ -2300,62 +2304,95 @@ function renderAuditData(){
  const financialComp=total?activeRevenue.length/Math.max(active.length,1)*100:0;
  const lifecycleComp=auditPct([customerComp,leaseFilled/total*100]);
  const assetValid=auditPct([validCoords/total*100,validTowerHeight/total*100]);
- const customerValid=total?validTenantStats/total*100:0;
+ const customerValid=customerMapped?validTenantStats/customerMapped*100:0;
  const productivityValid=active.length?validRevenueRelation/active.length*100:100;
  const landValid=auditPct([validLease/total*100,legalAssessed?legalCompleteCount/legalAssessed*100:null]);
  const technicalValid=auditPct([validTowerHeight/total*100,validPower/total*100]);
- const financialValid=productivityValid;
+ const financialValid=active.length?validRevenueRelation/active.length*100:100;
  const lifecycleValid=auditPct([validLease/total*100,customerValid]);
- const consistencyCustomer=customerMapped?validTenantStats/customerMapped*100:100;
- const consistencyProductivity=active.length?validRevenueRelation/active.length*100:100;
- const consistencyLand=legalAssessed?legalCompleteCount/legalAssessed*100:100;
- const consistencyTechnical=validPower/total*100;
- const consistencyFinancial=productivityValid;
- const consistencyLifecycle=auditPct([consistencyCustomer,consistencyLand]);
+
+ // Consistency is explicitly relationship-based, not a duplicate of completeness/validity.
+ const assetConsistencyRows=list.filter(r=>{
+   const la=String(val(r,'latitude')).trim(),lo=String(val(r,'longitude')).trim();
+   const coordPair=(!!la===!!lo);
+   const tt=String(val(r,'tower_type')).trim(),th=String(val(r,'tower_height_m')).trim();
+   return coordPair && (!!tt===!!th || (!tt&&!th));
+ }).length;
+ const customerConsistencyRows=list.filter(r=>{const x=liveTenantStats[sid(r)];return x&&Number(x.total)>=Number(x.active)&&Number(x.active)>=Number(x.revenue)}).length;
+ const productivityConsistencyRows=active.filter(r=>activeRevenueCount(sid(r))>0).length;
+ const landConsistencyRows=list.filter(r=>{const lease=String(val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).trim();return !lease||Number.isFinite(Date.parse(lease))}).length;
+ const technicalReview=active.filter(r=>!hasPower(sid(r))).length;
+ const technicalConsistencyRows=Math.max(0,total-technicalReview);
+ const financialConsistencyRows=Math.max(0,total-revenueWithoutTenant.length);
+ const lifecycleConflictRows=list.filter(r=>{const ls=leaseState(r);return activeTenantCount(sid(r))>0&&ls.expired}).length;
+ const consistencyScores=[
+   customerMapped?customerConsistencyRows/customerMapped*100:null,
+   active.length?productivityConsistencyRows/active.length*100:null,
+   total?assetConsistencyRows/total*100:null,
+   total?landConsistencyRows/total*100:null,
+   total?technicalConsistencyRows/total*100:null,
+   total?financialConsistencyRows/total*100:null,
+   total?Math.max(0,total-lifecycleConflictRows)/total*100:null
+ ];
+ const consistency=auditPct(consistencyScores);
  const completeness=auditPct([assetComp,customerComp,productivityComp,landComp,technicalComp,financialComp,lifecycleComp]);
  const validity=auditPct([assetValid,customerValid,productivityValid,landValid,technicalValid,financialValid,lifecycleValid]);
- const consistency=auditPct([assetValid,consistencyCustomer,consistencyProductivity,consistencyLand,consistencyTechnical,consistencyFinancial,consistencyLifecycle]);
  $('audit-completeness').textContent=completeness.toFixed(1)+'%';
  $('audit-validity').textContent=validity.toFixed(1)+'%';
  $('audit-consistency').textContent=consistency.toFixed(1)+'%';
  const setProfile=(id,items,note)=>{const el=$(id);if(el)el.innerHTML=auditProfileCard(items,note)};
  setProfile('audit-profile-asset',[
-  ['Completeness',assetComp.toFixed(1)+'%',auditStatus(assetComp)],['Validity',assetValid.toFixed(1)+'%',auditStatus(assetValid)],['Site ID populated',fmtInt(auditFieldStats(list,['site_id']).filled)+' / '+fmtInt(total)],['Coordinates valid',fmtInt(validCoords)+' / '+fmtInt(total)],['Tower height valid',fmtInt(validTowerHeight)+' / '+fmtInt(total)]
- ],'Audit terhadap field Asset Profile: identity, geography, tower type dan basic technical attributes.');
+  ['Completeness',assetComp.toFixed(1)+'%',auditStatus(assetComp)],['Validity',assetValid.toFixed(1)+'%',auditStatus(assetValid)],['Consistency',pct(assetConsistencyRows,total)+'%',auditStatus(pct(assetConsistencyRows,total))],['Site ID populated',fmtInt(auditFieldStats(list,['site_id']).filled)+' / '+fmtInt(total)],['Coordinates valid',fmtInt(validCoords)+' / '+fmtInt(total)],['Tower height valid',fmtInt(validTowerHeight)+' / '+fmtInt(total)],['Internal relationship anomalies',fmtInt(total-assetConsistencyRows),(total-assetConsistencyRows)?'warn':'good']
+ ],'Consistency checks whether identity, coordinate pairs and core tower attributes describe one coherent site record.');
  setProfile('audit-profile-customer',[
-  ['Completeness',customerComp.toFixed(1)+'%',auditStatus(customerComp)],['Validity',customerValid.toFixed(1)+'%',auditStatus(customerValid)],['Tenant source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Tenant count',fmtInt(list.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0))],['Active tenant sites',fmtInt(active.length)]
- ],'Tidak menganggap site tanpa tenant sebagai data missing; NPA adalah kondisi portfolio. Completeness diukur dari keterhubungan source customer ke Site Master.');
+  ['Completeness',customerComp.toFixed(1)+'%',auditStatus(customerComp)],['Validity',customerValid.toFixed(1)+'%',auditStatus(customerValid)],['Consistency',customerMapped?pct(customerConsistencyRows,customerMapped)+'%':'PARTIAL','neutral'],['Tenant source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Tenant count',fmtInt(list.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0))],['Active tenant sites',fmtInt(active.length)],['Customer relationship anomalies',fmtInt(Math.max(0,customerMapped-customerConsistencyRows)),Math.max(0,customerMapped-customerConsistencyRows)?'warn':'good']
+ ],'Site tanpa tenant tetap diklasifikasikan sebagai NPA, bukan data missing. Consistency customer menguji total ≥ active ≥ revenue pada source tenant.');
  setProfile('audit-profile-productivity',[
-  ['Completeness',productivityComp.toFixed(1)+'%',auditStatus(productivityComp)],['Validity',productivityValid.toFixed(1)+'%',auditStatus(productivityValid)],['Active tenant sites',fmtInt(active.length)],['With revenue',fmtInt(activeRevenue.length)],['Active tenant without revenue',fmtInt(active.length-activeRevenue.length),active.length-activeRevenue.length?'bad':'good']
- ],'Revenue diuji terhadap site yang mempunyai active tenant; ini menjaga audit tetap berbasis kondisi bisnis, bukan sekadar field terisi.');
+  ['Completeness',productivityComp.toFixed(1)+'%',auditStatus(productivityComp)],['Validity',productivityValid.toFixed(1)+'%',auditStatus(productivityValid)],['Consistency',active.length?pct(productivityConsistencyRows,active.length)+'%':'N/A','neutral'],['Active tenant sites',fmtInt(active.length)],['With revenue',fmtInt(activeRevenue.length)],['Active tenant without revenue',fmtInt(active.length-activeRevenue.length),active.length-activeRevenue.length?'warn':'good']
+ ],'Consistency is site-based: an active-tenant site is expected to have a mapped revenue relationship; exceptions are review candidates.');
  setProfile('audit-profile-land',[
-  ['Completeness',landComp.toFixed(1)+'%',auditStatus(landComp)],['Validity',landValid.toFixed(1)+'%',auditStatus(landValid)],['Lease expiry populated',fmtInt(leaseFilled)+' / '+fmtInt(total)],['Legal checklist assessed',fmtInt(legalAssessed)+' / '+fmtInt(total)],['Legal checklist complete',fmtInt(legalCompleteCount)+' / '+fmtInt(legalAssessed)]
- ],'Land dan legal dipisahkan antara ketersediaan informasi lease dan coverage checklist legal yang memang sudah termapping.');
+  ['Completeness',landComp.toFixed(1)+'%',auditStatus(landComp)],['Validity',landValid.toFixed(1)+'%',auditStatus(landValid)],['Consistency',pct(landConsistencyRows,total)+'%',auditStatus(pct(landConsistencyRows,total))],['Lease expiry populated',fmtInt(leaseFilled)+' / '+fmtInt(total)],['Legal checklist assessed',fmtInt(legalAssessed)+' / '+fmtInt(total)],['Legal checklist complete',fmtInt(legalCompleteCount)+' / '+fmtInt(legalAssessed)],['Active tenant + expired lease',fmtInt(lifecycleConflictRows),lifecycleConflictRows?'bad':'good']
+ ],'Land/legal consistency flags contradictions between lease dates, legal assessment and active commercial status.');
  setProfile('audit-profile-technical',[
-  ['Completeness',technicalComp.toFixed(1)+'%',auditStatus(technicalComp)],['Validity',technicalValid.toFixed(1)+'%',auditStatus(technicalValid)],['Tower type populated',fmtInt(auditFieldStats(list,['tower_type']).filled)+' / '+fmtInt(total)],['Height populated',fmtInt(auditFieldStats(list,['tower_height_m']).filled)+' / '+fmtInt(total)],['Power source mapped',fmtInt(list.filter(r=>hasPower(sid(r))).length)+' / '+fmtInt(total)]
- ],'Technical audit mencakup tower, height, access, terrain dan power berdasarkan source yang tersedia.');
+  ['Completeness',technicalComp.toFixed(1)+'%',auditStatus(technicalComp)],['Validity',technicalValid.toFixed(1)+'%',auditStatus(technicalValid)],['Consistency',pct(technicalConsistencyRows,total)+'%',auditStatus(pct(technicalConsistencyRows,total))],['Tower type populated',fmtInt(auditFieldStats(list,['tower_type']).filled)+' / '+fmtInt(total)],['Height populated',fmtInt(auditFieldStats(list,['tower_height_m']).filled)+' / '+fmtInt(total)],['Power source mapped',fmtInt(list.filter(r=>hasPower(sid(r))).length)+' / '+fmtInt(total)],['Active tenant without power',fmtInt(technicalReview),technicalReview?'warn':'good']
+ ],'Technical consistency is currently assessed against the mapped power relationship. Device-level control remains PARTIAL because no transactional device source is mapped in the current dashboard.');
  setProfile('audit-profile-financial',[
-  ['Completeness',financialComp.toFixed(1)+'%',auditStatus(financialComp)],['Validity',financialValid.toFixed(1)+'%',auditStatus(financialValid)],['Revenue mapped to active tenant',fmtInt(activeRevenue.length)+' / '+fmtInt(active.length)],['Revenue relation valid',fmtInt(validRevenueRelation)+' / '+fmtInt(active.length)],['Cost source','NOT MAPPED','neutral']
- ],'Cost belum digunakan sebagai angka audit karena source site-level Cost belum ter-mapping. Tidak ada angka cost yang diasumsikan.');
+  ['Completeness',financialComp.toFixed(1)+'%',auditStatus(financialComp)],['Validity',financialValid.toFixed(1)+'%',auditStatus(financialValid)],['Consistency',pct(financialConsistencyRows,total)+'%',auditStatus(pct(financialConsistencyRows,total))],['Revenue mapped to active tenant',fmtInt(activeRevenue.length)+' / '+fmtInt(active.length)],['Revenue without active tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],['Cost source','NOT MAPPED','neutral'],['NBV source coverage',fmtInt(Object.keys(liveNbv).length)+' / '+fmtInt(total),Object.keys(liveNbv).length<total?'warn':'good']
+ ],'Financial consistency checks revenue ↔ tenant relationships. Cost is not scored because no site-level cost source is mapped. NBV is shown separately as an exposure lens.');
+ const npaRows=list.filter(r=>activeTenantCount(sid(r))===0);
+ const nbvRows=list.filter(r=>hasNbv(sid(r)));
+ const npaNbvRows=npaRows.filter(r=>hasNbv(sid(r)));
+ const productiveNbvRows=list.filter(r=>activeTenantCount(sid(r))>0&&hasNbv(sid(r)));
+ const totalNbv=nbvRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
+ const npaNbv=npaNbvRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
+ const productiveNbv=productiveNbvRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
  setProfile('audit-profile-lifecycle',[
-  ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Customer source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Lease expiry available',fmtInt(leaseFilled)+' / '+fmtInt(total)],['NPA sites',fmtInt(list.filter(r=>activeTenantCount(sid(r))===0).length)]
- ],'Lifecycle menggunakan dua input utama yang tersedia saat ini: customer/tenant status dan lease expiry.');
- const ex1=active.length-activeRevenue.length;
- const ex2=list.filter(r=>activeTenantCount(sid(r))>0&&!hasPower(sid(r))).length;
- const ex3=total-validCoords;
- const ex4=total-customerMapped;
- const ex5=total-leaseFilled;
- const ex6=legalAssessed-legalCompleteCount;
- $('audit-exceptions').innerHTML=metricRows([
-  ['Active tenant without revenue',fmtInt(ex1),ex1?'bad':'good'],['Active tenant without power',fmtInt(ex2),ex2?'bad':'good'],['Invalid / out-of-range coordinates',fmtInt(ex3),ex3?'bad':'good'],['Customer source not mapped',fmtInt(ex4),ex4?'warn':'good'],['No lease expiry',fmtInt(ex5),ex5?'warn':'good'],['Legal checklist incomplete',fmtInt(ex6),ex6?'warn':'good']
- ]);
+  ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Consistency',pct(Math.max(0,total-lifecycleConflictRows),total)+'%',auditStatus(pct(Math.max(0,total-lifecycleConflictRows),total))],['Customer source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Lease expiry available',fmtInt(leaseFilled)+' / '+fmtInt(total)],['NPA sites',fmtInt(npaRows.length)],['NPA + active lease/revenue conflict',fmtInt(lifecycleConflictRows),lifecycleConflictRows?'bad':'good']
+ ],'Lifecycle consistency links NPA/tenant state with lease status and commercial activity.');
+ const crossRows=[
+  ['Site → Tenant → Revenue',fmtInt(productivityConsistencyRows)+' / '+fmtInt(active.length),active.length?auditStatus(pct(productivityConsistencyRows,active.length)):'neutral'],
+  ['Revenue without tenant',fmtInt(revenueWithoutTenant.length),revenueWithoutTenant.length?'bad':'good'],
+  ['Active tenant → Power',fmtInt(Math.max(0,active.length-technicalReview))+' / '+fmtInt(active.length),technicalReview?'warn':'good'],
+  ['Active tenant → Expired lease',fmtInt(lifecycleConflictRows),lifecycleConflictRows?'bad':'good'],
+  ['Site internal coherence',fmtInt(assetConsistencyRows)+' / '+fmtInt(total),auditStatus(pct(assetConsistencyRows,total))],
+  ['Device relationship','PARTIAL · source not mapped','neutral']
+ ];
+ $('audit-cross-profile').innerHTML=metricRows(crossRows)+'<div class="audit-note">Contoh anomaly: Site ✓ + Tenant ✓ + Revenue ✓ + Cost ✓ + Device ✕ hanya akan dinilai sebagai confirmed inconsistency setelah source Device tersedia. Saat ini ditandai PARTIAL, bukan dipaksakan menjadi angka audit.</div>';
+ const npaShare=totalNbv>0?npaNbv/totalNbv*100:0;
+ const nbvCoverage=total?nbvRows.length/total*100:0;
+ $('audit-nbv').innerHTML=metricRows([
+  ['NBV mapped',fmtInt(nbvRows.length)+' / '+fmtInt(total),nbvRows.length<total?'warn':'good'],
+  ['Total mapped NBV',formatMoney(totalNbv)],
+  ['NPA with NBV mapped',fmtInt(npaNbvRows.length)],
+  ['NPA NBV exposure',formatMoney(npaNbv),npaNbv>0?'warn':'good'],
+  ['Productive NBV',formatMoney(productiveNbv),'good'],
+  ['NPA share of mapped NBV',npaShare.toFixed(1)+'%',npaShare>0?'warn':'good']
+ ])+`<div class="audit-note">NBV saat ini berasal dari <b>public.site_master</b> dan baru terisi pada ${fmtInt(nbvRows.length)} dari ${fmtInt(total)} site pada scope filter. Karena coverage belum penuh, angka NPA-vs-NBV diperlakukan sebagai exposure yang terpetakan, bukan total portfolio NBV.</div>`;
+ setProfile('audit-coverage',[],'');
  $('audit-coverage').innerHTML=metricRows([
-  ['Asset Profile', 'ASSESSED','good'],['Customer Profile','ASSESSED','good'],['Productivity Profile','ASSESSED','good'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','ASSESSED','good'],['Financial Profile','PARTIAL · COST NOT MAPPED','warn'],['Asset Lifecycle','ASSESSED','good']
- ])+'<div class="audit-note">Audit layer menguji Completeness, Validity dan Consistency terhadap tujuh profile Show Data. Source yang belum ter-mapping ditandai PARTIAL, bukan dianggap valid.</div>';
+  ['Asset Profile','ASSESSED','good'],['Customer Profile','ASSESSED','good'],['Productivity Profile','ASSESSED','good'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST NOT MAPPED','warn'],['Asset Lifecycle','ASSESSED','good'],['NBV comparison','PARTIAL · '+fmtInt(nbvRows.length)+' / '+fmtInt(total)+' mapped','warn']
+ ])+'<div class="audit-note">Audit layer memisahkan Completeness, Validity dan Consistency. Consistency berbasis hubungan antar-data pada level site; source yang belum ter-mapping tidak dipaksakan menjadi PASS/FAIL.</div>';
 }
-
-
-
 function setDashboardMode(mode){const show=mode!=='AUDIT';$('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
 function applyFilters(){
  const rg=String($('dash-regional')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim().toLowerCase();
@@ -2382,7 +2419,7 @@ async function load(){
  const refreshBtn=$('dash-refresh');if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
   // Paged server-side reads. Never request the entire 40k+ dataset as one JSON payload.
-  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={};
+  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={};
   const pageSize=1000;
   const fetchPage=async(offset)=>{
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
@@ -2417,6 +2454,10 @@ async function load(){
   const legalRows=await optional(()=>getAll('v_document_completion'),[]);
   liveLegalStats={};
   for(const x of legalRows){const id=String(x?.site_id_dmt||'').trim();if(id)liveLegalStats[id]={required:Number(x?.required_count)||0,verified:Number(x?.verified_count)||0,pending:Number(x?.pending_count)||0,review:Number(x?.review_count)||0};}
+  // NBV is currently sourced from legacy public.site_master and may only cover a subset of Site Master.
+  const nbvRows=await optional(()=>getAll('site_master'),[]);
+  liveNbv={};
+  for(const x of nbvRows){const id=String(x?.site_id_dmt||'').trim();if(id && x?.nbv!==null && x?.nbv!==undefined && String(x.nbv).trim()!==''){const n=Number(x.nbv);if(Number.isFinite(n))liveNbv[id]=n;}}
   const total=Number(first.total_sites)||0;
   const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
   for(let i=0;i<offsets.length;i+=4){
