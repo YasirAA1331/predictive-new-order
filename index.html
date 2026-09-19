@@ -2421,6 +2421,15 @@ function renderAuditData(){
    {label:'Tanggal Masa Sewa Belum Ada',count:list.filter(r=>!String(val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).trim()).length}
   ]
  };
+ const causeLabels={
+  TENANT_WITHOUT_REVENUE:'Ada Tenant, Revenue Belum Ada',
+  REVENUE_WITHOUT_TENANT:'Ada Revenue, Tenant Belum Ada',
+  TENANT_WITHOUT_POWER:'Ada Tenant, Data Power Belum Ada',
+  ACTIVE_TENANT_EXPIRED_LEASE:'Tenant Aktif, Tapi Sewa Sudah Berakhir',
+  TENANT_COUNT_CONFLICT:'Jumlah Tenant Tidak Sesuai',
+  ASSET_INTERNAL_MISMATCH:'Data Asset Tidak Sesuai',
+  TECHNICAL_ATTRIBUTE_MISMATCH:'Data Teknis Tidak Sesuai'
+ };
  const profileDetail=(profile)=>{
   const rows=profileExceptionRows[profile]||[];
   const max=Math.max(1,...rows.filter(x=>x.count!==null).map(x=>x.count));
@@ -2453,15 +2462,6 @@ function renderAuditData(){
  setProfile('audit-profile-lifecycle','Asset Lifecycle',[
   ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Consistency',scoreLabel(consistencyByProfile.lifecycle),scoreCls(consistencyByProfile.lifecycle)],['Consistency exceptions',fmtInt(exceptionCount('Asset Lifecycle')),exceptionCount('Asset Lifecycle')?'bad':'good']
  ],'Checks tenant/lease lifecycle relationships. NPA itself is not an audit failure.');
- const causeLabels={
-  TENANT_WITHOUT_REVENUE:'Ada Tenant, Revenue Belum Ada',
-  REVENUE_WITHOUT_TENANT:'Ada Revenue, Tenant Belum Ada',
-  TENANT_WITHOUT_POWER:'Ada Tenant, Data Power Belum Ada',
-  ACTIVE_TENANT_EXPIRED_LEASE:'Tenant Aktif, Tapi Sewa Sudah Berakhir',
-  TENANT_COUNT_CONFLICT:'Jumlah Tenant Tidak Sesuai',
-  ASSET_INTERNAL_MISMATCH:'Data Asset Tidak Sesuai',
-  TECHNICAL_ATTRIBUTE_MISMATCH:'Data Teknis Tidak Sesuai'
- };
  const byCode={};exceptions.forEach(e=>{byCode[e.code]=(byCode[e.code]||0)+1});
  const rootCauses=Object.entries(byCode).sort((a,b)=>b[1]-a[1]);
  // Intersection view: intentionally overlaps criteria, so totals are NOT mutually exclusive.
@@ -2475,8 +2475,14 @@ function renderAuditData(){
    {label:'Tanpa Tenant, Revenue, Cost & Perangkat',count:null,assessable:false,source:'Cost & perangkat belum tersedia'}
  ];
  const maxAnomaly=Math.max(1,...anomalyRows.filter(x=>x.count!==null).map(x=>x.count));
+ const siteMap={};
+ exceptions.forEach(e=>{if(!siteMap[e.site_id])siteMap[e.site_id]=[];siteMap[e.site_id].push(e)});
+ const siteRows=Object.entries(siteMap).sort((a,b)=>b[1].length-a[1].length).slice(0,10);
  const siteHtml=siteRows.length?`<div class="audit-site-head"><strong>SITE YANG PERLU DICEK</strong><span>Menampilkan 10 site · scroll untuk melihat lainnya</span></div><div class="audit-site-scroll">${siteRows.map(([site,arr])=>{const r=list.find(x=>sid(x)===site)||{};const name=val(r,'site_name')||'Nama site belum tersedia';return `<div class="audit-site-card"><div><div class="audit-site-id">${esc(site)}</div><div class="audit-site-name">${esc(name)}</div></div><div class="audit-site-causes">${[...new Set(arr.map(e=>causeLabels[e.code]||e.code))].map(x=>`<span class="audit-cause-chip">${esc(x)}</span>`).join('')}</div><span class="audit-site-open dash-link" data-audit-site="${esc(site)}">LIHAT SITE →</span></div>`}).join('')}</div>`:'<div class="audit-note good">Tidak ada data yang perlu dicek pada scope saat ini.</div>';
- $('audit-exceptions').innerHTML=siteHtml+(exceptions.length?'<div class="audit-note">Site dapat memiliki lebih dari satu penyebab. Maksimal 10 site ditampilkan dan sisanya dapat dilihat dengan scroll.</div>':'<div class="audit-note good">Tidak ada data yang perlu dicek pada scope saat ini.</div>');
+ function rootsHtml(exs,labels){const codes={};exs.forEach(e=>codes[e.code]=(codes[e.code]||0)+1);const roots=Object.entries(codes).sort((a,b)=>b[1]-a[1]).slice(0,5);return roots.length?`<div class="profile-subtitle">PENYEBAB KETIDAKSESUAIAN</div><div class="audit-rootcause-list">${roots.map(([c,n])=>`<div class="audit-rootcause"><span>${esc(labels[c]||c)}</span><b>${fmtInt(n)}</b></div>`).join('')}</div>`:'';}
+ const globalAnomalyBody=anomalyRows.map(x=>`<div class="anomaly-row"><div><div class="anomaly-label">${esc(x.label)}</div>${x.source?`<div class="anomaly-source">${esc(x.source)}</div>`:''}</div><div class="anomaly-bar"><i style="width:${x.count===null?0:Math.max(2,(x.count/maxAnomaly)*100)}%"></i></div><div class="anomaly-count ${x.count===null?'na':''}">${x.count===null?'BELUM DINILAI':fmtInt(x.count)}</div></div>`).join('');
+ const globalRoot=rootsHtml(exceptions,causeLabels);
+ $('audit-exceptions').innerHTML=`<div class="profile-audit-detail"><div class="profile-subtitle">IRISAN DATA YANG TIDAK SESUAI</div><div class="anomaly-intersection-note">Kriteria dapat saling beririsan. Satu site bisa muncul di lebih dari satu kategori.</div><div class="anomaly-intersection">${globalAnomalyBody}</div></div>${siteHtml}${exceptions.length?'<div class="audit-note">Site dapat memiliki lebih dari satu penyebab. Maksimal 10 site ditampilkan dan sisanya dapat dilihat dengan scroll.</div>':'<div class="audit-note good">Tidak ada data yang perlu dicek pada scope saat ini.</div>'}`;
  $('audit-exceptions').querySelectorAll('[data-audit-site]').forEach(b=>b.onclick=()=>{const r=list.find(x=>sid(x)===b.dataset.auditSite);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
  $('audit-coverage').innerHTML=metricRows([
   ['Asset Profile','ASSESSED','good'],['Customer Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Productivity Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST SOURCE NOT MAPPED','warn'],['Asset Lifecycle',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['NBV source','Mapped where available','neutral']
