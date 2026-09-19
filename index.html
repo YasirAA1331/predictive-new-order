@@ -1979,18 +1979,19 @@ function renderKpis(){
   const id=sid(r), active=activeTenantCount(id)>0, rev=activeRevenueCount(id)>0, ls=leaseState(r), legal=legalComplete(r);
   if(!active||!rev||(active&&!hasPower(id))||!basicComplete(r)||(legal===false))anomalies.add(id);
  });
+ const controlSourcesAvailable=false;
+ const legalSourceAvailable=filtered.some(r=>legalComplete(r)!==null);
  const cards=[
   ['TOTAL SITE',a.total,'Site Master · Site basis','cyan'],
   ['TENANT ACTIVE',a.activeSites,`${pct(a.activeSites,a.total)}% of sites`,'green'],
   ['ADA REVENUE',a.revenueSites,`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
   ['ADA POWER',a.powerSites,`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
-  ['SITE COMPLY',a.comply,`${pct(a.comply,a.total)}% control rule`,'green'],
-  ['POTENTIAL ANOMALY',anomalies.size,'unique Site ID','red'],
+  ['SITE COMPLY',controlSourcesAvailable?fmtInt(a.comply):'N/A',controlSourcesAvailable?`${pct(a.comply,a.total)}% control rule`:'Requires site-level Cost + Device','green'],
+  ['POTENTIAL ANOMALY',controlSourcesAvailable?fmtInt(anomalies.size):'N/A',controlSourcesAvailable?'Unique Site ID':'Cannot assess — Cost + Device source unavailable','red'],
   ['LEASE < 6 BULAN',a.leaseRisk+a.leaseExpired,`${a.leaseExpired} expired`,'amber'],
-  ['LEGAL GAP',a.legalGap,`${pct(a.total-a.legalGap,a.total)}% complete`,'amber']
+  ['LEGAL GAP',legalSourceAvailable?fmtInt(a.legalGap):'N/A',legalSourceAvailable?`${pct(a.total-a.legalGap,a.total)}% complete`:'Legal source not mapped to Site Master','amber']
  ];
- const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${fmtInt(x[1])}</b><small>${esc(x[2])}</small></div>`).join('')+
- `<div class="dash-source-strip"><span><b>DEVICE/COST</b> site-level source not found in current app</span><span>Correlation key: <b>Site ID</b></span></div>`;
+ const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${esc(x[1])}</b><small>${esc(x[2])}</small></div>`).join('');
 }
 function metricRows(items){return `<div class="metric-list">${items.map(([k,v,cls=''])=>`<div class="metric-row"><span>${esc(k)}</span><b class="${cls}">${esc(v)}</b></div>`).join('')}</div>`}
 function renderDashboardSource(label){
@@ -2005,7 +2006,7 @@ function renderDashboardSource(label){
  const g=$('dash-legal');if(g)g.innerHTML=metricRows([['Legal gap',a.legalGap?fmtInt(a.legalGap):'Not available in Site Master','neutral'],['Basic data gap',fmtInt(a.missingBasic),'warn'],['Site records',fmtInt(a.total)]]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Sites with power',fmtInt(a.powerSites)],['Active tenant sites without power',fmtInt(a.tenantNoPower),'warn']]);
  const m=$('dash-maintenance');if(m)m.innerHTML=metricRows([['Maintenance records',fmtInt(Object.keys(liveMaintenance).length)],['Sites in current view',fmtInt(a.total)]]);
- const q=$('dash-quality');if(q)q.innerHTML=metricRows([['Complete basic data',fmtInt(a.total-a.missingBasic)],['Legal complete',fmtInt(a.total-a.legalGap)],['Potential anomaly',fmtInt(filtered.filter(r=>{const id=sid(r),active=activeTenantCount(id)>0,rev=activeRevenueCount(id)>0,legal=legalComplete(r);return !active||!rev||(active&&!hasPower(id))||!basicComplete(r)||(legal===false)}).length),'warn']]);
+ const legalAvailable=filtered.some(r=>legalComplete(r)!==null); const q=$('dash-quality');if(q)q.innerHTML=metricRows([['Complete basic data',fmtInt(a.total-a.missingBasic)],['Legal status',legalAvailable?fmtInt(a.total-a.legalGap):'Not available'],['Tenant / revenue gap',fmtInt(a.total-a.revenueSites),'warn'],['Full site compliance','Not calculable','neutral']]);
  const geo=$('dash-geo');if(geo)geo.innerHTML=Object.entries(byReg).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>`<div class="metric-row"><span>${esc(k)}</span><b>${fmtInt(v)}</b></div>`).join('')||'<div class="dash-empty-note">No site data.</div>';
  if(!window.__pmnoDashboardLoadingPages) renderMap();
  const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
@@ -2029,8 +2030,17 @@ function renderMap(){
  mapPoints=[];
  // Indonesia equirectangular projection; lightweight and stable on mobile.
  for(const p of valid){const x=((p.lon-95)/(141-95))*w;const y=((6-p.lat)/(17))*h;mapPoints.push({...p,x,y});}
- ctx.fillStyle='rgba(52,189,239,.72)';
- for(const p of mapPoints){ctx.beginPath();ctx.arc(p.x,p.y,1.6,0,Math.PI*2);ctx.fill();}
+ const pointColor=(n)=>{
+   if(n>=6)return 'rgba(255,92,122,.86)';
+   if(n>=4)return 'rgba(255,174,82,.86)';
+   if(n>=2)return 'rgba(226,220,76,.86)';
+   return 'rgba(67,224,160,.86)';
+ };
+ for(const p of mapPoints){
+   const n=Number(liveTenantStats[sid(p.row)]?.total||0);
+   ctx.fillStyle=pointColor(n);
+   ctx.beginPath();ctx.arc(p.x,p.y,n>=6?2.2:1.8,0,Math.PI*2);ctx.fill();
+ }
  const title=$('dash-map-title');if(title)title.textContent=`SITE MAP · ${fmtInt(mapPoints.length)} VALID COORDINATES`;
 }
 
