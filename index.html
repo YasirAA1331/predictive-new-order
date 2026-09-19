@@ -2019,23 +2019,38 @@ function excelSerialToISO(v){
   const d=new Date(base+n*86400000);
   return Number.isFinite(d.getTime())?isoDate(d.getUTCFullYear(),d.getUTCMonth()+1,d.getUTCDate()):null;
 }
+function isValidISODateValue(str){
+  const m=String(str||'').match(/^(\d{4})-(\d{2})-(\d{2})(.*)$/);
+  if(!m)return false;
+  const y=Number(m[1]),mo=Number(m[2]),d=Number(m[3]);
+  if(mo<1||mo>12||d<1||d>31)return false;
+  const dt=new Date(Date.UTC(y,mo-1,d));
+  return dt.getUTCFullYear()===y&&dt.getUTCMonth()===mo-1&&dt.getUTCDate()===d;
+}
+function isBlankExcelDate(value){
+  const s=String(value??'').trim().toLowerCase();
+  return value==null || s==='' || s==='0' || s==='0.0' || s==='00-jan-00' || s==='00/jan/00' || s==='00/00/0000' || s==='0000-00-00' || s==='nan' || s==='null';
+}
 function normalizeMasterDateValue(value,key){
-  if(value==null||value==='')return value;
+  if(value==null||value==='')return null;
   const k=String(key||'').toLowerCase();
   const isDateField=/(^|_)(date|from|to|at)$/.test(k)||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(k);
   if(!isDateField)return value;
+  if(isBlankExcelDate(value))return null;
   if(value instanceof Date){
     if(!Number.isFinite(value.getTime()))return value;
-    return isoDate(value.getFullYear(),value.getMonth()+1,value.getDate());
+    const out=isoDate(value.getFullYear(),value.getMonth()+1,value.getDate());
+    return isValidISODateValue(out)?out:value;
   }
   if(typeof value==='number')return excelSerialToISO(value)||value;
   const str=String(value).trim();
-  if(!str)return null;
-  if(/^\d{4,6}(?:\.\d+)?$/.test(str))return excelSerialToISO(Number(str))||str;
+  if(/^\d{1,6}(?:\.\d+)?$/.test(str))return excelSerialToISO(Number(str))||str;
   let m=str.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if(m)return isoDate(Number(m[3]),Number(m[2]),Number(m[1]));
-  m=str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})/);
-  if(m)return isoDate(Number(m[1]),Number(m[2]),Number(m[3]))+(str.length>10?str.slice(10):'');
+  if(m){const out=isoDate(Number(m[3]),Number(m[2]),Number(m[1]));return isValidISODateValue(out)?out:str}
+  m=str.match(/^(\d{1,2})[- ]([A-Za-z]{3,9})[- ](\d{2,4})$/);
+  if(m){const d=Number(m[1]),mon=String(m[2]).slice(0,3).toLowerCase(),yy=Number(m[3]);const months={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12};const y=yy<100?(yy>=50?1900+yy:2000+yy):yy;if(months[mon]){const out=isoDate(y,months[mon],d);return isValidISODateValue(out)?out:str}}
+  m=str.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})(.*)$/);
+  if(m){const out=isoDate(Number(m[1]),Number(m[2]),Number(m[3]));return isValidISODateValue(out)?out+(m[4]||''):str}
   return str;
 }
 function normalizeMasterRows(code,rows){
@@ -2044,7 +2059,10 @@ function normalizeMasterRows(code,rows){
   rows.forEach((row,i)=>{
     const clean={};
     Object.entries(row||{}).forEach(([k,v])=>{const nv=(typeof v==='string'&&v.trim()==='')?null:v;clean[k]=dateCols.has(k)?normalizeMasterDateValue(nv,k):nv});
-    dateCols.forEach(k=>{if(clean[k]!=null&&String(clean[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(clean[k])))issues.push(`row ${i+2} · ${k} = ${String(clean[k])}`)});
+    dateCols.forEach(k=>{
+      const original=row?.[k], value=clean[k];
+      if(original!=null&&!isBlankExcelDate(original)&&value!=null&&!isValidISODateValue(String(value)))issues.push(`row ${i+2} · ${k} = ${String(original)}`);
+    });
     out.push(clean);
   });
   return {rows:out,issues};
@@ -2063,7 +2081,29 @@ async function fetchAllRows(table){const out=[];const page=1000;for(let from=0;;
 async function exportModule(code){try{if(typeof XLSX==='undefined')throw Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');const mods=await getModules(),m=mods.find(x=>x.module_code===code);if(!m)throw Error('Module tidak ditemukan: '+code);const schema=headersFor(code)||[];let data=[];let backendAvailable=true;try{data=await fetchAllRows(m.target_table)}catch(e){backendAvailable=false}if(!data.length&&schema.length){const aoa=[schema,schema.map(()=> '')];const ws=XLSX.utils.aoa_to_sheet(aoa);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Master Data');XLSX.writeFile(wb,`PMNO_${code}_Template.xlsx`);$('masterUploadInfo').textContent=`Template exported · ${schema.length} columns · ${moduleName(code)}${backendAvailable?' · no records yet':' · backend table belum tersedia, template siap digunakan'}.`;return}const clean=data.map(row=>{const x={...row};delete x.id;delete x.created_at;delete x.updated_at;return x});exportRows(clean,`PMNO_${code}_Current.xlsx`);$('masterUploadInfo').textContent=`Exported · ${clean.length.toLocaleString('id-ID')} rows · ${moduleName(code)}.`}catch(e){console.error(e);alert('Export failed: '+e.message)}}
 $('masterClose').onclick=()=>$('masterModal').classList.remove('show');
 $('masterExport').onclick=()=>{if(!selected){alert('Pilih module terlebih dahulu.');return}exportModule(selected)};
-$('masterFile').onchange=async e=>{const file=e.target.files?.[0];if(!file)return;parsed=null;try{if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});if(!wb.SheetNames?.length)throw new Error('Workbook tidak memiliki sheet.');const ws=wb.Sheets[wb.SheetNames[0]];const rawRows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});if(!rawRows.length)throw new Error('Workbook kosong atau header tidak terbaca.');const normalized=normalizeMasterRows(selected,rawRows);if(normalized.issues.length)throw new Error(`Tanggal tidak valid pada ${normalized.issues.slice(0,3).join('; ')}`);parsed=normalized.rows;$('masterUploadInfo').innerHTML=`<b>${esc(file.name)}</b> · ${parsed.length.toLocaleString('id-ID')} rows · dates normalized`;$('masterStructure').textContent='READY FOR VALIDATION';$('masterBusiness').textContent='READY FOR VALIDATION';$('masterPublish').disabled=true}catch(err){$('masterUploadInfo').textContent='Unable to read workbook: '+err.message}};
+$('masterFile').onchange=async e=>{
+  const file=e.target.files?.[0];
+  if(!file)return;
+  parsed=null;
+  try{
+    if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');
+    const wb=XLSX.read(await file.arrayBuffer(),{type:'array',cellDates:true});
+    if(!wb.SheetNames?.length)throw new Error('Workbook tidak memiliki sheet.');
+    const ws=wb.Sheets[wb.SheetNames[0]];
+    const rawRows=XLSX.utils.sheet_to_json(ws,{defval:'',raw:true});
+    if(!rawRows.length)throw new Error('Workbook kosong atau header tidak terbaca.');
+    const normalized=normalizeMasterRows(selected,rawRows);
+    parsed=normalized.rows;
+    $('masterUploadInfo').innerHTML=`<b>${esc(file.name)}</b> · ${parsed.length.toLocaleString('id-ID')} rows${normalized.issues.length?` · ${normalized.issues.length} invalid date value(s) — VALIDATE untuk detail`:''}`;
+    $('masterStructure').textContent='READY FOR VALIDATION';
+    $('masterBusiness').textContent=normalized.issues.length?'CHECK DATE VALUES':'READY FOR VALIDATION';
+    $('masterPublish').disabled=true;
+  }catch(err){
+    parsed=null;
+    $('masterUploadInfo').textContent='Unable to read workbook: '+err.message;
+  }
+};
+
 $('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook first.');return}const req=headersFor(selected),cols=parsed.length?Object.keys(parsed[0]):[];const dateCols=(req||[]).filter(k=>/(^|_)(date|from|to|at)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));const invalidDates=parsed.reduce((n,r)=>n+dateCols.filter(k=>r[k]!=null&&String(r[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(r[k]))).length,0);const missing=req?req.filter(x=>!cols.includes(x)):[];const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));const keyRules={TENANT_CONTRACT:['site_id','tenant_id','tenant_name'],TENANT_POWER:['site_id','tenant_id','power_id'],MAINTENANCE:['site_id','maintenance_id']};const keyCols=keyRules[selected]||[];const missingKeys=keyCols.filter(k=>!cols.includes(k));const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;const ok=!missing.length&&!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;$('masterStructure').textContent=ok?'PASS':'FAILED';$('masterBusiness').textContent=ok?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;$('masterImpact').textContent=ok?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`Missing columns: ${missing.join(', ')||'invalid business data'}`;$('masterPublish').disabled=!ok};
 $('masterPublish').onclick=async()=>{
   if(!selected||!parsed)return;
