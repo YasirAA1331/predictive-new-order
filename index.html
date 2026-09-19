@@ -2051,30 +2051,59 @@ async function load(){
  if(loading)return;loading=true;
  const head=$('dash-head');head?.classList.add('loading');
  try{
-  // Site Master is mandatory backbone. Try PMNO table first, then legacy table.
-  let pmno=await optional(()=>getAll('pmno_site_master'),[]);
-  let site=pmno.length?[]:await optional(()=>getAll('site_master'),[]);
-  if(!pmno.length&&!site.length)throw new Error('Site Master tidak mengembalikan data. Cek koneksi Supabase / RLS / nama tabel.');
-  rows=normalizeMasterRows(pmno,site);
-  const [tenants,power,maintenance]=await Promise.all([
-   optional(()=>getAll('tenant_contract'),[]),
-   optional(()=>getAll('tenant_power'),[]),
-   optional(()=>getAll('maintenance'),[])
-  ]);
-  setLiveChildren(tenants,power,maintenance);
-  rows.forEach(r=>r.tenant_count=(liveTenants[sid(r)]||[]).length);
+  // Paged server-side reads. Never request the entire 40k+ dataset as one JSON payload.
+  rows=[]; filtered=[]; liveTenants={}; livePower={}; liveMaintenance={};
+  const pageSize=1000;
+  const fetchPage=async(offset)=>{
+   const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
+   if(!r.ok)throw new Error('pmno_dashboard_site_page HTTP '+r.status+': '+(await r.text()).slice(0,240));
+   const snap=await r.json();
+   if(!snap||!Array.isArray(snap.sites))throw new Error('Dashboard page response invalid.');
+   return snap;
+  };
+  const mergePage=(snap)=>{
+   const pageRows=normalizeMasterRows(snap.sites,[]);
+   const byId=new Map(rows.map(r=>[sid(r),r]));
+   for(const r of pageRows){const id=sid(r);if(id)byId.set(id,r)}
+   rows=Array.from(byId.values());
+   for(const x of (Array.isArray(snap.tenants)?snap.tenants:[])){
+    const id=String(x?.site_id||'').trim();if(!id)continue;
+    const total=Math.max(0,Number(x?.total_count)||0),active=Math.max(0,Number(x?.active_count)||0),rev=Math.max(0,Number(x?.active_revenue_count)||0);
+    const arr=[];for(let i=0;i<active;i++)arr.push({tenant_status:'ACTIVE',revenue_month:i<rev?1:0});
+    while(arr.length<total)arr.push({tenant_status:'INACTIVE',revenue_month:0});
+    liveTenants[id]=arr;
+   }
+   for(const x of (Array.isArray(snap.power)?snap.power:[])){
+    const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id&&cnt)livePower[id]=Array.from({length:Math.min(cnt,100)},()=>({power_source:'RECORDED'}));
+   }
+   for(const x of (Array.isArray(snap.maintenance)?snap.maintenance:[])){
+    const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id&&cnt)liveMaintenance[id]={status:'RECORDED',count:cnt};
+   }
+   rows.forEach(r=>r.tenant_count=(liveTenants[sid(r)]||[]).length);
+   filtered=rows.slice();
+   renderDashboardSource('MASTER DATA · PMNO');
+   return snap;
+  };
+
+  // First page renders quickly, then remaining pages are loaded in small parallel batches.
+  const first=await fetchPage(0); mergePage(first);
+  const total=Number(first.total_sites)||0;
+  const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
+  for(let i=0;i<offsets.length;i+=4){
+   const batch=await Promise.all(offsets.slice(i,i+4).map(fetchPage));
+   batch.forEach(mergePage);
+  }
   filtered=rows.slice();
   renderDashboardSource('MASTER DATA · PMNO');
   if(window._pmnoSelectedSite){
-   const selectedId=sid(window._pmnoSelectedSite);
-   const fresh=rows.find(x=>sid(x)===selectedId);
-   if(fresh) renderSiteProfile(fresh);
+   const selectedId=sid(window._pmnoSelectedSite);const fresh=rows.find(x=>sid(x)===selectedId);if(fresh)renderSiteProfile(fresh);
   }
  }catch(e){
   console.error('PMNO Dashboard load error',e);
-  rows=[];filtered=[];liveTenants={};livePower={};liveMaintenance={};
-  const el=$('dash-kpis');if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard tidak blank — data belum tersedia.</b><br>${esc(e.message||e)}</div>`;
-  ['dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo'].forEach(id=>{const x=$(id);if(x)x.innerHTML='<div class="dash-empty-note">Belum ada data untuk ditampilkan.</div>'});
+  const keep=rows.length>0;
+  if(!keep){rows=[];filtered=[];liveTenants={};livePower={};liveMaintenance={};}
+  const el=$('dash-kpis');if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard data gagal dimuat.</b><br>${esc(e.message||e)}</div>`;
+  if(!keep)['dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo'].forEach(id=>{const x=$(id);if(x)x.innerHTML='<div class="dash-empty-note">Data belum tersedia.</div>'});
  }finally{loading=false;head?.classList.remove('loading')}
 }
 function closeSiteSearch(){const el=$('sp-search-results');if(el)el.style.display='none'}
