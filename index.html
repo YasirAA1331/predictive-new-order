@@ -2016,6 +2016,67 @@ function renderKpis(){
  const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${esc(x[1])}</b><small>${esc(x[2])}</small></div>`).join('');
 }
 function metricRows(items){return `<div class="metric-list">${items.map(([k,v,cls=''])=>`<div class="metric-row"><span>${esc(k)}</span><b class="${cls}">${esc(v)}</b></div>`).join('')}</div>`}
+function initDashboardMap(){
+ const el=$('dash-map');
+ if(!el || typeof L==='undefined') return null;
+ if(dashMap) return dashMap;
+ dashMap=L.map(el,{zoomControl:true,attributionControl:true,preferCanvas:true,scrollWheelZoom:true}).setView([-2.2,118.0],5);
+ L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(dashMap);
+ dashMap._siteLayer=L.layerGroup().addTo(dashMap);
+ dashMap._siteData=[];
+ setTimeout(()=>dashMap.invalidateSize({animate:false}),60);
+ return dashMap;
+}
+function tenantBucket(n){n=Number(n)||0;return n<=1?'t1':n<=3?'t2':n<=5?'t3':'t4'}
+function tenantColor(n){return ({t1:'#43e0a0',t2:'#d8d85b',t3:'#f5a64f',t4:'#ff5570'})[tenantBucket(n)]}
+function dashboardMapPopup(r){
+ const id=sid(r), name=val(r,'site_name')||'—', city=val(r,'city','kabupaten')||'—', province=val(r,'province')||'—', t=tenantCount(r);
+ return `<div style="min-width:180px"><b>${esc(id)}</b><br><span>${esc(name)}</span><br><small>${esc(city)} · ${esc(province)}</small><br><strong>${fmtInt(t)} tenant</strong><br><button type="button" class="dash-site-open" data-site="${esc(id)}" style="margin-top:7px;padding:5px 8px;border:0;border-radius:5px;background:#35c4ff;color:#04111c;font-weight:800">OPEN SITE PROFILE</button></div>`;
+}
+function renderDashboardMap(data){
+ const m=initDashboardMap(); if(!m)return;
+ m._siteData=Array.isArray(data)?data:[];
+ const valid=m._siteData.map(r=>{const lat=Number(val(r,'latitude')),lon=Number(val(r,'longitude'));return Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-11.5&&lat<=6.5&&lon>=94.5&&lon<=141.5?{r,lat,lon,t:tenantCount(r)}:null}).filter(Boolean);
+ m._siteLayer.clearLayers();
+ const z=m.getZoom();
+ if(!valid.length){m.setView([-2.2,118],5);return;}
+ if(z>=7){
+   const renderer=L.canvas({padding:.5});
+   valid.forEach(x=>{
+     const mk=L.circleMarker([x.lat,x.lon],{radius:2.7,weight:.7,color:'#07111c',fillColor:tenantColor(x.t),fillOpacity:.9,renderer}).addTo(m._siteLayer);
+     mk.bindPopup(dashboardMapPopup(x.r));
+   });
+ }else{
+   const bounds=m.getBounds(), nw=m.getBounds().getNorthWest(), se=m.getBounds().getSouthEast();
+   const spanLat=Math.max(.15,nw.lat-se.lat),spanLon=Math.max(.15,se.lng-nw.lng);
+   const cellLat=spanLat/28,cellLon=spanLon/38, cells=new Map();
+   valid.forEach(x=>{
+     const gx=Math.floor((x.lon-se.lng+spanLon)/cellLon), gy=Math.floor((x.lat-se.lat+spanLat)/cellLat), key=gx+'|'+gy;
+     const c=cells.get(key)||{n:0,sumLat:0,sumLon:0,items:[],tenantMax:0};c.n++;c.sumLat+=x.lat;c.sumLon+=x.lon;c.items.push(x);c.tenantMax=Math.max(c.tenantMax,x.t);cells.set(key,c);
+   });
+   cells.forEach(c=>{
+     const lat=c.sumLat/c.n,lon=c.sumLon/c.n;
+     const radius=Math.min(14,6+Math.sqrt(c.n)*.55);
+     const mk=L.circleMarker([lat,lon],{radius,weight:1.2,color:'#07111c',fillColor:tenantColor(c.tenantMax),fillOpacity:.82}).addTo(m._siteLayer);
+     mk.bindTooltip(fmtInt(c.n)+' sites',{direction:'top',offset:[0,-radius]});
+     if(c.n>1) mk.bindPopup(`<div><b>${fmtInt(c.n)} sites</b><br><small>Zoom in to see individual Site Master records.</small></div>`);
+     else mk.bindPopup(dashboardMapPopup(c.items[0].r));
+     mk.on('click',()=>{if(c.n>1)m.setView([lat,lon],Math.min(9,z+2),{animate:true})});
+   });
+ }
+ if(!m._homeControl){
+   const Home=L.Control.extend({options:{position:'topright'},onAdd:function(){const b=L.DomUtil.create('button','dash-map-home');b.type='button';b.innerHTML='⌂';b.title='Reset Indonesia view';L.DomEvent.disableClickPropagation(b);b.onclick=()=>fitDashboardMap();return b;}});
+   m.addControl(new Home());m._homeControl=true;
+ }
+ setTimeout(()=>m.invalidateSize({animate:false}),40);
+}
+function fitDashboardMap(){
+ const m=dashMap;if(!m)return;
+ const pts=(m._siteData||[]).map(r=>{const lat=Number(val(r,'latitude')),lon=Number(val(r,'longitude'));return Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-11.5&&lat<=6.5&&lon>=94.5&&lon<=141.5?[lat,lon]:null}).filter(Boolean);
+ if(pts.length)m.fitBounds(L.latLngBounds(pts),{padding:[24,24],maxZoom:6,animate:false});else m.setView([-2.2,118],5,{animate:false});
+ renderDashboardMap(m._siteData||[]);
+}
+if(typeof document!=='undefined')document.addEventListener('click',e=>{const b=e.target.closest?.('.dash-site-open');if(!b)return;const r=rows.find(x=>sid(x)===b.dataset.site);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
 function renderDashboardSource(label){
  const a=siteAuditSnapshot(filtered), byReg={};
  filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
@@ -2037,7 +2098,7 @@ function renderDashboardSource(label){
  const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Sites with active tenant',fmtInt(active)],['Sites with revenue',fmtInt(a.revenueSites)],['Site NPA',fmtInt(npa),'warn'],['Active tenant sites without revenue',fmtInt(a.tenantNoRevenue),'warn'],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
  const fin=$('dash-financial');if(fin)fin.innerHTML=metricRows([['Sites with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%'],['Revenue source', 'Tenant contract / revenue mapping'],['Cost profile','Not mapped in current dashboard source','neutral']]);
  const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Productive · active tenant',fmtInt(active),'good'],['NPA · no active tenant',fmtInt(npa),'warn'],['Lease risk < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
- if(!window.__pmnoDashboardLoadingPages) renderMap();
+ renderDashboardMap(filtered);
  const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
  renderAuditData();
 }
