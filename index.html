@@ -2062,16 +2062,16 @@ function exportModule(code){
  $('masterUploadInfo').textContent='Preparing server export…';
  // IMPORTANT: keep the browser's original click gesture. Do not await fetch() here.
  // iOS Safari/WebView may reject an anchor download triggered after async work.
- const url=URL+'/functions/v1/pmno-master-export?module='+encodeURIComponent(code);
+ const url=URL+'/functions/v1/pmno-master-export-xlsx?module='+encodeURIComponent(code);
  const a=document.createElement('a');
  a.href=url;
- a.download=`PMNO_${code}_Current.csv`;
+ a.download=`PMNO_${code}_Current.xlsx`;
  a.rel='noopener';
  a.style.display='none';
  document.body.appendChild(a);
  a.click();
  a.remove();
- $('masterUploadInfo').textContent=`Export started · ${moduleName(code)} · server-side CSV.`;
+ $('masterUploadInfo').textContent=`Export started · ${moduleName(code)} · server-side Excel (.xlsx).`;
  setTimeout(()=>{btn.disabled=false;btn.textContent='EXPORT CURRENT'},700);
 }
 $('masterClose').onclick=()=>$('masterModal').classList.remove('show');
