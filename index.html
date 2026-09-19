@@ -1960,6 +1960,8 @@ function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID'))
 function uniq(key){return [...new Set(rows.map(r=>String(val(r,key)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function setOptions(id,values,all){const el=$(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+esc(all)+'</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(old))el.value=old}
 function tenantCount(r){const id=sid(r), n=num(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));return n||Number(liveTenantStats[id]?.total||0)}
+function dashboardTenantTotal(list){return (list||[]).reduce((n,r)=>n+tenantCount(r),0)}
+function dashboardTenancyRatio(list){const towers=(list||[]).length, tenants=dashboardTenantTotal(list);return towers?tenants/towers:0}
 function normalizeMasterRows(pmno,site){
  const source=(Array.isArray(pmno)&&pmno.length?pmno:site)||[];
  const map=new Map();
@@ -2006,12 +2008,12 @@ function siteAuditSnapshot(list){
 }
 function renderKpis(){
  const a=siteAuditSnapshot(filtered);
- const tenancyTotal=filtered.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0);
- const tenancyRatio=a.total?((tenancyTotal/a.total)*100):0;
+ const tenancyTotal=dashboardTenantTotal(filtered);
+ const tenancyRatio=dashboardTenancyRatio(filtered);
  const cards=[
   ['TOTAL TOWER / SITE',fmtInt(a.total),'Site Master · site basis','cyan'],
   ['TOTAL TENANT',fmtInt(tenancyTotal),'Customer count · site basis','cyan'],
-  ['TENANCY RATIO',tenancyRatio.toFixed(1)+'%','Total tenant ÷ total tower','green'],
+  ['TENANCY RATIO',tenancyRatio.toFixed(2)+'x',`${fmtInt(tenancyTotal)} tenant ÷ ${fmtInt(a.total)} tower`,'green'],
   ['SITE NPA',fmtInt(Math.max(0,a.total-a.activeSites)),`${pct(Math.max(0,a.total-a.activeSites),a.total)} of sites without active tenant`,'amber'],
   ['ADA REVENUE',fmtInt(a.revenueSites),`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
   ['ADA POWER',fmtInt(a.powerSites),`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
@@ -2089,12 +2091,12 @@ function renderDashboardSource(label){
  setOptions('dash-province',uniq('province'),'ALL PROVINCE');
  setOptions('dash-city',uniq('city').concat(uniq('kabupaten')).filter((v,i,a)=>a.indexOf(v)===i),'ALL CITY');
  renderKpis();
- const tenantTotal=filtered.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0);
+ const tenantTotal=dashboardTenantTotal(filtered);
  const active=a.activeSites, npa=Math.max(0,a.total-active);
- const ratio=a.total?((tenantTotal/a.total)*100):0;
+ const ratio=dashboardTenancyRatio(filtered);
  const t=$('dash-tenant');if(t)t.innerHTML=metricRows([
-  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(1)+'%','good'],['Sites with active tenant',fmtInt(active)],['Site NPA',fmtInt(npa),'warn'],['Tenant mix · 1 tenant',fmtInt(filtered.filter(r=>Number(liveTenantStats[sid(r)]?.total||0)===1).length)],['Tenant mix · 2+ tenants',fmtInt(filtered.filter(r=>Number(liveTenantStats[sid(r)]?.total||0)>=2).length)]
- ]);
+  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Sites with active tenant',fmtInt(active)],['Site NPA',fmtInt(npa),'warn'],['Tenant mix · 1 tenant',fmtInt(filtered.filter(r=>tenantCount(r)===1).length)],['Tenant mix · 2+ tenants',fmtInt(filtered.filter(r=>tenantCount(r)>=2).length)]
+ ])+`<div class="audit-note" style="margin-top:8px">Tenancy Ratio = ${fmtInt(tenantTotal)} tenant ÷ ${fmtInt(a.total)} tower = ${ratio.toFixed(2)}x</div>`;
  const asset=$('dash-asset');if(asset)asset.innerHTML=metricRows([
   ['Total site / tower',fmtInt(a.total)],['Province coverage',fmtInt(new Set(filtered.map(r=>val(r,'province')).filter(Boolean)).size)],['City / kabupaten coverage',fmtInt(new Set(filtered.map(r=>val(r,'city','kabupaten')).filter(Boolean)).size)],['Tower type populated',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Coordinate populated',fmtInt(filtered.filter(r=>String(val(r,'latitude')).trim()!==''&&String(val(r,'longitude')).trim()!=='').length)]
  ]);
