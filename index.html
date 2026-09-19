@@ -950,8 +950,8 @@ body.pmno-page-single .workspace{
       </div>
       <div class="dash-grid-3">
         <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>PRODUCTIVITY PROFILE</strong><small>Revenue and productive-site profile.</small></div></div><div id="dash-productivity" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>FINANCIAL PROFILE</strong><small>Financial information currently available.</small></div></div><div id="dash-financial" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>ASSET LIFECYCLE</strong><small>NPA and lease-driven lifecycle signals.</small></div></div><div id="dash-lifecycle" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>FINANCIAL PROFILE</strong><small>Pendapatan, investasi, biaya, profitabilitas dan return aset.</small></div></div><div id="dash-financial" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>ASSET LIFECYCLE</strong><small>Site productivity, NPA and lease lifecycle signals.</small></div></div><div id="dash-lifecycle" class="dash-panel-content"></div></section>
       </div>
     </div>
     <div id="dash-audit-layer" class="dash-layer hidden">
@@ -2104,6 +2104,12 @@ async function saveRun(){if(!state.project||!state.results.length)return;const a
  loadProjects();
 })();
 </script>
+<style id="pmno-financial-profile-css">
+.fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}.fin-group{border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px;background:rgba(255,255,255,.02)}.fin-group-title,.fin-profit-title{font-size:11px;font-weight:900;letter-spacing:.12em;color:#9fb0c3;margin-bottom:8px}.fin-source-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid rgba(148,163,184,.10);align-items:center}.fin-source-row:last-child{border-bottom:0}.fin-source-row span{font-size:12px;font-weight:700;color:#d7e0ea}.fin-source-row small{display:block;font-size:10px;color:#718096;margin-top:2px}.fin-source-row b{font-size:13px;text-align:right}.fin-profitability{margin-top:12px;border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}.fin-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.fin-profit-card{border:1px solid rgba(148,163,184,.12);border-radius:12px;padding:11px}.fin-profit-card span{display:block;font-size:10px;font-weight:900;letter-spacing:.1em;color:#9fb0c3}.fin-profit-card b{display:block;font-size:17px;margin:5px 0}.fin-profit-card small{font-size:10px;color:#718096}.fin-formula{margin-top:10px;padding:10px;border-radius:10px;background:rgba(212,175,55,.07);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:10px}.fin-formula strong{color:#d4af37;letter-spacing:.08em}.fin-formula span{color:#b8c5d3}.fin-asset-value{margin-top:12px}.fin-asset-value .metric-list{margin-top:0}@media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
+</style>
+<style id="pmno-financial-profile-css">
+.fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}.fin-group{border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px;background:rgba(255,255,255,.02)}.fin-group-title,.fin-profit-title{font-size:11px;font-weight:900;letter-spacing:.12em;color:#9fb0c3;margin-bottom:8px}.fin-source-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid rgba(148,163,184,.10);align-items:center}.fin-source-row:last-child{border-bottom:0}.fin-source-row span{font-size:12px;font-weight:700;color:#d7e0ea}.fin-source-row small{display:block;font-size:10px;color:#718096;margin-top:2px}.fin-source-row b{font-size:13px;text-align:right}.fin-profitability{margin-top:12px;border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}.fin-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.fin-profit-card{border:1px solid rgba(148,163,184,.12);border-radius:12px;padding:11px}.fin-profit-card span{display:block;font-size:10px;font-weight:900;letter-spacing:.1em;color:#9fb0c3}.fin-profit-card b{display:block;font-size:17px;margin:5px 0}.fin-profit-card small{font-size:10px;color:#718096}.fin-formula{margin-top:10px;padding:10px;border-radius:10px;background:rgba(212,175,55,.07);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:10px}.fin-formula strong{color:#d4af37;letter-spacing:.08em}.fin-formula span{color:#b8c5d3}.fin-asset-value{margin-top:12px}@media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
+</style>
 <script id="pmno-dashboard-controller">
 (function(){
 'use strict';
@@ -2115,7 +2121,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
 const fmtInt=v=>num(v).toLocaleString('id-ID');
 const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
-let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},liveNbv={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
+let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},liveNbv={},liveFinancial={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
 
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID')).trim()}
@@ -2265,8 +2271,40 @@ function renderDashboardSource(label){
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(filtered.filter(r=>val(r,'terrain_class')).length)]]);
  const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Productive site · active tenant',fmtInt(active),'good'],['Site with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
- const fin=$('dash-financial');if(fin){const npaRows=filtered.filter(r=>activeTenantCount(sid(r))===0&&hasNbv(sid(r)));const mappedRows=filtered.filter(r=>hasNbv(sid(r)));const totalNbv=mappedRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);const npaNbv=npaRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);fin.innerHTML=metricRows([['NBV available',formatMoney(totalNbv)],['NPA NBV exposure',formatMoney(npaNbv),npaNbv?'warn':'good'],['NPA sites with NBV',fmtInt(npaRows.length),npaRows.length?'warn':'good']])};
- const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Productive site · active tenant',fmtInt(active),'good'],['NPA · 0 tenant',fmtInt(npa),'warn'],['Lease risk < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
+ const fin=$('dash-financial');if(fin){
+  const hasNbv=id=>Object.prototype.hasOwnProperty.call(liveNbv,id);
+  const npaRows=filtered.filter(r=>activeTenantCount(sid(r))===0&&hasNbv(sid(r)));
+  const mappedRows=filtered.filter(r=>hasNbv(sid(r)));
+  const totalNbv=mappedRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
+  const npaNbv=npaRows.reduce((n,r)=>n+Number(liveNbv[sid(r)]||0),0);
+  const npaExposurePct=totalNbv>0?npaNbv/totalNbv*100:0;
+  const revRows=filtered.map(r=>liveFinancial[sid(r)]).filter(Boolean);
+  const totalRevMonth=revRows.reduce((n,x)=>n+Number(x.revenue_month||0),0);
+  const totalRevYear=revRows.reduce((n,x)=>n+Number(x.revenue_year||0),0);
+  const revSites=revRows.filter(x=>Number(x.revenue_month||x.revenue_year||0)>0).length;
+  const avgRevSite=filtered.length?totalRevMonth/filtered.length:0;
+  const avgRevSiteYear=filtered.length?totalRevYear/filtered.length:0;
+  const moneyOrNA=(v,ok)=>ok?formatMoney(v):'BELUM TERSEDIA';
+  const sourceRow=(label,value,note='')=>`<div class="fin-source-row"><div><span>${esc(label)}</span>${note?`<small>${esc(note)}</small>`:''}</div><b>${esc(value)}</b></div>`;
+  const group=(title,body)=>`<div class="fin-group"><div class="fin-group-title">${esc(title)}</div>${body}</div>`;
+  const revAvailable=revRows.length>0;
+  const na='BELUM TERSEDIA';
+  fin.innerHTML=`
+   <div class="fin-grid">
+    ${group('REVENUE',sourceRow('Revenue / Site',moneyOrNA(avgRevSite,revAvailable),revAvailable?`${fmtInt(revSites)} site memiliki revenue`:'Source tenant revenue belum terhubung')+sourceRow('Revenue / Site / Tahun',moneyOrNA(avgRevSiteYear,revAvailable),'Revenue bulanan × 12; revenue_year dipakai bila tersedia')+sourceRow('Total Revenue / Tahun',moneyOrNA(totalRevYear,revAvailable)))}
+    ${group('CAPEX / INVESTMENT',sourceRow('CAPEX / Site',na,'Sumber CAPEX site-level belum terhubung')+sourceRow('CAPEX B2S / Site',na,'Sumber hasil B2S site-level belum terhubung')+sourceRow('CAPEX Collo / Site',na,'Sumber hasil Collo site-level belum terhubung')+sourceRow('CAPEX QI / Site',na,'Sumber QI site-level belum terhubung'))}
+    ${group('OPERATING COST',sourceRow('Cost OM / Site',na,'Sumber OM site-level belum terhubung')+sourceRow('Cost OM / Site / Tahun',na,'Sumber OM site-level belum terhubung')+sourceRow('Cost Sewa Lahan / Site',na,'Sumber sewa lahan site-level belum terhubung')+sourceRow('Cost Sewa Lahan / Site / Tahun',na,'Sumber sewa tahunan site-level belum terhubung'))}
+    ${group('TAX',sourceRow('Tax / Site / Tahun',na,'Sumber tax site-level belum terhubung'))}
+   </div>
+   <div class="fin-profitability"><div class="fin-profit-title">PROFITABILITY BUILD-UP</div><div class="fin-profit-grid">
+      <div class="fin-profit-card"><span>EBITDA</span><b>${na}</b><small>Revenue − operating cost</small></div>
+      <div class="fin-profit-card"><span>EBIT</span><b>${na}</b><small>EBITDA − depreciation</small></div>
+      <div class="fin-profit-card"><span>CASHFLOW</span><b>${na}</b><small>Monthly cashflow dari engine PMNO</small></div>
+      <div class="fin-profit-card"><span>IRR / SITE</span><b>${na}</b><small>Menggunakan engine IRR PMNO yang sama</small></div>
+   </div><div class="fin-formula"><strong>KOMPONEN PEMBENTUK</strong><span>Revenue → OM Cost → Sewa Lahan → EBITDA → Depreciation → EBIT → Tax → Cashflow → IRR</span></div></div>
+   <div class="fin-asset-value">${metricRows([['Total NBV',formatMoney(totalNbv),mappedRows.length?'good':'neutral'],['Avg NBV / Site',mappedRows.length?formatMoney(totalNbv/mappedRows.length):na,mappedRows.length?'good':'neutral'],['NBV pada Site NPA',formatMoney(npaNbv),npaNbv?'warn':'good'],['Porsi NBV pada Site NPA',npaExposurePct.toFixed(1)+'%',npaNbv?'warn':'good']])}<div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div></div>`;
+ };
+ const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(npa),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  renderDashboardMap(filtered);
  const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
  renderAuditData();
@@ -2514,7 +2552,7 @@ async function load(){
  const refreshBtn=$('dash-refresh');if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
   // Paged server-side reads. Never request the entire 40k+ dataset as one JSON payload.
-  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={};
+  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
   const pageSize=1000;
   const fetchPage=async(offset)=>{
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
@@ -2553,6 +2591,16 @@ async function load(){
   const nbvRows=await optional(()=>getAll('site_master'),[]);
   liveNbv={};
   for(const x of nbvRows){const id=String(x?.site_id_dmt||'').trim();if(id && x?.nbv!==null && x?.nbv!==undefined && String(x.nbv).trim()!==''){const n=Number(x.nbv);if(Number.isFinite(n))liveNbv[id]=n;}}
+  const tenantContractRows=await optional(()=>getAll('tenant_contract'),[]);
+  liveFinancial={};
+  for(const x of tenantContractRows){
+    const id=String(x?.site_id||'').trim(); if(!id) continue;
+    const active=String(x?.tenant_status||'').toUpperCase()==='ACTIVE' || String(x?.contract_status||'').toUpperCase()==='ACTIVE';
+    if(!active) continue;
+    const rm=Number(x?.revenue_month)||0, ry=Number(x?.revenue_year)||0;
+    const rec=liveFinancial[id]||(liveFinancial[id]={revenue_month:0,revenue_year:0,tenant_rows:0});
+    rec.revenue_month+=rm; rec.revenue_year+=ry>0?ry:rm*12; rec.tenant_rows++;
+  }
   const total=Number(first.total_sites)||0;
   const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
   for(let i=0;i<offsets.length;i+=4){
