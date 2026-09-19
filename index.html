@@ -1922,13 +1922,13 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
 const fmtInt=v=>num(v).toLocaleString('id-ID');
 const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
-let rows=[],filtered=[],liveTenants={},livePower={},liveMaintenance={},dashMap=null,initialized=false,loading=false;
+let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
 
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID')).trim()}
 function uniq(key){return [...new Set(rows.map(r=>String(val(r,key)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
 function setOptions(id,values,all){const el=$(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+esc(all)+'</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(old))el.value=old}
-function tenantCount(r){const id=sid(r), n=num(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));return n||((liveTenants[id]||[]).length)}
+function tenantCount(r){const id=sid(r), n=num(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));return n||Number(liveTenantStats[id]?.total||0)}
 function normalizeMasterRows(pmno,site){
  const source=(Array.isArray(pmno)&&pmno.length?pmno:site)||[];
  const map=new Map();
@@ -1941,20 +1941,18 @@ function setLiveChildren(tenantRows,powerRows,maintenanceRows){
  for(const p of (powerRows||[])){const id=String(val(p,'site_id','site_id_dmt','siteId')).trim();if(id)(livePower[id]??=[]).push(p)}
  for(const m of (maintenanceRows||[])){const id=String(val(m,'site_id','site_id_dmt','siteId')).trim();if(id)liveMaintenance[id]=m}
 }
-function activeTenants(id){
- return (liveTenants[id]||[]).filter(t=>String(val(t,'tenant_status','status')).toUpperCase()==='ACTIVE')
-}
+function activeTenants(id){ return liveTenants[id]||[]; }
+function activeTenantCount(id){ return Number(liveTenantStats[id]?.active||0); }
+function activeRevenueCount(id){ return Number(liveTenantStats[id]?.revenue||0); }
 function hasRevenue(t){
  return num(val(t,'revenue_month','revenue_mo','monthly_revenue','revenue','revenue_year','annual_revenue'))>0
 }
-function hasPower(id){
- const ps=livePower[id]||[];
- if(ps.length)return true;
- return (liveTenants[id]||[]).some(t=>String(val(t,'power_source','power_configuration','pln_id','existing_power_capacity','power_capacity')).trim()!=='');
-}
+function hasPower(id){ return Number(livePowerCount[id]||0)>0 || (livePower[id]||[]).length>0; }
 function legalComplete(r){
  const keys=['pks_lama_document_link','pks_baru_document_link','imb_document_link','pbg_document_link','slf_document_link','sda_document_link','pks_lama','pks_baru','imb','pbg','slf','sda'];
- return keys.some(k=>Object.prototype.hasOwnProperty.call(r||{},k));
+ const present=keys.filter(k=>Object.prototype.hasOwnProperty.call(r||{},k));
+ if(!present.length) return null;
+ return present.some(k=>String(val(r,k)).trim()!=='');
 }
 function basicComplete(r){return ['site_id','site_name'].every(k=>String(val(r,k)).trim()!=='')&&['latitude','longitude'].every(k=>String(val(r,k)).trim()!=='')}
 function leaseState(r){
@@ -1966,23 +1964,20 @@ function siteAuditSnapshot(list){
  const total=list.length;
  let activeSites=0,revenueSites=0,powerSites=0,comply=0,leaseRisk=0,leaseExpired=0,legalGap=0,missingBasic=0,tenantNoRevenue=0,tenantNoPower=0;
  for(const r of list){
-  const id=sid(r), ats=activeTenants(id), all=liveTenants[id]||[], active=ats.length>0;
-  const rev=all.some(t=>String(val(t,'tenant_status','status')).toUpperCase()==='ACTIVE'&&hasRevenue(t));
-  const power=hasPower(id), legal=!legalComplete(r), basic=!basicComplete(r), ls=leaseState(r);
+  const id=sid(r), active=activeTenantCount(id)>0, rev=activeRevenueCount(id)>0, power=hasPower(id), legal=legalComplete(r), basic=!basicComplete(r), ls=leaseState(r);
   if(active)activeSites++; if(rev)revenueSites++; if(power)powerSites++;
-  if(legal)legalGap++; if(basic)missingBasic++; if(ls.risk)leaseRisk++; if(ls.expired)leaseExpired++;
-  if(active && ats.some(t=>!hasRevenue(t)))tenantNoRevenue++;
+  if(legal===false)legalGap++; if(basic)missingBasic++; if(ls.risk)leaseRisk++; if(ls.expired)leaseExpired++;
+  if(active && !rev)tenantNoRevenue++;
   if(active && !power)tenantNoPower++;
-  // Audit rule is site-basis: active tenant + revenue + power + basic/legal data.
-  if(active&&rev&&power&&!legal&&!basic)comply++;
+  if(active&&rev&&power&&legal!==false&&!basic)comply++;
  }
  return {total,activeSites,revenueSites,powerSites,comply,leaseRisk,leaseExpired,legalGap,missingBasic,tenantNoRevenue,tenantNoPower};
 }
 function renderKpis(){
  const a=siteAuditSnapshot(filtered), anomalies=new Set();
  filtered.forEach(r=>{
-  const id=sid(r), ats=activeTenants(id), ls=leaseState(r);
-  if(!ats.length||ats.some(t=>!hasRevenue(t))||(ats.length&&!hasPower(id))||!basicComplete(r)||!legalComplete(r))anomalies.add(id);
+  const id=sid(r), active=activeTenantCount(id)>0, rev=activeRevenueCount(id)>0, ls=leaseState(r), legal=legalComplete(r);
+  if(!active||!rev||(active&&!hasPower(id))||!basicComplete(r)||(legal===false))anomalies.add(id);
  });
  const cards=[
   ['TOTAL SITE',a.total,'Site Master · Site basis','cyan'],
@@ -2007,24 +2002,38 @@ function renderDashboardSource(label){
  renderKpis();
  const t=$('dash-tenant');if(t)t.innerHTML=metricRows([['Sites with active tenant',fmtInt(a.activeSites)],['Sites with revenue',fmtInt(a.revenueSites)],['Active tenant sites without revenue',fmtInt(a.tenantNoRevenue),'warn']]);
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!leaseState(r).risk&&!leaseState(r).expired&&!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
- const g=$('dash-legal');if(g)g.innerHTML=metricRows([['Legal gap',fmtInt(a.legalGap),'warn'],['Basic data gap',fmtInt(a.missingBasic),'warn'],['Site records',fmtInt(a.total)]]);
+ const g=$('dash-legal');if(g)g.innerHTML=metricRows([['Legal gap',a.legalGap?fmtInt(a.legalGap):'Not available in Site Master','neutral'],['Basic data gap',fmtInt(a.missingBasic),'warn'],['Site records',fmtInt(a.total)]]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Sites with power',fmtInt(a.powerSites)],['Active tenant sites without power',fmtInt(a.tenantNoPower),'warn']]);
  const m=$('dash-maintenance');if(m)m.innerHTML=metricRows([['Maintenance records',fmtInt(Object.keys(liveMaintenance).length)],['Sites in current view',fmtInt(a.total)]]);
- const q=$('dash-quality');if(q)q.innerHTML=metricRows([['Complete basic data',fmtInt(a.total-a.missingBasic)],['Legal complete',fmtInt(a.total-a.legalGap)],['Potential anomaly',fmtInt(filtered.filter(r=>{const id=sid(r),ats=activeTenants(id);return !ats.length||ats.some(t=>!hasRevenue(t))||(ats.length&&!hasPower(id))||!basicComplete(r)||!legalComplete(r)}).length),'warn']]);
+ const q=$('dash-quality');if(q)q.innerHTML=metricRows([['Complete basic data',fmtInt(a.total-a.missingBasic)],['Legal complete',fmtInt(a.total-a.legalGap)],['Potential anomaly',fmtInt(filtered.filter(r=>{const id=sid(r),active=activeTenantCount(id)>0,rev=activeRevenueCount(id)>0,legal=legalComplete(r);return !active||!rev||(active&&!hasPower(id))||!basicComplete(r)||(legal===false)}).length),'warn']]);
  const geo=$('dash-geo');if(geo)geo.innerHTML=Object.entries(byReg).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>`<div class="metric-row"><span>${esc(k)}</span><b>${fmtInt(v)}</b></div>`).join('')||'<div class="dash-empty-note">No site data.</div>';
  if(!window.__pmnoDashboardLoadingPages) renderMap();
  const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
  const head=$('dash-head');if(head)head.classList.remove('loading');
 }
 function renderMap(){
- const el=$('dash-map');if(!el||typeof L==='undefined')return;
- if(!dashMap){dashMap=L.map(el,{zoomControl:true}).setView([-2.5,118],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(dashMap)}
- dashMap.eachLayer(x=>{if(x instanceof L.Marker||x instanceof L.CircleMarker)x.remove()});
- const pts=[];
- for(const r of filtered){const lat=Number(val(r,'latitude','lat')),lon=Number(val(r,'longitude','lon','lng'));if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;pts.push([lat,lon]);L.circleMarker([lat,lon],{radius:2,weight:0.6,fillOpacity:.72,renderer:L.canvas()}).addTo(dashMap).bindTooltip(`${esc(sid(r))}<br>${esc(val(r,'site_name'))}`).on('click',()=>window.pmnoOpenSiteProfile(r))}
- if(pts.length===1)dashMap.setView(pts[0],13);else if(pts.length>1)dashMap.fitBounds(pts,{padding:[30,30],maxZoom:10});
- setTimeout(()=>dashMap.invalidateSize(),50);
+ const el=$('dash-map');if(!el)return;
+ if(!mapCanvas){
+  el.innerHTML=''; mapCanvas=document.createElement('canvas'); mapCanvas.style.width='100%';mapCanvas.style.height='100%';mapCanvas.style.display='block';el.appendChild(mapCanvas);
+  mapCanvas.addEventListener('click',ev=>{
+   const rect=mapCanvas.getBoundingClientRect(),x=ev.clientX-rect.left,y=ev.clientY-rect.top;
+   let best=null,bd=14;
+   for(const p of mapPoints){const d=Math.hypot(p.x-x,p.y-y);if(d<bd){bd=d;best=p}}
+   if(best)window.pmnoOpenSiteProfile(best.row);
+  });
+ }
+ const w=Math.max(320,el.clientWidth||window.innerWidth),h=Math.max(260,el.clientHeight||360),dpr=Math.min(window.devicePixelRatio||1,2);
+ mapCanvas.width=Math.round(w*dpr);mapCanvas.height=Math.round(h*dpr);
+ const ctx=mapCanvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+ const valid=filtered.map(r=>({row:r,lat:Number(val(r,'latitude','lat')),lon:Number(val(r,'longitude','lon','lng'))})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&p.lat>=-11&&p.lat<=6&&p.lon>=95&&p.lon<=141);
+ mapPoints=[];
+ // Indonesia equirectangular projection; lightweight and stable on mobile.
+ for(const p of valid){const x=((p.lon-95)/(141-95))*w;const y=((6-p.lat)/(17))*h;mapPoints.push({...p,x,y});}
+ ctx.fillStyle='rgba(52,189,239,.72)';
+ for(const p of mapPoints){ctx.beginPath();ctx.arc(p.x,p.y,1.6,0,Math.PI*2);ctx.fill();}
+ const title=$('dash-map-title');if(title)title.textContent=`SITE MAP · ${fmtInt(mapPoints.length)} VALID COORDINATES`;
 }
+
 function applyFilters(){
  const rg=String($('dash-regional')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim().toLowerCase();
  filtered=rows.filter(r=>{
@@ -2050,7 +2059,7 @@ async function load(){
  const head=$('dash-head');head?.classList.add('loading');
  try{
   // Paged server-side reads. Never request the entire 40k+ dataset as one JSON payload.
-  rows=[]; filtered=[]; liveTenants={}; livePower={}; liveMaintenance={};
+  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={};
   const pageSize=1000;
   const fetchPage=async(offset)=>{
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
@@ -2066,18 +2075,15 @@ async function load(){
    rows=Array.from(byId.values());
    for(const x of (Array.isArray(snap.tenants)?snap.tenants:[])){
     const id=String(x?.site_id||'').trim();if(!id)continue;
-    const total=Math.max(0,Number(x?.total_count)||0),active=Math.max(0,Number(x?.active_count)||0),rev=Math.max(0,Number(x?.active_revenue_count)||0);
-    const arr=[];for(let i=0;i<active;i++)arr.push({tenant_status:'ACTIVE',revenue_month:i<rev?1:0});
-    while(arr.length<total)arr.push({tenant_status:'INACTIVE',revenue_month:0});
-    liveTenants[id]=arr;
+    liveTenantStats[id]={total:Math.max(0,Number(x?.total_count)||0),active:Math.max(0,Number(x?.active_count)||0),revenue:Math.max(0,Number(x?.active_revenue_count)||0)};
    }
    for(const x of (Array.isArray(snap.power)?snap.power:[])){
-    const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id&&cnt)livePower[id]=Array.from({length:Math.min(cnt,100)},()=>({power_source:'RECORDED'}));
+    const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id)livePowerCount[id]=cnt;
    }
    for(const x of (Array.isArray(snap.maintenance)?snap.maintenance:[])){
-    const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id&&cnt)liveMaintenance[id]={status:'RECORDED',count:cnt};
+    const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id)liveMaintenance[id]={status:'RECORDED',count:cnt};
    }
-   rows.forEach(r=>r.tenant_count=(liveTenants[sid(r)]||[]).length);
+   rows.forEach(r=>r.tenant_count=Number(liveTenantStats[sid(r)]?.total||0));
    filtered=rows.slice();
    if(!window.__pmnoDashboardLoadingPages) renderDashboardSource('MASTER DATA · PMNO');
    return snap;
@@ -2101,7 +2107,7 @@ async function load(){
   window.__pmnoDashboardLoadingPages=false;
   console.error('PMNO Dashboard load error',e);
   const keep=rows.length>0;
-  if(!keep){rows=[];filtered=[];liveTenants={};livePower={};liveMaintenance={};}
+  if(!keep){rows=[];filtered=[];liveTenants={};liveTenantStats={};livePower={};livePowerCount={};liveMaintenance={};}
   const el=$('dash-kpis');if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard data gagal dimuat.</b><br>${esc(e.message||e)}</div>`;
   if(!keep)['dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo'].forEach(id=>{const x=$(id);if(x)x.innerHTML='<div class="dash-empty-note">Data belum tersedia.</div>'});
  }finally{window.__pmnoDashboardLoadingPages=false;loading=false;head?.classList.remove('loading')}
@@ -2118,7 +2124,7 @@ window.pmnoOpenSiteProfile=function(r){
 function kv(items){return items.map(([a,b])=>`<div class="kvitem"><span>${esc(a)}</span><b>${esc(b||'—')}</b></div>`).join('')}
 async function loadSiteProfileDetails(id){
  const clean=encodeURIComponent(String(id||''));
- const get=async(table)=>{const r=await fetch(URL+'/rest/v1/'+table+'?site_id=eq.'+clean+'&select=*',{headers:H});if(!r.ok)throw new Error(table+' HTTP '+r.status);return await r.json()};
+ const get=async(table)=>{const order=table==='maintenance'?'&order=last_maintenance_date.desc':'&order=created_at.desc';const r=await fetch(URL+'/rest/v1/'+table+'?site_id=eq.'+clean+'&select=*'+order+'&limit=1000',{headers:H});if(!r.ok)throw new Error(table+' HTTP '+r.status);const data=await r.json();if(!Array.isArray(data))throw new Error(table+' invalid response');return data};
  const [ts,ps,ms]=await Promise.all([get('tenant_contract'),get('tenant_power'),get('maintenance')]);
  if(id){liveTenants[id]=Array.isArray(ts)?ts:[];livePower[id]=Array.isArray(ps)?ps:[];liveMaintenance[id]=Array.isArray(ms)&&ms.length?ms[ms.length-1]:null;}
  return {ts:Array.isArray(ts)?ts:[],ps:Array.isArray(ps)?ps:[],ms:Array.isArray(ms)?ms:[]};
@@ -2167,6 +2173,8 @@ window.pmnoSiteProfileInit=function(){
  else if(window._pmnoSelectedSite){
   const id=sid(window._pmnoSelectedSite), fresh=rows.find(x=>sid(x)===id)||window._pmnoSelectedSite;
   renderSiteProfile(fresh);
+ } else {
+  const empty=$('sp-empty'); const content=$('sp-content'); if(empty){empty.style.display='block';empty.innerHTML='<div class="dash-empty-note"><b>SELECT SITE</b><br>Pilih site dari Dashboard / Search Site terlebih dahulu.</div>';} if(content)content.style.display='none';
  }
 };
 try{const h=String(location.hash||'').replace(/^#/,'').toLowerCase();if(h==='dashboard'||h==='siteprofile')setTimeout(init,0)}catch(e){console.error(e)}
@@ -2403,5 +2411,5 @@ window.pmnoMasterInit=render;render();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-</body>
+<script>window.__PMNO_BUILD__="V25-AUDITED";</script></body>
 </html>
