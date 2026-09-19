@@ -1917,7 +1917,7 @@ const URL='https://vzeitjesovdojfsfgyza.supabase.co',KEY='sb_publishable_AjVsTRk
 const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let rows=[],filtered=[],dashMap=null,dashMarkers=[];
-// Demo child domains are intentionally separate from Site Master: Tenant -> Power and Maintenance.
+// Dashboard is LIVE DATA ONLY. No demo/fallback dataset is used.
 let demoTenants={}, demoPower={}, demoMaintenance={};
 let initialized=false;
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
@@ -1982,7 +1982,7 @@ function applyFilters(){const rg=$('dash-regional').value,p=$('dash-province').v
 let loading=false;
 function renderDashboardSource(sourceLabel){
   const head=$('dash-head');
-  if(!rows.length){rows=demoRows(40000);buildDemoChildren(rows)}
+  if(!rows.length){$('dash-kpis').innerHTML='<div class="dash-empty-note">No Site Master data loaded.</div>'; return;}
   setOptions('dash-regional',uniq('regional'),'ALL REGIONAL');
   setOptions('dash-province',uniq('province'),'ALL PROVINCE');
   setOptions('dash-city',[...new Set(rows.map(r=>String(val(r,'city','kabupaten')).trim()).filter(Boolean))].sort(),'ALL KABUPATEN / KOTA');
@@ -1991,7 +1991,7 @@ function renderDashboardSource(sourceLabel){
   head?.insertAdjacentHTML('beforeend',`<span class="dash-demo">${sourceLabel} · ${rows.length.toLocaleString('id-ID')} SITES</span>`);
   head?.classList.remove('loading');
 }
-async function load(){if(loading)return;loading=true;const head=$('dash-head');try{if(!rows.length)renderDashboardSource('DEMO BASELINE');const getAll=async(table,select='*')=>{const out=[],pageSize=1000;let from=0;while(true){const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&offset='+from+'&limit='+pageSize,{headers:H});if(!r.ok)break;const batch=await r.json();if(!Array.isArray(batch)||!batch.length)break;out.push(...batch);if(batch.length<pageSize)break;from+=pageSize}return out};const [pmnoRows,siteRows,tenantRows,powerRows,maintenanceRows]=await Promise.all([getAll('pmno_site_master'),getAll('site_master'),getAll('tenant_contract'),getAll('tenant_power'),getAll('maintenance')]);if(pmnoRows.length){rows=normalizeMasterRows(pmnoRows,siteRows);setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>{r.tenant_count=(demoTenants[r.site_id]||[]).length});renderDashboardSource('MASTER DATA · PMNO');}else if(siteRows.length){rows=siteRows.map(x=>({...x,site_id:x.site_id_dmt,site_name:x.site_name||'',city:x.kabupaten||'',province:x.province||'',regional:regionFromProvince(x.province||''),latitude:x.latitude??x.lat,longitude:x.longitude??x.lon,lease_expiry_date:x.lease_expiry_date||x.end_sewa}));setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>{r.tenant_count=(demoTenants[r.site_id]||[]).length});if(!tenantRows.length&&!powerRows.length&&!maintenanceRows.length)buildDemoChildren(rows);renderDashboardSource('MASTER DATA');}else{renderDashboardSource('DEMO BASELINE');}}catch(e){console.error('PMNO Dashboard load error',e);try{if(!rows.length){rows=demoRows(40000);buildDemoChildren(rows)}renderDashboardSource('DEMO BASELINE')}catch(x){console.error('PMNO Dashboard render error',x)}}finally{loading=false}}
+async function load(){if(loading)return;loading=true;const head=$('dash-head');head?.classList.add('loading');try{const getAll=async(table,select='*')=>{const out=[],pageSize=1000;let from=0;while(true){const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&offset='+from+'&limit='+pageSize,{headers:H});if(!r.ok)throw new Error(`${table}: HTTP ${r.status}`);const batch=await r.json();if(!Array.isArray(batch))throw new Error(`${table}: invalid response`);if(!batch.length)break;out.push(...batch);if(batch.length<pageSize)break;from+=pageSize}return out};const [pmnoRows,siteRows,tenantRows,powerRows,maintenanceRows]=await Promise.all([getAll('pmno_site_master'),getAll('site_master'),getAll('tenant_contract'),getAll('tenant_power'),getAll('maintenance')]);if(!pmnoRows.length)throw new Error('pmno_site_master returned 0 rows');rows=normalizeMasterRows(pmnoRows,siteRows);setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>{r.tenant_count=(demoTenants[r.site_id]||[]).length});renderDashboardSource('MASTER DATA · PMNO');head?.classList.remove('loading');}catch(e){console.error('PMNO Dashboard load error',e);rows=[];filtered=[];demoTenants={};demoPower={};demoMaintenance={};const el=$('dash-kpis');if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard gagal memuat Master Data.</b><br>${esc(e.message||e)}</div>`;['dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo'].forEach(id=>{const x=$(id);if(x)x.innerHTML='<div class="dash-empty-note">Master Data belum berhasil dimuat.</div>'});head?.classList.remove('loading');}finally{loading=false}}
 function init(){
   if(!initialized){
     initialized=true;
@@ -2005,8 +2005,7 @@ function init(){
     document.addEventListener('click',e=>{if(!e.target.closest('.sp-picker'))closeSiteSearch()});
     $('sp-open-analysis')?.addEventListener('click',()=>openSingleAnalysis());
   }
-  // Synchronous first paint + async reconciliation with Master Data.
-  if(!rows.length)renderDashboardSource('DEMO BASELINE');
+  // Dashboard always starts from live Master Data.
   load();
 }
 function closeSiteSearch(){const el=$('sp-search-results');if(el)el.style.display='none'}
