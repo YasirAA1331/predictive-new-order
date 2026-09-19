@@ -1913,65 +1913,202 @@ async function saveRun(){if(!state.project||!state.results.length)return;const a
 </script>
 <script id="pmno-dashboard-controller">
 (function(){
-const URL='https://vzeitjesovdojfsfgyza.supabase.co',KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
+'use strict';
+const URL='https://vzeitjesovdojfsfgyza.supabase.co';
+const KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const H={'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'};
-const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-let rows=[],filtered=[],dashMap=null,dashMarkers=[];
-// Dashboard uses live Master Data only.
-let liveTenants={}, livePower={}, liveMaintenance={};
-let initialized=false;
+const $=id=>document.getElementById(id);
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
+const fmtInt=v=>num(v).toLocaleString('id-ID');
+const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
+let rows=[],filtered=[],liveTenants={},livePower={},liveMaintenance={},dashMap=null,initialized=false,loading=false;
+
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
+function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID')).trim()}
 function uniq(key){return [...new Set(rows.map(r=>String(val(r,key)).trim()).filter(Boolean))].sort((a,b)=>a.localeCompare(b))}
-function setOptions(id,values,all){const el=$(id),old=el.value;el.innerHTML='<option value="">'+all+'</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(old))el.value=old}
-function tenantCount(r){const n=Number(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));if(Number.isFinite(n)&&n>0)return Math.max(0,n);const sid=String(val(r,'site_id','site_id_dmt')).trim();return sid&&Array.isArray(liveTenants[sid])?liveTenants[sid].length:0}
+function setOptions(id,values,all){const el=$(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+esc(all)+'</option>'+values.map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if(values.includes(old))el.value=old}
+function tenantCount(r){const id=sid(r), n=num(val(r,'tenant_count','tenantCount','total_tenant','tenant_total','jumlah_tenant'));return n||((liveTenants[id]||[]).length)}
+function normalizeMasterRows(pmno,site){
+ const source=(Array.isArray(pmno)&&pmno.length?pmno:site)||[];
+ const map=new Map();
+ for(const r of source){const id=sid(r);if(id)map.set(id,{...r,site_id:id})}
+ return [...map.values()];
+}
+function setLiveChildren(tenantRows,powerRows,maintenanceRows){
+ liveTenants={};livePower={};liveMaintenance={};
+ for(const t of (tenantRows||[])){const id=String(val(t,'site_id','site_id_dmt','siteId')).trim();if(id)(liveTenants[id]??=[]).push(t)}
+ for(const p of (powerRows||[])){const id=String(val(p,'site_id','site_id_dmt','siteId')).trim();if(id)(livePower[id]??=[]).push(p)}
+ for(const m of (maintenanceRows||[])){const id=String(val(m,'site_id','site_id_dmt','siteId')).trim();if(id)liveMaintenance[id]=m}
+}
+function activeTenants(id){
+ return (liveTenants[id]||[]).filter(t=>String(val(t,'tenant_status','status')).toUpperCase()==='ACTIVE')
+}
+function hasRevenue(t){
+ return num(val(t,'revenue_month','revenue_mo','monthly_revenue','revenue','revenue_year','annual_revenue'))>0
+}
+function hasPower(id){
+ const ps=livePower[id]||[];
+ if(ps.length)return true;
+ return (liveTenants[id]||[]).some(t=>String(val(t,'power_source','power_configuration','pln_id','existing_power_capacity','power_capacity')).trim()!=='');
+}
+function legalComplete(r){
+ const keys=['pks_lama_document_link','pks_baru_document_link','imb_document_link','pbg_document_link','slf_document_link','sda_document_link'];
+ const any=keys.some(k=>String(val(r,k)).trim()!=='');
+ if(any)return keys.filter(k=>String(val(r,k)).trim()!=='').length>=2;
+ return ['pks_lama','pks_baru','imb','pbg','slf','sda'].some(k=>String(val(r,k)).trim()!=='');
+}
+function basicComplete(r){return ['site_id','site_name'].every(k=>String(val(r,k)).trim()!=='')&&['latitude','longitude'].every(k=>String(val(r,k)).trim()!=='')}
+function leaseState(r){
+ const raw=val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date');
+ const d=Date.parse(raw); if(!Number.isFinite(d))return {risk:false,expired:false};
+ const days=Math.ceil((d-Date.now())/86400000); return {risk:days>=0&&days<180,expired:days<0};
+}
+function siteAuditSnapshot(list){
+ const total=list.length;
+ let activeSites=0,revenueSites=0,powerSites=0,comply=0,leaseRisk=0,leaseExpired=0,legalGap=0,missingBasic=0,tenantNoRevenue=0,tenantNoPower=0;
+ for(const r of list){
+  const id=sid(r), ats=activeTenants(id), all=liveTenants[id]||[], active=ats.length>0;
+  const rev=all.some(t=>String(val(t,'tenant_status','status')).toUpperCase()==='ACTIVE'&&hasRevenue(t));
+  const power=hasPower(id), legal=!legalComplete(r), basic=!basicComplete(r), ls=leaseState(r);
+  if(active)activeSites++; if(rev)revenueSites++; if(power)powerSites++;
+  if(legal)legalGap++; if(basic)missingBasic++; if(ls.risk)leaseRisk++; if(ls.expired)leaseExpired++;
+  if(active && ats.some(t=>!hasRevenue(t)))tenantNoRevenue++;
+  if(active && !power)tenantNoPower++;
+  // Audit rule is site-basis: active tenant + revenue + power + basic/legal data.
+  if(active&&rev&&power&&!legal&&!basic)comply++;
+ }
+ return {total,activeSites,revenueSites,powerSites,comply,leaseRisk,leaseExpired,legalGap,missingBasic,tenantNoRevenue,tenantNoPower};
+}
 function renderKpis(){
- const a=siteAuditSnapshot(filtered), tenants=filtered.flatMap(r=>liveTenants[String(val(r,'site_id')||'').trim()]||[]);
- const expSites=new Set(tenants.filter(t=>String(t.tenant_status||'').toUpperCase()==='EXPIRING').map(t=>String(t.site_id||'').trim())).size;
- const uniqueAnomaly=new Set();
- filtered.forEach(r=>{const sid=String(val(r,'site_id')||'').trim();const ts=liveTenants[sid]||[];if(!ts.length||a.tenantNoRevenue&&ts.some(x=>String(x.tenant_status||'').toUpperCase()==='ACTIVE'&&Number(x.revenue_month??x.revenue_year??0)<=0)||a.tenantNoPower&&ts.some(x=>String(x.tenant_status||'').toUpperCase()==='ACTIVE'&&!String(x.power_source||x.power_configuration||x.pln_id||x.existing_power_capacity||'').trim())||a.missingBasic||a.legalGap) uniqueAnomaly.add(sid)});
- $('dash-kpis').innerHTML=[
-  ['TOTAL SITE',a.total,'Master Site · Site basis','cyan'],
+ const a=siteAuditSnapshot(filtered), anomalies=new Set();
+ filtered.forEach(r=>{
+  const id=sid(r), ats=activeTenants(id), ls=leaseState(r);
+  if(!ats.length||ats.some(t=>!hasRevenue(t))||(ats.length&&!hasPower(id))||!basicComplete(r)||!legalComplete(r))anomalies.add(id);
+ });
+ const cards=[
+  ['TOTAL SITE',a.total,'Site Master · Site basis','cyan'],
   ['TENANT ACTIVE',a.activeSites,`${pct(a.activeSites,a.total)}% of sites`,'green'],
   ['ADA REVENUE',a.revenueSites,`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
   ['ADA POWER',a.powerSites,`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
   ['SITE COMPLY',a.comply,`${pct(a.comply,a.total)}% control rule`,'green'],
-  ['POTENTIAL ANOMALY',uniqueAnomaly.size,'unique Site ID','red'],
-  ['LEASE < 6 BULAN',a.leaseRisk+ a.leaseExpired,`${a.leaseExpired} expired`,'amber'],
+  ['POTENTIAL ANOMALY',anomalies.size,'unique Site ID','red'],
+  ['LEASE < 6 BULAN',a.leaseRisk+a.leaseExpired,`${a.leaseExpired} expired`,'amber'],
   ['LEGAL GAP',a.legalGap,`${pct(a.total-a.legalGap,a.total)}% complete`,'amber']
- ].map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${Number(x[1]||0).toLocaleString('id-ID')}</b><small>${esc(x[2])}</small></div>`).join('')+
- `<div class="dash-source-strip"><span><b>DEVICE</b> source not available</span><span><b>COST</b> source not available</span><span>Audit correlation: <b>Site ID</b></span></div>`;
+ ];
+ const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${fmtInt(x[1])}</b><small>${esc(x[2])}</small></div>`).join('')+
+ `<div class="dash-source-strip"><span><b>DEVICE/COST</b> site-level source not found in current app</span><span>Correlation key: <b>Site ID</b></span></div>`;
 }
-async function load(){if(loading)return;loading=true;const head=$('dash-head');head?.classList.add('loading');try{const getAll=async(table,select='*')=>{const out=[],pageSize=1000;let from=0;while(true){const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&offset='+from+'&limit='+pageSize,{headers:H});if(!r.ok)throw new Error(`${table}: HTTP ${r.status}`);const batch=await r.json();if(!Array.isArray(batch))throw new Error(`${table}: invalid response`);if(!batch.length)break;out.push(...batch);if(batch.length<pageSize)break;from+=pageSize}return out};const [pmnoRows,siteRows,tenantRows,powerRows,maintenanceRows]=await Promise.all([getAll('pmno_site_master'),getAll('site_master'),getAll('tenant_contract'),getAll('tenant_power'),getAll('maintenance')]);if(!pmnoRows.length)throw new Error('pmno_site_master returned 0 rows');rows=normalizeMasterRows(pmnoRows,siteRows);setLiveChildren(tenantRows,powerRows,maintenanceRows);rows.forEach(r=>{r.tenant_count=(liveTenants[r.site_id]||[]).length});renderDashboardSource('MASTER DATA · PMNO');head?.classList.remove('loading');}catch(e){console.error('PMNO Dashboard load error',e);rows=[];filtered=[];liveTenants={};livePower={};liveMaintenance={};const el=$('dash-kpis');if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard gagal memuat Master Data.</b><br>${esc(e.message||e)}</div>`;['dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo'].forEach(id=>{const x=$(id);if(x)x.innerHTML='<div class="dash-empty-note">Master Data belum berhasil dimuat.</div>'});head?.classList.remove('loading');}finally{loading=false}}
-function init(){
-  if(!initialized){
-    initialized=true;
-    ['dash-regional','dash-province','dash-city','dash-search'].forEach(id=>$(id)?.addEventListener('input',applyFilters));
-    $('dash-refresh')?.addEventListener('click',load);
-    $('dash-open-site')?.addEventListener('click',()=>navigateSite());
-    $('sp-search-btn')?.addEventListener('click',()=>searchSite($('sp-search').value));
-    $('sp-search')?.addEventListener('input',()=>renderSiteSearchResults($('sp-search').value));
-    $('sp-search')?.addEventListener('focus',()=>renderSiteSearchResults($('sp-search').value));
-    $('sp-search')?.addEventListener('keydown',e=>{if(e.key==='Enter'){const first=$('sp-search-results')?.querySelector('.sp-search-result');if(first){first.click();e.preventDefault()}else searchSite(e.target.value)}if(e.key==='Escape')closeSiteSearch()});
-    document.addEventListener('click',e=>{if(!e.target.closest('.sp-picker'))closeSiteSearch()});
-    $('sp-open-analysis')?.addEventListener('click',()=>openSingleAnalysis());
-  }
-  // Dashboard always starts from live Master Data.
-  load();
+function metricRows(items){return `<div class="metric-list">${items.map(([k,v,cls=''])=>`<div class="metric-row"><span>${esc(k)}</span><b class="${cls}">${esc(v)}</b></div>`).join('')}</div>`}
+function renderDashboardSource(label){
+ const a=siteAuditSnapshot(filtered), byReg={};
+ filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
+ setOptions('dash-regional',uniq('regional').concat(uniq('region')).filter((v,i,a)=>a.indexOf(v)===i),'ALL REGIONAL');
+ setOptions('dash-province',uniq('province'),'ALL PROVINCE');
+ setOptions('dash-city',uniq('city').concat(uniq('kabupaten')).filter((v,i,a)=>a.indexOf(v)===i),'ALL CITY');
+ renderKpis();
+ const t=$('dash-tenant');if(t)t.innerHTML=metricRows([['Sites with active tenant',fmtInt(a.activeSites)],['Sites with revenue',fmtInt(a.revenueSites)],['Active tenant sites without revenue',fmtInt(a.tenantNoRevenue),'warn']]);
+ const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!leaseState(r).risk&&!leaseState(r).expired&&!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
+ const g=$('dash-legal');if(g)g.innerHTML=metricRows([['Legal gap',fmtInt(a.legalGap),'warn'],['Basic data gap',fmtInt(a.missingBasic),'warn'],['Site records',fmtInt(a.total)]]);
+ const p=$('dash-power');if(p)p.innerHTML=metricRows([['Sites with power',fmtInt(a.powerSites)],['Active tenant sites without power',fmtInt(a.tenantNoPower),'warn']]);
+ const m=$('dash-maintenance');if(m)m.innerHTML=metricRows([['Maintenance records',fmtInt(Object.keys(liveMaintenance).length)],['Sites in current view',fmtInt(a.total)]]);
+ const q=$('dash-quality');if(q)q.innerHTML=metricRows([['Complete basic data',fmtInt(a.total-a.missingBasic)],['Legal complete',fmtInt(a.total-a.legalGap)],['Potential anomaly',fmtInt(filtered.filter(r=>{const id=sid(r),ats=activeTenants(id);return !ats.length||ats.some(t=>!hasRevenue(t))||(ats.length&&!hasPower(id))||!basicComplete(r)||!legalComplete(r)}).length),'warn']]);
+ const geo=$('dash-geo');if(geo)geo.innerHTML=Object.entries(byReg).sort((a,b)=>b[1]-a[1]).slice(0,12).map(([k,v])=>`<div class="metric-row"><span>${esc(k)}</span><b>${fmtInt(v)}</b></div>`).join('')||'<div class="dash-empty-note">No site data.</div>';
+ renderMap();
+ const src=$('dash-source');if(src)src.textContent=label+' · '+fmtInt(rows.length)+' SITE';
+ const head=$('dash-head');if(head)head.classList.remove('loading');
+}
+function renderMap(){
+ const el=$('dash-map');if(!el||typeof L==='undefined')return;
+ if(!dashMap){dashMap=L.map(el,{zoomControl:true}).setView([-2.5,118],5);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(dashMap)}
+ dashMap.eachLayer(x=>{if(x instanceof L.Marker)x.remove()});
+ const pts=[];
+ for(const r of filtered){const lat=Number(val(r,'latitude','lat')),lon=Number(val(r,'longitude','lon','lng'));if(!Number.isFinite(lat)||!Number.isFinite(lon))continue;pts.push([lat,lon]);L.marker([lat,lon]).addTo(dashMap).bindTooltip(`${esc(sid(r))}<br>${esc(val(r,'site_name'))}`)}
+ if(pts.length===1)dashMap.setView(pts[0],13);else if(pts.length>1)dashMap.fitBounds(pts,{padding:[30,30],maxZoom:10});
+ setTimeout(()=>dashMap.invalidateSize(),50);
+}
+function applyFilters(){
+ const rg=String($('dash-regional')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim().toLowerCase();
+ filtered=rows.filter(r=>{
+  const R=String(val(r,'regional','region')).trim(),P=String(val(r,'province')).trim(),C=String(val(r,'city','kabupaten')).trim();
+  const blob=[sid(r),val(r,'site_name'),R,P,C].join(' ').toLowerCase();
+  return (!rg||R===rg)&&(!pv||P===pv)&&(!ct||C===ct)&&(!q||blob.includes(q));
+ });
+ renderDashboardSource('MASTER DATA · PMNO');
+}
+async function optional(getter,fallback=[]){try{return await getter()}catch(e){console.warn('Optional source failed:',e);return fallback}}
+async function getAll(table){
+ const out=[],pageSize=1000;
+ for(let offset=0;offset<100000;offset+=pageSize){
+  const r=await fetch(URL+'/rest/v1/'+table+'?select=*&offset='+offset+'&limit='+pageSize,{headers:H});
+  if(!r.ok)throw new Error(`${table}: HTTP ${r.status}`);
+  const batch=await r.json();if(!Array.isArray(batch))throw new Error(`${table}: invalid response`);
+  out.push(...batch);if(batch.length<pageSize)break;
+ }
+ return out;
+}
+async function load(){
+ if(loading)return;loading=true;
+ const head=$('dash-head');head?.classList.add('loading');
+ try{
+  // Site Master is mandatory backbone. Try PMNO table first, then legacy table.
+  let pmno=await optional(()=>getAll('pmno_site_master'),[]);
+  let site=pmno.length?[]:await optional(()=>getAll('site_master'),[]);
+  if(!pmno.length&&!site.length)throw new Error('Site Master tidak mengembalikan data. Cek koneksi Supabase / RLS / nama tabel.');
+  rows=normalizeMasterRows(pmno,site);
+  const [tenants,power,maintenance]=await Promise.all([
+   optional(()=>getAll('tenant_contract'),[]),
+   optional(()=>getAll('tenant_power'),[]),
+   optional(()=>getAll('maintenance'),[])
+  ]);
+  setLiveChildren(tenants,power,maintenance);
+  rows.forEach(r=>r.tenant_count=(liveTenants[sid(r)]||[]).length);
+  filtered=rows.slice();
+  renderDashboardSource('MASTER DATA · PMNO');
+ }catch(e){
+  console.error('PMNO Dashboard load error',e);
+  rows=[];filtered=[];liveTenants={};livePower={};liveMaintenance={};
+  const el=$('dash-kpis');if(el)el.innerHTML=`<div class="dash-empty-note"><b>Dashboard tidak blank — data belum tersedia.</b><br>${esc(e.message||e)}</div>`;
+  ['dash-tenant','dash-lease','dash-legal','dash-power','dash-maintenance','dash-quality','dash-geo'].forEach(id=>{const x=$(id);if(x)x.innerHTML='<div class="dash-empty-note">Belum ada data untuk ditampilkan.</div>'});
+ }finally{loading=false;head?.classList.remove('loading')}
 }
 function closeSiteSearch(){const el=$('sp-search-results');if(el)el.style.display='none'}
-function siteSearchRows(q){const needle=String(q||'').trim().toLowerCase();if(!needle)return rows.slice(0,20);const scored=[];for(const r of rows){const id=String(val(r,'site_id')).toLowerCase(),name=String(val(r,'site_name')).toLowerCase(),city=String(val(r,'city','kabupaten')).toLowerCase();let score=-1;if(id===needle)score=1000;else if(id.startsWith(needle))score=800;else if(name.startsWith(needle))score=700;else if(name.includes(needle))score=600;else if(city.includes(needle))score=400;else if(id.includes(needle))score=500;if(score>=0)scored.push({r,score})}scored.sort((a,b)=>b.score-a.score||String(val(a.r,'site_id')).localeCompare(String(val(b.r,'site_id'))));return scored.slice(0,20).map(x=>x.r)}
-function renderSiteSearchResults(q){const box=$('sp-search-results');if(!box)return;const needle=String(q||'').trim();const hits=siteSearchRows(needle);if(!needle){box.innerHTML=rows.length?`<div class="sp-search-more">${fmtInt(rows.length)} site tersedia · ketik untuk mencari</div>`:'<div class="sp-search-empty">Site Master belum tersedia.</div>';box.style.display='block';return}if(!hits.length){box.innerHTML='<div class="sp-search-empty">Site tidak ditemukan di Site Master.</div>';box.style.display='block';return}box.innerHTML=hits.map((r,i)=>`<div class="sp-search-result" data-site-index="${rows.indexOf(r)}"><b>${esc(val(r,'site_id'))} · ${esc(val(r,'site_name'))}</b><span>${esc([val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten')].filter(Boolean).join(' · ')||'Location not available')}</span><em>${esc(val(r,'site_status')||'ACTIVE')} · ${fmtInt(tenantCount(r))} tenant</em></div>`).join('')+(hits.length===20?`<div class="sp-search-more">Menampilkan 20 hasil teratas · persempit pencarian untuk hasil lebih spesifik</div>`:'');box.querySelectorAll('.sp-search-result').forEach(el=>el.addEventListener('click',()=>{const r=rows[Number(el.dataset.siteIndex)];if(r){closeSiteSearch();window.pmnoOpenSiteProfile(r)}}));box.style.display='block'}
-
-function navigateSite(){const q=$('dash-search')?.value?.trim();if(q)searchSite(q);else window.location.hash='#siteprofile'}
-function searchSite(q){q=String(q||'').trim().toLowerCase();if(!q){$('sp-empty').style.display='block';$('sp-content').style.display='none';$('sp-search-status').textContent='Type to search site, then select a result.';renderSiteSearchResults('');return}const hits=siteSearchRows(q);const r=hits[0];if(r){closeSiteSearch();window.pmnoOpenSiteProfile(r)}else{$('sp-search-status').textContent='Site tidak ditemukan di Site Master.';renderSiteSearchResults(q)}}
-window.pmnoOpenSiteProfile=function(r){window.location.hash='#siteprofile';setTimeout(()=>renderSiteProfile(r),30)};
+function siteSearchRows(q){const needle=String(q||'').trim().toLowerCase();if(!needle)return rows.slice(0,20);return rows.filter(r=>[sid(r),val(r,'site_name'),val(r,'city','kabupaten')].join(' ').toLowerCase().includes(needle)).slice(0,20)}
+function renderSiteSearchResults(q){const box=$('sp-search-results');if(!box)return;const hits=siteSearchRows(q);box.innerHTML=hits.length?hits.map(r=>`<div class="sp-search-result" data-site-index="${rows.indexOf(r)}"><b>${esc(sid(r))} · ${esc(val(r,'site_name'))}</b><span>${esc([val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten')].filter(Boolean).join(' · ')||'Location not available')}</span><em>${fmtInt(tenantCount(r))} tenant</em></div>`).join(''):'<div class="sp-search-empty">Site tidak ditemukan di Site Master.</div>';box.style.display='block';box.querySelectorAll('.sp-search-result').forEach(el=>el.onclick=()=>{const r=rows[Number(el.dataset.siteIndex)];if(r){closeSiteSearch();window.pmnoOpenSiteProfile(r)}})}
+function searchSite(q){const r=siteSearchRows(q)[0];if(r)window.pmnoOpenSiteProfile(r);else{const st=$('sp-search-status');if(st)st.textContent='Site tidak ditemukan di Site Master.'}}
+window.pmnoOpenSiteProfile=function(r){location.hash='#siteprofile';setTimeout(()=>renderSiteProfile(r),30)}
 function kv(items){return items.map(([a,b])=>`<div class="kvitem"><span>${esc(a)}</span><b>${esc(b||'—')}</b></div>`).join('')}
-function renderSiteProfile(r){$('sp-empty').style.display='none';$('sp-content').style.display='block';const tenants=liveTenants[r.site_id]||[];$('sp-site-id').textContent=val(r,'site_id')||'—';$('sp-site-name').textContent=val(r,'site_name')||'—';$('sp-location').textContent=[val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten'),val(r,'district'),val(r,'village')].filter(Boolean).join(' · ')||'Location not available';$('sp-badges').innerHTML=[`TENANT · ${tenants.length}`,val(r,'site_status')&&`STATUS · ${val(r,'site_status')}`,val(r,'tower_type')&&`TOWER · ${val(r,'tower_type')}`].filter(Boolean).map(x=>`<span class="sp-badge">${esc(x)}</span>`).join('');$('sp-asset').innerHTML=kv([['Site ID',val(r,'site_id')],['Asset Status',val(r,'site_status')],['Tower Type',val(r,'tower_type')],['Height',val(r,'tower_height_m')+' m'],['Latitude',val(r,'latitude')],['Longitude',val(r,'longitude')],['Area Type',val(r,'area_type')],['Access Level',val(r,'access_level')]]);$('sp-tenant').innerHTML=`<table class="sp-tenant-table"><thead><tr><th>TENANT</th><th>STATUS</th><th>CONTRACT END</th><th>REVENUE/MO</th></tr></thead><tbody>${tenants.map(t=>`<tr><td><b>${esc(t.tenant_name)}</b><br><span style="color:#637c91">${esc(t.tenant_id)}</span></td><td><span class="sp-status ${t.tenant_status==='ACTIVE'?'active':t.tenant_status==='EXPIRING'?'warn':'expired'}">${t.tenant_status}</span></td><td>${esc(t.contract_end_date)}</td><td>Rp ${Number(t.revenue_month).toLocaleString('id-ID')}</td></tr>`).join('')}</tbody></table>`;$('sp-power').innerHTML=`<table class="sp-tenant-table"><thead><tr><th>TENANT</th><th>CONFIG</th><th>SOURCE</th><th>CAPACITY</th><th>PLN ID</th></tr></thead><tbody>${tenants.map(t=>`<tr><td><b>${esc(t.tenant_name)}</b></td><td>${esc(t.power_configuration)}</td><td>${esc(t.power_source)}</td><td>${esc(String(t.power_capacity||'—'))} kW${t.battery_capacity?` · ${esc(t.battery_capacity)} kWh batt.`:''}</td><td>${esc(t.pln_id||'—')}</td></tr>`).join('')}</tbody></table>`;$('sp-land').innerHTML=kv([['Land Status',val(r,'land_status')],['Land Owner',val(r,'land_owner_name')],['Lease Expiry',val(r,'lease_expiry_date')||val(r,'end_sewa')],['Land Category',val(r,'land_category')],['Existing Rent Year',val(r,'existing_rent_year')],['Existing Tenure Year',val(r,'existing_tenure_year')],['New Tenure Year',val(r,'new_tenure_year')]]);$('sp-legal').innerHTML=kv([['PKS Lama',val(r,'pks_lama_document_link')?'Available':'Missing'],['PKS Baru',val(r,'pks_baru_document_link')?'Available':'Missing'],['IMB',val(r,'imb_document_link')?'Available':'Missing'],['PBG',val(r,'pbg_document_link')?'Available':'Missing'],['SLF',val(r,'slf_document_link')?'Available':'Missing'],['SDA',val(r,'sda_document_link')?'Available':'Missing']]);const mt=liveMaintenance[r.site_id]||{};$('sp-maintenance').innerHTML=kv([['Status',mt.status||'—'],['Last Maintenance',mt.last||'—'],['Next Maintenance',mt.next||'—'],['Ticket',mt.ticket?'Open Ticket':'—'],['Report',mt.report?'Open Report':'—']]);const gaps=[];[['Site Name','site_name'],['Latitude','latitude'],['Longitude','longitude'],['Province','province'],['City','city']].forEach(([n,k])=>{if(!String(val(r,k)).trim())gaps.push(n)});$('sp-attention').innerHTML=kv([['Basic Data',gaps.length?`Gap · ${gaps.join(', ')}`:'Complete'],['Community Issue',val(r,'community_issue')],['Comcase Status',val(r,'comcase_status')],['Lease Alert',(()=>{const d=Date.parse(val(r,'lease_expiry_date'));if(!Number.isFinite(d))return 'No date';const days=Math.round((d-Date.now())/86400000);return days<0?'EXPIRED':days<180?`EXPIRING · ${days} days`:'OK'})()],['Maintenance',mt.status||'—'],['Latest Update',val(r,'latest_update')]]);$('sp-search').value=val(r,'site_id');$('sp-search-status').textContent='Profile loaded · '+tenants.length+' tenant(s) · power per tenant.';window._pmnoSelectedSite=r}
-function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;window.location.hash='#single';setTimeout(()=>{const lat=Number(val(r,'latitude')),lon=Number(val(r,'longitude'));if(Number.isFinite(lat))$('lat').value=lat;if(Number.isFinite(lon))$('lon').value=lon;},40)}
-window.pmnoDashboardInit=init;window.pmnoSiteProfileInit=function(){if(!initialized)init();else setTimeout(()=>{if(window._pmnoSelectedSite)renderSiteProfile(window._pmnoSelectedSite);},20)};
-// Initial-route bootstrap: the navigation router is declared earlier in the document,
-// so a direct #dashboard/#siteprofile load must initialize after this controller exists.
-try{const initialHash=String(location.hash||'').replace(/^#/, '').toLowerCase();if(initialHash==='dashboard')setTimeout(init,0);else if(initialHash==='siteprofile')setTimeout(window.pmnoSiteProfileInit,0);}catch(e){console.error('PMNO Dashboard bootstrap error',e)}
+function renderSiteProfile(r){
+ const id=sid(r),ts=liveTenants[id]||[];
+ $('sp-empty')?.style.setProperty('display','none');$('sp-content')?.style.setProperty('display','block');
+ if($('sp-site-id'))$('sp-site-id').textContent=id||'—';if($('sp-site-name'))$('sp-site-name').textContent=val(r,'site_name')||'—';
+ if($('sp-location'))$('sp-location').textContent=[val(r,'regional','region'),val(r,'province'),val(r,'city','kabupaten'),val(r,'district'),val(r,'village')].filter(Boolean).join(' · ')||'Location not available';
+ if($('sp-badges'))$('sp-badges').innerHTML=`<span class="sp-badge">TENANT · ${ts.length}</span>`;
+ if($('sp-asset'))$('sp-asset').innerHTML=kv([['Site ID',id],['Status',val(r,'site_status')],['Tower Type',val(r,'tower_type')],['Latitude',val(r,'latitude')],['Longitude',val(r,'longitude')]]);
+ if($('sp-tenant'))$('sp-tenant').innerHTML=ts.length?`<table class="sp-tenant-table"><thead><tr><th>TENANT</th><th>STATUS</th><th>CONTRACT END</th><th>REVENUE/MO</th></tr></thead><tbody>${ts.map(t=>`<tr><td><b>${esc(val(t,'tenant_name'))}</b></td><td>${esc(val(t,'tenant_status','status'))}</td><td>${esc(val(t,'contract_end_date','end_date'))}</td><td>Rp ${fmtInt(val(t,'revenue_month','revenue_mo','revenue'))}</td></tr>`).join('')}</tbody></table>`:'<div class="dash-empty-note">No tenant record.</div>';
+ if($('sp-power'))$('sp-power').innerHTML=metricRows([['Power records',fmtInt((livePower[id]||[]).length)],['Tenant power records',fmtInt(ts.filter(t=>val(t,'power_source','power_configuration','pln_id','power_capacity')).length)]]);
+ if($('sp-land'))$('sp-land').innerHTML=kv([['Land Status',val(r,'land_status')],['Land Owner',val(r,'land_owner_name')],['Lease Expiry',val(r,'lease_expiry_date','end_sewa')]]);
+ if($('sp-legal'))$('sp-legal').innerHTML=kv([['PKS Lama',val(r,'pks_lama_document_link')?'Available':'Missing'],['PKS Baru',val(r,'pks_baru_document_link')?'Available':'Missing'],['IMB/PBG',(val(r,'imb_document_link')||val(r,'pbg_document_link'))?'Available':'Missing'],['SLF',val(r,'slf_document_link')?'Available':'Missing']]);
+ const mt=liveMaintenance[id]||{};if($('sp-maintenance'))$('sp-maintenance').innerHTML=kv([['Status',val(mt,'status')],['Last Maintenance',val(mt,'last','last_maintenance')],['Next Maintenance',val(mt,'next','next_maintenance')]]);
+}
+function navigateSite(){const q=$('dash-search')?.value?.trim();if(q)searchSite(q);else location.hash='#siteprofile'}
+function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;location.hash='#single';setTimeout(()=>{$('lat')&&($('lat').value=val(r,'latitude'));$('lon')&&($('lon').value=val(r,'longitude'))},40)}
+function init(){
+ if(!initialized){
+  initialized=true;
+  ['dash-regional','dash-province','dash-city','dash-search'].forEach(id=>$(id)?.addEventListener('input',applyFilters));
+  $('dash-refresh')?.addEventListener('click',load);
+  $('dash-open-site')?.addEventListener('click',navigateSite);
+  $('sp-search-btn')?.addEventListener('click',()=>searchSite($('sp-search')?.value));
+  $('sp-search')?.addEventListener('input',()=>renderSiteSearchResults($('sp-search').value));
+  $('sp-search')?.addEventListener('focus',()=>renderSiteSearchResults($('sp-search').value));
+  $('sp-open-analysis')?.addEventListener('click',openSingleAnalysis);
+ }
+ load();
+}
+window.pmnoDashboardInit=init;
+window.pmnoSiteProfileInit=function(){if(!initialized)init();else if(window._pmnoSelectedSite)renderSiteProfile(window._pmnoSelectedSite)};
+try{const h=String(location.hash||'').replace(/^#/,'').toLowerCase();if(h==='dashboard'||h==='siteprofile')setTimeout(init,0)}catch(e){console.error(e)}
 })();
 </script>
 
