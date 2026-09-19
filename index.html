@@ -2016,9 +2016,9 @@ function renderMap(){
    mapEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;';
    el.style.position='relative';
    el.appendChild(mapEl);
-   window.__pmnoDashMap=L.map(mapEl,{zoomControl:true,preferCanvas:true,attributionControl:true,minZoom:4,maxZoom:12,worldCopyJump:false});
-   window.__pmnoDashMap.setView([-2.5,118],5);
-   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true,opacity:.72,attribution:'© OpenStreetMap contributors'}).addTo(window.__pmnoDashMap);
+   window.__pmnoDashMap=L.map(mapEl,{zoomControl:true,preferCanvas:true,attributionControl:true,minZoom:4,maxZoom:12,worldCopyJump:false,maxBounds:[[ -12,94],[7,142]],maxBoundsViscosity:.85});
+   window.__pmnoDashMap.fitBounds([[-11.5,94.5],[6.5,141.5]],{padding:[18,18],maxZoom:5});
+   L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,crossOrigin:true,opacity:.96,attribution:'© OpenStreetMap © CARTO'}).addTo(window.__pmnoDashMap);
    const pane=window.__pmnoDashMap.createPane('pmno-sites');pane.style.zIndex=450;pane.style.pointerEvents='none';
    const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;';pane.appendChild(canvas);
    window.__pmnoDashCanvas=canvas;
@@ -2039,29 +2039,36 @@ function drawDashMap(){
  canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';
  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
  const valid=filtered.map(r=>({row:r,lat:Number(val(r,'latitude','lat')),lon:Number(val(r,'longitude','lon','lng'))})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&p.lat>=-11&&p.lat<=6&&p.lon>=95&&p.lon<=141);
- const color=n=>n>=6?'rgba(255,92,122,.88)':n>=4?'rgba(255,174,82,.88)':n>=2?'rgba(226,220,76,.9)':'rgba(67,224,160,.9)';
- const z=map.getZoom();
- window.__pmnoDashPoints=[];
+ const color=n=>n>=6?'rgba(255,92,122,.96)':n>=4?'rgba(255,174,82,.96)':n>=2?'rgba(226,220,76,.96)':'rgba(67,224,160,.96)';
+ const z=map.getZoom(); window.__pmnoDashPoints=[];
  if(z<6){
-   // Aggregate into geographic cells so the national view remains readable.
-   const cell=.35;const bins=new Map();
-   for(const p of valid){const bx=Math.floor(p.lon/cell),by=Math.floor(p.lat/cell),key=bx+':'+by;let b=bins.get(key);if(!b){b={lon:0,lat:0,n:0,sites:[]};bins.set(key,b)}b.lon+=p.lon;b.lat+=p.lat;b.n++;if(b.sites.length<8)b.sites.push(p.row)}
+   // Screen-space clustering: clean national view without giant overlapping blobs.
+   const bins=new Map(), cell=58;
+   for(const p of valid){
+     const pt=map.latLngToContainerPoint([p.lat,p.lon]);
+     const bx=Math.floor(pt.x/cell),by=Math.floor(pt.y/cell),key=bx+':'+by;
+     let b=bins.get(key); if(!b)b={x:0,y:0,n:0,tenantSum:0,maxTenant:0,sites:[]};
+     b.x+=pt.x;b.y+=pt.y;b.n++;
+     const tc=Number(liveTenantStats[sid(p.row)]?.total||0);b.tenantSum+=tc;b.maxTenant=Math.max(b.maxTenant,tc);
+     if(b.sites.length<12)b.sites.push(p.row);
+   }
    for(const b of bins.values()){
-     const ll=L.latLng(b.lat/b.n,b.lon/b.n),pt=map.latLngToContainerPoint(ll),r=Math.min(10,3+Math.sqrt(b.n)*.75);
-     ctx.fillStyle='rgba(53,200,255,.20)';ctx.beginPath();ctx.arc(pt.x,pt.y,r+2,0,Math.PI*2);ctx.fill();
-     ctx.fillStyle='rgba(53,200,255,.78)';ctx.beginPath();ctx.arc(pt.x,pt.y,r,0,Math.PI*2);ctx.fill();
-     if(b.n>=25){ctx.fillStyle='#eaf4fa';ctx.font='700 8px Poppins,Arial';ctx.textAlign='center';ctx.fillText(b.n.toLocaleString('id-ID'),pt.x,pt.y+3)}
+     const x=b.x/b.n,y=b.y/b.n,r=Math.min(18,5+Math.sqrt(b.n)*1.15);
+     const dominant=b.maxTenant;
+     ctx.beginPath();ctx.arc(x,y,r+3,0,Math.PI*2);ctx.fillStyle='rgba(4,13,23,.78)';ctx.fill();
+     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color(dominant);ctx.fill();
+     ctx.strokeStyle='rgba(255,255,255,.38)';ctx.lineWidth=1;ctx.stroke();
+     if(b.n>1){ctx.fillStyle='#071321';ctx.font='800 8px Poppins,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.n.toLocaleString('id-ID'),x,y);}
    }
  }else{
    for(const p of valid){
-     const pt=map.latLngToContainerPoint([p.lat,p.lon]);const n=Number(liveTenantStats[sid(p.row)]?.total||0);
-     ctx.fillStyle=color(n);ctx.beginPath();ctx.arc(pt.x,pt.y,n>=6?3.2:2.5,0,Math.PI*2);ctx.fill();
+     const pt=map.latLngToContainerPoint([p.lat,p.lon]),n=Number(liveTenantStats[sid(p.row)]?.total||0);
+     ctx.beginPath();ctx.arc(pt.x,pt.y,n>=6?3.4:2.6,0,Math.PI*2);ctx.fillStyle=color(n);ctx.fill();
      window.__pmnoDashPoints.push({row:p.row,x:pt.x,y:pt.y});
    }
  }
  const title=$('dash-map-title');if(title)title.textContent=`SITE MAP · ${fmtInt(valid.length)} VALID COORDINATES`;
 }
-
 
 function applyFilters(){
  const rg=String($('dash-regional')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim().toLowerCase();
