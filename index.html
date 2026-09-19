@@ -2906,27 +2906,47 @@ $('masterFile').onchange=async e=>{
   }
 };
 
-$('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook first.');return}const req=headersFor(selected),required=requiredHeaders[selected]||[],cols=parsed.length?Object.keys(parsed[0]):[],keyRules=requiredHeaders,keyCols=keyRules[selected]||[];const dateCols=(req||[]).filter(k=>/(date|from|to|at|valid_until|expiry_date)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));const invalidDates=parsed.reduce((n,r)=>n+dateCols.filter(k=>r[k]!=null&&String(r[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(r[k]))).length,0);const missing=keyCols.filter(x=>!cols.includes(x));const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));const missingKeys=keyCols.filter(k=>!cols.includes(k));const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;const ok=!missing.length&&!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;$('masterStructure').textContent=ok?'PASS':'FAILED';$('masterBusiness').textContent=ok?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;$('masterImpact').textContent=ok?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. ${((req||[]).filter(x=>!cols.includes(x)).length)?`Optional fields not supplied: ${(req||[]).filter(x=>!cols.includes(x)).join(', ')}. `:''}Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`Missing key columns: ${missing.join(', ')||'invalid business data'}${emptyKeys?` · ${emptyKeys} rows missing key fields`:''}`;$('masterPublish').disabled=!ok};
+$('masterValidate').onclick=()=>{
+  if(!selected||!parsed){alert('Upload a workbook first.');return;}
+  const req=headersFor(selected)||[], keyCols=requiredHeaders[selected]||[], cols=parsed.length?Object.keys(parsed[0]):[];
+  const missingKeyColumns=keyCols.filter(k=>!cols.includes(k));
+  const emptyKeyRows=keyCols.length?parsed.map((r,i)=>({r,i})).filter(x=>keyCols.some(k=>!String(x.r[k]??'').trim())).map(x=>x.i+2):[];
+  const emptyRows=parsed.map((r,i)=>({r,i})).filter(x=>Object.values(x.r).every(v=>String(v??'').trim()==='')).map(x=>x.i+2);
+  const dateCols=req.filter(k=>/(date|from|to|at|valid_until|expiry_date)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));
+  const invalidDates=parsed.reduce((n,r)=>n+dateCols.filter(k=>r[k]!=null&&String(r[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(r[k]))).length,0);
+  const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];
+  const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);
+  const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];
+  const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));
+  const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));
+  const structureOk=missingKeyColumns.length===0;
+  const businessOk=structureOk&&!emptyKeyRows.length&&!emptyRows.length&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;
+  $('masterStructure').textContent=structureOk?'PASS':'FAILED';
+  $('masterBusiness').textContent=businessOk?'PASS · BASIC RULES':`FAILED · ${emptyKeyRows.length?emptyKeyRows.length+' rows missing key fields; ':''}${emptyRows.length?emptyRows.length+' empty rows; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected; ':''}${missingKeyColumns.length?'missing key columns: '+missingKeyColumns.join(', '):''}`;
+  $('masterImpact').textContent=businessOk?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. ${req.filter(x=>!cols.includes(x)).length?`Optional fields not supplied: ${req.filter(x=>!cols.includes(x)).join(', ')}. `:''}Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`${missingKeyColumns.length?'Missing key columns: '+missingKeyColumns.join(', ')+' · ':''}${emptyKeyRows.length?`${emptyKeyRows.length} rows missing key fields (Excel rows ${emptyKeyRows.slice(0,10).join(', ')}${emptyKeyRows.length>10?'…':''}) · `:''}${emptyRows.length?`${emptyRows.length} empty rows · `:''}Fix validation errors before publish.`;
+  $('masterPublish').disabled=!businessOk;
+};
 $('masterPublish').onclick=async()=>{
   try{
     if(!selected||!parsed){alert('Upload a workbook first.');return;}
     // Publish is allowed from the uploaded state, but validation is always enforced before commit.
     // This makes the button actionable on mobile while preserving the validation gate.
-    const req=headersFor(selected),keyCols=(requiredHeaders[selected]||[]),cols=parsed.length?Object.keys(parsed[0]):[];
-    const missingKeys=keyCols.filter(k=>!cols.includes(k));
-    const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;
-    const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;
-    const dateCols=(req||[]).filter(k=>/(date|from|to|at|valid_until|expiry_date)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));
+    const req=headersFor(selected)||[],keyCols=requiredHeaders[selected]||[],cols=parsed.length?Object.keys(parsed[0]):[];
+    const missingKeyColumns=keyCols.filter(k=>!cols.includes(k));
+    const emptyKeyRows=keyCols.length?parsed.map((r,i)=>({r,i})).filter(x=>keyCols.some(k=>!String(x.r[k]??'').trim())).map(x=>x.i+2):[];
+    const emptyRows=parsed.map((r,i)=>({r,i})).filter(x=>Object.values(x.r).every(v=>String(v??'').trim()==='')).map(x=>x.i+2);
+    const dateCols=req.filter(k=>/(date|from|to|at|valid_until|expiry_date)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));
     const invalidDates=parsed.reduce((n,r)=>n+dateCols.filter(k=>r[k]!=null&&String(r[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(r[k]))).length,0);
     const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];
     const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);
     const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];
     const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));
     const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));
-    const validationOk=!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;
-    $('masterStructure').textContent=validationOk?'PASS':'FAILED';
-    $('masterBusiness').textContent=validationOk?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;
-    if(!validationOk){$('masterImpact').textContent=`Publish blocked. Fix validation errors first.`;return;}
+    const structureOk=missingKeyColumns.length===0;
+    const validationOk=structureOk&&!emptyKeyRows.length&&!emptyRows.length&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;
+    $('masterStructure').textContent=structureOk?'PASS':'FAILED';
+    $('masterBusiness').textContent=validationOk?'PASS · BASIC RULES':`FAILED · ${emptyKeyRows.length?emptyKeyRows.length+' rows missing key fields; ':''}${emptyRows.length?emptyRows.length+' empty rows; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected; ':''}${missingKeyColumns.length?'missing key columns: '+missingKeyColumns.join(', '):''}`;
+    if(!validationOk){$('masterImpact').textContent=`Publish blocked. ${missingKeyColumns.length?`Missing key columns: ${missingKeyColumns.join(', ')}. `:''}${emptyKeyRows.length?`${emptyKeyRows.length} rows missing key fields (Excel rows ${emptyKeyRows.slice(0,10).join(', ')}${emptyKeyRows.length>10?'…':''}). `:''}Fix validation errors first.`;return;}
     const originalOp=$('masterOperation').value;
     const batchId=(globalThis.crypto&&typeof globalThis.crypto.randomUUID==='function')?globalThis.crypto.randomUUID():`pmno-${Date.now()}-${Math.random().toString(36).slice(2)}`;
     const uploadRows=normalizeMasterRows(selected,parsed).rows.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
