@@ -795,20 +795,25 @@ body.bulk-page .mobile-nav{
     </div>
     <div id="dash-audit-layer" class="dash-layer hidden">
       <div class="audit-headline">
-        <div class="audit-kpi good"><span>COMPLETENESS</span><b id="audit-completeness">—</b><small>Required fields populated</small></div>
-        <div class="audit-kpi good"><span>VALIDITY</span><b id="audit-validity">—</b><small>Format · range · basic business rules</small></div>
-        <div class="audit-kpi warn"><span>CONSISTENCY</span><b id="audit-consistency">—</b><small>Site-basis cross-source consistency</small></div>
+        <div class="audit-kpi good"><span>COMPLETENESS</span><b id="audit-completeness">—</b><small>Required information available by profile</small></div>
+        <div class="audit-kpi good"><span>VALIDITY</span><b id="audit-validity">—</b><small>Format · range · business-rule checks</small></div>
+        <div class="audit-kpi warn"><span>CONSISTENCY</span><b id="audit-consistency">—</b><small>Cross-field and cross-source consistency</small></div>
+      </div>
+      <div class="show-section-title">AUDIT BY PROFILE</div>
+      <div class="dash-grid-3">
+        <section class="dash-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET PROFILE</strong><small>Site identity, geography and core asset attributes.</small></div></div><div id="audit-profile-asset" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>CUSTOMER PROFILE</strong><small>Tenant mapping, active status and tenancy data.</small></div></div><div id="audit-profile-customer" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>PRODUCTIVITY PROFILE</strong><small>Revenue relationship to active tenants and sites.</small></div></div><div id="audit-profile-productivity" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LAND &amp; LEGAL PROFILE</strong><small>Lease information and mapped legal checklist.</small></div></div><div id="audit-profile-land" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>TECHNICAL PROFILE</strong><small>Tower, access, terrain and power information.</small></div></div><div id="audit-profile-technical" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>FINANCIAL PROFILE</strong><small>Revenue and currently mapped financial sources.</small></div></div><div id="audit-profile-financial" class="dash-panel-content"></div></section>
       </div>
       <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>01</span><strong>COMPLETENESS</strong><small>Apakah field wajib tersedia?</small></div></div><div id="audit-completeness-detail" class="dash-panel-content"></div></section>
- $('audit-validity-detail').innerHTML=metricRows([['Valid coordinates',fmtInt(validCoords)+' / '+fmtInt(total),validCoords===total?'good':'warn'],['Valid lease dates',fmtInt(validDates)+' / '+fmtInt(total),validDates===total?'good':'warn'],['Valid tower height',fmtInt(validTowerHeight)+' / '+fmtInt(total),validTowerHeight===total?'good':'warn']])+'<div class="audit-note">Validity saat ini memakai rule format/range yang tersedia di Site Master. Rule bisnis tambahan dapat ditambah tanpa mengubah schema.</div>';
-        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>CONSISTENCY</strong><small>Apakah antar-source menceritakan site yang sama?</small></div></div><div id="audit-consistency-detail" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>ASSET LIFECYCLE</strong><small>Tenant, lease and lifecycle signal consistency.</small></div></div><div id="audit-profile-lifecycle" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>EXCEPTION PROFILE</strong><small>Record-level issues requiring review.</small></div></div><div id="audit-exceptions" class="dash-panel-content"></div></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>09</span><strong>AUDIT COVERAGE</strong><small>What is currently assessable from mapped sources.</small></div></div><div id="audit-coverage" class="dash-panel-content"></div></section>
       </div>
-      <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>SOURCE RECONCILIATION</strong><small>Site Master → Tenant → Revenue → Power.</small></div></div><div id="audit-reconciliation" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>EXCEPTION PROFILE</strong><small>Record-level exceptions requiring review.</small></div></div><div id="audit-exceptions" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>AUDIT COVERAGE</strong><small>What is currently assessable from mapped sources.</small></div></div><div id="audit-coverage" class="dash-panel-content"></div></section>
-      </div>
+    </div>
     </div>
   </div>
 </section>
@@ -2005,8 +2010,8 @@ function renderKpis(){
  const tenancyRatio=a.total?((tenancyTotal/a.total)*100):0;
  const cards=[
   ['TOTAL TOWER / SITE',fmtInt(a.total),'Site Master · site basis','cyan'],
-  ['TOTAL TENANT',fmtInt(tenancyTotal),`${pct(tenancyTotal,a.total)} tenant / site basis`,'cyan'],
-  ['TENANCY RATIO',tenancyRatio.toFixed(1)+'%','Key portfolio KPI','green'],
+  ['TOTAL TENANT',fmtInt(tenancyTotal),'Customer count · site basis','cyan'],
+  ['TENANCY RATIO',tenancyRatio.toFixed(1)+'%','Total tenant ÷ total tower','green'],
   ['SITE NPA',fmtInt(Math.max(0,a.total-a.activeSites)),`${pct(Math.max(0,a.total-a.activeSites),a.total)} of sites without active tenant`,'amber'],
   ['ADA REVENUE',fmtInt(a.revenueSites),`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
   ['ADA POWER',fmtInt(a.powerSites),`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
@@ -2103,27 +2108,96 @@ function renderDashboardSource(label){
  renderAuditData();
 }
 function auditFieldStats(list,fieldKeys){const total=list.length;let filled=0;for(const r of list){if(fieldKeys.some(k=>String(val(r,k)).trim()!==''))filled++}return {filled,missing:Math.max(0,total-filled),pct:total?filled/total*100:0}}
-function renderAuditData(){
- const list=filtered,total=list.length;if(!total)return;
- const required=[['Site ID',['site_id']],['Site Name',['site_name']],['Latitude',['latitude']],['Longitude',['longitude']],['Province',['province']],['City',['city','kabupaten']],['Tower Type',['tower_type']],['Lease Expiry',['lease_expiry_date','end_sewa','lease_end_date','contract_end_date']]];
- const comp=required.map(([name,keys])=>[name,auditFieldStats(list,keys)]);
- const compPct=comp.length?comp.reduce((s,x)=>s+x[1].pct,0)/comp.length:0;
- const validCoords=list.filter(r=>{const la=Number(val(r,'latitude')),lo=Number(val(r,'longitude'));return Number.isFinite(la)&&Number.isFinite(lo)&&la>=-11.5&&la<=6.5&&lo>=94.5&&lo<=141.5}).length;
- const validDates=list.filter(r=>{const raw=val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date');if(!raw)return false;const d=Date.parse(raw);return Number.isFinite(d)}).length;
- const validTowerHeight=list.filter(r=>{const v=val(r,'tower_height_m');if(v==='')return true;const n=Number(v);return Number.isFinite(n)&&n>=0&&n<=300}).length;
- const validityPct=total?((validCoords+validDates+validTowerHeight)/(total*3))*100:0;
- const consistencyPass=list.filter(r=>{const id=sid(r),active=activeTenantCount(id)>0,rev=activeRevenueCount(id)>0,power=hasPower(id);return !(active&&!rev) && !(active&&!power)}).length;
- const consistencyPct=total?consistencyPass/total*100:0;
- $('audit-completeness').textContent=compPct.toFixed(1)+'%';$('audit-validity').textContent=validityPct.toFixed(1)+'%';$('audit-consistency').textContent=consistencyPct.toFixed(1)+'%';
- const statusPct=(p)=>p>=98?'good':p>=90?'warn':'bad';
- $('audit-completeness-detail').innerHTML='<table class="audit-table"><thead><tr><th>FIELD</th><th>STATUS</th><th>FILLED</th></tr></thead><tbody>'+comp.map(x=>`<tr><td>${esc(x[0])}</td><td><span class="audit-status ${statusPct(x[1].pct)}">${x[1].pct.toFixed(1)}%</span></td><td>${fmtInt(x[1].filled)} / ${fmtInt(total)}</td></tr>`).join('')+'</tbody></table>';
- $('audit-validity-detail').innerHTML=metricRows([['Valid coordinates',fmtInt(validCoords)+' / '+fmtInt(total),validCoords===total?'good':'warn'],['Valid lease dates',fmtInt(validDates)+' / '+fmtInt(total),validDates===total?'good':'warn'],['Valid tower height',fmtInt(validTowerHeight)+' / '+fmtInt(total),validTowerHeight===total?'good':'warn']])+'<div class="audit-note">Validity saat ini memakai rule format/range yang tersedia di Site Master. Rule bisnis tambahan dapat ditambah tanpa mengubah schema.</div>';
- $('audit-consistency-detail').innerHTML=metricRows([['Consistent site-basis records',fmtInt(consistencyPass)+' / '+fmtInt(total),consistencyPass===total?'good':'warn'],['Active tenant without revenue',fmtInt(list.filter(r=>activeTenantCount(sid(r))>0&&activeRevenueCount(sid(r))===0)),'bad'],['Active tenant without power',fmtInt(list.filter(r=>activeTenantCount(sid(r))>0&&!hasPower(sid(r)))),'bad']])+'<div class="audit-note">Consistency ini menggunakan source yang saat ini sudah ter-mapping: Site Master, Tenant/Revenue, dan Power.</div>';
- $('audit-reconciliation').innerHTML=metricRows([['Site Master records',fmtInt(total)],['With tenant source',fmtInt(list.filter(r=>activeTenantCount(sid(r))>0).length)],['With revenue source',fmtInt(list.filter(r=>activeRevenueCount(sid(r))>0).length)],['With power source',fmtInt(list.filter(r=>hasPower(sid(r))).length)],['Legal checklist mapped',fmtInt(list.filter(r=>legalComplete(r)!==null).length)]]);
- const ex1=list.filter(r=>activeTenantCount(sid(r))>0&&activeRevenueCount(sid(r))===0).length,ex2=list.filter(r=>activeTenantCount(sid(r))>0&&!hasPower(sid(r))).length,ex3=list.filter(r=>{const la=Number(val(r,'latitude')),lo=Number(val(r,'longitude'));return !(Number.isFinite(la)&&Number.isFinite(lo)&&la>=-11.5&&la<=6.5&&lo>=94.5&&lo<=141.5)}).length;
- $('audit-exceptions').innerHTML=metricRows([['Tenant → revenue mismatch',fmtInt(ex1),'bad'],['Tenant → power mismatch',fmtInt(ex2),'bad'],['Invalid / out-of-range coordinates',fmtInt(ex3),'warn'],['Legal not assessed',fmtInt(total-list.filter(r=>legalComplete(r)!==null).length),'neutral']]);
- $('audit-coverage').innerHTML=metricRows([['Completeness assessable fields',fmtInt(required.length)],['Validity rules active',fmtInt(3)],['Consistency source domains',fmtInt(4)],['Evidence / lineage', 'Source mapping view'],['Cost + Device audit','Not mapped in current dashboard','neutral']]);
+function auditPct(values){
+ const v=values.filter(x=>x!==null&&Number.isFinite(Number(x))).map(Number);
+ return v.length?v.reduce((a,b)=>a+b,0)/v.length:0;
 }
+function auditStatus(p){return p>=98?'good':p>=90?'warn':'bad'}
+function auditProfileCard(items,note=''){
+ return metricRows(items.map(x=>[x[0],x[1],x[2]||'']))+(note?`<div class="audit-note">${esc(note)}</div>`:'');
+}
+function renderAuditData(){
+ const list=filtered,total=list.length;
+ if(!total)return;
+ const hasTenantSource=id=>Object.prototype.hasOwnProperty.call(liveTenantStats,id);
+ const tenantRows=list.map(r=>liveTenantStats[sid(r)]||null);
+ const active=list.filter(r=>activeTenantCount(sid(r))>0);
+ const activeRevenue=active.filter(r=>activeRevenueCount(sid(r))>0);
+ const customerMapped=list.filter(r=>hasTenantSource(sid(r))).length;
+ const validCoords=list.filter(r=>{const la=Number(val(r,'latitude')),lo=Number(val(r,'longitude'));return Number.isFinite(la)&&Number.isFinite(lo)&&la>=-11.5&&la<=6.5&&lo>=94.5&&lo<=141.5}).length;
+ const validTowerHeight=list.filter(r=>{const raw=val(r,'tower_height_m');if(String(raw).trim()==='')return true;const n=Number(raw);return Number.isFinite(n)&&n>=0&&n<=300}).length;
+ const validTenantStats=list.filter(r=>{const x=liveTenantStats[sid(r)];if(!x)return false;return Number(x.total)>=Number(x.active)&&Number(x.active)>=0&&Number(x.revenue)>=0&&Number(x.revenue)<=Number(x.active)}).length;
+ const validRevenueRelation=active.filter(r=>activeRevenueCount(sid(r))<=activeTenantCount(sid(r))).length;
+ const validLease=list.filter(r=>{const raw=val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date');if(!String(raw).trim())return true;const d=Date.parse(raw);return Number.isFinite(d)}).length;
+ const validPower=list.filter(r=>{const c=Number(livePowerCount[sid(r)]||0);return Number.isFinite(c)&&c>=0}).length;
+ const legalAssessed=list.filter(r=>legalComplete(r)!==null).length;
+ const legalCompleteCount=list.filter(r=>legalComplete(r)===true).length;
+ const leaseFilled=list.filter(r=>String(val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).trim()!=='').length;
+ const technicalFields=['tower_type','tower_height_m','access_level','terrain_class'];
+ const techFieldPcts=technicalFields.map(k=>auditFieldStats(list,[k]).pct);
+ const techPower=total?list.filter(r=>hasPower(sid(r))).length/total*100:0;
+ const assetComp=auditPct(['site_id','site_name','province','city','latitude','longitude','tower_type'].map(k=>auditFieldStats(list,[k]).pct));
+ const customerComp=total?customerMapped/total*100:0;
+ const productivityComp=active.length?activeRevenue.length/active.length*100:100;
+ const landComp=auditPct([leaseFilled/total*100,legalAssessed/total*100]);
+ const technicalComp=auditPct([...techFieldPcts,techPower]);
+ const financialComp=total?activeRevenue.length/Math.max(active.length,1)*100:0;
+ const lifecycleComp=auditPct([customerComp,leaseFilled/total*100]);
+ const assetValid=auditPct([validCoords/total*100,validTowerHeight/total*100]);
+ const customerValid=total?validTenantStats/total*100:0;
+ const productivityValid=active.length?validRevenueRelation/active.length*100:100;
+ const landValid=auditPct([validLease/total*100,legalAssessed?legalCompleteCount/legalAssessed*100:null]);
+ const technicalValid=auditPct([validTowerHeight/total*100,validPower/total*100]);
+ const financialValid=productivityValid;
+ const lifecycleValid=auditPct([validLease/total*100,customerValid]);
+ const consistencyCustomer=customerMapped?validTenantStats/customerMapped*100:100;
+ const consistencyProductivity=active.length?validRevenueRelation/active.length*100:100;
+ const consistencyLand=legalAssessed?legalCompleteCount/legalAssessed*100:100;
+ const consistencyTechnical=validPower/total*100;
+ const consistencyFinancial=productivityValid;
+ const consistencyLifecycle=auditPct([consistencyCustomer,consistencyLand]);
+ const completeness=auditPct([assetComp,customerComp,productivityComp,landComp,technicalComp,financialComp,lifecycleComp]);
+ const validity=auditPct([assetValid,customerValid,productivityValid,landValid,technicalValid,financialValid,lifecycleValid]);
+ const consistency=auditPct([assetValid,consistencyCustomer,consistencyProductivity,consistencyLand,consistencyTechnical,consistencyFinancial,consistencyLifecycle]);
+ $('audit-completeness').textContent=completeness.toFixed(1)+'%';
+ $('audit-validity').textContent=validity.toFixed(1)+'%';
+ $('audit-consistency').textContent=consistency.toFixed(1)+'%';
+ const setProfile=(id,items,note)=>{const el=$(id);if(el)el.innerHTML=auditProfileCard(items,note)};
+ setProfile('audit-profile-asset',[
+  ['Completeness',assetComp.toFixed(1)+'%',auditStatus(assetComp)],['Validity',assetValid.toFixed(1)+'%',auditStatus(assetValid)],['Site ID populated',fmtInt(auditFieldStats(list,['site_id']).filled)+' / '+fmtInt(total)],['Coordinates valid',fmtInt(validCoords)+' / '+fmtInt(total)],['Tower height valid',fmtInt(validTowerHeight)+' / '+fmtInt(total)]
+ ],'Audit terhadap field Asset Profile: identity, geography, tower type dan basic technical attributes.');
+ setProfile('audit-profile-customer',[
+  ['Completeness',customerComp.toFixed(1)+'%',auditStatus(customerComp)],['Validity',customerValid.toFixed(1)+'%',auditStatus(customerValid)],['Tenant source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Tenant count',fmtInt(list.reduce((n,r)=>n+Number(liveTenantStats[sid(r)]?.total||0),0))],['Active tenant sites',fmtInt(active.length)]
+ ],'Tidak menganggap site tanpa tenant sebagai data missing; NPA adalah kondisi portfolio. Completeness diukur dari keterhubungan source customer ke Site Master.');
+ setProfile('audit-profile-productivity',[
+  ['Completeness',productivityComp.toFixed(1)+'%',auditStatus(productivityComp)],['Validity',productivityValid.toFixed(1)+'%',auditStatus(productivityValid)],['Active tenant sites',fmtInt(active.length)],['With revenue',fmtInt(activeRevenue.length)],['Active tenant without revenue',fmtInt(active.length-activeRevenue.length),active.length-activeRevenue.length?'bad':'good']
+ ],'Revenue diuji terhadap site yang mempunyai active tenant; ini menjaga audit tetap berbasis kondisi bisnis, bukan sekadar field terisi.');
+ setProfile('audit-profile-land',[
+  ['Completeness',landComp.toFixed(1)+'%',auditStatus(landComp)],['Validity',landValid.toFixed(1)+'%',auditStatus(landValid)],['Lease expiry populated',fmtInt(leaseFilled)+' / '+fmtInt(total)],['Legal checklist assessed',fmtInt(legalAssessed)+' / '+fmtInt(total)],['Legal checklist complete',fmtInt(legalCompleteCount)+' / '+fmtInt(legalAssessed)]
+ ],'Land dan legal dipisahkan antara ketersediaan informasi lease dan coverage checklist legal yang memang sudah termapping.');
+ setProfile('audit-profile-technical',[
+  ['Completeness',technicalComp.toFixed(1)+'%',auditStatus(technicalComp)],['Validity',technicalValid.toFixed(1)+'%',auditStatus(technicalValid)],['Tower type populated',fmtInt(auditFieldStats(list,['tower_type']).filled)+' / '+fmtInt(total)],['Height populated',fmtInt(auditFieldStats(list,['tower_height_m']).filled)+' / '+fmtInt(total)],['Power source mapped',fmtInt(list.filter(r=>hasPower(sid(r))).length)+' / '+fmtInt(total)]
+ ],'Technical audit mencakup tower, height, access, terrain dan power berdasarkan source yang tersedia.');
+ setProfile('audit-profile-financial',[
+  ['Completeness',financialComp.toFixed(1)+'%',auditStatus(financialComp)],['Validity',financialValid.toFixed(1)+'%',auditStatus(financialValid)],['Revenue mapped to active tenant',fmtInt(activeRevenue.length)+' / '+fmtInt(active.length)],['Revenue relation valid',fmtInt(validRevenueRelation)+' / '+fmtInt(active.length)],['Cost source','NOT MAPPED','neutral']
+ ],'Cost belum digunakan sebagai angka audit karena source site-level Cost belum ter-mapping. Tidak ada angka cost yang diasumsikan.');
+ setProfile('audit-profile-lifecycle',[
+  ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Customer source mapped',fmtInt(customerMapped)+' / '+fmtInt(total)],['Lease expiry available',fmtInt(leaseFilled)+' / '+fmtInt(total)],['NPA sites',fmtInt(list.filter(r=>activeTenantCount(sid(r))===0).length)]
+ ],'Lifecycle menggunakan dua input utama yang tersedia saat ini: customer/tenant status dan lease expiry.');
+ const ex1=active.length-activeRevenue.length;
+ const ex2=list.filter(r=>activeTenantCount(sid(r))>0&&!hasPower(sid(r))).length;
+ const ex3=total-validCoords;
+ const ex4=total-customerMapped;
+ const ex5=total-leaseFilled;
+ const ex6=legalAssessed-legalCompleteCount;
+ $('audit-exceptions').innerHTML=metricRows([
+  ['Active tenant without revenue',fmtInt(ex1),ex1?'bad':'good'],['Active tenant without power',fmtInt(ex2),ex2?'bad':'good'],['Invalid / out-of-range coordinates',fmtInt(ex3),ex3?'bad':'good'],['Customer source not mapped',fmtInt(ex4),ex4?'warn':'good'],['No lease expiry',fmtInt(ex5),ex5?'warn':'good'],['Legal checklist incomplete',fmtInt(ex6),ex6?'warn':'good']
+ ]);
+ $('audit-coverage').innerHTML=metricRows([
+  ['Asset Profile', 'ASSESSED','good'],['Customer Profile','ASSESSED','good'],['Productivity Profile','ASSESSED','good'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','ASSESSED','good'],['Financial Profile','PARTIAL · COST NOT MAPPED','warn'],['Asset Lifecycle','ASSESSED','good']
+ ])+'<div class="audit-note">Audit layer menguji Completeness, Validity dan Consistency terhadap tujuh profile Show Data. Source yang belum ter-mapping ditandai PARTIAL, bukan dianggap valid.</div>';
+}
+
 
 
 function setDashboardMode(mode){const show=mode!=='AUDIT';$('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
