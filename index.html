@@ -810,6 +810,40 @@ body.pmno-page-master .workspace{
   overflow:hidden!important;
 }
 </style>
+
+<style id="pmno-page-layout-v44">
+/* V44 — one deterministic top-level page grid. No hidden view may reserve a row. */
+html,body{width:100%;min-height:100%;}
+body{overflow-x:hidden;overflow-y:auto;}
+body .app{display:grid!important;grid-template-columns:minmax(0,1fr)!important;grid-template-rows:auto auto!important;align-content:start!important;height:auto!important;min-height:100dvh!important;}
+body .topbar{grid-column:1!important;grid-row:1!important;position:relative!important;z-index:50!important;}
+body .workspace,
+body #dashboardView,
+body #siteProfileView,
+body #bulkView,
+body #drmView,
+body #masterDataView{grid-column:1!important;grid-row:2!important;align-self:start!important;justify-self:stretch!important;}
+body .workspace{display:none!important;flex:none!important;width:100%!important;height:0!important;min-height:0!important;max-height:0!important;overflow:hidden!important;}
+body #dashboardView,body #siteProfileView,body #bulkView,body #drmView,body #masterDataView{margin:0!important;top:auto!important;transform:none!important;}
+body.pmno-page-single .workspace{display:grid!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;}
+body.pmno-page-single #dashboardView,body.pmno-page-single #siteProfileView,body.pmno-page-single #bulkView,body.pmno-page-single #drmView,body.pmno-page-single #masterDataView{display:none!important;}
+body.pmno-page-dashboard #dashboardView,
+body.pmno-page-siteprofile #siteProfileView,
+body.pmno-page-bulk #bulkView,
+body.pmno-page-drm #drmView,
+body.pmno-page-master #masterDataView{display:block!important;position:relative!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;}
+body.pmno-page-dashboard .workspace,body.pmno-page-dashboard #siteProfileView,body.pmno-page-dashboard #bulkView,body.pmno-page-dashboard #drmView,body.pmno-page-dashboard #masterDataView,
+body.pmno-page-siteprofile .workspace,body.pmno-page-siteprofile #dashboardView,body.pmno-page-siteprofile #bulkView,body.pmno-page-siteprofile #drmView,body.pmno-page-siteprofile #masterDataView,
+body.pmno-page-bulk .workspace,body.pmno-page-bulk #dashboardView,body.pmno-page-bulk #siteProfileView,body.pmno-page-bulk #drmView,body.pmno-page-bulk #masterDataView,
+body.pmno-page-drm .workspace,body.pmno-page-drm #dashboardView,body.pmno-page-drm #siteProfileView,body.pmno-page-drm #bulkView,body.pmno-page-drm #masterDataView,
+body.pmno-page-master .workspace,body.pmno-page-master #dashboardView,body.pmno-page-master #siteProfileView,body.pmno-page-master #bulkView,body.pmno-page-master #drmView{display:none!important;}
+@media(max-width:760px){
+  body .app{grid-template-rows:auto auto!important;min-height:100dvh!important;}
+  body .workspace{grid-template-rows:auto minmax(430px,62dvh) auto;}
+  body.pmno-page-single .workspace{display:grid!important;}
+  body.pmno-page-dashboard #dashboardView,body.pmno-page-siteprofile #siteProfileView,body.pmno-page-bulk #bulkView,body.pmno-page-drm #drmView,body.pmno-page-master #masterDataView{min-height:0!important;}
+}
+</style>
 </head>
 <body>
 <div class="app">
