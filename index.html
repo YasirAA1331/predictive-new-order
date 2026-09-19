@@ -725,6 +725,42 @@ body.bulk-page .mobile-nav{
   .mode-menu button{height:38px !important;min-height:38px !important;font-size:7px !important;padding:0 5px !important;letter-spacing:.55px !important}
 }
 </style>
+
+<style id="pmno-view-layout-v42">
+/* V42 — top-level SPA views must never leave phantom vertical space on navigation */
+html,body{min-height:100%;}
+body{overflow-x:hidden;}
+#dashboardView,#siteProfileView,#bulkView,#drmView,#masterDataView{margin:0!important;position:relative!important;top:auto!important;transform:none!important;}
+body.pmno-page-siteprofile .workspace,
+body.pmno-page-siteprofile #dashboardView,
+body.pmno-page-siteprofile #bulkView,
+body.pmno-page-siteprofile #drmView,
+body.pmno-page-siteprofile #masterDataView{display:none!important;}
+body.pmno-page-dashboard .workspace,
+body.pmno-page-dashboard #siteProfileView,
+body.pmno-page-dashboard #bulkView,
+body.pmno-page-dashboard #drmView,
+body.pmno-page-dashboard #masterDataView{display:none!important;}
+body.pmno-page-bulk .workspace,
+body.pmno-page-bulk #dashboardView,
+body.pmno-page-bulk #siteProfileView,
+body.pmno-page-bulk #drmView,
+body.pmno-page-bulk #masterDataView{display:none!important;}
+body.pmno-page-drm .workspace,
+body.pmno-page-drm #dashboardView,
+body.pmno-page-drm #siteProfileView,
+body.pmno-page-drm #bulkView,
+body.pmno-page-master #workspace,
+body.pmno-page-master #dashboardView,
+body.pmno-page-master #siteProfileView,
+body.pmno-page-master #bulkView,
+body.pmno-page-master #drmView{display:none!important;}
+body.pmno-page-single #dashboardView,
+body.pmno-page-single #siteProfileView,
+body.pmno-page-single #bulkView,
+body.pmno-page-single #drmView,
+body.pmno-page-single #masterDataView{display:none!important;}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1481,7 +1517,7 @@ loadTenants().then(pmnoLoadRouteContext);
   const KEY='pmno_active_page'; const valid=p=>p==='dashboard'||p==='siteprofile'||p==='bulk'||p==='single'||p==='drm'||p==='master';
   function readSaved(){try{const p=localStorage.getItem(KEY);return valid(p)?p:null}catch(e){return null}}
   function save(page){try{localStorage.setItem(KEY,page)}catch(e){}}
-  function apply(page){orig.style.display=page==='single'?'grid':'none';dv.style.display=page==='dashboard'?'block':'none';sp.style.display=page==='siteprofile'?'block':'none';w.style.display=page==='bulk'?'block':'none';drm.style.display=page==='drm'?'block':'none';md.style.display=page==='master'?'block':'none';document.body.classList.toggle('bulk-page',page==='bulk');db.classList.toggle('active',page==='dashboard');spm.classList.toggle('active',page==='siteprofile');s.classList.toggle('active',page==='single');b.classList.toggle('active',page==='bulk');d.classList.toggle('active',page==='drm');m.classList.toggle('active',page==='master');if(mob)mob.style.display=page==='single'?'':'none';save(page);window.dispatchEvent(new Event('resize'));if(page==='dashboard'&&window.pmnoDashboardInit)window.pmnoDashboardInit();if(page==='siteprofile'&&window.pmnoSiteProfileInit)window.pmnoSiteProfileInit()}
+  function apply(page){document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');document.body.classList.add('pmno-page-'+page);orig.hidden=page!=='single';dv.hidden=page!=='dashboard';sp.hidden=page!=='siteprofile';w.hidden=page!=='bulk';drm.hidden=page!=='drm';md.hidden=page!=='master';orig.style.display=page==='single'?'grid':'none';dv.style.display=page==='dashboard'?'block':'none';sp.style.display=page==='siteprofile'?'block':'none';w.style.display=page==='bulk'?'block':'none';drm.style.display=page==='drm'?'block':'none';md.style.display=page==='master'?'block':'none';document.body.classList.toggle('bulk-page',page==='bulk');db.classList.toggle('active',page==='dashboard');spm.classList.toggle('active',page==='siteprofile');s.classList.toggle('active',page==='single');b.classList.toggle('active',page==='bulk');d.classList.toggle('active',page==='drm');m.classList.toggle('active',page==='master');if(mob)mob.style.display=page==='single'?'':'none';save(page);window.dispatchEvent(new Event('resize'));if(page==='dashboard'&&window.pmnoDashboardInit)window.pmnoDashboardInit();if(page==='siteprofile'&&window.pmnoSiteProfileInit)window.pmnoSiteProfileInit()}
   function current(){const h=String(location.hash||'').replace(/^#/,'').toLowerCase();return valid(h)?h:(readSaved()||'single')}
   function navigate(page,replace=false){if(!valid(page))page='single';const target='#'+page;if(location.hash!==target){if(replace)history.replaceState({pmnoPage:page},'',target);else history.pushState({pmnoPage:page},'',target)}apply(page);if(page==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()}
   db.onclick=()=>navigate('dashboard');spm.onclick=()=>navigate('siteprofile');s.onclick=()=>navigate('single');b.onclick=()=>navigate('bulk');d.onclick=()=>navigate('drm');m.onclick=()=>navigate('master');window.addEventListener('popstate',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('hashchange',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('pageshow',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});const initial=current();if(location.hash!=='#'+initial)history.replaceState({pmnoPage:initial},'','#'+initial);apply(initial);if(initial==='master'&&window.pmnoMasterInit)window.pmnoMasterInit();
