@@ -1959,7 +1959,7 @@ function renderKpis(){
   ['LEASE < 6 BULAN',a.leaseRisk+a.leaseExpired,`${a.leaseExpired} expired`,'amber'],
   ['LEGAL GAP',a.legalGap,`${pct(a.total-a.legalGap,a.total)}% complete`,'amber']
  ].map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${fmtInt(x[1])}</b><small>${esc(x[2])}</small></div>`).join('')+
- `<div class="dash-source-strip"><span><b>DEVICE</b> source not in dashboard DB</span><span><b>COST</b> source not in dashboard DB</span><span>Audit key: <b>Site ID</b></span></div>`;
+ `<div class="dash-source-strip"><span>Audit basis: <b>Site ID</b></span><span>Tenant / Revenue / Power: <b>site-level correlation</b></span><span>Device / Cost: <b>site-level evidence not mapped</b></span></div>`;
 }
 function applyFilters(){
  const reg=String($('dash-regional')?.value||''),prov=String($('dash-province')?.value||''),city=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim().toLowerCase();
@@ -1980,17 +1980,47 @@ function renderDashboardSource(source){
  const powerSites=new Set();filtered.forEach(r=>{if((livePower[siteId(r)]||[]).length)powerSites.add(siteId(r))});$('dash-power').innerHTML=`<div class="metric-list"><div class="metric-row"><span>SITES WITH POWER DATA</span><b>${fmtInt(powerSites.size)}</b></div><div class="metric-row"><span>POWER ROWS</span><b>${fmtInt(filtered.reduce((n,r)=>n+(livePower[siteId(r)]||[]).length,0))}</b></div></div>`;
  const mts=filtered.map(r=>liveMaintenance[siteId(r)]).filter(Boolean);const ms={};mts.forEach(m=>{const k=String(m.maintenance_status||'UNKNOWN');ms[k]=(ms[k]||0)+1});$('dash-maintenance').innerHTML=`<div class="metric-list">${Object.entries(ms).slice(0,6).map(([k,v])=>`<div class="metric-row"><span>${esc(k)}</span><b>${fmtInt(v)}</b></div>`).join('')||'<div class="dash-empty-note">No maintenance data.</div>'}</div>`;
  const gaps=filtered.reduce((n,r)=>n+(!basicComplete(r)?1:0),0);$('dash-quality').innerHTML=`<div class="metric-list"><div class="metric-row"><span>BASIC DATA COMPLETE</span><b>${fmtInt(filtered.length-gaps)} / ${fmtInt(filtered.length)}</b></div><div class="metric-row"><span>LEGAL COMPLETE</span><b>${fmtInt(filtered.length-siteAuditSnapshot(filtered).legalGap)} / ${fmtInt(filtered.length)}</b></div></div>`;
- $('dash-geo').innerHTML=`<div class="metric-list"><div class="metric-row"><span>WITH COORDINATES</span><b>${fmtInt(filtered.filter(r=>Number.isFinite(Number(val(r,'latitude')))&&Number.isFinite(Number(val(r,'longitude')))).length)}</b></div><div class="metric-row"><span>DISPLAYED ON MAP</span><b>${fmtInt(Math.min(2500,filtered.length))}</b></div></div>`;
+ $('dash-geo').innerHTML=`<div class="metric-list"><div class="metric-row"><span>WITH COORDINATES</span><b>${fmtInt(filtered.filter(r=>Number.isFinite(Number(val(r,'latitude')))&&Number.isFinite(Number(val(r,'longitude')))).length)}</b></div><div class="metric-row"><span>DISPLAYED ON MAP</span><b>${fmtInt(Math.min(2500,filtered.filter(r=>Number.isFinite(Number(val(r,'latitude')))&&Number.isFinite(Number(val(r,'longitude')))).length))}</b></div></div>`;
  renderMap(filtered);
 }
 function renderMap(list){
- const el=$('dash-map');if(!el)return;if(typeof L==='undefined'){el.innerHTML='<div class="dash-empty-note" style="margin:14px">Map library belum termuat. Data dashboard tetap tersedia.</div>';return}if(!dashMap){dashMap=L.map(el,{preferCanvas:true,zoomControl:true,attributionControl:true}).setView([-7.2,110.4],8);L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(dashMap);}
+ const el=$('dash-map');if(!el)return;
+ if(typeof L==='undefined'){el.innerHTML='<div class="dash-empty-note" style="margin:14px">Map library belum termuat. Data dashboard tetap tersedia.</div>';return}
+ if(!dashMap){
+   dashMap=L.map(el,{preferCanvas:true,zoomControl:true,attributionControl:true});
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'© OpenStreetMap'}).addTo(dashMap);
+   dashMap.setView([-2.5,118],5);
+ }
  dashMarkers.forEach(m=>dashMap.removeLayer(m));dashMarkers=[];
- const valid=list.filter(r=>Number.isFinite(Number(val(r,'latitude')))&&Number.isFinite(Number(val(r,'longitude'))));const shown=valid.slice(0,2500);
- for(const r of shown){const n=activeTenants(r).length;const color=n>=6?'#ff5570':n>=4?'#f5a64f':n>=2?'#d8d85b':'#43e0a0';const m=L.circleMarker([Number(r.latitude),Number(r.longitude)],{radius:n>=6?6:n>=4?5:n>=2?4:3,weight:1,color,fillColor:color,fillOpacity:.72});m.bindTooltip(`<b>${esc(siteId(r))}</b><br>${esc(val(r,'site_name'))}<br>${n} active tenant`,{direction:'top'});m.on('click',()=>window.pmnoOpenSiteProfile(r));m.addTo(dashMap);dashMarkers.push(m)}
- if(shown.length){const b=L.latLngBounds(shown.map(r=>[Number(r.latitude),Number(r.longitude)]));dashMap.fitBounds(b,{padding:[20,20],maxZoom:11})}
- setTimeout(()=>dashMap.invalidateSize(),80);
- const card=el.closest('.dash-map-card');if(card){const old=card.querySelector('.dash-map-note');old?.remove();const note=document.createElement('div');note.className='dash-map-note';note.textContent=`Showing ${fmtInt(shown.length)} of ${fmtInt(valid.length)} sites with coordinates`;note.style.cssText='padding:6px 12px;color:#71899c;font-size:8px;border-top:1px solid #1a3047';card.appendChild(note)}
+ const valid=list.filter(r=>Number.isFinite(Number(val(r,'latitude')))&&Number.isFinite(Number(val(r,'longitude'))));
+ // Render a bounded subset for mobile performance, but calculate viewport from ALL valid sites.
+ const maxMarkers=2500;
+ let shown=valid;
+ if(valid.length>maxMarkers){
+   const step=(valid.length-1)/(maxMarkers-1);
+   shown=Array.from({length:maxMarkers},(_,i)=>valid[Math.round(i*step)]);
+ }
+ for(const r of shown){
+   const n=activeTenants(r).length;
+   const color=n>=6?'#ff5570':n>=4?'#f5a64f':n>=2?'#d8d85b':'#43e0a0';
+   const m=L.circleMarker([Number(r.latitude),Number(r.longitude)],{radius:n>=6?6:n>=4?5:n>=2?4:3,weight:1,color,fillColor:color,fillOpacity:.72});
+   m.bindTooltip(`<b>${esc(siteId(r))}</b><br>${esc(val(r,'site_name'))}<br>${n} active tenant`,{direction:'top'});
+   m.on('click',()=>window.pmnoOpenSiteProfile(r));m.addTo(dashMap);dashMarkers.push(m);
+ }
+ if(valid.length){
+   const b=L.latLngBounds(valid.map(r=>[Number(r.latitude),Number(r.longitude)]));
+   dashMap.fitBounds(b,{padding:[28,28],maxZoom:9,animate:false});
+ }else{
+   dashMap.setView([-2.5,118],5);
+ }
+ setTimeout(()=>dashMap.invalidateSize(),100);
+ const card=el.closest('.dash-map-card');
+ if(card){
+   const old=card.querySelector('.dash-map-note');old?.remove();
+   const note=document.createElement('div');note.className='dash-map-note';
+   note.textContent=`Showing ${fmtInt(shown.length)} of ${fmtInt(valid.length)} sites with coordinates · viewport based on all filtered sites`;
+   note.style.cssText='padding:6px 12px;color:#71899c;font-size:8px;border-top:1px solid #1a3047';card.appendChild(note);
+ }
 }
 async function getAll(table,select='*'){
  const pageSize=1000;
