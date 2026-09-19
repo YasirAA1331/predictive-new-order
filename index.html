@@ -1664,16 +1664,54 @@ loadTenants().then(pmnoLoadRouteContext);
   window.pmnoSingleCandidateOptions=singleCandidateOptions;
 })();
 </script>
-<script>
+<script id="pmno-navigation-v26">
 (function(){
-  const db=document.getElementById('dashboardMenu'),spm=document.getElementById('siteProfileMenu'),s=document.getElementById('singleMenu'),b=document.getElementById('bulkMenu'),d=document.getElementById('drmMenu'),m=document.getElementById('masterDataMenu'),dv=document.getElementById('dashboardView'),sp=document.getElementById('siteProfileView'),w=document.getElementById('bulkView'),drm=document.getElementById('drmView'),md=document.getElementById('masterDataView'),orig=document.querySelector('.workspace'),mob=document.querySelector('.mobile-nav');
-  const KEY='pmno_active_page'; const valid=p=>p==='dashboard'||p==='siteprofile'||p==='bulk'||p==='single'||p==='drm'||p==='master';
-  function readSaved(){try{const p=localStorage.getItem(KEY);return valid(p)?p:null}catch(e){return null}}
-  function save(page){try{localStorage.setItem(KEY,page)}catch(e){}}
-  function apply(page){document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');document.body.classList.add('pmno-page-'+page);orig.hidden=page!=='single';dv.hidden=page!=='dashboard';sp.hidden=page!=='siteprofile';w.hidden=page!=='bulk';drm.hidden=page!=='drm';md.hidden=page!=='master';orig.style.display=page==='single'?'grid':'none';dv.style.display=page==='dashboard'?'block':'none';sp.style.display=page==='siteprofile'?'block':'none';w.style.display=page==='bulk'?'block':'none';drm.style.display=page==='drm'?'block':'none';md.style.display=page==='master'?'block':'none';document.body.classList.toggle('bulk-page',page==='bulk');db.classList.toggle('active',page==='dashboard');spm.classList.toggle('active',page==='siteprofile');s.classList.toggle('active',page==='single');b.classList.toggle('active',page==='bulk');d.classList.toggle('active',page==='drm');m.classList.toggle('active',page==='master');if(mob)mob.style.display=page==='single'?'':'none';save(page);window.dispatchEvent(new Event('resize'));if(page==='dashboard'&&window.pmnoDashboardInit)window.pmnoDashboardInit();if(page==='siteprofile'&&window.pmnoSiteProfileInit)window.pmnoSiteProfileInit()}
-  function current(){const h=String(location.hash||'').replace(/^#/,'').toLowerCase();return valid(h)?h:(readSaved()||'single')}
-  function navigate(page,replace=false){if(!valid(page))page='single';const target='#'+page;if(location.hash!==target){if(replace)history.replaceState({pmnoPage:page},'',target);else history.pushState({pmnoPage:page},'',target)}apply(page);if(page==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()}
-  db.onclick=()=>navigate('dashboard');spm.onclick=()=>navigate('siteprofile');s.onclick=()=>navigate('single');b.onclick=()=>navigate('bulk');d.onclick=()=>navigate('drm');m.onclick=()=>navigate('master');window.addEventListener('popstate',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('hashchange',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('pageshow',()=>{const p=current();apply(p);requestAnimationFrame(()=>window.scrollTo(0,0));if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});const initial=current();if(location.hash!=='#'+initial)history.replaceState({pmnoPage:initial},'','#'+initial);apply(initial);if(initial==='master'&&window.pmnoMasterInit)window.pmnoMasterInit();
+  'use strict';
+  const KEY='pmno_active_page';
+  const ROUTES=new Set(['dashboard','siteprofile','bulk','single','drm','master']);
+  const el=id=>document.getElementById(id);
+  const views={dashboard:el('dashboardView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
+  const menus={dashboard:el('dashboardMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
+  const valid=p=>ROUTES.has(String(p||'').toLowerCase());
+  const readHash=()=>{const h=String(location.hash||'').replace(/^#/,'').trim().toLowerCase();const r=h.split(/[?&/]/)[0];return valid(r)?r:null};
+  const readSaved=()=>{try{const p=String(localStorage.getItem(KEY)||'').toLowerCase();return valid(p)?p:null}catch(_){return null}};
+  const current=()=>readHash()||readSaved()||'single';
+  const persist=p=>{try{localStorage.setItem(KEY,p)}catch(_){} };
+  function setRouteUrl(page,replace){
+    const target='#'+page;
+    if(location.hash===target)return;
+    const url=location.pathname+location.search+target;
+    try{(replace?history.replaceState:history.pushState).call(history,{pmnoPage:page},'',url)}catch(_){location.hash=page}
+  }
+  function apply(page,opts){
+    page=valid(page)?page:'single';
+    document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');
+    document.body.classList.add('pmno-page-'+page);
+    Object.entries(views).forEach(([name,node])=>{if(!node)return;const on=name===page;node.hidden=!on;node.style.display=on?(name==='single'?'grid':'block'):'none'});
+    document.body.classList.toggle('bulk-page',page==='bulk');
+    Object.entries(menus).forEach(([name,node])=>node?.classList.toggle('active',name===page));
+    const mob=document.querySelector('.mobile-nav');if(mob)mob.style.display=page==='single'?'':'none';
+    persist(page);
+    if(opts?.writeHash!==false)setRouteUrl(page,!!opts?.replace);
+    if(opts?.scroll!==false)requestAnimationFrame(()=>window.scrollTo(0,0));
+    window.dispatchEvent(new Event('resize'));
+    if(page==='dashboard'&&typeof window.pmnoDashboardInit==='function')Promise.resolve(window.pmnoDashboardInit()).catch(e=>console.warn('[PMNO NAV] dashboard init',e));
+    if(page==='siteprofile'&&typeof window.pmnoSiteProfileInit==='function')Promise.resolve(window.pmnoSiteProfileInit()).catch(e=>console.warn('[PMNO NAV] site profile init',e));
+    if(page==='master'&&typeof window.pmnoMasterInit==='function')Promise.resolve(window.pmnoMasterInit()).catch(e=>console.warn('[PMNO NAV] master init',e));
+    return page;
+  }
+  function navigate(page,replace=false){return apply(page,{writeHash:true,replace,scroll:true})}
+  window.pmnoNavigate=navigate;
+  window.pmnoRouteCurrent=current;
+  Object.entries(menus).forEach(([page,node])=>{if(node){node.onclick=e=>{e?.preventDefault?.();navigate(page)}}});
+  function syncFromUrl(){apply(current(),{writeHash:false,scroll:true})}
+  window.addEventListener('popstate',syncFromUrl);
+  window.addEventListener('hashchange',syncFromUrl);
+  window.addEventListener('pageshow',()=>{const p=current();apply(p,{writeHash:true,replace:true,scroll:true});setTimeout(()=>apply(p,{writeHash:false,scroll:false}),100)});
+  document.addEventListener('visibilitychange',()=>{if(!document.hidden){const p=current();apply(p,{writeHash:false,scroll:false})}});
+  // Initial route is resolved only after every static view exists. Explicit hash wins over saved state.
+  const boot=()=>apply(current(),{writeHash:true,replace:true,scroll:true});
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
 })();
 </script>
 <script>
@@ -3150,5 +3188,24 @@ window.pmnoMasterInit=render;render();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V25-AUDITED";</script></body>
+<script>window.__PMNO_BUILD__="V25-AUDITED";</script>
+
+<script id="pmno-navigation-watchdog-v26">
+(function(){
+  'use strict';
+  function masterReady(){
+    const box=document.getElementById('masterSections');
+    if(!box)return;
+    // Master controller normally paints this itself. If a refresh restores a stale DOM
+    // before the controller finishes, force one deterministic render without touching data.
+    if(document.body.classList.contains('pmno-page-master') && !box.querySelector('.master-card') && typeof window.pmnoMasterInit==='function'){
+      Promise.resolve(window.pmnoMasterInit()).catch(err=>console.warn('[PMNO MASTER WATCHDOG]',err));
+    }
+  }
+  window.addEventListener('pageshow',()=>setTimeout(masterReady,80));
+  window.addEventListener('hashchange',()=>setTimeout(masterReady,80));
+  setInterval(masterReady,1200);
+})();
+</script>
+</body>
 </html>
