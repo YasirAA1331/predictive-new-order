@@ -2008,64 +2008,58 @@ function renderDashboardSource(label){
  const head=$('dash-head');if(head)head.classList.remove('loading');
 }
 function renderMap(){
- const el=$('dash-map');if(!el)return;
- // Real geographic map: Leaflet basemap + one canvas overlay for 40k+ sites.
+ const el=$('dash-map');if(!el||typeof L==='undefined')return;
  if(!window.__pmnoDashMap){
    el.innerHTML='';
-   const mapEl=document.createElement('div');
-   mapEl.style.cssText='position:absolute;inset:0;width:100%;height:100%;';
    el.style.position='relative';
-   el.appendChild(mapEl);
-   window.__pmnoDashMap=L.map(mapEl,{zoomControl:true,preferCanvas:true,attributionControl:true,minZoom:4,maxZoom:12,worldCopyJump:false,maxBounds:[[ -12,94],[7,142]],maxBoundsViscosity:.85});
-   window.__pmnoDashMap.fitBounds([[-11.5,94.5],[6.5,141.5]],{padding:[18,18],maxZoom:5});
-   const tiles=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,crossOrigin:true,opacity:.34,attribution:'© OpenStreetMap contributors'}).addTo(window.__pmnoDashMap);
-   // Keep the basemap subtle: geographic context without overpowering the site layer.
-   tiles.getContainer().style.filter='brightness(.72) saturate(.62) contrast(1.05)';
-   const pane=window.__pmnoDashMap.createPane('pmno-sites');pane.style.zIndex=450;pane.style.pointerEvents='none';
-   const canvas=document.createElement('canvas');canvas.style.cssText='position:absolute;inset:0;width:100%;height:100%;pointer-events:auto;';pane.appendChild(canvas);
+   window.__pmnoDashMap=L.map(el,{zoomControl:true,attributionControl:true,preferCanvas:true,zoomAnimation:true,minZoom:4,maxZoom:12,worldCopyJump:false,maxBounds:[[-12,94],[7,142]],maxBoundsViscosity:.9}).setView([-2.5,118],5);
+   window.__pmnoDashHome=()=>{window.__pmnoDashMap.fitBounds([[-11.5,94.5],[6.5,141.5]],{padding:[18,18],maxZoom:5});};
+   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,keepBuffer:2,updateWhenZooming:true,updateWhenIdle:false,attribution:'© OpenStreetMap contributors'}).addTo(window.__pmnoDashMap);
+   const home=L.control({position:'topright'});
+   home.onAdd=()=>{const d=L.DomUtil.create('div','leaflet-control');d.innerHTML='<button type="button" title="Reset Indonesia view" style="width:34px;height:34px;border:1px solid #29445d;border-radius:4px;background:#071321;color:#53c8ff;font-weight:900;font-size:16px;cursor:pointer">⌂</button>';L.DomEvent.disableClickPropagation(d);d.querySelector('button').onclick=()=>window.__pmnoDashHome();return d;};home.addTo(window.__pmnoDashMap);
+   const pane=window.__pmnoDashMap.getPanes().overlayPane;
+   const canvas=document.createElement('canvas');canvas.className='pmno-dash-canvas';canvas.style.cssText='position:absolute;left:0;top:0;width:100%;height:100%;z-index:10;pointer-events:auto;';pane.appendChild(canvas);
    window.__pmnoDashCanvas=canvas;
    canvas.addEventListener('click',ev=>{
      const rect=canvas.getBoundingClientRect(),x=ev.clientX-rect.left,y=ev.clientY-rect.top;
-     let best=null,bd=window.__pmnoDashMap.getZoom()<6?18:12;
-     for(const pt of (window.__pmnoDashPoints||[])){const d=Math.hypot(pt.x-x,pt.y-y);if(d<bd){bd=d;best=pt}}
-     if(best&&best.row)window.pmnoOpenSiteProfile(best.row);
+     let best=null,bd=window.__pmnoDashMap.getZoom()<6?22:14;
+     for(const pt of (window.__pmnoDashPoints||[])){const d=Math.hypot(pt.x-x,pt.y-y);if(d<bd){bd=d;best=pt;}}
+     if(best?.row)window.pmnoOpenSiteProfile(best.row);
    });
-   window.__pmnoDashMap.on('zoom move resize',()=>drawDashMap());
-   setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),50);
+   window.__pmnoDashMap.on('zoomend moveend resize',drawDashMap);
+   setTimeout(()=>{window.__pmnoDashHome();window.__pmnoDashMap.invalidateSize({animate:false});drawDashMap();},80);
+ }else{
+   setTimeout(()=>{window.__pmnoDashMap.invalidateSize({animate:false});drawDashMap();},0);
  }
- setTimeout(()=>{window.__pmnoDashMap.invalidateSize({animate:false});drawDashMap();},0);
 }
 function drawDashMap(){
  const map=window.__pmnoDashMap,canvas=window.__pmnoDashCanvas;if(!map||!canvas)return;
- const rect=map.getContainer().getBoundingClientRect(),w=Math.max(320,rect.width),h=Math.max(260,rect.height),dpr=Math.min(window.devicePixelRatio||1,2);
+ const size=map.getSize(),w=Math.max(320,size.x),h=Math.max(260,size.y),dpr=Math.min(window.devicePixelRatio||1,2);
  canvas.width=Math.round(w*dpr);canvas.height=Math.round(h*dpr);canvas.style.width=w+'px';canvas.style.height=h+'px';
  const ctx=canvas.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
- const valid=filtered.map(r=>({row:r,lat:Number(val(r,'latitude','lat')),lon:Number(val(r,'longitude','lon','lng'))})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&p.lat>=-11&&p.lat<=6&&p.lon>=95&&p.lon<=141);
- const color=n=>n>=6?'rgba(255,92,122,.96)':n>=4?'rgba(255,174,82,.96)':n>=2?'rgba(226,220,76,.96)':'rgba(67,224,160,.96)';
- const z=map.getZoom(); window.__pmnoDashPoints=[];
+ const valid=filtered.map(r=>({row:r,lat:Number(val(r,'latitude','lat')),lon:Number(val(r,'longitude','lon','lng'))})).filter(p=>Number.isFinite(p.lat)&&Number.isFinite(p.lon)&&p.lat>=-11.5&&p.lat<=6.5&&p.lon>=94.5&&p.lon<=141.5);
+ const color=n=>n>=6?'#ff5c7a':n>=4?'#ffae52':n>=2?'#e2dc4c':'#43e0a0';
+ const z=map.getZoom();window.__pmnoDashPoints=[];
  if(z<6){
-   // Screen-space clustering: clean national view without giant overlapping blobs.
-   const bins=new Map(), cell=58;
+   const bins=new Map(),cell=52;
    for(const p of valid){
      const pt=map.latLngToContainerPoint([p.lat,p.lon]);
      const bx=Math.floor(pt.x/cell),by=Math.floor(pt.y/cell),key=bx+':'+by;
-     let b=bins.get(key); if(!b)b={x:0,y:0,n:0,tenantSum:0,maxTenant:0,sites:[]};
+     let b=bins.get(key);if(!b)b={x:0,y:0,n:0,tenantMax:0,tenantSum:0,site:null};
      b.x+=pt.x;b.y+=pt.y;b.n++;
-     const tc=Number(liveTenantStats[sid(p.row)]?.total||0);b.tenantSum+=tc;b.maxTenant=Math.max(b.maxTenant,tc);
-     if(b.sites.length<12)b.sites.push(p.row);
+     const tc=Number(liveTenantStats[sid(p.row)]?.total||0);b.tenantSum+=tc;b.tenantMax=Math.max(b.tenantMax,tc);if(!b.site)b.site=p.row;
    }
    for(const b of bins.values()){
-     const x=b.x/b.n,y=b.y/b.n,r=Math.min(13,4+Math.sqrt(b.n)*.72);
-     const dominant=b.maxTenant;
-     ctx.beginPath();ctx.arc(x,y,r+2,0,Math.PI*2);ctx.fillStyle='rgba(5,16,29,.92)';ctx.fill();
-     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle=color(dominant);ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
-     ctx.strokeStyle='rgba(255,255,255,.55)';ctx.lineWidth=1;ctx.stroke();
-     if(b.n>1){ctx.fillStyle='#081522';ctx.font='800 7px Poppins,Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.n.toLocaleString('id-ID'),x,y);}
+     const x=b.x/b.n,y=b.y/b.n,r=Math.min(15,5+Math.sqrt(b.n)*.65);
+     ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fillStyle='rgba(5,16,29,.88)';ctx.fill();
+     ctx.beginPath();ctx.arc(x,y,r-1,0,Math.PI*2);ctx.fillStyle=color(b.tenantMax);ctx.globalAlpha=.9;ctx.fill();ctx.globalAlpha=1;
+     if(b.n>1){ctx.fillStyle='#071321';ctx.font='900 8px Arial';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.n.toLocaleString('id-ID'),x,y);}
+     window.__pmnoDashPoints.push({row:b.site,x,y});
    }
  }else{
    for(const p of valid){
      const pt=map.latLngToContainerPoint([p.lat,p.lon]),n=Number(liveTenantStats[sid(p.row)]?.total||0);
-     ctx.beginPath();ctx.arc(pt.x,pt.y,n>=6?3.4:2.6,0,Math.PI*2);ctx.fillStyle=color(n);ctx.fill();
+     ctx.beginPath();ctx.arc(pt.x,pt.y,n>=6?3.2:2.5,0,Math.PI*2);ctx.fillStyle=color(n);ctx.globalAlpha=.92;ctx.fill();ctx.globalAlpha=1;
      window.__pmnoDashPoints.push({row:p.row,x:pt.x,y:pt.y});
    }
  }
