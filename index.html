@@ -211,6 +211,7 @@
 <script id="pmno-nav-bootstrap">
 (function(){
   try{
+    if('scrollRestoration' in history) history.scrollRestoration='manual';
     var h=String(location.hash||'').replace(/^#/,'').toLowerCase();
     var saved=localStorage.getItem('pmno_active_page');
     var page=(h==='bulk'||h==='single')?h:((saved==='bulk'||saved==='single')?saved:'single');
@@ -1672,7 +1673,7 @@ loadTenants().then(pmnoLoadRouteContext);
   function apply(page){document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');document.body.classList.add('pmno-page-'+page);orig.hidden=page!=='single';dv.hidden=page!=='dashboard';sp.hidden=page!=='siteprofile';w.hidden=page!=='bulk';drm.hidden=page!=='drm';md.hidden=page!=='master';orig.style.display=page==='single'?'grid':'none';dv.style.display=page==='dashboard'?'block':'none';sp.style.display=page==='siteprofile'?'block':'none';w.style.display=page==='bulk'?'block':'none';drm.style.display=page==='drm'?'block':'none';md.style.display=page==='master'?'block':'none';document.body.classList.toggle('bulk-page',page==='bulk');db.classList.toggle('active',page==='dashboard');spm.classList.toggle('active',page==='siteprofile');s.classList.toggle('active',page==='single');b.classList.toggle('active',page==='bulk');d.classList.toggle('active',page==='drm');m.classList.toggle('active',page==='master');if(mob)mob.style.display=page==='single'?'':'none';save(page);window.dispatchEvent(new Event('resize'));if(page==='dashboard'&&window.pmnoDashboardInit)window.pmnoDashboardInit();if(page==='siteprofile'&&window.pmnoSiteProfileInit)window.pmnoSiteProfileInit()}
   function current(){const h=String(location.hash||'').replace(/^#/,'').toLowerCase();return valid(h)?h:(readSaved()||'single')}
   function navigate(page,replace=false){if(!valid(page))page='single';const target='#'+page;if(location.hash!==target){if(replace)history.replaceState({pmnoPage:page},'',target);else history.pushState({pmnoPage:page},'',target)}apply(page);if(page==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()}
-  db.onclick=()=>navigate('dashboard');spm.onclick=()=>navigate('siteprofile');s.onclick=()=>navigate('single');b.onclick=()=>navigate('bulk');d.onclick=()=>navigate('drm');m.onclick=()=>navigate('master');window.addEventListener('popstate',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('hashchange',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('pageshow',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});const initial=current();if(location.hash!=='#'+initial)history.replaceState({pmnoPage:initial},'','#'+initial);apply(initial);if(initial==='master'&&window.pmnoMasterInit)window.pmnoMasterInit();
+  db.onclick=()=>navigate('dashboard');spm.onclick=()=>navigate('siteprofile');s.onclick=()=>navigate('single');b.onclick=()=>navigate('bulk');d.onclick=()=>navigate('drm');m.onclick=()=>navigate('master');window.addEventListener('popstate',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('hashchange',()=>{const p=current();apply(p);if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});window.addEventListener('pageshow',()=>{const p=current();apply(p);requestAnimationFrame(()=>window.scrollTo(0,0));if(p==='master'&&window.pmnoMasterInit)window.pmnoMasterInit()});const initial=current();if(location.hash!=='#'+initial)history.replaceState({pmnoPage:initial},'','#'+initial);apply(initial);if(initial==='master'&&window.pmnoMasterInit)window.pmnoMasterInit();
 })();
 </script>
 <script>
@@ -2896,7 +2897,33 @@ async function getModules(){
  try{const r=await fetch(URL+'/rest/v1/pmno_master_module?select=module_code,module_name,data_category,upload_mode,target_table&active=eq.true&order=module_code',{headers:apiHeaders()});if(!r.ok)throw Error();const db=await r.json();const byCode=Object.fromEntries(db.map(x=>[x.module_code,x]));return fallback.map(x=>byCode[x.module_code]?{...x,...byCode[x.module_code]}:x)}catch(e){return fallback}
 }
 async function rowCount(table){try{const select=table==='pmno_site_master'?'site_id':'*';const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&limit=1',{headers:{...apiHeaders(),'Prefer':'count=exact'}});const cr=r.headers.get('content-range');if(cr&&cr.includes('/'))return Number(cr.split('/')[1]);return '—'}catch(e){return '—'}}
-async function render(){const box=$('masterSections');if(!box)return;const mods=await getModules();const byCode=Object.fromEntries(mods.map(x=>[x.module_code,x]));box.innerHTML=modules.map(g=>`<section class="master-section"><div class="master-section-head"><strong>${g[1]}</strong><span>${g[2].length} MODULES</span></div><div class="master-grid">${g[2].map(name=>{const c=codeByName[name],x=byCode[c]||{};return `<article class="master-card"><div class="master-card-top"><div><h3>${esc(name)}</h3><div class="master-type">${esc(x.upload_mode||'REPLACE')} · ${esc(x.data_category||g[0])}</div></div><span class="master-type">ACTIVE</span></div><div class="master-stat"><div><b id="count-${esc(c)}">—</b><small> records</small></div><small>version controlled</small></div><div class="master-actions"><button data-md="${esc(c)}">MANAGE</button><button class="primary" data-exp="${esc(c)}">EXPORT</button></div></article>`}).join('')}</div></section>`).join('');box.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>openModule(b.dataset.md));box.querySelectorAll('[data-exp]').forEach(b=>b.onclick=(ev)=>{ev?.preventDefault?.();void exportModule(b.dataset.exp)});for(const m of mods){const n=await rowCount(m.target_table);const el=$('count-'+m.module_code);if(el)el.textContent=typeof n==='number'?n.toLocaleString('id-ID'):n}}
+async function render(){
+  const box=$('masterSections');
+  if(!box)return;
+  // Render the navigation/cards immediately from the local contract. Do not block the
+  // Master page on a remote metadata request during refresh; a slow/offline request
+  // must never leave the page looking empty.
+  const baseMods=Object.entries(codeByName).map(([module_name,module_code])=>({
+    module_code,module_name,
+    data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',
+    upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',
+    target_table:({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()
+  }));
+  const paint=(mods)=>{
+    const byCode=Object.fromEntries(mods.map(x=>[x.module_code,x]));
+    box.innerHTML=modules.map(g=>`<section class="master-section"><div class="master-section-head"><strong>${g[1]}</strong><span>${g[2].length} MODULES</span></div><div class="master-grid">${g[2].map(name=>{const c=codeByName[name],x=byCode[c]||{};return `<article class="master-card"><div class="master-card-top"><div><h3>${esc(name)}</h3><div class="master-type">${esc(x.upload_mode||'REPLACE')} · ${esc(x.data_category||g[0])}</div></div><span class="master-type">ACTIVE</span></div><div class="master-stat"><div><b id="count-${esc(c)}">—</b><small> records</small></div><small>version controlled</small></div><div class="master-actions"><button data-md="${esc(c)}">MANAGE</button><button class="primary" data-exp="${esc(c)}">EXPORT</button></div></article>`}).join('')}</div></section>`).join('');
+    box.querySelectorAll('[data-md]').forEach(b=>b.onclick=()=>openModule(b.dataset.md));
+    box.querySelectorAll('[data-exp]').forEach(b=>b.onclick=(ev)=>{ev?.preventDefault?.();void exportModule(b.dataset.exp)});
+  };
+  paint(baseMods);
+  try{
+    const mods=await Promise.race([getModules(),new Promise(resolve=>setTimeout(()=>resolve(baseMods),5000))]);
+    paint(Array.isArray(mods)&&mods.length?mods:baseMods);
+    for(const m of mods||baseMods){
+      try{const n=await rowCount(m.target_table);const el=$('count-'+m.module_code);if(el)el.textContent=typeof n==='number'?n.toLocaleString('id-ID'):n}catch(_){/* keep placeholder */}
+    }
+  }catch(e){console.warn('[PMNO MASTER RENDER]',e)}
+}
 function moduleName(code){return Object.entries(codeByName).find(x=>x[1]===code)?.[0]||code}
 async function openModule(code){selected=code;parsed=null;$('masterModalTitle').textContent=moduleName(code);$('masterModalSub').textContent=`${code} · Export → Edit → Upload → Validate → Impact → Publish`;$('masterUploadInfo').textContent='No file uploaded. Export the official template or upload an edited workbook.';$('masterStructure').textContent='PENDING';$('masterBusiness').textContent='PENDING';$('masterImpact').textContent='Upload and validate a version to preview affected engines.';$('masterPublish').disabled=true;masterValidationErrors=[];if($('masterFix'))$('masterFix').style.display='none';if($('masterFixBody'))$('masterFixBody').innerHTML='';const hist=['LEASE_HISTORY','SITAC_HISTORY','PERMIT_HISTORY','CONSTRUCTION_HISTORY','DELIVERY_HISTORY','COMMUNITY_HISTORY'].includes(code);$('masterOperation').value=hist?'APPEND':'REPLACE';$('masterOperation').disabled=!hist;const modeEl=$('masterOperationMode');if(modeEl)modeEl.textContent=`MODE · ${hist?'APPEND':'REPLACE'}`;$('masterModal').classList.add('show');await renderHistory(code)}
 function exportRows(rows,headers,name){
@@ -2941,21 +2968,35 @@ async function exportModule(code){
   const btn=$('masterExport');
   const original=btn?.textContent||'EXPORT CURRENT';
   try{
-    if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');
     if(!code)throw new Error('Module export belum dipilih.');
-    const mods=await getModules();
-    const m=mods.find(x=>x.module_code===code);
-    const targetTable=(m&&m.target_table)||targetTableByCode[code];
-    if(!targetTable)throw new Error('Source data untuk module tidak ditemukan: '+code);
+    if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');
     const schema=headersFor(code)||[];
     if(!schema.length)throw new Error('Mapping kolom export belum tersedia untuk '+moduleName(code)+'.');
     if(btn){btn.disabled=true;btn.textContent='EXPORTING…';}
-    $('masterUploadInfo').textContent='Membaca current data…';
-    const data=code==='ASSET_PROFILE'?await fetchAllAssetProfileRows():await fetchAllRows(targetTable);
-    if(!data.length)throw new Error(`Tidak ada current data untuk ${moduleName(code)}.`);
-    const clean=data.map(row=>{const out={};schema.forEach(k=>{out[k]=row?.[k]??''});return out});
-    exportRows(clean,schema,`PMNO_${code}_Current.xlsx`);
-    $('masterUploadInfo').textContent=`Exported · ${clean.length.toLocaleString('id-ID')} rows · ${schema.length} columns · ${moduleName(code)}.`;
+    $('masterUploadInfo').textContent='Preparing server-side export…';
+    const endpoint=URL+'/functions/v1/pmno-master-export-fast';
+    const r=await fetch(endpoint,{
+      method:'POST',
+      headers:{...apiHeaders(),'Content-Type':'application/json'},
+      body:JSON.stringify({module_code:code})
+    });
+    if(!r.ok){
+      let msg='HTTP '+r.status;
+      try{const j=await r.json();msg=j?.error||j?.message||msg}catch(_){}
+      throw new Error(msg);
+    }
+    const blob=await r.blob();
+    if(!blob.size)throw new Error('File export kosong.');
+    const cd=r.headers.get('Content-Disposition')||'';
+    const match=cd.match(/filename="?([^";]+)"?/i);
+    const filename=match?.[1]||`PMNO_${code}_Current.xlsx`;
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');
+    a.href=url;a.download=filename;a.style.display='none';
+    document.body.appendChild(a);a.click();a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),15000);
+    const rows=r.headers.get('X-PMNO-Rows')||'';
+    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · server-side`;
   }catch(e){
     console.error('[PMNO EXPORT]',e);
     $('masterUploadInfo').textContent=`EXPORT GAGAL · ${e.message}`;
@@ -2966,7 +3007,6 @@ async function exportModule(code){
 }
 $('masterClose').onclick=()=>$('masterModal').classList.remove('show');
 $('masterExport').onclick=(ev)=>{ev?.preventDefault?.();if(!selected){alert('Pilih module terlebih dahulu.');return}void exportModule(selected)};
-document.addEventListener('click',ev=>{const card=ev.target?.closest?.('[data-exp]');if(card&&!ev.defaultPrevented){ev.preventDefault();void exportModule(card.dataset.exp)}},{capture:true});
 $('masterFile').onchange=async e=>{
   const file=e.target.files?.[0];
   if(!file)return;
