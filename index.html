@@ -889,6 +889,7 @@ body.pmno-page-single .workspace{
 
 <style id="pmno-financial-profile-v58-css">
 /* Financial Profile follows the same card language as the other FE profiles. */
+/* Financial Profile — keep existing card structure; normalize only vertical spacing */
 .fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
 .fin-group{border:0;border-radius:0;padding:0;background:transparent}
 .fin-group-title,.fin-profit-title{font-size:11px;font-weight:900;letter-spacing:.12em;color:#9fb0c3;margin:2px 0 8px}
@@ -898,6 +899,11 @@ body.pmno-page-single .workspace{
 .fin-row-label small{display:block;font-size:9px;color:#718096;font-weight:500;margin-top:2px;line-height:1.25}
 .fin-group .metric-row{min-height:42px;padding:8px 9px}
 .fin-group .metric-row b{font-size:11px;text-align:right;white-space:nowrap}
+
+/* The first four groups live in the existing 2-column grid.
+   Profitability and Asset Value sit below it; use the same 12px rhythm. */
+#dash-financial > .fin-group + .fin-group{margin-top:12px}
+
 .fin-profitability{margin-top:12px;border:0;border-radius:0;padding:0;background:transparent}
 .fin-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .fin-profit-card{border:1px solid #1a3047;border-radius:8px;padding:10px;background:#091827}
@@ -911,6 +917,11 @@ body.pmno-page-single .workspace{
 .fin-asset-value .metric-list{margin-top:0}
 @media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
+</style>
+<style id="pmno-financial-spacing-only">
+/* ONLY: match vertical spacing between Financial Profile cards to existing FE card rhythm. */
+#dash-financial > .fin-grid + .fin-group,
+#dash-financial > .fin-group + .fin-group{margin-top:12px!important}
 </style>
 </head>
 <body>
