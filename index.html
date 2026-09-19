@@ -2053,15 +2053,59 @@ function normalizeMasterDateValue(value,key){
   if(m){const out=isoDate(Number(m[1]),Number(m[2]),Number(m[3]));return isValidISODateValue(out)?out+(m[4]||''):str}
   return str;
 }
+function normalizeNumericMasterValue(value,key){
+  if(value==null)return null;
+  if(typeof value==='number')return Number.isFinite(value)?value:null;
+  let s=String(value).trim();
+  if(!s||/^(na|n\/a|nil|null|none|nan|ny data|no data|not available|-)$/i.test(s))return null;
+  s=s.replace(/[\u00A0\s]/g,'').replace(/^(rp|idr|usd|eur|sgd)/i,'').replace(/%$/,'');
+  // Keep only numeric syntax and separators. Remove common unit suffixes such as m, kg, ton, kw.
+  const m=s.match(/[+-]?\d[\d.,]*(?:[eE][+-]?\d+)?/);
+  if(!m)return null;
+  s=m[0];
+  const decimalCommaFields=new Set(['latitude','longitude','slope_pct','distance_decay','base_rsrp_dbm','min_rsrp_dbm','excellent_min_dbm','good_min_dbm','fair_min_dbm','poor_min_dbm']);
+  if(decimalCommaFields.has(String(key||'').toLowerCase()) && s.includes(',') && !s.includes('.')) s=s.replace(',', '.');
+  const hasComma=s.includes(','),hasDot=s.includes('.');
+  if(hasComma&&hasDot){
+    if(s.lastIndexOf(',')>s.lastIndexOf('.')){s=s.replace(/\./g,'').replace(',','.')}else{s=s.replace(/,/g,'')}
+  }else if(hasComma){
+    const parts=s.split(',');
+    if(parts.length>2 || (parts.length===2&&parts[1].length===3)){s=parts.join('')}else{s=s.replace(',','.')}
+  }else if(hasDot){
+    const parts=s.split('.');
+    if(parts.length>2 || (parts.length===2&&parts[1].length===3&&parts[0].length>=1)){s=parts.join('')}
+  }
+  const n=Number(s);
+  return Number.isFinite(n)?n:null;
+}
+function normalizeBooleanMasterValue(value){
+  if(value==null)return null;if(typeof value==='boolean')return value;
+  const s=String(value).trim().toLowerCase();
+  if(!s)return null;if(['true','1','yes','y','ya','aktif','active','on'].includes(s))return true;if(['false','0','no','n','tidak','inactive','nonaktif','off'].includes(s))return false;return null;
+}
+function normalizeUUIDMasterValue(value){
+  if(value==null||String(value).trim()==='')return null;
+  const s=String(value).trim();
+  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(s)?s:null;
+}
 function normalizeMasterRows(code,rows){
   const out=[];const issues=[];
   const dateCols=new Set((headersFor(code)||[]).filter(k=>/(^|_)(date|from|to|at)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase())));
+  const boolCols=new Set(['active','synthetic_flag','manual_carry_required','traditional_transport_required']);
+  const uuidCols=new Set(['tenant_document_file_id','pks_lama_document_file_id']);
+  const numericCols=new Set(['latitude','longitude','tower_height_m','roadhead_distance_m','slope_pct','height_m','width_m','depth_m','weight_kg','wind_load','wind_area_m2','power_consumption_w','max_power_consumption_w','input_voltage','operating_voltage','standard_height_m','max_height_m','base_capacity_ton','typical_cost','max_device_count','max_load_kg','unit_cost','base_unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','base_rsrp_dbm','distance_decay','min_rsrp_dbm','excellent_min_dbm','good_min_dbm','fair_min_dbm','poor_min_dbm','default_cost_multiplier','default_days_add','value_numeric','cost','duration_days','area_m2','tower_height_m','service_fee','official_cost','site_area_m2','foundation_days','erection_days','finishing_days','total_days','total_cost','factory_to_port_days','port_to_port_days','port_to_site_days','langsir_days','radius_m','resolution_cost','annual_lease_value','lease_term_years','district_count','dummy_history_count','annual_lease_benchmark','p25_annual_lease','p75_annual_lease','contract_value','revenue_month','revenue_year','pln_capacity','sps_capacity','battery_capacity','genset_capacity','existing_power_capacity','frequency_mhz','existing_rent_year','existing_tenure_year','new_tenure_year','boq_level','port','quantity','frequency_mhz']);
   rows.forEach((row,i)=>{
     const clean={};
-    Object.entries(row||{}).forEach(([k,v])=>{const nv=(typeof v==='string'&&v.trim()==='')?null:v;clean[k]=dateCols.has(k)?normalizeMasterDateValue(nv,k):nv});
-    dateCols.forEach(k=>{
-      const original=row?.[k], value=clean[k];
-      if(original!=null&&!isBlankExcelDate(original)&&value!=null&&!isValidISODateValue(String(value)))issues.push(`row ${i+2} · ${k} = ${String(original)}`);
+    Object.entries(row||{}).forEach(([k,v])=>{
+      let nv=(typeof v==='string'&&v.trim()==='')?null:v;
+      if(dateCols.has(k)){
+        const original=nv;nv=normalizeMasterDateValue(nv,k);
+        if(original!=null&&!isBlankExcelDate(original)&&nv!=null&&!isValidISODateValue(String(nv)))issues.push(`row ${i+2} · ${k} = ${String(original)}`);
+        if(original!=null&&!isBlankExcelDate(original)&&nv==null)issues.push(`row ${i+2} · ${k} = ${String(original)} → blank`);
+      }else if(boolCols.has(k)){const original=nv;nv=normalizeBooleanMasterValue(nv);if(original!=null&&nv==null)issues.push(`row ${i+2} · ${k} = ${String(original)} → blank`)}
+      else if(uuidCols.has(k)){const original=nv;nv=normalizeUUIDMasterValue(nv);if(original!=null&&nv==null)issues.push(`row ${i+2} · ${k} = ${String(original)} → blank`)}
+      else if(numericCols.has(k)){const original=nv;nv=normalizeNumericMasterValue(nv,k);if(original!=null&&nv==null)issues.push(`row ${i+2} · ${k} = ${String(original)} → blank`)}
+      clean[k]=nv;
     });
     out.push(clean);
   });
@@ -2108,7 +2152,8 @@ $('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook
 $('masterPublish').onclick=async()=>{
   if(!selected||!parsed)return;
   const originalOp=$('masterOperation').value;
-  const uploadRows=parsed.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
+  const batchId=crypto.randomUUID();
+  const uploadRows=normalizeMasterRows(selected,parsed).rows.map(r=>Object.fromEntries(Object.entries(r).map(([k,v])=>[k,(typeof v==='string'&&v.trim()==='')?null:v])));
   if(originalOp==='REPLACE'&&!confirm(`Replace active ${moduleName(selected)} data with ${uploadRows.length.toLocaleString('id-ID')} uploaded rows?`))return;
   try{
     $('masterPublish').disabled=true;$('masterPublish').textContent='PUBLISHING…';
@@ -2129,7 +2174,7 @@ $('masterPublish').onclick=async()=>{
       let last='';
       for(let attempt=1;attempt<=4;attempt++){
         try{
-          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),60000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact}),signal:ctl.signal})}finally{clearTimeout(kill)}
+          const ctl=new AbortController();const kill=setTimeout(()=>ctl.abort(),60000);let r;try{r=await fetch(URL+'/functions/v1/pmno-master-publish-direct',{method:'POST',headers:{...apiHeaders(),'Prefer':'return=minimal'},body:JSON.stringify({p_module_code:selected,p_operation:operation,p_source_filename:$('masterFile').files?.[0]?.name||'uploaded_workbook',p_rows:chunk,p_validation_errors:[],p_validation_warnings:[],p_impact_preview:impact,p_batch_id:batchId}),signal:ctl.signal})}finally{clearTimeout(kill)}
           const raw=await r.text();
           if(r.ok){last='';break}
           last=`HTTP ${r.status}: ${raw||'empty response'}`;
@@ -2139,8 +2184,8 @@ $('masterPublish').onclick=async()=>{
       }
       if(last)throw Error(`Commit chunk ${start+1}-${start+chunk.length} failed after 4 attempts: ${last}`);
       committed+=chunk.length;completedChunks++;
-      paintProgress(committed,isFinal?'Finalizing publish…':`Committed rows ${(start+1).toLocaleString('id-ID')}–${(start+chunk.length).toLocaleString('id-ID')}`);
-      $('masterUploadInfo').textContent=`COMMITTED ${committed.toLocaleString('id-ID')} / ${total.toLocaleString('id-ID')} rows · chunk ${completedChunks}/${totalChunks}`;
+      paintProgress(committed,isFinal?'Committing final dataset…':`Staged rows ${(start+1).toLocaleString('id-ID')}–${(start+chunk.length).toLocaleString('id-ID')}`);
+      $('masterUploadInfo').textContent=`STAGED ${committed.toLocaleString('id-ID')} / ${total.toLocaleString('id-ID')} rows · chunk ${completedChunks}/${totalChunks}`;
     }
     paintProgress(total,'Publish complete');progress.classList.add('is-done');
     $('masterUploadInfo').innerHTML=`<b>PUBLISHED</b> · ${total.toLocaleString('id-ID')} rows · ${totalChunks} chunks`;
