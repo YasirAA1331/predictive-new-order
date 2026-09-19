@@ -889,7 +889,6 @@ body.pmno-page-single .workspace{
 
 <style id="pmno-financial-profile-v58-css">
 /* Financial Profile follows the same card language as the other FE profiles. */
-/* Financial Profile — keep existing card structure; normalize only vertical spacing */
 .fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
 .fin-group{border:0;border-radius:0;padding:0;background:transparent}
 .fin-group-title,.fin-profit-title{font-size:11px;font-weight:900;letter-spacing:.12em;color:#9fb0c3;margin:2px 0 8px}
@@ -899,11 +898,6 @@ body.pmno-page-single .workspace{
 .fin-row-label small{display:block;font-size:9px;color:#718096;font-weight:500;margin-top:2px;line-height:1.25}
 .fin-group .metric-row{min-height:42px;padding:8px 9px}
 .fin-group .metric-row b{font-size:11px;text-align:right;white-space:nowrap}
-
-/* The first four groups live in the existing 2-column grid.
-   Profitability and Asset Value sit below it; use the same 12px rhythm. */
-#dash-financial > .fin-group + .fin-group{margin-top:12px}
-
 .fin-profitability{margin-top:12px;border:0;border-radius:0;padding:0;background:transparent}
 .fin-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
 .fin-profit-card{border:1px solid #1a3047;border-radius:8px;padding:10px;background:#091827}
@@ -917,11 +911,6 @@ body.pmno-page-single .workspace{
 .fin-asset-value .metric-list{margin-top:0}
 @media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
-</style>
-<style id="pmno-financial-spacing-only">
-/* ONLY: match vertical spacing between Financial Profile cards to existing FE card rhythm. */
-#dash-financial > .fin-grid + .fin-group,
-#dash-financial > .fin-group + .fin-group{margin-top:12px!important}
 </style>
 </head>
 <body>
@@ -2740,14 +2729,26 @@ try{const h=String(location.hash||'').replace(/^#/,'').toLowerCase();if(h==='das
 (function(){
 const URL='https://vzeitjesovdojfsfgyza.supabase.co',KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const modules=[
-['STATIC_MASTER','STATIC MASTER',['Site Master','Device Catalog','Tower Catalog','Mounting Catalog','CAPEX / Shopping List','Power Cost','RF Parameter','Area Classification','Last Mile Access']],
-['OPERATIONAL_DATA','OPERATIONAL DATA',['Tenant Contract','Tenant Power Existing','Maintenance']],
-['HISTORICAL_EVIDENCE','REFERENCE & HISTORICAL',['Land / Lease Benchmark','Lease History','SITAC History','Permit History','Construction History','Delivery History','Community History']],
-['BUSINESS_ASSUMPTION','BUSINESS ASSUMPTION',['Investment Assumption']]
+['ASSET_PROFILE','01 ASSET PROFILE',['Asset Profile']],
+['CUSTOMER_PROFILE','02 CUSTOMER PROFILE',['Customer Profile']],
+['LAND_LEGAL_PROFILE','03 LAND & LEGAL PROFILE',['Land & Legal Profile']],
+['TECHNICAL_PROFILE','04 TECHNICAL PROFILE',['Power','Antenna Installed']],
+['DOCUMENT_PROFILE','05 DOCUMENT',['Document']],
+['FINANCIAL_PROFILE','06 FINANCIAL PROFILE',['Financial Profile']],
+['REFERENCE_DATA','REFERENCE DATA',['Device Catalog','Tower Catalog','Mounting Catalog','CAPEX / Shopping List','Power Cost','RF Parameter','Area Classification','Last Mile Access','Land / Lease Benchmark','Investment Assumption']],
+['HISTORICAL_DATA','REFERENCE & HISTORICAL',['Lease History','SITAC History','Permit History','Construction History','Delivery History','Community History','Maintenance']]
 ];
-const codeByName={'Site Master':'SITE_MASTER','Device Catalog':'DEVICE_CATALOG','Tower Catalog':'TOWER_CATALOG','Mounting Catalog':'MOUNTING_CATALOG','CAPEX / Shopping List':'CAPEX_CATALOG','Power Cost':'POWER_COST','RF Parameter':'RF_PARAMETER','Area Classification':'AREA_CLASSIFICATION','Last Mile Access':'LAST_MILE_ACCESS','Land / Lease Benchmark':'LAND_LEASE_BENCHMARK','Lease History':'LEASE_HISTORY','SITAC History':'SITAC_HISTORY','Permit History':'PERMIT_HISTORY','Construction History':'CONSTRUCTION_HISTORY','Delivery History':'DELIVERY_HISTORY','Community History':'COMMUNITY_HISTORY','Investment Assumption':'INVESTMENT_ASSUMPTION','Tenant Contract':'TENANT_CONTRACT','Tenant Power Existing':'TENANT_POWER','Maintenance':'MAINTENANCE'};
+const codeByName={
+'Asset Profile':'ASSET_PROFILE','Customer Profile':'CUSTOMER_PROFILE','Land & Legal Profile':'LAND_LEGAL_PROFILE','Power':'POWER_PROFILE','Antenna Installed':'ANTENNA_INSTALLED','Document':'DOCUMENT_PROFILE','Financial Profile':'FINANCIAL_PROFILE',
+'Device Catalog':'DEVICE_CATALOG','Tower Catalog':'TOWER_CATALOG','Mounting Catalog':'MOUNTING_CATALOG','CAPEX / Shopping List':'CAPEX_CATALOG','Power Cost':'POWER_COST','RF Parameter':'RF_PARAMETER','Area Classification':'AREA_CLASSIFICATION','Last Mile Access':'LAST_MILE_ACCESS','Land / Lease Benchmark':'LAND_LEASE_BENCHMARK','Investment Assumption':'INVESTMENT_ASSUMPTION','Lease History':'LEASE_HISTORY','SITAC History':'SITAC_HISTORY','Permit History':'PERMIT_HISTORY','Construction History':'CONSTRUCTION_HISTORY','Delivery History':'DELIVERY_HISTORY','Community History':'COMMUNITY_HISTORY','Maintenance':'MAINTENANCE'};
 const schemas={
-'SITE_MASTER':['site_id','site_name','latitude','longitude','province','city','district','village','site_status','tower_type','tower_height_m','soil_category','land_status','lease_expiry_date','area_type','terrain_class','access_level','roadhead_distance_m','slope_pct'],
+'ASSET_PROFILE':['site_id','site_name','regional','area','project_source','tower_type','tower_height_m','latitude','longitude','access_level','terrain_class','asset_register_date'],
+'CUSTOMER_PROFILE':['site_id','site_name','project_id','tenant_id','tenant_name','tenant_status','contract_no','contract_start_date','contract_end_date','contract_status','revenue_month','revenue_year'],
+'LAND_LEGAL_PROFILE':['site_id','site_name','land_owner_name','land_owner_phone','land_owner_phone_status','land_category','land_type','land_size_m2','land_status','lease_start_date','lease_expiry_date','annual_land_lease_cost','pbg_status','pbg_valid_until','slf_status','slf_valid_until','last_pbb_payment_date'],
+'POWER_PROFILE':['site_id','site_name','project_id','tenant_id','tenant_name','power_type','capacity','pln_id'],
+'ANTENNA_INSTALLED':['site_id','site_name','project_id','tenant_id','tenant_name','rf_count','rf_type','rf_height_m','rf_azimuth','rf_leg','mw_count','mw_type','mw_height_m','mw_azimuth','mw_leg','rru_count','rru_type','rru_height_m','rru_azimuth','rru_leg','odu_count','odu_type','odu_height_m','odu_azimuth','odu_leg','aau_count','aau_type','aau_height_m','aau_azimuth','aau_leg'],
+'DOCUMENT_PROFILE':['site_id','site_name','tenant_name','tenant_contract_link','pks_lahan_link','pbg_slf_link','sda_link','apd_link','abd_link'],
+'FINANCIAL_PROFILE':['site_id','site_name','tenant_id','tenant_name','revenue_month','revenue_effective_from','revenue_effective_to','capex_b2s','capex_collo','capex_qi','om_cost_year','land_lease_cost_year','land_lease_start_date','land_lease_end_date','tax_year','nbv'],
 'DEVICE_CATALOG':['vendor','family','model','category','port','band','height_m','width_m','depth_m','weight_kg','wind_load','wind_area_m2','power_consumption_w','max_power_consumption_w','input_voltage','operating_voltage','active','device_role'],
 'TOWER_CATALOG':['tower_type','description','standard_height_m','max_height_m','base_capacity_ton','typical_cost','active','effective_from','effective_to'],
 'MOUNTING_CATALOG':['mounting_type','max_device_count','max_load_kg','unit_cost','active'],
@@ -2764,8 +2765,6 @@ const schemas={
 'COMMUNITY_HISTORY':['site_id','source_unit','case_type','severity','status','case_date','resolution_date','radius_m','resolution_cost','notes'],
 'LEASE_HISTORY':['admin_code','annual_lease_value','lease_term_years','lease_type','source'],
 'LAND_LEASE_BENCHMARK':['admin_code','province_code','province_name','admin_name','admin_type','district_count','dummy_history_count','annual_lease_benchmark','p25_annual_lease','p75_annual_lease','benchmark_source','benchmark_version'],
-'TENANT_CONTRACT':['site_id','tenant_id','tenant_name','tenant_status','contract_no','contract_start_date','contract_end_date','contract_status','contract_value','revenue_month','revenue_year','tenant_document_link','tenant_document_file_id','last_update'],
-'TENANT_POWER':['site_id','tenant_id','power_id','power_configuration','power_source','pln_id','pln_capacity','sps_capacity','battery_capacity','battery_type','genset_capacity','existing_power_capacity','power_unit','power_status','power_document_link','power_note','last_update'],
 'MAINTENANCE':['site_id','maintenance_id','maintenance_status','last_maintenance_date','next_maintenance_date','maintenance_type','maintenance_vendor','maintenance_document_link','maintenance_ticket_link','maintenance_note','last_update']};
 let selected=null,parsed=null;
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -2794,7 +2793,7 @@ function isBlankExcelDate(value){
 function normalizeMasterDateValue(value,key){
   if(value==null||value==='')return null;
   const k=String(key||'').toLowerCase();
-  const isDateField=/(^|_)(date|from|to|at)$/.test(k)||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(k);
+  const isDateField=/(^|_)(date|from|to|at|until)$/.test(k)||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(k);
   if(!isDateField)return value;
   if(isBlankExcelDate(value))return null;
   if(value instanceof Date){
@@ -2850,7 +2849,7 @@ function normalizeUUIDMasterValue(value){
 }
 function normalizeMasterRows(code,rows){
   const out=[];const issues=[];
-  const dateCols=new Set((headersFor(code)||[]).filter(k=>/(^|_)(date|from|to|at)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase())));
+  const dateCols=new Set((headersFor(code)||[]).filter(k=>/(^|_)(date|from|to|at|until)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase())));
   const boolCols=new Set(['active','synthetic_flag','manual_carry_required','traditional_transport_required']);
   const uuidCols=new Set(['tenant_document_file_id','pks_lama_document_file_id']);
   const numericCols=new Set(['latitude','longitude','tower_height_m','roadhead_distance_m','slope_pct','height_m','width_m','depth_m','weight_kg','wind_load','wind_area_m2','power_consumption_w','max_power_consumption_w','input_voltage','operating_voltage','standard_height_m','max_height_m','base_capacity_ton','typical_cost','max_device_count','max_load_kg','unit_cost','base_unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','base_rsrp_dbm','distance_decay','min_rsrp_dbm','excellent_min_dbm','good_min_dbm','fair_min_dbm','poor_min_dbm','default_cost_multiplier','default_days_add','value_numeric','cost','duration_days','area_m2','tower_height_m','service_fee','official_cost','site_area_m2','foundation_days','erection_days','finishing_days','total_days','total_cost','factory_to_port_days','port_to_port_days','port_to_site_days','langsir_days','radius_m','resolution_cost','annual_lease_value','lease_term_years','district_count','dummy_history_count','annual_lease_benchmark','p25_annual_lease','p75_annual_lease','contract_value','revenue_month','revenue_year','pln_capacity','sps_capacity','battery_capacity','genset_capacity','existing_power_capacity','frequency_mhz','existing_rent_year','existing_tenure_year','new_tenure_year','boq_level','port','quantity','frequency_mhz']);
@@ -2873,7 +2872,7 @@ function normalizeMasterRows(code,rows){
 }
 function apiHeaders(){return {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'}}
 async function getModules(){
- const fallback=Object.entries(codeByName).map(([module_name,module_code])=>({module_code,module_name,data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',target_table:({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()}));
+ const fallback=Object.entries(codeByName).map(([module_name,module_code])=>({module_code,module_name,data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',target_table:({'ASSET_PROFILE':'pmno_site_master','CUSTOMER_PROFILE':'tenant_contract','LAND_LEGAL_PROFILE':'pmno_site_master','POWER_PROFILE':'tenant_power','ANTENNA_INSTALLED':'antenna_installed','DOCUMENT_PROFILE':'site_document_profile','FINANCIAL_PROFILE':'site_financial_profile','TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()}));
  try{const r=await fetch(URL+'/rest/v1/pmno_master_module?select=module_code,module_name,data_category,upload_mode,target_table&active=eq.true&order=module_code',{headers:apiHeaders()});if(!r.ok)throw Error();const db=await r.json();const byCode=Object.fromEntries(db.map(x=>[x.module_code,x]));return fallback.map(x=>byCode[x.module_code]?{...x,...byCode[x.module_code]}:x)}catch(e){return fallback}
 }
 async function rowCount(table){try{const select=table==='pmno_site_master'?'site_id':'*';const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&limit=1',{headers:{...apiHeaders(),'Prefer':'count=exact'}});const cr=r.headers.get('content-range');if(cr&&cr.includes('/'))return Number(cr.split('/')[1]);return '—'}catch(e){return '—'}}
@@ -2908,7 +2907,7 @@ $('masterFile').onchange=async e=>{
   }
 };
 
-$('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook first.');return}const req=headersFor(selected),cols=parsed.length?Object.keys(parsed[0]):[];const dateCols=(req||[]).filter(k=>/(^|_)(date|from|to|at)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));const invalidDates=parsed.reduce((n,r)=>n+dateCols.filter(k=>r[k]!=null&&String(r[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(r[k]))).length,0);const missing=req?req.filter(x=>!cols.includes(x)):[];const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));const keyRules={TENANT_CONTRACT:['site_id','tenant_id','tenant_name'],TENANT_POWER:['site_id','tenant_id','power_id'],MAINTENANCE:['site_id','maintenance_id']};const keyCols=keyRules[selected]||[];const missingKeys=keyCols.filter(k=>!cols.includes(k));const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;const ok=!missing.length&&!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;$('masterStructure').textContent=ok?'PASS':'FAILED';$('masterBusiness').textContent=ok?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;$('masterImpact').textContent=ok?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`Missing columns: ${missing.join(', ')||'invalid business data'}`;$('masterPublish').disabled=!ok};
+$('masterValidate').onclick=()=>{if(!selected||!parsed){alert('Upload a workbook first.');return}const req=headersFor(selected),cols=parsed.length?Object.keys(parsed[0]):[];const dateCols=(req||[]).filter(k=>/(^|_)(date|from|to|at|until)$/.test(String(k).toLowerCase())||/(^|_)(effective_from|effective_to|completed_at|last_update)$/.test(String(k).toLowerCase()));const invalidDates=parsed.reduce((n,r)=>n+dateCols.filter(k=>r[k]!=null&&String(r[k]).trim()!==''&&!/^\d{4}-\d{2}-\d{2}(?:T.*)?$/.test(String(r[k]))).length,0);const missing=req?req.filter(x=>!cols.includes(x)):[];const empty=parsed.filter(r=>Object.values(r).every(v=>String(v??'').trim()==='')).length;const negativeFields=['base_unit_cost','unit_cost','connection_cost','meter_cost','panel_protection_cost','cable_cost','installation_cost','supporting_work_cost','value_numeric','typical_cost','annual_lease_value','p25_annual_lease','p75_annual_lease'];const negative=parsed.reduce((n,r)=>n+negativeFields.filter(k=>k in r&&r[k]!==''&&Number(r[k])<0).length,0);const calculated=['need_str','reinforcement_ton','reinforcement_expected_ton','irr','estimated_irr','npv','investment_decision','calculated_capex','capex_total'];const suppliedCalculated=calculated.filter(k=>cols.some(c=>c.toLowerCase().replace(/[^a-z0-9_]/g,'_')===k));const reinforcementOutput=cols.filter(c=>/reinforcement.*(ton|result|need|capex)|need.*str/i.test(c));const keyRules={ASSET_PROFILE:['site_id','site_name'],CUSTOMER_PROFILE:['site_id','site_name','project_id','tenant_name'],LAND_LEGAL_PROFILE:['site_id','site_name'],POWER_PROFILE:['site_id','site_name','tenant_name'],ANTENNA_INSTALLED:['site_id','site_name','tenant_name'],DOCUMENT_PROFILE:['site_id','site_name'],FINANCIAL_PROFILE:['site_id','site_name'],TENANT_CONTRACT:['site_id','tenant_id','tenant_name'],TENANT_POWER:['site_id','tenant_id','power_id'],MAINTENANCE:['site_id','maintenance_id']};const keyCols=keyRules[selected]||[];const missingKeys=keyCols.filter(k=>!cols.includes(k));const emptyKeys=keyCols.length?parsed.filter(r=>keyCols.some(k=>!String(r[k]??'').trim())).length:0;const ok=!missing.length&&!missingKeys.length&&!emptyKeys&&!empty&&negative===0&&!invalidDates&&!suppliedCalculated.length&&!reinforcementOutput.length;$('masterStructure').textContent=ok?'PASS':'FAILED';$('masterBusiness').textContent=ok?'PASS · BASIC RULES':`FAILED · ${empty?'empty rows; ':''}${emptyKeys?emptyKeys+' rows missing key fields; ':''}${negative?negative+' negative values; ':''}${invalidDates?invalidDates+' invalid date values; ':''}${suppliedCalculated.length||reinforcementOutput.length?'calculated/technical output columns detected':''}${missingKeys.length?'missing key columns: '+missingKeys.join(', '):''}`;$('masterImpact').textContent=ok?`${parsed.length.toLocaleString('id-ID')} rows validated · operation ${$('masterOperation').value}. Affected engine: ${selected==='CAPEX_CATALOG'?'CAPEX → COLLO/B2S Financial':selected==='INVESTMENT_ASSUMPTION'?'Financial → IRR / NPV / Decision':'Predictive engine dependency graph'}. Technical outputs remain system-calculated.`:`Missing columns: ${missing.join(', ')||'invalid business data'}`;$('masterPublish').disabled=!ok};
 $('masterPublish').onclick=async()=>{
   if(!selected||!parsed)return;
   const originalOp=$('masterOperation').value;
