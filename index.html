@@ -1922,7 +1922,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
 const fmtInt=v=>num(v).toLocaleString('id-ID');
 const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
-let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
+let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
 
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID')).trim()}
@@ -1949,10 +1949,9 @@ function hasRevenue(t){
 }
 function hasPower(id){ return Number(livePowerCount[id]||0)>0 || (livePower[id]||[]).length>0; }
 function legalComplete(r){
- const keys=['pks_lama_document_link','pks_baru_document_link','imb_document_link','pbg_document_link','slf_document_link','sda_document_link','pks_lama','pks_baru','imb','pbg','slf','sda'];
- const present=keys.filter(k=>Object.prototype.hasOwnProperty.call(r||{},k));
- if(!present.length) return null;
- return present.some(k=>String(val(r,k)).trim()!=='');
+ const id=sid(r), x=liveLegalStats[id];
+ if(!x) return null;
+ return x.required>0 ? x.verified>=x.required : null;
 }
 function basicComplete(r){return ['site_id','site_name'].every(k=>String(val(r,k)).trim()!=='')&&['latitude','longitude'].every(k=>String(val(r,k)).trim()!=='')}
 function leaseState(r){
@@ -1962,37 +1961,33 @@ function leaseState(r){
 }
 function siteAuditSnapshot(list){
  const total=list.length;
- let activeSites=0,revenueSites=0,powerSites=0,comply=0,leaseRisk=0,leaseExpired=0,legalGap=0,missingBasic=0,tenantNoRevenue=0,tenantNoPower=0;
+ let activeSites=0,revenueSites=0,powerSites=0,corePass=0,leaseRisk=0,leaseExpired=0,legalGap=0,legalAssessed=0,missingBasic=0,tenantNoRevenue=0,tenantNoPower=0;
  for(const r of list){
   const id=sid(r), active=activeTenantCount(id)>0, rev=activeRevenueCount(id)>0, power=hasPower(id), legal=legalComplete(r), basic=!basicComplete(r), ls=leaseState(r);
   if(active)activeSites++; if(rev)revenueSites++; if(power)powerSites++;
-  if(legal===false)legalGap++; if(basic)missingBasic++; if(ls.risk)leaseRisk++; if(ls.expired)leaseExpired++;
+  if(legal!==null){legalAssessed++; if(!legal)legalGap++;}
+  if(basic)missingBasic++; if(ls.risk)leaseRisk++; if(ls.expired)leaseExpired++;
   if(active && !rev)tenantNoRevenue++;
   if(active && !power)tenantNoPower++;
-  if(active&&rev&&power&&legal!==false&&!basic)comply++;
+  if(active&&rev&&power&&!basic)corePass++;
  }
- return {total,activeSites,revenueSites,powerSites,comply,leaseRisk,leaseExpired,legalGap,missingBasic,tenantNoRevenue,tenantNoPower};
+ return {total,activeSites,revenueSites,powerSites,corePass,coreGap:Math.max(0,total-corePass),leaseRisk,leaseExpired,legalGap,legalAssessed,missingBasic,tenantNoRevenue,tenantNoPower};
 }
 function renderKpis(){
- const a=siteAuditSnapshot(filtered), anomalies=new Set();
- filtered.forEach(r=>{
-  const id=sid(r), active=activeTenantCount(id)>0, rev=activeRevenueCount(id)>0, ls=leaseState(r), legal=legalComplete(r);
-  if(!active||!rev||(active&&!hasPower(id))||!basicComplete(r)||(legal===false))anomalies.add(id);
- });
- const controlSourcesAvailable=false;
- const legalSourceAvailable=filtered.some(r=>legalComplete(r)!==null);
+ const a=siteAuditSnapshot(filtered);
  const cards=[
-  ['TOTAL SITE',a.total,'Site Master · Site basis','cyan'],
-  ['TENANT ACTIVE',a.activeSites,`${pct(a.activeSites,a.total)}% of sites`,'green'],
-  ['ADA REVENUE',a.revenueSites,`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
-  ['ADA POWER',a.powerSites,`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
-  ['SITE COMPLY',controlSourcesAvailable?fmtInt(a.comply):'N/A',controlSourcesAvailable?`${pct(a.comply,a.total)}% control rule`:'Requires site-level Cost + Device','green'],
-  ['POTENTIAL ANOMALY',controlSourcesAvailable?fmtInt(anomalies.size):'N/A',controlSourcesAvailable?'Unique Site ID':'Cannot assess — Cost + Device source unavailable','red'],
-  ['LEASE < 6 BULAN',a.leaseRisk+a.leaseExpired,`${a.leaseExpired} expired`,'amber'],
-  ['LEGAL GAP',legalSourceAvailable?fmtInt(a.legalGap):'N/A',legalSourceAvailable?`${pct(a.total-a.legalGap,a.total)}% complete`:'Legal source not mapped to Site Master','amber']
+  ['TOTAL SITE',fmtInt(a.total),'Site Master · Site basis','cyan'],
+  ['TENANT ACTIVE',fmtInt(a.activeSites),`${pct(a.activeSites,a.total)}% of sites`,'green'],
+  ['ADA REVENUE',fmtInt(a.revenueSites),`${pct(a.revenueSites,a.total)}% of sites`,'cyan'],
+  ['ADA POWER',fmtInt(a.powerSites),`${pct(a.powerSites,a.total)}% of sites`,'cyan'],
+  ['CORE CONTROL PASS',fmtInt(a.corePass),`${pct(a.corePass,a.total)}% · Tenant + Revenue + Power + Basic`,'green'],
+  ['CORE CONTROL GAP',fmtInt(a.coreGap),`${pct(a.coreGap,a.total)}% · missing one or more core controls`,'red'],
+  ['LEASE < 6 BULAN',fmtInt(a.leaseRisk+a.leaseExpired),`${fmtInt(a.leaseExpired)} expired`,'amber'],
+  ['LEGAL GAP',a.legalAssessed?fmtInt(a.legalGap):'N/A',a.legalAssessed?`${fmtInt(a.legalAssessed)} checklist sites assessed`:'No legal checklist mapped','amber']
  ];
  const el=$('dash-kpis');if(el)el.innerHTML=cards.map(x=>`<div class="dash-kpi ${x[3]}"><span>${x[0]}</span><b>${esc(x[1])}</b><small>${esc(x[2])}</small></div>`).join('');
 }
+
 function metricRows(items){return `<div class="metric-list">${items.map(([k,v,cls=''])=>`<div class="metric-row"><span>${esc(k)}</span><b class="${cls}">${esc(v)}</b></div>`).join('')}</div>`}
 function renderDashboardSource(label){
  const a=siteAuditSnapshot(filtered), byReg={};
@@ -2003,7 +1998,7 @@ function renderDashboardSource(label){
  renderKpis();
  const t=$('dash-tenant');if(t)t.innerHTML=metricRows([['Sites with active tenant',fmtInt(a.activeSites)],['Sites with revenue',fmtInt(a.revenueSites)],['Active tenant sites without revenue',fmtInt(a.tenantNoRevenue),'warn']]);
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!leaseState(r).risk&&!leaseState(r).expired&&!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
- const g=$('dash-legal');if(g)g.innerHTML=metricRows([['Legal gap',a.legalGap?fmtInt(a.legalGap):'Not available in Site Master','neutral'],['Basic data gap',fmtInt(a.missingBasic),'warn'],['Site records',fmtInt(a.total)]]);
+ const g=$('dash-legal');if(g)g.innerHTML=metricRows([['Checklist sites assessed',fmtInt(a.legalAssessed)],['Legal gap',a.legalAssessed?fmtInt(a.legalGap):'Not available','warn'],['Not assessed',fmtInt(Math.max(0,a.total-a.legalAssessed)),'neutral'],['Site records',fmtInt(a.total)]]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Sites with power',fmtInt(a.powerSites)],['Active tenant sites without power',fmtInt(a.tenantNoPower),'warn']]);
  const m=$('dash-maintenance');if(m)m.innerHTML=metricRows([['Maintenance records',fmtInt(Object.keys(liveMaintenance).length)],['Sites in current view',fmtInt(a.total)]]);
  const legalAvailable=filtered.some(r=>legalComplete(r)!==null); const q=$('dash-quality');if(q)q.innerHTML=metricRows([['Complete basic data',fmtInt(a.total-a.missingBasic)],['Legal status',legalAvailable?fmtInt(a.total-a.legalGap):'Not available'],['Tenant / revenue gap',fmtInt(a.total-a.revenueSites),'warn'],['Full site compliance','Not calculable','neutral']]);
@@ -2069,7 +2064,7 @@ async function load(){
  const head=$('dash-head');head?.classList.add('loading');
  try{
   // Paged server-side reads. Never request the entire 40k+ dataset as one JSON payload.
-  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={};
+  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={};
   const pageSize=1000;
   const fetchPage=async(offset)=>{
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
@@ -2101,6 +2096,9 @@ async function load(){
 
   // First page renders quickly, then remaining pages are loaded in small parallel batches.
   const first=await fetchPage(0); mergePage(first);
+  const legalRows=await optional(()=>getAll('v_document_completion'),[]);
+  liveLegalStats={};
+  for(const x of legalRows){const id=String(x?.site_id_dmt||'').trim();if(id)liveLegalStats[id]={required:Number(x?.required_count)||0,verified:Number(x?.verified_count)||0,pending:Number(x?.pending_count)||0,review:Number(x?.review_count)||0};}
   const total=Number(first.total_sites)||0;
   const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
   for(let i=0;i<offsets.length;i+=4){
