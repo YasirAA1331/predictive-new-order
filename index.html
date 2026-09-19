@@ -2103,88 +2103,69 @@ function drawDashMap(){
  const z=map.getZoom();
  window.__pmnoDashPoints=[];
 
- // National view: geographic grid clusters.
- // Cluster location is ALWAYS an actual site's coordinate, never the average
- // of points in pixel space. This prevents clusters floating in the sea.
- if(z<=5){
+ // Clean national / regional view: cluster by actual screen position.
+ // This keeps every cluster geographically attached to the Leaflet map while
+ // avoiding the "mushroom" effect caused by thousands of overlapping circles.
+ if(z<=7){
+   const cell=z<=5?34:z===6?28:22;
    const bins=new Map();
-   const latStep=0.55, lonStep=0.55;
 
    for(const p of valid){
-     const bx=Math.floor((p.lon-94.5)/lonStep);
-     const by=Math.floor((p.lat+11.5)/latStep);
-     const key=bx+':'+by;
-
+     const pt=map.latLngToContainerPoint([p.lat,p.lon]);
+     const gx=Math.floor(pt.x/cell), gy=Math.floor(pt.y/cell);
+     const key=gx+':'+gy;
      let b=bins.get(key);
-     if(!b){
-       b={n:0,tenantMax:0,site:p.row,lat:p.lat,lon:p.lon};
-       bins.set(key,b);
-     }
-     b.n++;
+     if(!b){b={n:0,sumLat:0,sumLon:0,tenantCounts:{1:0,'2-3':0,'4-5':0,'6+':0},sample:p.row};bins.set(key,b)}
+     b.n++; b.sumLat+=p.lat; b.sumLon+=p.lon;
      const tc=Number(liveTenantStats[sid(p.row)]?.total||0);
-     if(tc>b.tenantMax){
-       b.tenantMax=tc;
-       b.site=p.row;
-       b.lat=p.lat;
-       b.lon=p.lon;
-     }
+     const bucket=tc>=6?'6+':tc>=4?'4-5':tc>=2?'2-3':'1';
+     b.tenantCounts[bucket]++;
+     if(tc>Number(liveTenantStats[sid(b.sample)]?.total||0)) b.sample=p.row;
    }
 
    for(const b of bins.values()){
-     const radius=Math.min(18,7+Math.sqrt(b.n)*0.72);
-     const marker=L.circleMarker([b.lat,b.lon],{
+     const lat=b.sumLat/b.n, lon=b.sumLon/b.n;
+     const dominant=Object.entries(b.tenantCounts).sort((a,c)=>c[1]-a[1])[0]?.[0]||'1';
+     const tc=dominant==='6+'?6:dominant==='4-5'?4:dominant==='2-3'?2:1;
+     const radius=b.n>=500?11:b.n>=150?9:b.n>=50?7:b.n>=10?6:5;
+     const marker=L.circleMarker([lat,lon],{
        renderer,
        radius,
        color:'#071321',
-       weight:1.2,
-       opacity:.95,
-       fillColor:color(b.tenantMax),
-       fillOpacity:.88
+       weight:1,
+       opacity:.9,
+       fillColor:color(tc),
+       fillOpacity:.86
      });
-
-     if(b.n>1){
-       marker.bindTooltip(
-         `${b.n.toLocaleString('id-ID')} sites`,
-         {direction:'top',offset:[0,-radius],opacity:.95}
-       );
-       marker.on('click',()=>{
-         map.setView([b.lat,b.lon],Math.min(7,z+2),{animate:false});
-       });
-     }else{
-       marker.on('click',()=>window.pmnoOpenSiteProfile?.(b.site));
-     }
-
+     marker.bindTooltip(`${b.n.toLocaleString('id-ID')} sites`,{direction:'top',offset:[0,-radius],opacity:.95,sticky:false});
+     marker.on('click',()=>{
+       map.setView([lat,lon],Math.min(8,z+2),{animate:false});
+     });
      marker.addTo(layer);
    }
  }else{
-   // Detail view: native Leaflet Canvas renderer.
-   // 40k+ markers remain on the same geographic coordinate system as the map.
+   // Detail view: small native Leaflet Canvas dots. No oversized circles.
    for(const p of valid){
      const n=Number(liveTenantStats[sid(p.row)]?.total||0);
      const marker=L.circleMarker([p.lat,p.lon],{
        renderer,
-       radius:n>=6?4.2:n>=4?3.8:n>=2?3.4:3,
+       radius:n>=6?3.0:n>=4?2.8:n>=2?2.6:2.4,
        color:'#071321',
-       weight:.65,
-       opacity:.9,
+       weight:.5,
+       opacity:.82,
        fillColor:color(n),
-       fillOpacity:.9
+       fillOpacity:.88
      });
-
-     marker.on('click',()=>window.pmnoOpenSiteProfile?.(p.row));
-     marker.bindTooltip(
-       `${esc(sid(p.row))}${p.row?.site_name?' · '+esc(p.row.site_name):''}`,
-       {direction:'top',sticky:true,opacity:.95}
-     );
+     marker.on('click',e=>{e.originalEvent?.stopPropagation();window.pmnoOpenSiteProfile?.(p.row)});
+     marker.bindTooltip(`${esc(sid(p.row))}${p.row?.site_name?' · '+esc(p.row.site_name):''}`,{direction:'top',sticky:true,opacity:.95});
      marker.addTo(layer);
    }
  }
 
  const title=$('dash-map-title');
  if(title)title.textContent=`SITE MAP · ${fmtInt(valid.length)} VALID COORDINATES`;
-
  const status=$('dash-map-status');
- if(status)status.textContent=`${fmtInt(valid.length)} sites mapped`;
+ if(status)status.textContent=`${fmtInt(valid.length)} sites mapped · zoom ${z}`;
 }
 
 function applyFilters(){
