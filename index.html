@@ -886,6 +886,32 @@ body.pmno-page-single .workspace{
   display:grid!important;
 }
 </style>
+
+<style id="pmno-financial-profile-v58-css">
+/* Financial Profile follows the same card language as the other FE profiles. */
+.fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}
+.fin-group{border:0;border-radius:0;padding:0;background:transparent}
+.fin-group-title,.fin-profit-title{font-size:11px;font-weight:900;letter-spacing:.12em;color:#9fb0c3;margin:2px 0 8px}
+.fin-group .metric-list{display:grid;gap:8px}
+.fin-row-label{min-width:0}
+.fin-row-label span{display:block}
+.fin-row-label small{display:block;font-size:9px;color:#718096;font-weight:500;margin-top:2px;line-height:1.25}
+.fin-group .metric-row{min-height:42px;padding:8px 9px}
+.fin-group .metric-row b{font-size:11px;text-align:right;white-space:nowrap}
+.fin-profitability{margin-top:12px;border:0;border-radius:0;padding:0;background:transparent}
+.fin-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+.fin-profit-card{border:1px solid #1a3047;border-radius:8px;padding:10px;background:#091827}
+.fin-profit-card span{display:block;font-size:8px;font-weight:900;letter-spacing:.1em;color:#8aa0b2}
+.fin-profit-card b{display:block;font-size:12px;margin:5px 0}
+.fin-profit-card small{font-size:9px;color:#718096}
+.fin-formula{margin-top:8px;padding:9px;border-radius:8px;background:#091827;border:1px solid #1a3047;display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:9px}
+.fin-formula strong{color:#d4af37;letter-spacing:.08em}
+.fin-formula span{color:#8aa0b2}
+.fin-asset-value{margin-top:12px}
+.fin-asset-value .metric-list{margin-top:0}
+@media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}
+@media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -2285,8 +2311,8 @@ function renderDashboardSource(label){
   const avgRevSite=filtered.length?totalRevMonth/filtered.length:0;
   const avgRevSiteYear=filtered.length?totalRevYear/filtered.length:0;
   const moneyOrNA=(v,ok)=>ok?formatMoney(v):'BELUM TERSEDIA';
-  const sourceRow=(label,value,note='')=>`<div class="fin-source-row"><div><span>${esc(label)}</span>${note?`<small>${esc(note)}</small>`:''}</div><b>${esc(value)}</b></div>`;
-  const group=(title,body)=>`<div class="fin-group"><div class="fin-group-title">${esc(title)}</div>${body}</div>`;
+  const sourceRow=(label,value,note='')=>`<div class="metric-row"><div class="fin-row-label"><span>${esc(label)}</span>${note?`<small>${esc(note)}</small>`:''}</div><b>${esc(value)}</b></div>`;
+  const group=(title,body)=>`<div class="fin-group"><div class="fin-group-title">${esc(title)}</div><div class="metric-list">${body}</div></div>`;
   const revAvailable=revRows.length>0;
   const na='BELUM TERSEDIA';
   fin.innerHTML=`
