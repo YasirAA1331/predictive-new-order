@@ -916,6 +916,24 @@ body.pmno-page-single .workspace{
 @media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
 </style>
+<style id="pmno-tower-adj-responsive-v62">
+/* V62 — mobile card containment: prevent Tower Bersebelahan card/table from widening the viewport */
+.asset-profile-readiness{width:100%;min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
+.tower-adj-value{min-width:0;flex-wrap:wrap;align-items:baseline}
+.tower-adj-value em{min-width:0;flex:1 1 180px;line-height:1.35}
+.tower-adj-meta{min-width:0}
+.tower-adj-meta>div{min-width:0;box-sizing:border-box}
+.tower-adj-height{min-width:0;max-width:100%;box-sizing:border-box;overflow:hidden}
+.tower-adj-height-wrap{min-width:0;max-width:100%;overflow-x:auto;overflow-y:hidden;-webkit-overflow-scrolling:touch}
+.tower-adj-height-table{min-width:420px;width:100%;}
+.tower-adj-note{overflow-wrap:anywhere}
+@media(max-width:700px){
+  .tower-adj-meta{grid-template-columns:1fr}
+  .tower-adj-value strong{font-size:22px}
+  .tower-adj-value b{font-size:15px}
+  .tower-adj-value em{flex-basis:100%;font-size:8px}
+}
+</style>
 </head>
 <body>
 <div class="app">
