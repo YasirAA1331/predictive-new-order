@@ -3179,7 +3179,10 @@ async function pmnoLoadGeoReference(){
  return ref.loading;
 }
 // Tower adjacency is MANUAL: calculate on demand and keep the latest completed result visible.
-window.__pmnoTowerAdjacency=window.__pmnoTowerAdjacency||(()=>{try{const x=JSON.parse(localStorage.getItem('pmnoTowerAdjacencyLastResult')||'null');return x&&x.status==='ready'&&x.coordinateBasis==='VALID_COORDINATE'&&Array.isArray(x.validSiteIds)?x:null}catch(_e){return null}})()||{status:'idle',thresholdM:100,total:0,adjacentSites:0,adjacentPairs:0,nonAdjacentSites:0,adjacentSiteShare:0,elapsedMs:0,lastRunAt:null,lastContext:{},processed:0,progress:0,error:null,loading:null,heightMatrix:null,portfolioTotal:0};
+window.__pmnoTowerAdjacency=window.__pmnoTowerAdjacency||(()=>{try{
+ const x=JSON.parse(localStorage.getItem('pmnoTowerAdjacencyLastResult')||'null');
+ return x&&x.status==='ready'&&x.coordinateBasis==='VALID_COORDINATE'?x:null;
+}catch(_e){return null}})()||{status:'idle',thresholdM:100,total:0,adjacentSites:0,adjacentPairs:0,nonAdjacentSites:0,adjacentSiteShare:0,elapsedMs:0,lastRunAt:null,lastContext:{},processed:0,progress:0,error:null,loading:null,heightMatrix:null,portfolioTotal:0};
 function pmnoAdjFilterLabel(ctx){return pmnoGeoFilterLabel(ctx||{})}
 function pmnoAdjDistanceM(a,b){const R=6371008.8,lat1=a.lat*Math.PI/180,lat2=b.lat*Math.PI/180,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180,h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.min(1,Math.sqrt(h)))}
 function pmnoAdjCell(p){const latRad=p.lat*Math.PI/180,x=p.lon*111320*Math.cos(latRad),y=p.lat*110540;return [Math.floor(x/100),Math.floor(y/100)]}
@@ -3247,6 +3250,7 @@ async function pmnoCalculateTowerAdjacency(){
  }finally{g.loading=null;const b=document.getElementById('pmnoAdjCalcBtn');if(b){b.disabled=false;b.textContent='↻ CALCULATE <100 M'}}})();return g.loading;
 }
 
+/* MANUAL ONLY: dashboard render must not start adjacency calculation. */
 window.__pmnoRunTowerAdjacency=()=>pmnoCalculateTowerAdjacency();document.addEventListener('click',e=>{if(e.target?.closest?.('#pmnoAdjCalcBtn'))window.__pmnoRunTowerAdjacency()});
 
 // Geospatial validation is MANUAL. The reference layer is loaded only when the user presses VALIDATE COORDINATE.
@@ -4489,7 +4493,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V82-SINGLE-SITE-NAV-TRUE-COMMON";</script>
+<script>window.__PMNO_BUILD__="V83-ADJACENCY-PERSIST-LAST-RESULT";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
@@ -4671,4 +4675,4 @@ body.pmno-page-single .detail-panel{
   window.addEventListener('pageshow',fixSingleScroll,{passive:true});
 })();
 </script>
-<script>window.__PMNO_BUILD__="V82-SINGLE-SITE-NAV-TRUE-COMMON";</script>
+<script>window.__PMNO_BUILD__="V83-ADJACENCY-PERSIST-LAST-RESULT";</script>
