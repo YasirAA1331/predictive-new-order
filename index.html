@@ -2543,7 +2543,7 @@ function pmnoGeoFilterLabel(ctx){
 }
 function pmnoEnsureGeoIssueModal(){
  if(document.getElementById('pmnoGeoIssueModal'))return;
- const el=document.createElement('div');el.id='pmnoGeoIssueModal';el.className='geo-issue-modal';el.innerHTML=`<div class="geo-issue-panel"><div class="geo-issue-head"><div><h3 id="geoIssueTitle">COORDINATE ISSUES</h3><small id="geoIssueSub">—</small></div><div class="geo-issue-actions"><button type="button" id="geoIssueExport" class="geo-issue-btn">EXPORT CSV</button><button type="button" id="geoIssueClose" class="geo-issue-btn secondary">CLOSE</button></div></div><div id="geoIssueTableWrap" class="geo-issue-table-wrap"></div></div>`;
+ const el=document.createElement('div');el.id='pmnoGeoIssueModal';el.className='geo-issue-modal';el.innerHTML=`<div class="geo-issue-panel"><div class="geo-issue-head"><div><h3 id="geoIssueTitle">COORDINATE ISSUES</h3><small id="geoIssueSub">—</small></div><div class="geo-issue-actions"><button type="button" id="geoIssueExport" class="geo-issue-btn">EXPORT EXCEL</button><button type="button" id="geoIssueClose" class="geo-issue-btn secondary">CLOSE</button></div></div><div id="geoIssueTableWrap" class="geo-issue-table-wrap"></div></div>`;
  document.body.appendChild(el);
  el.addEventListener('click',e=>{if(e.target===el||e.target.closest('#geoIssueClose'))el.classList.remove('open')});
  document.getElementById('geoIssueExport')?.addEventListener('click',()=>pmnoExportGeoIssues());
@@ -2559,11 +2559,38 @@ function pmnoOpenGeoIssues(status){
  document.getElementById('pmnoGeoIssueModal')?.classList.add('open');
 }
 function pmnoExportGeoIssues(){
- const g=window.__pmnoGeoPortfolio||{};const rows=(Array.isArray(g.details)?g.details:[]).filter(x=>x.status===__pmnoGeoIssueStatus);if(!rows.length)return;
- const cols=['status','site_id','site_name','regional','area','master_province','mapped_province','city','district','village','latitude','longitude','reason'];
- const escCsv=v=>{const x=String(v??'');return /[",\n]/.test(x)?`"${x.replace(/"/g,'""')}"`:x};
- const csv=[cols.join(','),...rows.map(r=>cols.map(c=>escCsv(r[c])).join(','))].join('\n');
- const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;a.download=`PMNO_Coordinate_${__pmnoGeoIssueStatus}_${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+ const g=window.__pmnoGeoPortfolio||{};
+ const rows=(Array.isArray(g.details)?g.details:[]).filter(x=>x.status===__pmnoGeoIssueStatus);
+ if(!rows.length)return;
+ if(!window.XLSX){alert('Library Excel belum siap. Silakan coba lagi.');return;}
+
+ // Export remediation-friendly: hanya identitas site, alamat, dan koordinat.
+ const data=rows.map(r=>({
+   'Site ID':r.site_id??'',
+   'Site Name':r.site_name??'',
+   'Regional':r.regional??'',
+   'Area':r.area??'',
+   'Province':r.master_province??'',
+   'City':r.city??'',
+   'District':r.district??'',
+   'Village':r.village??'',
+   'Latitude':r.latitude==null?'':Number(r.latitude),
+   'Longitude':r.longitude==null?'':Number(r.longitude),
+   'Reason':r.reason??''
+ }));
+ const ws=XLSX.utils.json_to_sheet(data);
+ ws['!cols']=[
+   {wch:18},{wch:30},{wch:14},{wch:12},{wch:24},{wch:24},{wch:24},{wch:30},{wch:16},{wch:16},{wch:48}
+ ];
+ ws['!autofilter']={ref:`A1:K${data.length+1}`};
+ // Freeze header row so the column titles remain visible while scrolling.
+ ws['!freeze']={xSplit:0,ySplit:1};
+
+ const wb=XLSX.utils.book_new();
+ const sheetName=__pmnoGeoIssueStatus==='LOCATION_MISMATCH'?'Location Mismatch':__pmnoGeoIssueStatus==='INVALID_COORDINATE'?'Invalid Coordinate':'Missing Coordinate';
+ XLSX.utils.book_append_sheet(wb,ws,sheetName.slice(0,31));
+ const date=new Date().toISOString().slice(0,10);
+ XLSX.writeFile(wb,`PMNO_Coordinate_${__pmnoGeoIssueStatus}_${date}.xlsx`,{bookType:'xlsx',compression:true});
 }
 document.addEventListener('click',e=>{const row=e.target?.closest?.('.geo-issue-row[data-geo-status]');if(row)pmnoOpenGeoIssues(row.dataset.geoStatus)});
 
