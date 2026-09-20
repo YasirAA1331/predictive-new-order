@@ -2328,8 +2328,7 @@ function fitDashboardMap(){
 }
 if(typeof document!=='undefined')document.addEventListener('click',e=>{const b=e.target.closest?.('.dash-site-open');if(!b)return;const r=rows.find(x=>sid(x)===b.dataset.site);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
 const PMNO_GEO_REF_URLS={
-  land:'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_IDN_0.json',
-  province:'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_IDN_1.json'
+  both:URL+'/functions/v1/pmno-geo-reference?layer=both'
 };
 window.__pmnoGeoReference=window.__pmnoGeoReference||{status:'idle',land:null,province:null,error:null,loading:null};
 function pmnoPointInRing(pt,ring){let x=pt[0],y=pt[1],inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];const hit=((yi>y)!==(yj>y))&&(x<((xj-xi)*(y-yi)/(yj-yi)+xi));if(hit)inside=!inside;}return inside}
@@ -2363,15 +2362,25 @@ function pmnoGeoClassify(rows){
 async function pmnoLoadGeoReference(){
  const ref=window.__pmnoGeoReference;if(ref.status==='ready')return ref;if(ref.loading)return ref.loading;
  ref.status='loading';ref.error=null;
- ref.loading=(async()=>{try{
-   const [landR,provR]=await Promise.all([fetch(PMNO_GEO_REF_URLS.land,{cache:'force-cache'}),fetch(PMNO_GEO_REF_URLS.province,{cache:'force-cache'})]);
-   if(!landR.ok||!provR.ok)throw new Error('Geospatial reference unavailable');
-   const [land,province]=await Promise.all([landR.json(),provR.json()]);
-   const lf=(land.features||[])[0];if(!lf)throw new Error('Land polygon unavailable');
-   ref.land=lf;ref.province=province;ref.status='ready';
-   if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
-   return ref;
- }catch(e){ref.status='error';ref.error=e;return ref;}finally{ref.loading=null;}})();
+ ref.loading=(async()=>{
+   const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),35000);
+   try{
+     const r=await fetch(PMNO_GEO_REF_URLS.both,{method:'GET',headers:H,cache:'force-cache',signal:ctl.signal});
+     if(!r.ok)throw new Error('Geospatial reference unavailable ('+r.status+')');
+     const payload=await r.json();
+     const lf=(payload.land?.features||[])[0];
+     const province=payload.province;
+     if(!lf)throw new Error('Land polygon unavailable');
+     if(!province?.features?.length)throw new Error('Province polygon unavailable');
+     ref.land=lf;ref.province=province;ref.status='ready';
+     if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+     return ref;
+   }catch(e){
+     ref.status='error';ref.error=e;
+     if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+     return ref;
+   }finally{clearTimeout(timer);ref.loading=null;}
+ })();
  return ref.loading;
 }
 pmnoLoadGeoReference();
@@ -2401,6 +2410,7 @@ function renderDashboardSource(label){
   filtered.forEach(r=>{const n=Number(val(r,'tower_height_m'));if(!Number.isFinite(n)){heightBuckets[4][1]++;return}if(n<30)heightBuckets[0][1]++;else if(n<50)heightBuckets[1][1]++;else if(n<70)heightBuckets[2][1]++;else heightBuckets[3][1]++;});
   const geo=pmnoGeoClassify(filtered);
   const geoReady=!!geo;
+  const geoError=window.__pmnoGeoReference?.status==='error';
   const geoValid=geoReady?geo.valid:0;
   const locationMismatch=geoReady?geo.mismatch:null;
   const invalidCoord=geoReady?geo.invalid:null;
@@ -2415,12 +2425,12 @@ function renderDashboardSource(label){
     ${group('ASSET COMPOSITION',barRows(towerTypeRows))}
     ${group('ASSET MATURITY',barRows(ageBuckets))}
     ${group('PHYSICAL PROFILE · TOWER HEIGHT',barRows(heightBuckets))}
-    <div class="asset-profile-readiness"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':'Pending'}</b><em>${geoReady?'valid coordinates':'geospatial validation loading'}</em></div><div class="asset-readiness-breakdown">
-      <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${geoReady?fmtInt(geoValid):'—'}</b><em>${geoReady?pctOfTotal(geoValid):'Pending'}</em></div>
-      <div class="asset-readiness-row mismatch"><span>Location Mismatch</span><b>${geoReady?fmtInt(locationMismatch):'—'}</b><em>${geoReady?pctOfTotal(locationMismatch):'Pending'}</em></div>
-      <div class="asset-readiness-row invalid"><span>Invalid Coordinate</span><b>${geoReady?fmtInt(invalidCoord):'—'}</b><em>${geoReady?pctOfTotal(invalidCoord):'Pending'}</em></div>
-      <div class="asset-readiness-row missing"><span>Missing Coordinate</span><b>${geoReady?fmtInt(missingCoord):'—'}</b><em>${geoReady?pctOfTotal(missingCoord):'Pending'}</em></div>
-    </div><div class="asset-readiness-note">Validation uses detailed GADM 4.1 Indonesia land and province polygons: sea/outside-land points are Invalid Coordinate; land points whose mapped province differs from the master province are Location Mismatch.</div></div>
+    <div class="asset-profile-readiness"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':(geoError?'Unavailable':'Loading')}</b><em>${geoReady?'valid coordinates':(geoError?'geospatial validation unavailable':'geospatial validation loading')}</em></div><div class="asset-readiness-breakdown">
+      <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${geoReady?fmtInt(geoValid):'—'}</b><em>${geoReady?pctOfTotal(geoValid):(geoError?'Unavailable':'Loading')}</em></div>
+      <div class="asset-readiness-row mismatch"><span>Location Mismatch</span><b>${geoReady?fmtInt(locationMismatch):'—'}</b><em>${geoReady?pctOfTotal(locationMismatch):(geoError?'Unavailable':'Loading')}</em></div>
+      <div class="asset-readiness-row invalid"><span>Invalid Coordinate</span><b>${geoReady?fmtInt(invalidCoord):'—'}</b><em>${geoReady?pctOfTotal(invalidCoord):(geoError?'Unavailable':'Loading')}</em></div>
+      <div class="asset-readiness-row missing"><span>Missing Coordinate</span><b>${geoReady?fmtInt(missingCoord):'—'}</b><em>${geoReady?pctOfTotal(missingCoord):(geoError?'Unavailable':'Loading')}</em></div>
+    </div><div class="asset-readiness-note">Validation uses detailed GADM 4.1 Indonesia land and province polygons. Sea/outside-land points are Invalid Coordinate; land points whose mapped province differs from the master province are Location Mismatch.</div></div>
   </div>`;
  }
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
