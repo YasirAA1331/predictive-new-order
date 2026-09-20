@@ -2383,7 +2383,20 @@ async function pmnoLoadGeoReference(){
  })();
  return ref.loading;
 }
-pmnoLoadGeoReference();
+// Geospatial reference is intentionally lazy-loaded. It is a large reference layer and must never block initial dashboard render.
+function pmnoStartGeoWhenVisible(){
+  const target=document.getElementById('dash-asset');
+  if(!target){return;}
+  if('IntersectionObserver' in window){
+    const io=new IntersectionObserver(entries=>{
+      if(entries.some(e=>e.isIntersecting)){io.disconnect();pmnoLoadGeoReference();}
+    },{root:null,rootMargin:'900px 0px',threshold:0.01});
+    io.observe(target);
+  }else{
+    setTimeout(()=>pmnoLoadGeoReference(),2500);
+  }
+}
+if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',pmnoStartGeoWhenVisible,{once:true}); else pmnoStartGeoWhenVisible();
 
 function renderDashboardSource(label){
  const a=siteAuditSnapshot(filtered), byReg={};
@@ -2777,15 +2790,26 @@ async function load(){
    return snap;
   };
 
-  // First page renders quickly, then remaining pages are loaded in small parallel batches.
-  const first=await fetchPage(0); mergePage(first);
+  // Render the first page immediately. The remaining pages load in bounded parallel batches
+  // so the dashboard becomes usable without waiting for all 40k sites.
+  const first=await fetchPage(0);
+  mergePage(first);
+  window.__pmnoDashboardLoadingPages=false;
+  renderDashboardSource('MASTER DATA · PMNO');
+
   const total=Number(first.total_sites)||0;
   const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
-  // Load the remaining pages sequentially. The snapshot RPC is fast enough,
-  // and this avoids four concurrent aggregate queries competing for DB resources.
-  for(const offset of offsets){
-   const snap=await fetchPage(offset);
-   mergePage(snap);
+  const batchSize=8;
+  window.__pmnoDashboardLoadingPages=true;
+  for(let i=0;i<offsets.length;i+=batchSize){
+   const batchOffsets=offsets.slice(i,i+batchSize);
+   const snaps=await Promise.all(batchOffsets.map(fetchPage));
+   for(const snap of snaps) mergePage(snap);
+   // Keep the UI fresh after each batch rather than waiting for the full dataset.
+   window.__pmnoDashboardLoadingPages=false;
+   filtered=rows.slice();
+   renderDashboardSource('MASTER DATA · PMNO');
+   window.__pmnoDashboardLoadingPages=true;
   }
   filtered=rows.slice();
   window.__pmnoDashboardLoadingPages=false;
