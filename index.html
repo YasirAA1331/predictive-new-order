@@ -2532,19 +2532,35 @@ function pmnoAdjFilterLabel(ctx){return pmnoGeoFilterLabel(ctx||{})}
 function pmnoAdjDistanceM(a,b){const R=6371008.8,lat1=a.lat*Math.PI/180,lat2=b.lat*Math.PI/180,dLat=(b.lat-a.lat)*Math.PI/180,dLon=(b.lon-a.lon)*Math.PI/180,h=Math.sin(dLat/2)**2+Math.cos(lat1)*Math.cos(lat2)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.min(1,Math.sqrt(h)))}
 function pmnoAdjCell(p){const latRad=p.lat*Math.PI/180,x=p.lon*111320*Math.cos(latRad),y=p.lat*110540;return [Math.floor(x/100),Math.floor(y/100)]}
 async function pmnoCalculateTowerAdjacency(){
- const g=window.__pmnoTowerAdjacency;if(g.status==='loading')return g.loading||g;g.status='loading';g.error=null;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;
+ const g=window.__pmnoTowerAdjacency;
+ if(g.status==='loading')return g.loading||g;
+ g.status='loading';g.error=null;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;
  const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
+ const setBtn=(label)=>{const b=document.getElementById('pmnoAdjCalcBtn');if(b){b.disabled=true;b.textContent=label}};
  g.loading=(async()=>{try{
-  const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});if(!r.ok)throw new Error('pmno_coordinate_points HTTP '+r.status);
-  const raw=await r.json();if(!Array.isArray(raw))throw new Error('Coordinate payload invalid');const pts=[];
-  for(const x of raw){const lat=Number(x.latitude),lon=Number(x.longitude);if(Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-11.5&&lat<=6.5&&lon>=94.5&&lon<=141.5)pts.push({site_id:x.site_id,lat,lon})}
-  g.total=pts.length;const grid=new Map();pts.forEach((p,i)=>{const [cx,cy]=pmnoAdjCell(p),k=cx+'|'+cy;let a=grid.get(k);if(!a)grid.set(k,a=[]);a.push(i)});
-  const adjacent=new Set();let pairs=0,total=pts.length;
-  for(let i=0;i<total;i++){const p=pts[i],[cx,cy]=pmnoAdjCell(p);for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const a=grid.get((cx+dx)+'|'+(cy+dy));if(!a)continue;for(const j of a){if(j<=i)continue;if(pmnoAdjDistanceM(p,pts[j])<100){pairs++;adjacent.add(i);adjacent.add(j)}}}if((i+1)%250===0||i===total-1){g.processed=i+1;g.progress=total?(i+1)/total*100:100;g.elapsedMs=performance.now()-g.startedAt;const b=document.getElementById('pmnoAdjCalcBtn');if(b)b.textContent='CALCULATING '+Math.round(g.progress)+'%';await new Promise(requestAnimationFrame)}}
-  g.adjacentSites=adjacent.size;g.adjacentPairs=pairs;g.nonAdjacentSites=Math.max(0,total-adjacent.size);g.adjacentSiteShare=total?adjacent.size/total*100:0;g.thresholdM=100;g.processed=total;g.progress=100;g.elapsedMs=performance.now()-g.startedAt;g.status='ready';g.lastRunAt=new Date().toISOString();g.lastContext={regional:rg,area:ar,province:pv,city:ct,search:q};
-  try{localStorage.setItem('pmnoTowerAdjacencyLastResult',JSON.stringify({status:'ready',thresholdM:100,total,adjacentSites:g.adjacentSites,adjacentPairs:pairs,nonAdjacentSites:g.nonAdjacentSites,adjacentSiteShare:g.adjacentSiteShare,elapsedMs:g.elapsedMs,lastRunAt:g.lastRunAt,lastContext:g.lastContext}))}catch(_e){}
+  setBtn('⟳ CALCULATING…');
+  let after=null,total=null,pts=[];
+  while(true){
+   const r=await fetch(URL+'/rest/v1/rpc/pmno_tower_adjacency_points',{method:'POST',headers:H,body:JSON.stringify({
+     p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null,p_after_site_id:after,p_limit:1000
+   })});
+   if(!r.ok)throw new Error('pmno_tower_adjacency_points HTTP '+r.status);
+   const payload=await r.json();
+   if(!payload||!Array.isArray(payload.points))throw new Error('Tower adjacency payload invalid');
+   if(total===null)total=Number(payload.total)||0;
+   for(const x of payload.points){const lat=Number(x.latitude),lon=Number(x.longitude);if(Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-11.5&&lat<=6.5&&lon>=94.5&&lon<=141.5)pts.push({site_id:x.site_id,lat,lon})}
+   g.total=total;g.processed=pts.length;g.progress=total?Math.min(pts.length/total*100,100):100;g.elapsedMs=performance.now()-g.startedAt;setBtn(`⟳ CALCULATING ${Math.round(g.progress)}%`);
+   after=payload.next_after||null;if(!payload.has_more||!after)break;await new Promise(requestAnimationFrame);
+  }
+  const grid=new Map();pts.forEach((p,i)=>{const [cx,cy]=pmnoAdjCell(p),k=cx+'|'+cy;let a=grid.get(k);if(!a)grid.set(k,a=[]);a.push(i)});
+  const adjacent=new Set();let pairs=0;
+  for(let i=0;i<pts.length;i++){const p=pts[i],[cx,cy]=pmnoAdjCell(p);for(let dx=-1;dx<=1;dx++)for(let dy=-1;dy<=1;dy++){const a=grid.get((cx+dx)+'|'+(cy+dy));if(!a)continue;for(const j of a){if(j<=i)continue;if(pmnoAdjDistanceM(p,pts[j])<100){pairs++;adjacent.add(i);adjacent.add(j)}}}if((i+1)%250===0||i===pts.length-1){g.processed=i+1;g.progress=total?Math.min(i+1,total)/total*100:100;g.elapsedMs=performance.now()-g.startedAt;setBtn(`⟳ CALCULATING ${Math.round(g.progress)}%`);await new Promise(requestAnimationFrame)}}
+  g.total=total??pts.length;g.adjacentSites=adjacent.size;g.adjacentPairs=pairs;g.nonAdjacentSites=Math.max(0,g.total-adjacent.size);g.adjacentSiteShare=g.total?adjacent.size/g.total*100:0;g.thresholdM=100;g.processed=pts.length;g.progress=100;g.elapsedMs=performance.now()-g.startedAt;g.status='ready';g.lastRunAt=new Date().toISOString();g.lastContext={regional:rg,area:ar,province:pv,city:ct,search:q};
+  try{localStorage.setItem('pmnoTowerAdjacencyLastResult',JSON.stringify({status:'ready',thresholdM:100,total:g.total,adjacentSites:g.adjacentSites,adjacentPairs:pairs,nonAdjacentSites:g.nonAdjacentSites,adjacentSiteShare:g.adjacentSiteShare,elapsedMs:g.elapsedMs,lastRunAt:g.lastRunAt,lastContext:g.lastContext}))}catch(_e){}
   renderDashboardSource('MASTER DATA · PMNO');return g;
- }catch(e){g.status='error';g.error=e;g.elapsedMs=performance.now()-g.startedAt;renderDashboardSource('MASTER DATA · PMNO');return g}finally{g.loading=null;const b=document.getElementById('pmnoAdjCalcBtn');if(b){b.disabled=false;b.textContent='↻ CALCULATE <100 M'}}})();return g.loading}
+ }catch(e){g.status='error';g.error=e;g.elapsedMs=performance.now()-g.startedAt;renderDashboardSource('MASTER DATA · PMNO');return g;
+ }finally{g.loading=null;const b=document.getElementById('pmnoAdjCalcBtn');if(b){b.disabled=false;b.textContent='↻ CALCULATE <100 M'}}})();return g.loading;
+}
 window.__pmnoRunTowerAdjacency=()=>pmnoCalculateTowerAdjacency();document.addEventListener('click',e=>{if(e.target?.closest?.('#pmnoAdjCalcBtn'))window.__pmnoRunTowerAdjacency()});
 
 // Geospatial validation is MANUAL. The reference layer is loaded only when the user presses VALIDATE COORDINATE.
