@@ -2193,6 +2193,7 @@ const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Numbe
 const fmtInt=v=>num(v).toLocaleString('id-ID');
 const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
 let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},liveNbv={},liveFinancial={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
+let dashboardMapNeedsReload=true;
 
 function val(r,...keys){for(const k of keys){if(r&&r[k]!==undefined&&r[k]!==null&&String(r[k]).trim()!=='')return r[k]}return ''}
 function sid(r){return String(val(r,'site_id','site_id_dmt','siteId','SITE_ID')).trim()}
@@ -2313,11 +2314,15 @@ function dashboardMapPopup(r){
  return `<div style="min-width:180px"><b>${esc(id)}</b><br><span>${esc(name)}</span><br><small>${esc(city)} · ${esc(province)}</small><br><strong>${fmtInt(t)} tenant</strong><br><button type="button" class="dash-site-open" data-site="${esc(id)}" style="margin-top:7px;padding:5px 8px;border:0;border-radius:5px;background:#35c4ff;color:#04111c;font-weight:800">OPEN SITE PROFILE</button></div>`;
 }
 let dashboardMapRequestId=0;
+let dashboardMapAbortController=null;
 async function loadDashboardMapData(){
  const requestId=++dashboardMapRequestId;
+ if(dashboardMapAbortController){try{dashboardMapAbortController.abort()}catch(e){}}
+ dashboardMapAbortController=new AbortController();
+ const mapSignal=dashboardMapAbortController.signal;
  const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
  try{
-  const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_map_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
+  const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_map_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null}),signal:mapSignal});
   if(!r.ok)throw new Error('pmno_dashboard_map_points HTTP '+r.status);
   const payload=await r.json();
   if(requestId!==dashboardMapRequestId)return;
@@ -2339,6 +2344,7 @@ async function loadDashboardMapData(){
   renderDashboardMap(mapped);
   const src=$('dash-map-status');if(src)src.textContent=fmtInt(mapped.length)+' mapped sites';
  }catch(e){
+  if(e?.name==='AbortError')return;
   console.warn('[PMNO MAP]',e);
   const src=$('dash-map-status');if(src)src.textContent='MAP ERROR · '+String(e?.message||e).slice(0,90);
   const m=initDashboardMap();if(m&&requestId===dashboardMapRequestId){m._siteData=[];renderDashboardMap([])}
@@ -2630,7 +2636,9 @@ function renderDashboardSource(label){
    <div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div>`;
  };
  const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(siteNpaCount(filtered)),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
- loadDashboardMapData();
+ // Map rendering is deliberately decoupled from this source renderer.
+ // renderDashboardSource() is also called repeatedly during geo-validation;
+ // triggering a map reload here would race/clear the visible layer.
  const src=$('dash-source');if(src){const shownTotal=Number(window.__pmnoDashboardSummary?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
  renderAuditData();
 }
@@ -2854,6 +2862,7 @@ function renderAuditData(){
 function setDashboardMode(mode){const show=mode!=='AUDIT';$('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
 let dashboardFilterTimer=null;
 async function applyFilters(){
+ dashboardMapNeedsReload=true;
  clearTimeout(dashboardFilterTimer);
  dashboardFilterTimer=setTimeout(async()=>{
   const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
@@ -2871,6 +2880,9 @@ async function applyFilters(){
    rows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
    filtered=rows.slice();
    renderDashboardSource('MASTER DATA · PMNO · server-side filter');
+   // One map refresh per completed filter request. Never refresh from the
+   // summary renderer itself because geo validation calls that renderer many times.
+   if(dashboardMapNeedsReload){dashboardMapNeedsReload=false;loadDashboardMapData();}
    if(window.__pmnoGeoReference?.status==='ready')pmnoLoadGeoPortfolio();
   }catch(e){
    console.error('[PMNO FILTER]',e);
@@ -2894,7 +2906,7 @@ function normalizeRpcObject(value){
  return value&&typeof value==='object'?value:{};
 }
 async function load(){
- if(loading)return; loading=true;
+ if(loading)return; dashboardMapNeedsReload=true; loading=true;
  const refreshBtn=$('dash-refresh');
  if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
@@ -2941,6 +2953,8 @@ async function load(){
   }
 
   window.__pmnoDashboardLoadingPages=false;
+  // Initial map load is independent from summary rendering and runs exactly once.
+  loadDashboardMapData();
   // Do not hydrate all 40,350 rows. Search/detail remains server-side/on-demand.
  }catch(e){
   console.error('[PMNO DASHBOARD LOAD]',e);
