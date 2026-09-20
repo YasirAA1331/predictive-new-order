@@ -2550,12 +2550,83 @@ function pmnoEnsureGeoIssueModal(){
 }
 let __pmnoGeoIssueStatus='LOCATION_MISMATCH';
 function pmnoGeoStatusLabel(s){return s==='LOCATION_MISMATCH'?'LOCATION MISMATCH':s==='INVALID_COORDINATE'?'INVALID COORDINATE':'MISSING COORDINATE'}
-function pmnoOpenGeoIssues(status){
- const g=window.__pmnoGeoPortfolio||{};const all=Array.isArray(g.details)?g.details:[];const rows=all.filter(x=>x.status===status);__pmnoGeoIssueStatus=status;pmnoEnsureGeoIssueModal();
+async function pmnoOpenGeoIssues(status){
+ const g=window.__pmnoGeoPortfolio||{};
+ let all=Array.isArray(g.details)?g.details:[];
+ __pmnoGeoIssueStatus=status;
+ pmnoEnsureGeoIssueModal();
+
+ // Backward compatibility: older saved validation results only stored site_id
+ // plus province/mapped province. Enrich them from the current coordinate RPC
+ // so the remediation list/export always has the full site data.
+ const needsEnrich=all.some(x=>x.status===status && (!String(x.site_name||'').trim() || x.latitude==='' || x.latitude==null));
+ if(needsEnrich){
+   try{
+     const c=g.lastContext||{};
+     const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{
+       method:'POST',
+       headers:H,
+       body:JSON.stringify({
+         p_regional:c.regional||null,
+         p_area:c.area||null,
+         p_province:c.province||null,
+         p_city:c.city||null,
+         p_search:c.search||null
+       })
+     });
+     if(r.ok){
+       const pts=await r.json();
+       if(Array.isArray(pts)){
+         const byId=new Map(pts.map(x=>[String(x.site_id),x]));
+         all=all.map(x=>{
+           const p=byId.get(String(x.site_id));
+           if(!p)return x;
+           return {
+             ...x,
+             site_name:x.site_name||p.site_name||'',
+             regional:x.regional||p.regional||'',
+             area:x.area||p.area||'',
+             master_province:x.master_province||p.province||'',
+             city:x.city||p.city||'',
+             district:x.district||p.district||'',
+             village:x.village||p.village||'',
+             latitude:x.latitude===''||x.latitude==null?p.latitude:x.latitude,
+             longitude:x.longitude===''||x.longitude==null?p.longitude:x.longitude
+           };
+         });
+         g.details=all;
+         try{
+           localStorage.setItem('pmnoGeoLastResult',JSON.stringify({
+             status:'ready',valid:Number(g.valid)||0,mismatch:Number(g.mismatch)||0,
+             invalid:Number(g.invalid)||0,missing:Number(g.missing)||0,total:Number(g.total)||0,
+             processed:Number(g.processed)||Number(g.total)||0,progress:100,
+             elapsedMs:Number(g.elapsedMs)||0,lastRunAt:g.lastRunAt||null,
+             lastContext:g.lastContext||{},details:all
+           }));
+         }catch(_e){}
+       }
+     }
+   }catch(_e){}
+ }
+
+ const rows=all.filter(x=>x.status===status);
  const title=document.getElementById('geoIssueTitle'),sub=document.getElementById('geoIssueSub'),wrap=document.getElementById('geoIssueTableWrap');
  if(title)title.textContent=`${pmnoGeoStatusLabel(status)} · ${fmtInt(rows.length)} SITES`;
  if(sub)sub.textContent=`Last validation · ${g.lastRunAt?new Date(g.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}):'—'} · ${pmnoGeoFilterLabel(g.lastContext||{})}`;
- if(!rows.length){if(wrap)wrap.innerHTML='<div class="geo-issue-empty">Tidak ada site pada kategori ini.</div>'}else if(wrap){wrap.innerHTML=`<table class="geo-issue-table"><thead><tr><th>STATUS</th><th>SITE ID</th><th>SITE NAME</th><th>REGIONAL</th><th>AREA</th><th>MASTER PROVINCE</th><th>MAPPED PROVINCE</th><th>CITY</th><th>LAT</th><th>LON</th><th>REASON</th></tr></thead><tbody>${rows.map(r=>`<tr><td><span class="geo-status ${status==='LOCATION_MISMATCH'?'mismatch':status==='INVALID_COORDINATE'?'invalid':'missing'}">${esc(pmnoGeoStatusLabel(r.status))}</span></td><td><b>${esc(r.site_id||'—')}</b></td><td>${esc(r.site_name||'—')}</td><td>${esc(r.regional||'—')}</td><td>${esc(r.area||'—')}</td><td>${esc(r.master_province||'—')}</td><td>${esc(r.mapped_province||'—')}</td><td>${esc(r.city||'—')}</td><td>${esc(r.latitude??'—')}</td><td>${esc(r.longitude??'—')}</td><td>${esc(r.reason||'—')}</td></tr>`).join('')}</tbody></table>`}
+ if(!rows.length){
+   if(wrap)wrap.innerHTML='<div class="geo-issue-empty">Tidak ada site pada kategori ini.</div>';
+ }else if(wrap){
+   wrap.innerHTML=`<table class="geo-issue-table"><thead><tr>
+     <th>STATUS</th><th>SITE ID</th><th>SITE NAME</th><th>REGIONAL</th><th>AREA</th>
+     <th>MASTER PROVINCE</th><th>MAPPED PROVINCE</th><th>CITY</th><th>DISTRICT</th><th>VILLAGE</th>
+     <th>LAT</th><th>LON</th><th>REASON</th>
+   </tr></thead><tbody>${rows.map(r=>`<tr>
+     <td><span class="geo-status ${status==='LOCATION_MISMATCH'?'mismatch':status==='INVALID_COORDINATE'?'invalid':'missing'}">${esc(pmnoGeoStatusLabel(r.status))}</span></td>
+     <td><b>${esc(r.site_id||'—')}</b></td><td>${esc(r.site_name||'—')}</td><td>${esc(r.regional||'—')}</td><td>${esc(r.area||'—')}</td>
+     <td>${esc(r.master_province||'—')}</td><td>${esc(r.mapped_province||'—')}</td><td>${esc(r.city||'—')}</td>
+     <td>${esc(r.district||'—')}</td><td>${esc(r.village||'—')}</td><td>${esc(r.latitude??'—')}</td><td>${esc(r.longitude??'—')}</td><td>${esc(r.reason||'—')}</td>
+   </tr>`).join('')}</tbody></table>`;
+ }
  document.getElementById('pmnoGeoIssueModal')?.classList.add('open');
 }
 function pmnoExportGeoIssues(){
