@@ -1474,6 +1474,94 @@ body.pmno-page-single button {
    focus zoom by keeping form-control text at the iOS 16px threshold. */
 </style>
 
+
+<style id="pmno-v79-single-site-nav-ios-fix">
+/* V79 — Fix V78 side effect.
+   iOS 16px is required for form controls, NOT navigation buttons.
+   Restore the existing PMNO navigation sizing and bind navigation directly. */
+
+/* Keep navigation visually identical to the other pages. */
+@media (max-width:760px){
+  body.pmno-page-single .mode-menu button,
+  body.pmno-page-single .mobile-nav button {
+    font-size:8px !important;
+    line-height:1 !important;
+    letter-spacing:.7px !important;
+  }
+
+  body.pmno-page-single .mode-menu button {
+    height:32px !important;
+    min-height:32px !important;
+    padding:0 8px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+
+  /* Only actual form controls get the iOS anti-auto-zoom 16px size. */
+  body.pmno-page-single input,
+  body.pmno-page-single select,
+  body.pmno-page-single textarea {
+    font-size:16px !important;
+    line-height:1.25 !important;
+    -webkit-text-size-adjust:100% !important;
+  }
+
+  body.pmno-page-single input[type="search"] {
+    -webkit-appearance:none !important;
+    appearance:none !important;
+  }
+
+  /* Preserve the existing compact Single Site input-mode buttons. */
+  body.pmno-page-single .single-input-mode-btn {
+    font-size:8px !important;
+    line-height:1 !important;
+    letter-spacing:1.4px !important;
+  }
+}
+
+/* Final navigation binding: use the existing SPA router, without depending
+   on the earlier capture listener. */
+</style>
+<script id="pmno-v79-final-nav-binding">
+(function(){
+  'use strict';
+  function bindPMNONav(){
+    const routes = {
+      dashboardMenu:'dashboard',
+      siteProfileMenu:'siteprofile',
+      singleMenu:'single',
+      bulkMenu:'bulk',
+      drmMenu:'drm',
+      masterDataMenu:'master'
+    };
+    Object.keys(routes).forEach(function(id){
+      const btn=document.getElementById(id);
+      if(!btn || btn.__pmnoV79Bound) return;
+      btn.__pmnoV79Bound=true;
+      btn.type='button';
+      btn.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const page=routes[id];
+        if(typeof window.pmnoNavigate==='function'){
+          window.pmnoNavigate(page);
+        } else {
+          const hash='#'+page;
+          if(location.hash!==hash) location.hash=page;
+        }
+      },false);
+    });
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bindPMNONav,{once:true});
+  } else {
+    bindPMNONav();
+  }
+  window.addEventListener('pageshow',function(){setTimeout(bindPMNONav,0);});
+})();
+</script>
+
 </head>
 <body>
 <div class="app">
@@ -4492,7 +4580,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V78-SINGLE-SITE-IOS-INPUT-ZOOM-FIX";</script>
+<script>window.__PMNO_BUILD__="V79-SINGLE-SITE-NAV-IOS-FIX";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
@@ -4666,4 +4754,4 @@ body.pmno-page-single .detail-panel{
   window.addEventListener('pageshow',fixSingleScroll,{passive:true});
 })();
 </script>
-<script>window.__PMNO_BUILD__="V78-SINGLE-SITE-IOS-INPUT-ZOOM-FIX";</script>
+<script>window.__PMNO_BUILD__="V79-SINGLE-SITE-NAV-IOS-FIX";</script>
