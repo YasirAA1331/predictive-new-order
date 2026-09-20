@@ -2327,6 +2327,55 @@ function fitDashboardMap(){
  renderDashboardMap(m._siteData||[]);
 }
 if(typeof document!=='undefined')document.addEventListener('click',e=>{const b=e.target.closest?.('.dash-site-open');if(!b)return;const r=rows.find(x=>sid(x)===b.dataset.site);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
+const PMNO_GEO_REF_URLS={
+  land:'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_IDN_0.json',
+  province:'https://geodata.ucdavis.edu/gadm/gadm4.1/json/gadm41_IDN_1.json'
+};
+window.__pmnoGeoReference=window.__pmnoGeoReference||{status:'idle',land:null,province:null,error:null,loading:null};
+function pmnoPointInRing(pt,ring){let x=pt[0],y=pt[1],inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];const hit=((yi>y)!==(yj>y))&&(x<((xj-xi)*(y-yi)/(yj-yi)+xi));if(hit)inside=!inside;}return inside}
+function pmnoPointInPolygon(pt,poly){if(!poly||!poly.length)return false;if(!pmnoPointInRing(pt,poly[0]))return false;for(let i=1;i<poly.length;i++)if(pmnoPointInRing(pt,poly[i]))return false;return true}
+function pmnoPointInGeometry(pt,g){if(!g)return false;const t=g.type,c=g.coordinates;if(t==='Polygon')return pmnoPointInPolygon(pt,c);if(t==='MultiPolygon')return c.some(poly=>pmnoPointInPolygon(pt,poly));return false}
+function pmnoFeatureBBox(f){const b=f?.bbox;if(b&&b.length>=4)return b;let minX=Infinity,minY=Infinity,maxX=-Infinity,maxY=-Infinity;const walk=(a)=>{if(!Array.isArray(a))return;if(typeof a[0]==='number'){minX=Math.min(minX,a[0]);maxX=Math.max(maxX,a[0]);minY=Math.min(minY,a[1]);maxY=Math.max(maxY,a[1]);return}a.forEach(walk)};walk(f?.geometry?.coordinates);return [minX,minY,maxX,maxY]}
+function pmnoBboxContains(b,pt){return b&&pt[0]>=b[0]&&pt[0]<=b[2]&&pt[1]>=b[1]&&pt[1]<=b[3]}
+function pmnoFeatureContains(f,pt){const b=pmnoFeatureBBox(f);return pmnoBboxContains(b,pt)&&pmnoPointInGeometry(pt,f.geometry)}
+function pmnoNorm(s){return String(s??'').trim().toUpperCase().replace(/[.']/g,'').replace(/\s+/g,' ').replace(/^PROVINSI\s+/,'').replace(/^PROVINCE\s+/,'')}
+function pmnoMasterProvince(r){return pmnoNorm(val(r,'province','provinsi','propinsi','regional_province'))}
+function pmnoGeoClassify(rows){
+ const ref=window.__pmnoGeoReference;if(ref.status!=='ready'||!ref.land)return null;
+ let valid=0,mismatch=0,invalid=0,missing=0;
+ const provinceFeatures=ref.province?.features||[];
+ const details=[];
+ (rows||[]).forEach(r=>{
+   const laRaw=val(r,'latitude'),loRaw=val(r,'longitude');
+   if(String(laRaw??'').trim()===''||String(loRaw??'').trim()===''){missing++;details.push({site_id:sid(r),status:'MISSING_COORDINATE'});return;}
+   const la=Number(laRaw),lo=Number(loRaw);
+   if(!Number.isFinite(la)||!Number.isFinite(lo)||la<-11.5||la>6.5||lo<94.5||lo>141.5){invalid++;details.push({site_id:sid(r),status:'INVALID_COORDINATE'});return;}
+   const pt=[lo,la];
+   if(!pmnoFeatureContains(ref.land,pt)){invalid++;details.push({site_id:sid(r),status:'INVALID_COORDINATE',reason:'SEA_OR_OUTSIDE_LAND'});return;}
+   const pf=provinceFeatures.find(f=>pmnoFeatureContains(f,pt));
+   const mapped=pmnoNorm(pf?.properties?.NAME_1||pf?.properties?.name_1||pf?.properties?.NAME_1_EN||'');
+   const master=pmnoMasterProvince(r);
+   if(master&&mapped&&master!==mapped){mismatch++;details.push({site_id:sid(r),status:'LOCATION_MISMATCH',master_province:master,mapped_province:mapped});return;}
+   valid++;details.push({site_id:sid(r),status:'VALID_COORDINATE',mapped_province:mapped});
+ });
+ return {valid,mismatch,invalid,missing,total:(rows||[]).length,details};
+}
+async function pmnoLoadGeoReference(){
+ const ref=window.__pmnoGeoReference;if(ref.status==='ready')return ref;if(ref.loading)return ref.loading;
+ ref.status='loading';ref.error=null;
+ ref.loading=(async()=>{try{
+   const [landR,provR]=await Promise.all([fetch(PMNO_GEO_REF_URLS.land,{cache:'force-cache'}),fetch(PMNO_GEO_REF_URLS.province,{cache:'force-cache'})]);
+   if(!landR.ok||!provR.ok)throw new Error('Geospatial reference unavailable');
+   const [land,province]=await Promise.all([landR.json(),provR.json()]);
+   const lf=(land.features||[])[0];if(!lf)throw new Error('Land polygon unavailable');
+   ref.land=lf;ref.province=province;ref.status='ready';
+   if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+   return ref;
+ }catch(e){ref.status='error';ref.error=e;return ref;}finally{ref.loading=null;}})();
+ return ref.loading;
+}
+pmnoLoadGeoReference();
+
 function renderDashboardSource(label){
  const a=siteAuditSnapshot(filtered), byReg={};
  filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
@@ -2350,12 +2399,13 @@ function renderDashboardSource(label){
   filtered.forEach(r=>{const raw=val(r,'asset_register_date');if(!String(raw).trim()){ageBuckets[4][1]++;return}const d=new Date(raw);if(!Number.isFinite(d.getTime())){ageBuckets[4][1]++;return}const age=Math.max(0,nowY-d.getFullYear());if(age<5)ageBuckets[0][1]++;else if(age<10)ageBuckets[1][1]++;else if(age<15)ageBuckets[2][1]++;else ageBuckets[3][1]++;});
   const heightBuckets=[['< 30 m',0],['30–50 m',0],['50–70 m',0],['> 70 m',0],['Unknown',0]];
   filtered.forEach(r=>{const n=Number(val(r,'tower_height_m'));if(!Number.isFinite(n)){heightBuckets[4][1]++;return}if(n<30)heightBuckets[0][1]++;else if(n<50)heightBuckets[1][1]++;else if(n<70)heightBuckets[2][1]++;else heightBuckets[3][1]++;});
-  const coordRows=filtered.filter(r=>String(val(r,'latitude')).trim()!==''&&String(val(r,'longitude')).trim()!=='');
-  const geoValid=coordRows.filter(r=>{const la=Number(val(r,'latitude')),lo=Number(val(r,'longitude'));return Number.isFinite(la)&&Number.isFinite(lo)&&la>=-11.5&&la<=6.5&&lo>=94.5&&lo<=141.5}).length;
-  const invalidCoord=coordRows.length-geoValid;
-  const missingCoord=Math.max(0,filtered.length-coordRows.length);
-  const locationMismatch=null;
-  const coordPct=filtered.length?geoValid/filtered.length*100:0;
+  const geo=pmnoGeoClassify(filtered);
+  const geoReady=!!geo;
+  const geoValid=geoReady?geo.valid:0;
+  const locationMismatch=geoReady?geo.mismatch:null;
+  const invalidCoord=geoReady?geo.invalid:null;
+  const missingCoord=geoReady?geo.missing:null;
+  const coordPct=geoReady&&filtered.length?geoValid/filtered.length*100:0;
   const pctOfTotal=n=>filtered.length?(n/filtered.length*100).toFixed(1)+'%':'0.0%';
   const barRows=(rows)=>rows.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${filtered.length?Math.min(100,n/filtered.length*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
   const group=(title,body)=>`<div class="asset-profile-group"><div class="asset-profile-group-title">${esc(title)}</div>${body}</div>`;
@@ -2365,12 +2415,12 @@ function renderDashboardSource(label){
     ${group('ASSET COMPOSITION',barRows(towerTypeRows))}
     ${group('ASSET MATURITY',barRows(ageBuckets))}
     ${group('PHYSICAL PROFILE · TOWER HEIGHT',barRows(heightBuckets))}
-    <div class="asset-profile-readiness"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div><div class="asset-readiness-value"><strong>${fmtInt(geoValid)}</strong><b>${coordPct.toFixed(1)}%</b><em>valid coordinates</em></div><div class="asset-readiness-breakdown">
-      <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${fmtInt(geoValid)}</b><em>${pctOfTotal(geoValid)}</em></div>
-      <div class="asset-readiness-row mismatch"><span>Location Mismatch</span><b>${locationMismatch===null?'—':fmtInt(locationMismatch)}</b><em>${locationMismatch===null?'Pending':pctOfTotal(locationMismatch)}</em></div>
-      <div class="asset-readiness-row invalid"><span>Invalid Coordinate</span><b>${fmtInt(invalidCoord)}</b><em>${pctOfTotal(invalidCoord)}</em></div>
-      <div class="asset-readiness-row missing"><span>Missing Coordinate</span><b>${fmtInt(missingCoord)}</b><em>${pctOfTotal(missingCoord)}</em></div>
-    </div><div class="asset-readiness-note">Valid Coordinate currently covers available numeric coordinates within the Indonesia geographic bounds. Location mismatch and sea-point validation require a geospatial reference layer.</div></div>
+    <div class="asset-profile-readiness"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':'Pending'}</b><em>${geoReady?'valid coordinates':'geospatial validation loading'}</em></div><div class="asset-readiness-breakdown">
+      <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${geoReady?fmtInt(geoValid):'—'}</b><em>${geoReady?pctOfTotal(geoValid):'Pending'}</em></div>
+      <div class="asset-readiness-row mismatch"><span>Location Mismatch</span><b>${geoReady?fmtInt(locationMismatch):'—'}</b><em>${geoReady?pctOfTotal(locationMismatch):'Pending'}</em></div>
+      <div class="asset-readiness-row invalid"><span>Invalid Coordinate</span><b>${geoReady?fmtInt(invalidCoord):'—'}</b><em>${geoReady?pctOfTotal(invalidCoord):'Pending'}</em></div>
+      <div class="asset-readiness-row missing"><span>Missing Coordinate</span><b>${geoReady?fmtInt(missingCoord):'—'}</b><em>${geoReady?pctOfTotal(missingCoord):'Pending'}</em></div>
+    </div><div class="asset-readiness-note">Validation uses detailed GADM 4.1 Indonesia land and province polygons: sea/outside-land points are Invalid Coordinate; land points whose mapped province differs from the master province are Location Mismatch.</div></div>
   </div>`;
  }
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
