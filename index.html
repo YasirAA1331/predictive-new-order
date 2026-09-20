@@ -1437,6 +1437,43 @@ body.pmno-page-single button {
 }
 </style>
 
+
+<style id="pmno-v78-ios-input-zoom-fix">
+/* V78 — iOS Safari focus zoom fix.
+   iOS automatically zooms the page when focusing form controls whose rendered
+   font-size is below 16px. Keep the UI visually compact while making controls
+   exactly 16px on mobile so focusing SEARCH MASTER SITE does not zoom/lock the page. */
+
+@media (max-width:760px){
+  body.pmno-page-single input,
+  body.pmno-page-single select,
+  body.pmno-page-single textarea,
+  body.pmno-page-single button {
+    font-size:16px !important;
+    line-height:1.25 !important;
+  }
+
+  body.pmno-page-single #masterSiteSearch,
+  body.pmno-page-single #lat,
+  body.pmno-page-single #lon,
+  body.pmno-page-single #tenantMaster,
+  body.pmno-page-single #radiusMaster,
+  body.pmno-page-single #tenant,
+  body.pmno-page-single #radius {
+    font-size:16px !important;
+    -webkit-text-size-adjust:100% !important;
+  }
+
+  body.pmno-page-single input[type="search"] {
+    -webkit-appearance:none !important;
+    appearance:none !important;
+  }
+}
+
+/* Do not change pinch-to-zoom. This only prevents Safari's automatic
+   focus zoom by keeping form-control text at the iOS 16px threshold. */
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -4455,7 +4492,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V77-SINGLE-SITE-OVERFLOW-ROOT-FIX";</script>
+<script>window.__PMNO_BUILD__="V78-SINGLE-SITE-IOS-INPUT-ZOOM-FIX";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
@@ -4629,4 +4666,4 @@ body.pmno-page-single .detail-panel{
   window.addEventListener('pageshow',fixSingleScroll,{passive:true});
 })();
 </script>
-<script>window.__PMNO_BUILD__="V77-SINGLE-SITE-OVERFLOW-ROOT-FIX";</script>
+<script>window.__PMNO_BUILD__="V78-SINGLE-SITE-IOS-INPUT-ZOOM-FIX";</script>
