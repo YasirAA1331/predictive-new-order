@@ -2361,6 +2361,53 @@ function pmnoGeoClassify(rows){
  });
  return {valid,mismatch,invalid,missing,total:(rows||[]).length,details};
 }
+window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||{status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,error:null,loading:null};
+async function pmnoLoadGeoPortfolio(){
+ const g=window.__pmnoGeoPortfolio;
+ if(g.status==='ready'||g.status==='loading')return g.loading||g;
+ if(window.__pmnoGeoReference?.status!=='ready')return null;
+ g.status='loading';g.error=null;
+ g.loading=(async()=>{
+  try{
+   const rg=String($('dash-regional')?.value||'');
+   const ar=String($('dash-area')?.value||'');
+   const pv=String($('dash-province')?.value||'');
+   const ct=String($('dash-city')?.value||'');
+   const q=String($('dash-search')?.value||'').trim();
+   const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
+   if(!r.ok)throw new Error('pmno_coordinate_points HTTP '+r.status);
+   const pts=await r.json();
+   if(!Array.isArray(pts))throw new Error('Coordinate payload invalid');
+   let valid=0,mismatch=0,invalid=0,missing=0;
+   const ref=window.__pmnoGeoReference, provinceFeatures=ref.province?.features||[];
+   const masterNorm=pmnoNorm;
+   const chunkSize=150;
+   for(let start=0;start<pts.length;start+=chunkSize){
+    const end=Math.min(pts.length,start+chunkSize);
+    for(let i=start;i<end;i++){
+      const r=pts[i],laRaw=r.latitude,loRaw=r.longitude;
+      if(String(laRaw??'').trim()===''||String(loRaw??'').trim()===''){missing++;continue;}
+      const la=Number(laRaw),lo=Number(loRaw);
+      if(!Number.isFinite(la)||!Number.isFinite(lo)||la<-11.5||la>6.5||lo<94.5||lo>141.5){invalid++;continue;}
+      const pt=[lo,la];
+      if(!pmnoFeatureContains(ref.land,pt)){invalid++;continue;}
+      const pf=provinceFeatures.find(f=>pmnoFeatureContains(f,pt));
+      const mapped=masterNorm(pf?.properties?.NAME_1||pf?.properties?.name_1||pf?.properties?.NAME_1_EN||'');
+      const master=masterNorm(r.province||'');
+      if(master&&mapped&&master!==mapped){mismatch++;continue;}
+      valid++;
+    }
+    if(end<pts.length) await new Promise(requestAnimationFrame);
+   }
+   g.valid=valid;g.mismatch=mismatch;g.invalid=invalid;g.missing=missing;g.total=pts.length;g.status='ready';
+   if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+   return g;
+  }catch(e){g.status='error';g.error=e;if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');return g;}
+  finally{g.loading=null;}
+ })();
+ return g.loading;
+}
+
 async function pmnoLoadGeoReference(){
  const ref=window.__pmnoGeoReference;if(ref.status==='ready')return ref;if(ref.loading)return ref.loading;
  ref.status='loading';ref.error=null;
@@ -2376,6 +2423,7 @@ async function pmnoLoadGeoReference(){
      if(!province?.features?.length)throw new Error('Province polygon unavailable');
      ref.land=lf;ref.province=province;ref.status='ready';
      if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+     pmnoLoadGeoPortfolio();
      return ref;
    }catch(e){
      ref.status='error';ref.error=e;
@@ -2427,16 +2475,16 @@ function renderDashboardSource(label){
   if(!window.__pmnoDashboardSummary){const nowY=new Date().getFullYear();filtered.forEach(r=>{const raw=val(r,'asset_register_date');if(!String(raw).trim()){ageBuckets[4][1]++;return}const d=new Date(raw);if(!Number.isFinite(d.getTime())){ageBuckets[4][1]++;return}const age=Math.max(0,nowY-d.getFullYear());if(age<5)ageBuckets[0][1]++;else if(age<10)ageBuckets[1][1]++;else if(age<15)ageBuckets[2][1]++;else ageBuckets[3][1]++;});}
     const heightBuckets=Array.isArray(window.__pmnoDashboardSummary?.height)?window.__pmnoDashboardSummary.height:[['< 30 m',0],['30–50 m',0],['50–70 m',0],['> 70 m',0],['Unknown',0]];
   if(!window.__pmnoDashboardSummary){filtered.forEach(r=>{const n=Number(val(r,'tower_height_m'));if(!Number.isFinite(n)){heightBuckets[4][1]++;return}if(n<30)heightBuckets[0][1]++;else if(n<50)heightBuckets[1][1]++;else if(n<70)heightBuckets[2][1]++;else heightBuckets[3][1]++;});}
-    const geo=pmnoGeoClassify(filtered);
-  const geoReady=!!geo;
-  const geoError=window.__pmnoGeoReference?.status==='error';
-  const geoValid=geoReady?geo.valid:0;
-  const locationMismatch=geoReady?geo.mismatch:null;
-  const invalidCoord=geoReady?geo.invalid:null;
-  const missingCoord=geoReady?geo.missing:null;
-  const coordPct=geoReady&&filtered.length?geoValid/filtered.length*100:0;
-  const pctOfTotal=n=>filtered.length?(n/filtered.length*100).toFixed(1)+'%':'0.0%';
-  const barRows=(rows)=>rows.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${filtered.length?Math.min(100,n/filtered.length*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
+    const geo=window.__pmnoGeoPortfolio;
+  const geoReady=geo?.status==='ready' && Number(geo.total)===Number(a.total);
+  const geoError=geo?.status==='error';
+  const geoValid=geoReady?Number(geo.valid)||0:0;
+  const locationMismatch=geoReady?Number(geo.mismatch)||0:null;
+  const invalidCoord=geoReady?Number(geo.invalid)||0:null;
+  const missingCoord=geoReady?Number(geo.missing)||0:null;
+  const coordPct=geoReady&&a.total?geoValid/a.total*100:0;
+  const pctOfTotal=n=>a.total?(n/a.total*100).toFixed(1)+'%':'0.0%';
+  const barRows=(rows)=>rows.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${a.total?Math.min(100,n/a.total*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
   const group=(title,body)=>`<div class="asset-profile-group"><div class="asset-profile-group-title">${esc(title)}</div>${body}</div>`;
   asset.innerHTML=`<div class="asset-profile-grid">
     <div class="asset-profile-hero"><small>PORTFOLIO SIZE</small><strong>${fmtInt(a.total)}</strong><span>Sites / Towers</span></div>
@@ -2726,10 +2774,12 @@ async function applyFilters(){
    if(!r.ok)throw new Error('pmno_dashboard_query HTTP '+r.status);
    const snap=await r.json();
    window.__pmnoDashboardSummary=snap||null;
+   window.__pmnoGeoPortfolio={status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,error:null,loading:null};
    rows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
    filtered=rows.slice();
    applySnapshotSupport({sites:rows});
    renderDashboardSource('MASTER DATA · PMNO · server-side filter');
+   if(window.__pmnoGeoReference?.status==='ready')pmnoLoadGeoPortfolio();
   }catch(e){console.error('[PMNO FILTER]',e)}
  },220);
 }
@@ -2749,7 +2799,7 @@ async function load(){
  const refreshBtn=$('dash-refresh');
  if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
-  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
+  rows=[]; filtered=[]; window.__pmnoGeoPortfolio={status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,error:null,loading:null}; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
   const pageSize=1000;
   const fetchPage=async(offset)=>{
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
