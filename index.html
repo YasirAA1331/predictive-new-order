@@ -965,11 +965,26 @@ body.pmno-page-single .workspace{
 <main class="workspace">
 <aside class="panel input-panel">
 <div class="section-kicker">NEW ORDER INPUT</div>
+<div class="single-input-mode" role="tablist" aria-label="New Order input mode">
+<button id="inputModeCoordinate" class="single-input-mode-btn active" type="button">COORDINATE</button>
+<button id="inputModeMaster" class="single-input-mode-btn" type="button">MASTER SITE</button>
+</div>
+<div id="coordinateInputBlock">
 <div class="input-grid">
 <div class="field"><label>LATITUDE</label><input id="lat" type="number" step="0.0001" value="-6.9818"></div>
 <div class="field"><label>LONGITUDE</label><input id="lon" type="number" step="0.0001" value="110.4093"></div>
 <div class="field"><label>TARGET TENANT</label><select id="tenant"><option>IOH</option><option>TSEL</option><option>XLS</option><option>SFN</option></select></div>
 <div class="field"><label>SEARCH RADIUS</label><select id="radius"><option value="1000">1 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></div>
+</div>
+</div>
+<div id="masterSiteInputBlock" hidden>
+<div class="field master-site-search-field"><label>SEARCH MASTER SITE</label><input id="masterSiteSearch" type="search" autocomplete="off" placeholder="Site ID / Site Name"></div>
+<div id="masterSiteResults" class="master-site-results" hidden></div>
+<div id="masterSiteSelected" class="master-site-selected" hidden></div>
+<div class="input-grid master-site-options">
+<div class="field"><label>TARGET TENANT</label><select id="tenantMaster"><option>IOH</option><option>TSEL</option><option>XLS</option><option>SFN</option></select></div>
+<div class="field"><label>SEARCH RADIUS</label><select id="radiusMaster"><option value="1000">1 km</option><option value="3000" selected>3 km</option><option value="5000">5 km</option><option value="10000">10 km</option></select></div>
+</div>
 </div>
 <button id="analyze" class="analyze">ANALYZE NEW ORDER <span>→</span></button>
 <div class="rule"><strong>COLLO FIRST</strong><p>Existing tower opportunities are evaluated before Predictive New Site / B2S fallback.</p></div>
@@ -1657,6 +1672,87 @@ async function pmnoLoadRouteContext(){
     }
   }catch(e){}
 }
+/* V74 — Single Site dual input: Coordinate / Master Site */
+(function(){
+  const coordBtn=$('inputModeCoordinate'), masterBtn=$('inputModeMaster');
+  const coordBlock=$('coordinateInputBlock'), masterBlock=$('masterSiteInputBlock');
+  const search=$('masterSiteSearch'), results=$('masterSiteResults'), selectedBox=$('masterSiteSelected');
+  const tenantMaster=$('tenantMaster'), radiusMaster=$('radiusMaster');
+  let selectedMaster=null, searchTimer=null, searchToken=0;
+  state.inputMode='coordinate'; state.masterSite=null;
+  function syncMasterSelectors(){
+    if(tenantMaster && $('tenant')) tenantMaster.value=$('tenant').value;
+    if(radiusMaster && $('radius')) radiusMaster.value=$('radius').value;
+  }
+  function setMode(mode){
+    state.inputMode=mode;
+    coordBtn?.classList.toggle('active',mode==='coordinate');
+    masterBtn?.classList.toggle('active',mode==='master');
+    if(coordBlock)coordBlock.hidden=mode!=='coordinate';
+    if(masterBlock)masterBlock.hidden=mode!=='master';
+    if(mode==='master'){
+      syncMasterSelectors();
+      setTimeout(()=>search?.focus(),30);
+    }
+  }
+  function renderSelected(site){
+    if(!selectedBox)return;
+    if(!site){selectedBox.hidden=true;selectedBox.innerHTML='';return}
+    selectedBox.hidden=false;
+    selectedBox.innerHTML=`<div class="mini-label">MASTER SITE TERPILIH</div><strong>${esc(site.site_id||'—')} · ${esc(site.site_name||'Unnamed Site')}</strong><p>${esc(site.city||site.province||site.area||site.regional||'')} · ${site.latitude!=null?Number(site.latitude).toFixed(5):'—'}, ${site.longitude!=null?Number(site.longitude).toFixed(5):'—'}</p>`;
+  }
+  function renderResults(rows){
+    if(!results)return;
+    if(!rows.length){results.hidden=false;results.innerHTML='<div class="master-site-result"><span>Site tidak ditemukan.</span></div>';return}
+    results.hidden=false;
+    results.innerHTML=rows.map((r,i)=>`<button type="button" class="master-site-result" data-master-index="${i}"><strong>${esc(r.site_id||'—')} · ${esc(r.site_name||'Unnamed Site')}</strong><span>${esc(r.city||r.province||r.area||r.regional||'')} · <b>${r.latitude!=null?Number(r.latitude).toFixed(5):'—'}, ${r.longitude!=null?Number(r.longitude).toFixed(5):'—'}</b></span></button>`).join('');
+    results.querySelectorAll('[data-master-index]').forEach(btn=>btn.addEventListener('click',()=>{
+      const row=rows[Number(btn.dataset.masterIndex)];
+      if(!row)return;
+      selectedMaster=row; state.masterSite=row;
+      if(row.latitude!=null&&row.longitude!=null){$('lat').value=row.latitude;$('lon').value=row.longitude;state.lat=Number(row.latitude);state.lon=Number(row.longitude);}
+      if($('tenant')&&tenantMaster)$('tenant').value=tenantMaster.value;
+      if($('radius')&&radiusMaster)$('radius').value=radiusMaster.value;
+      $('radiusText').textContent=(num($('radius').value,3000)/1000)+' km';
+      search.value=`${row.site_id||''} · ${row.site_name||''}`.trim();
+      results.hidden=true; renderSelected(row);
+    }));
+  }
+  async function searchMasterSites(){
+    const raw=(search?.value||'').trim();
+    if(raw.includes(' · ')){return;}
+    if(raw.length<2){if(results){results.hidden=true;results.innerHTML='';}return;}
+    const token=++searchToken;
+    results.hidden=false; results.innerHTML='<div class="master-site-result"><span>Searching master site…</span></div>';
+    const q=raw.replace(/[,*()]/g,' ').replace(/\s+/g,' ').trim().slice(0,80);
+    try{
+      const u=new URL(`${SUPABASE_URL}/rest/v1/pmno_site_master`);
+      u.searchParams.set('select','site_id,site_name,latitude,longitude,regional,area,province,city');
+      u.searchParams.set('or',`(site_id.ilike.*${q}*,site_name.ilike.*${q}*)`);
+      u.searchParams.set('limit','8');
+      u.searchParams.set('order','site_id.asc');
+      const res=await fetch(u.toString(),{headers:apiHeaders()});
+      if(!res.ok)throw new Error(`Master Site HTTP ${res.status}`);
+      const rows=await res.json();
+      if(token===searchToken)renderResults(Array.isArray(rows)?rows:[]);
+    }catch(e){if(token===searchToken){results.hidden=false;results.innerHTML=`<div class="master-site-result"><span>Gagal mencari master site. ${esc(e.message)}</span></div>`;}}
+  }
+  coordBtn?.addEventListener('click',()=>setMode('coordinate'));
+  masterBtn?.addEventListener('click',()=>setMode('master'));
+  search?.addEventListener('input',()=>{clearTimeout(searchTimer);searchTimer=setTimeout(searchMasterSites,280);});
+  search?.addEventListener('keydown',e=>{if(e.key==='Escape'){results.hidden=true;search.blur();}});
+  tenantMaster?.addEventListener('change',()=>{if($('tenant'))$('tenant').value=tenantMaster.value;state.tenant=tenantMaster.value;});
+  radiusMaster?.addEventListener('change',()=>{if($('radius'))$('radius').value=radiusMaster.value;state.radius=num(radiusMaster.value,3000);$('radiusText').textContent=(state.radius/1000)+' km';if(radiusCircle)radiusCircle.setRadius(state.radius);});
+  $('analyze').addEventListener('click',function(e){
+    if(state.inputMode==='master'){
+      if(!selectedMaster){e.preventDefault();showError('Pilih Master Site terlebih dahulu.');search?.focus();return;}
+      if(selectedMaster.latitude==null||selectedMaster.longitude==null){e.preventDefault();showError('Master Site terpilih tidak memiliki koordinat yang dapat digunakan.');return;}
+      $('lat').value=selectedMaster.latitude;$('lon').value=selectedMaster.longitude;
+      $('tenant').value=tenantMaster?.value||$('tenant').value;$('radius').value=radiusMaster?.value||$('radius').value;
+    }
+  },true);
+})();
+
 loadTenants().then(pmnoLoadRouteContext);
 /* PMNO SINGLE SITE SOURCE OF TRUTH BRIDGE
    DRM/Bulk consumers use this bridge so analysis semantics remain anchored to
@@ -3938,6 +4034,27 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 </body>
 </html>
 
+<style id="pmno-single-site-master-input-v74">
+.single-input-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 12px;padding:4px;border:1px solid var(--line);border-radius:10px;background:#081522}
+.single-input-mode-btn{height:34px;border:1px solid transparent;border-radius:7px;background:transparent;color:#7890a4;font-size:8px;font-weight:950;letter-spacing:1.4px;cursor:pointer}
+.single-input-mode-btn.active{border-color:#287897;background:#0d2a3d;color:var(--cyan);box-shadow:inset 0 0 0 1px rgba(53,200,255,.08)}
+.master-site-search-field{position:relative}
+.master-site-search-field input{width:100%}
+.master-site-results{margin-top:7px;border:1px solid var(--line);border-radius:9px;background:#081522;overflow:hidden;max-height:230px;overflow-y:auto}
+.master-site-result{display:block;width:100%;padding:10px 11px;border:0;border-bottom:1px solid #182d42;background:transparent;color:#d8e4ed;text-align:left;cursor:pointer}
+.master-site-result:last-child{border-bottom:0}
+.master-site-result:hover,.master-site-result:focus{background:#10283b;outline:none}
+.master-site-result strong{display:block;font-size:9px;letter-spacing:.3px}
+.master-site-result span{display:block;margin-top:3px;color:#7890a4;font-size:8px;line-height:1.35}
+.master-site-result b{color:var(--cyan);font-weight:900}
+.master-site-selected{margin-top:8px;padding:10px 11px;border:1px solid #27647f;border-radius:9px;background:#0b2032}
+.master-site-selected .mini-label{color:#6f879c;font-size:7px;letter-spacing:1.5px;font-weight:900}
+.master-site-selected strong{display:block;margin-top:4px;font-size:10px}
+.master-site-selected p{margin:3px 0 0;color:#7890a4;font-size:8px;line-height:1.4}
+.master-site-options{margin-top:10px}
+.master-site-results[hidden],.master-site-selected[hidden],#masterSiteInputBlock[hidden],#coordinateInputBlock[hidden]{display:none!important}
+@media(max-width:700px){.single-input-mode{margin:8px 0 10px}.single-input-mode-btn{height:32px;font-size:7px}.master-site-results{max-height:210px}.master-site-result{padding:9px}.master-site-options{grid-template-columns:1fr 1fr!important}}
+</style>
 <style id="pmno-single-site-scroll-fix-v73">
 /* V73 — SINGLE SITE must be scrollable on both desktop and mobile.
    Do not lock the SPA viewport while the Single Site page is active. */
@@ -4033,4 +4150,4 @@ body.pmno-page-single .detail-panel{
   window.addEventListener('pageshow',fixSingleScroll,{passive:true});
 })();
 </script>
-<script>window.__PMNO_BUILD__="V73-SINGLE-SITE-SCROLL-FIX";</script>
+<script>window.__PMNO_BUILD__="V74-SINGLE-SITE-DUAL-INPUT";</script>
