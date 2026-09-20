@@ -2401,7 +2401,8 @@ function pmnoStartGeoWhenVisible(){
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',pmnoStartGeoWhenVisible,{once:true}); else pmnoStartGeoWhenVisible();
 
 function renderDashboardSource(label){
- const a=siteAuditSnapshot(filtered), byReg={};
+ const sm=window.__pmnoDashboardSummary?.stats||null;
+ const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:0,leaseRisk:0,leaseExpired:0}:siteAuditSnapshot(filtered), byReg={};
  filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
  const fo=window.__pmnoDashboardSummary?.filter_options;
  setOptions('dash-regional',Array.isArray(fo?.regional)?fo.regional:uniq('regional').concat(uniq('region')).filter((v,i,a)=>a.indexOf(v)===i),'ALL REGIONAL');
@@ -2409,7 +2410,6 @@ function renderDashboardSource(label){
  setOptions('dash-province',Array.isArray(fo?.province)?fo.province:uniq('province'),'ALL PROVINCE');
  setOptions('dash-city',Array.isArray(fo?.city)?fo.city:uniq('city').concat(uniq('kabupaten')).filter((v,i,a)=>a.indexOf(v)===i),'ALL CITY');
  renderKpis();
- const sm=window.__pmnoDashboardSummary?.stats||null;
  const tenantTotal=sm?Number(sm.total_tenant)||0:dashboardTenantTotal(filtered);
  const npa=sm?Number(sm.npa_sites)||0:siteNpaCount(filtered);
  const ratio=sm&&Number(sm.total_sites)?tenantTotal/Number(sm.total_sites):dashboardTenancyRatio(filtered);
