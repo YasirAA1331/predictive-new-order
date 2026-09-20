@@ -2806,6 +2806,7 @@ async function applyFilters(){
    if(!r.ok)throw new Error('pmno_dashboard_query HTTP '+r.status);
    const snap=await r.json();
    window.__pmnoDashboardSummary=snap||null;
+   window.__pmnoDashboardFilterOptions=snap?.filter_options||null;
    window.__pmnoGeoPortfolio={status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,error:null,loading:null};
    rows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
    filtered=rows.slice();
@@ -2918,7 +2919,18 @@ function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;loca
 function init(){
  if(!initialized){
   initialized=true;
-  ['dash-regional','dash-area','dash-province','dash-city','dash-search'].forEach(id=>$(id)?.addEventListener('input',applyFilters));
+  // Select filters must use change (especially iOS/Safari); search keeps input.
+  ['dash-regional','dash-area','dash-province','dash-city'].forEach(id=>$(id)?.addEventListener('change',()=>{
+    if(id==='dash-regional'){
+      $('dash-area').value='';$('dash-province').value='';$('dash-city').value='';
+    } else if(id==='dash-area'){
+      $('dash-province').value='';$('dash-city').value='';
+    } else if(id==='dash-province'){
+      $('dash-city').value='';
+    }
+    applyFilters();
+  }));
+  $('dash-search')?.addEventListener('input',applyFilters);
   $('dash-refresh')?.addEventListener('click',load);
   $('dash-open-site')?.addEventListener('click',navigateSite);
   $('sp-search-btn')?.addEventListener('click',()=>searchSite($('sp-search')?.value));
