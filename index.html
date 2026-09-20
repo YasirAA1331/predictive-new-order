@@ -2414,7 +2414,7 @@ async function pmnoLoadGeoPortfolio(){
  if(g.status==='ready'||g.status==='loading')return g.loading||g;
  if(window.__pmnoGeoReference?.status!=='ready')return null;
  g.status='loading';g.error=null;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;
- if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO · geo validation starting');
+ if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO · geo validation starting');
  g.loading=(async()=>{
   try{
    const rg=String($('dash-regional')?.value||'');
@@ -2431,7 +2431,7 @@ async function pmnoLoadGeoPortfolio(){
    const masterNorm=pmnoNorm;
    const chunkSize=150;
    g.total=pts.length;
-   if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO · validating coordinates');
+   if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO · validating coordinates');
    for(let start=0;start<pts.length;start+=chunkSize){
     const end=Math.min(pts.length,start+chunkSize);
     for(let i=start;i<end;i++){
@@ -2448,13 +2448,13 @@ async function pmnoLoadGeoPortfolio(){
       valid++;
     }
     g.valid=valid;g.mismatch=mismatch;g.invalid=invalid;g.missing=missing;g.processed=end;g.progress=pts.length?end/pts.length*100:100;g.elapsedMs=performance.now()-(g.startedAt||performance.now());
-    if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO · validating coordinates');
+    if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO · validating coordinates');
     if(end<pts.length) await new Promise(requestAnimationFrame);
    }
    g.valid=valid;g.mismatch=mismatch;g.invalid=invalid;g.missing=missing;g.total=pts.length;g.processed=pts.length;g.progress=100;g.elapsedMs=performance.now()-(g.startedAt||performance.now());g.status='ready';
-   if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+   if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO');
    return g;
-  }catch(e){g.status='error';g.error=e;g.elapsedMs=performance.now()-(g.startedAt||performance.now());if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');return g;}
+  }catch(e){g.status='error';g.error=e;g.elapsedMs=performance.now()-(g.startedAt||performance.now());if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO');return g;}
   finally{g.loading=null;}
  })();
  return g.loading;
@@ -2474,12 +2474,12 @@ async function pmnoLoadGeoReference(){
      if(!lf)throw new Error('Land polygon unavailable');
      if(!province?.features?.length)throw new Error('Province polygon unavailable');
      ref.land=lf;ref.province=province;ref.status='ready';
-     if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+     if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO');
      pmnoLoadGeoPortfolio();
      return ref;
    }catch(e){
      ref.status='error';ref.error=e;
-     if(typeof renderDashboardSource==='function')renderDashboardSource('MASTER DATA · PMNO');
+     if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO');
      return ref;
    }finally{clearTimeout(timer);ref.loading=null;}
  })();
@@ -2858,40 +2858,59 @@ async function getAll(table){
  }
  return out;
 }
+function normalizeRpcObject(value){
+ if(Array.isArray(value)) return value.length===1 && value[0] && typeof value[0]==='object' ? value[0] : (value[0]||{});
+ return value&&typeof value==='object'?value:{};
+}
 async function load(){
  if(loading)return; loading=true;
  const refreshBtn=$('dash-refresh');
  if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
   rows=[]; filtered=[]; window.__pmnoGeoPortfolio={status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,error:null,loading:null}; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
-  const pageSize=1000;
-  const fetchPage=async(offset)=>{
-   const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:pageSize})});
-   if(!r.ok)throw new Error('pmno_dashboard_site_page HTTP '+r.status);
-   const snap=await r.json(); if(!snap||!Array.isArray(snap.sites))throw new Error('Dashboard page response invalid.');
-   applySnapshotSupport(snap); return snap;
-  };
-  // Lightweight architecture: summary and detail page are independent.
-  // Never make the whole dashboard depend on the 1,000-row query endpoint.
-  const [summaryResult, pageResult] = await Promise.allSettled([
-    fetch(URL+'/rest/v1/rpc/pmno_dashboard_summary',{method:'POST',headers:H,body:'{}'}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_summary HTTP '+r.status);return r.json();}),
-    fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:0,p_limit:1000})}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_site_page HTTP '+r.status);return r.json();})
-  ]);
-  if(summaryResult.status==='rejected' && pageResult.status==='rejected') throw summaryResult.reason||pageResult.reason||new Error('Dashboard source unavailable');
-  const summary=summaryResult.status==='fulfilled'?summaryResult.value:{};
-  const page=pageResult.status==='fulfilled'?pageResult.value:{sites:[],total_sites:Number(summary?.stats?.total_sites)||0};
-  const first={...(summary||{}),sites:Array.isArray(page?.sites)?page.sites:[],total_sites:Number(page?.total_sites||summary?.stats?.total_sites||0)};
-  window.__pmnoDashboardSummary=first;
-  window.__pmnoDashboardFilterOptions=first?.filter_options||null;
-  applySnapshotSupport(page||{});
-  const pageRows=normalizeMasterRows(first.sites,[]);
-  for(const r of pageRows){const id=sid(r);if(id)rows.push(r);}
-  for(const r of pageRows) r.tenant_count=Number(liveTenantStats[sid(r)]?.total||0);
-  filtered=rows.slice();
-  window.__pmnoDashboardLoadingPages=false;
-  renderDashboardSource('MASTER DATA · PMNO · summary server-side');
-  // Deliberately do not hydrate all 40,350 rows. Detail/search can be loaded on demand.
   window.__pmnoDashboardPartial=true;
+  const pageSize=1000;
+  const fetchJson=(url,body)=>fetch(url,{method:'POST',headers:H,body:JSON.stringify(body)}).then(async r=>{if(!r.ok)throw new Error(url+' HTTP '+r.status);return normalizeRpcObject(await r.json())});
+
+  // Progressive load: render the server-side summary immediately. Do NOT wait for the 1,000-row detail page.
+  const summaryPromise=fetchJson(URL+'/rest/v1/rpc/pmno_dashboard_summary',{});
+  const pagePromise=fetchJson(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{p_offset:0,p_limit:pageSize});
+
+  let summary={};
+  try{
+    summary=await summaryPromise;
+    if(!summary?.stats?.total_sites) throw new Error('Summary response missing stats.total_sites');
+    window.__pmnoDashboardSummary=summary;
+    window.__pmnoDashboardFilterOptions=summary?.filter_options||null;
+    // Render KPI/profile from the full server-side aggregate immediately.
+    renderDashboardSource('MASTER DATA · PMNO · summary server-side');
+  }catch(e){
+    console.warn('[PMNO SUMMARY]',e);
+  }
+
+  try{
+    const page=await pagePromise;
+    const snap=normalizeRpcObject(page);
+    const pageRows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
+    applySnapshotSupport(snap||{});
+    rows=pageRows.slice();
+    filtered=rows.slice();
+    // Keep the already-loaded full summary; only enrich it with page/filter metadata where present.
+    if(!window.__pmnoDashboardSummary) window.__pmnoDashboardSummary={...snap,stats:snap?.stats||{total_sites:Number(snap?.total_sites)||0}};
+    if(snap?.filter_options) window.__pmnoDashboardFilterOptions=snap.filter_options;
+    renderDashboardSource('MASTER DATA · PMNO · summary + detail page');
+  }catch(e){
+    console.warn('[PMNO DETAIL PAGE]',e);
+    // Summary is sufficient for KPI/profile; detail page failure must not blank the dashboard.
+    if(window.__pmnoDashboardSummary?.stats?.total_sites){
+      renderDashboardSource('MASTER DATA · PMNO · summary server-side');
+    } else {
+      throw e;
+    }
+  }
+
+  window.__pmnoDashboardLoadingPages=false;
+  // Do not hydrate all 40,350 rows. Search/detail remains server-side/on-demand.
  }catch(e){
   console.error('[PMNO DASHBOARD LOAD]',e);
   const el=$('dash-kpis'); if(el) el.innerHTML='<div class="dash-error">Dashboard gagal memuat data. Coba Refresh.</div>';
