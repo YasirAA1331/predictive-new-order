@@ -2558,8 +2558,28 @@ async function pmnoCalculateTowerAdjacency(){
  const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
  const ctx={regional:rg,area:ar,province:pv,city:ct,search:q};
  const same=(a,b)=>['regional','area','province','city','search'].every(k=>String(a?.[k]||'')===String(b?.[k]||''));
- if(geo.status!=='ready'||!Array.isArray(geo.validSiteIds)||geo.validSiteIds.length!==Number(geo.valid)||!same(geo.lastContext,ctx)){
+ if(geo.status!=='ready'||!same(geo.lastContext,ctx)){
    g.status='error';g.error=new Error('VALIDATE COORDINATE terlebih dahulu untuk scope/filter yang sama.');g.elapsedMs=0;renderDashboardSource('MASTER DATA · PMNO');return g;
+ }
+ // Backward-compatible: validation results from older builds may have the correct totals/details but no validSiteIds. Reconstruct the valid scope from the last completed validation result so CALCULATE can run without forcing the user to press VALIDATE again.
+ if(!Array.isArray(geo.validSiteIds)||geo.validSiteIds.length!==Number(geo.valid)){
+   try{
+     const expectedIssues=(Number(geo.mismatch)||0)+(Number(geo.invalid)||0)+(Number(geo.missing)||0);
+     let details=Array.isArray(geo.details)?geo.details:[];
+     if(details.filter(x=>x.status!=='VALID_COORDINATE').length!==expectedIssues){
+       await pmnoRebuildGeoIssueDetails();
+       details=Array.isArray(geo.details)?geo.details:[];
+     }
+     const issueIds=new Set(details.filter(x=>x.status!=='VALID_COORDINATE').map(x=>String(x.site_id)));
+     const rr=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
+     if(!rr.ok)throw new Error('pmno_coordinate_points HTTP '+rr.status);
+     const allPts=await rr.json();
+     if(!Array.isArray(allPts))throw new Error('Coordinate payload invalid');
+     geo.validSiteIds=allPts.map(x=>String(x.site_id||'')).filter(id=>id&&!issueIds.has(id));
+     if(geo.validSiteIds.length!==Number(geo.valid))throw new Error('VALID_COORDINATE scope reconstruction mismatch');
+   }catch(e){
+     g.status='error';g.error=e;g.elapsedMs=0;renderDashboardSource('MASTER DATA · PMNO');return g;
+   }
  }
  g.status='loading';g.error=null;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;
  const portfolioTotalAtRun=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||Number(geo.total)||0;
@@ -3837,7 +3857,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V69-ADJACENCY-VALID-COORDINATE";</script>
+<script>window.__PMNO_BUILD__="V70-ADJACENCY-LAST-VALIDATION";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
