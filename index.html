@@ -1239,6 +1239,204 @@ body {
 }
 </style>
 
+
+<style id="pmno-v77-single-overflow-root-fix">
+/* V77 — Single Site: eliminate the remaining intrinsic-width overflow.
+   Do not rely on parent max-width alone; every horizontal flex/grid child must be shrinkable. */
+
+body.pmno-page-single,
+body.pmno-page-single .app,
+body.pmno-page-single .workspace,
+body.pmno-page-single .panel,
+body.pmno-page-single .input-panel,
+body.pmno-page-single .map-stage,
+body.pmno-page-single .detail-panel,
+body.pmno-page-single .detail-panel > *,
+body.pmno-page-single .section-block,
+body.pmno-page-single .section-title,
+body.pmno-page-single .detail-head,
+body.pmno-page-single .target-strip,
+body.pmno-page-single .candidate-list,
+body.pmno-page-single .candidate-row,
+body.pmno-page-single .info-grid,
+body.pmno-page-single .signal-card,
+body.pmno-page-single .challenge,
+body.pmno-page-single .cost-stack,
+body.pmno-page-single .investment-card,
+body.pmno-page-single .investment-result {
+  box-sizing:border-box !important;
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+body.pmno-page-single .detail-panel {
+  overflow-x:hidden !important;
+}
+
+body.pmno-page-single .detail-head {
+  flex-wrap:wrap !important;
+  width:100% !important;
+}
+
+body.pmno-page-single .detail-head > div:first-child {
+  min-width:0 !important;
+  max-width:100% !important;
+  flex:1 1 180px !important;
+}
+
+body.pmno-page-single .decision {
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+}
+
+body.pmno-page-single .decision-pill {
+  flex:0 1 auto !important;
+  max-width:100% !important;
+  white-space:normal !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.pmno-page-single .target-strip {
+  flex-wrap:wrap !important;
+  gap:4px 12px !important;
+}
+
+body.pmno-page-single .target-strip span,
+body.pmno-page-single .target-strip b {
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.pmno-page-single .section-title {
+  flex-wrap:wrap !important;
+}
+
+body.pmno-page-single .section-title strong {
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.pmno-page-single .section-title small {
+  min-width:0 !important;
+  max-width:100% !important;
+  margin-left:auto !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.pmno-page-single .info-grid,
+body.pmno-page-single .investment-row {
+  width:100% !important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+}
+
+body.pmno-page-single .info-cell,
+body.pmno-page-single .investment-cell {
+  min-width:0 !important;
+  max-width:100% !important;
+  overflow:hidden !important;
+}
+
+body.pmno-page-single .info-cell b,
+body.pmno-page-single .info-cell small,
+body.pmno-page-single .investment-cell b,
+body.pmno-page-single .investment-cell small,
+body.pmno-page-single .challenge strong,
+body.pmno-page-single .challenge p {
+  max-width:100% !important;
+  overflow-wrap:anywhere !important;
+  word-break:break-word !important;
+}
+
+body.pmno-page-single .candidate-row {
+  width:100% !important;
+  grid-template-columns:26px minmax(0,1fr) !important;
+}
+
+body.pmno-page-single .candidate-row > * {
+  min-width:0 !important;
+  max-width:100% !important;
+}
+
+body.pmno-page-single .candidate-right {
+  grid-column:2 !important;
+  width:100% !important;
+  max-width:100% !important;
+  min-width:0 !important;
+  text-align:left !important;
+  overflow-wrap:anywhere !important;
+}
+
+body.pmno-page-single input,
+body.pmno-page-single select,
+body.pmno-page-single button {
+  max-width:100% !important;
+  box-sizing:border-box !important;
+}
+
+/* Mobile: the detail result must never inherit a desktop horizontal minimum. */
+@media (max-width:760px){
+  html, body {
+    width:100% !important;
+    max-width:100% !important;
+    overflow-x:hidden !important;
+  }
+
+  body.pmno-page-single .workspace {
+    width:100% !important;
+    max-width:100vw !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    overflow-x:hidden !important;
+  }
+
+  body.pmno-page-single .detail-panel {
+    width:100% !important;
+    max-width:100vw !important;
+    padding-left:16px !important;
+    padding-right:16px !important;
+    overflow-x:hidden !important;
+  }
+
+  body.pmno-page-single .detail-head > div:first-child {
+    flex-basis:100% !important;
+  }
+
+  body.pmno-page-single .decision-pill {
+    margin-top:2px !important;
+  }
+
+  body.pmno-page-single .section-title small {
+    margin-left:0 !important;
+    flex-basis:100% !important;
+  }
+
+  body.pmno-page-single .info-grid,
+  body.pmno-page-single .investment-row {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  }
+}
+
+@media (max-width:430px){
+  body.pmno-page-single .info-grid,
+  body.pmno-page-single .investment-row {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+
+  body.pmno-page-single .detail-panel {
+    padding-left:14px !important;
+    padding-right:14px !important;
+  }
+
+  body.pmno-page-single .decision {
+    font-size:clamp(25px,8vw,32px) !important;
+    line-height:1.05 !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -4257,7 +4455,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V76-SINGLE-SITE-FULL-RESPONSIVE-FIXED";</script>
+<script>window.__PMNO_BUILD__="V77-SINGLE-SITE-OVERFLOW-ROOT-FIX";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
@@ -4431,4 +4629,4 @@ body.pmno-page-single .detail-panel{
   window.addEventListener('pageshow',fixSingleScroll,{passive:true});
 })();
 </script>
-<script>window.__PMNO_BUILD__="V74-SINGLE-SITE-DUAL-INPUT";</script>
+<script>window.__PMNO_BUILD__="V77-SINGLE-SITE-OVERFLOW-ROOT-FIX";</script>
