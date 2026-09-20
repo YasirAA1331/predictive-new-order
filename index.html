@@ -3937,3 +3937,100 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 </script>
 </body>
 </html>
+
+<style id="pmno-single-site-scroll-fix-v73">
+/* V73 — SINGLE SITE must be scrollable on both desktop and mobile.
+   Do not lock the SPA viewport while the Single Site page is active. */
+body.pmno-page-single{
+  overflow-x:hidden!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+body.pmno-page-single .app{
+  height:auto!important;
+  min-height:100dvh!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+body.pmno-page-single .workspace{
+  flex:none!important;
+  width:100%!important;
+  height:auto!important;
+  min-height:calc(100dvh - 72px)!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+body.pmno-page-single .input-panel,
+body.pmno-page-single .detail-panel{
+  min-height:0!important;
+  touch-action:pan-y!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+/* Mobile: use normal document scrolling. No nested scroll trap. */
+@media(max-width:760px){
+  body.pmno-page-single .app{
+    display:block!important;
+    height:auto!important;
+    min-height:100dvh!important;
+    overflow:visible!important;
+  }
+  body.pmno-page-single .topbar{
+    position:relative!important;
+    height:auto!important;
+    min-height:0!important;
+  }
+  body.pmno-page-single .workspace{
+    display:grid!important;
+    grid-template-columns:1fr!important;
+    grid-template-rows:auto minmax(430px,62dvh) auto!important;
+    height:auto!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  body.pmno-page-single .panel{
+    height:auto!important;
+    max-height:none!important;
+    min-height:0!important;
+    overflow:visible!important;
+  }
+  body.pmno-page-single .map-stage{
+    height:min(62dvh,620px)!important;
+    min-height:430px!important;
+    max-height:620px!important;
+  }
+}
+/* Desktop: keep the 3-column Single Site layout, but guarantee wheel/touch scrolling
+   inside the input/detail columns when their content exceeds the viewport. */
+@media(min-width:761px){
+  body.pmno-page-single .workspace{
+    height:calc(100dvh - 72px)!important;
+    min-height:calc(100dvh - 72px)!important;
+    overflow:visible!important;
+  }
+  body.pmno-page-single .input-panel,
+  body.pmno-page-single .detail-panel{
+    height:100%!important;
+    overflow-y:auto!important;
+    overflow-x:hidden!important;
+    overscroll-behavior:contain!important;
+    touch-action:pan-y!important;
+    scrollbar-gutter:stable;
+  }
+}
+</style>
+<script id="pmno-single-site-scroll-fix-v73">
+(function(){
+  'use strict';
+  function fixSingleScroll(){
+    if(!document.body.classList.contains('pmno-page-single')) return;
+    document.documentElement.style.overflowX='hidden';
+    document.documentElement.style.overflowY='auto';
+    document.body.style.overflowX='hidden';
+    document.body.style.overflowY='auto';
+  }
+  fixSingleScroll();
+  window.addEventListener('hashchange',()=>setTimeout(fixSingleScroll,0),{passive:true});
+  window.addEventListener('pageshow',fixSingleScroll,{passive:true});
+})();
+</script>
+<script>window.__PMNO_BUILD__="V73-SINGLE-SITE-SCROLL-FIX";</script>
