@@ -2839,12 +2839,17 @@ async function load(){
    const snap=await r.json(); if(!snap||!Array.isArray(snap.sites))throw new Error('Dashboard page response invalid.');
    applySnapshotSupport(snap); return snap;
   };
-  // Lightweight architecture: the browser receives only the first page. Portfolio-wide
-  // KPIs/profile aggregates are computed server-side by pmno_dashboard_summary.
-  const first=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_query',{method:'POST',headers:H,body:JSON.stringify({p_offset:0,p_limit:1000})}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_query HTTP '+r.status);return r.json();});
-  window.__pmnoDashboardSummary=first||null;
+  // Lightweight architecture: summary and detail page are independent.
+  // Never make the whole dashboard depend on the 1,000-row query endpoint.
+  const [summary, page] = await Promise.all([
+    fetch(URL+'/rest/v1/rpc/pmno_dashboard_summary',{method:'POST',headers:H,body:'{}'}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_summary HTTP '+r.status);return r.json();}),
+    fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:0,p_limit:1000})}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_site_page HTTP '+r.status);return r.json();})
+  ]);
+  const first={...(summary||{}),sites:Array.isArray(page?.sites)?page.sites:[],total_sites:Number(page?.total_sites||summary?.stats?.total_sites||0)};
+  window.__pmnoDashboardSummary=first;
   window.__pmnoDashboardFilterOptions=first?.filter_options||null;
-  const pageRows=normalizeMasterRows(Array.isArray(first?.sites)?first.sites:[],[]);
+  applySnapshotSupport(page||{});
+  const pageRows=normalizeMasterRows(first.sites,[]);
   for(const r of pageRows){const id=sid(r);if(id)rows.push(r);}
   for(const r of pageRows) r.tenant_count=Number(liveTenantStats[sid(r)]?.total||0);
   filtered=rows.slice();
