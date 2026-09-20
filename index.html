@@ -1080,6 +1080,165 @@ body {
 }
 </style>
 
+
+<style id="pmno-v76-single-site-full-responsive-fix">
+/* V76 — full Single Site responsive layout fix.
+   Root issue: legacy Single Site CSS kept the 3-column workspace and 100dvh overflow-lock on mobile.
+   Desktop layout is preserved; mobile becomes a true single-column flow. */
+
+@media (max-width:760px){
+  html, body {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    overflow-x:hidden !important;
+    overflow-y:auto !important;
+  }
+
+  body.pmno-page-single .app {
+    display:flex !important;
+    flex-direction:column !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:100dvh !important;
+    max-height:none !important;
+    overflow:visible !important;
+  }
+
+  body.pmno-page-single .workspace {
+    display:grid !important;
+    grid-template-columns:minmax(0,1fr) !important;
+    grid-template-rows:auto minmax(430px,62dvh) auto !important;
+    width:100% !important;
+    height:auto !important;
+    min-height:0 !important;
+    max-height:none !important;
+    overflow:visible !important;
+  }
+
+  body.pmno-page-single .input-panel,
+  body.pmno-page-single .map-stage,
+  body.pmno-page-single .detail-panel {
+    grid-column:1 !important;
+    width:100% !important;
+    min-width:0 !important;
+    max-width:100% !important;
+    box-sizing:border-box !important;
+  }
+
+  body.pmno-page-single .input-panel {
+    grid-row:1 !important;
+    border-right:0 !important;
+    border-bottom:1px solid var(--line) !important;
+  }
+
+  body.pmno-page-single .map-stage {
+    grid-row:2 !important;
+    height:clamp(430px,62dvh,620px) !important;
+    min-height:430px !important;
+    max-height:620px !important;
+  }
+
+  body.pmno-page-single .detail-panel {
+    grid-row:3 !important;
+    border-left:0 !important;
+    border-top:1px solid var(--line) !important;
+    overflow:visible !important;
+  }
+
+  /* Never allow result content to create a second horizontal viewport. */
+  body.pmno-page-single .detail-panel > *,
+  body.pmno-page-single .detail-panel .single-site-result,
+  body.pmno-page-single .detail-panel .section-block,
+  body.pmno-page-single .detail-panel .candidate-list,
+  body.pmno-page-single .detail-panel .candidate-row,
+  body.pmno-page-single .detail-panel .info-grid,
+  body.pmno-page-single .detail-panel .signal-card,
+  body.pmno-page-single .detail-panel .cost-stack,
+  body.pmno-page-single .detail-panel .investment-card {
+    width:100% !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    box-sizing:border-box !important;
+  }
+
+  body.pmno-page-single .candidate-row {
+    grid-template-columns:26px minmax(0,1fr) !important;
+    gap:10px !important;
+  }
+
+  body.pmno-page-single .candidate-row .candidate-right {
+    grid-column:2 !important;
+    max-width:100% !important;
+    min-width:0 !important;
+    width:100% !important;
+    text-align:left !important;
+    overflow-wrap:anywhere !important;
+  }
+
+  body.pmno-page-single .candidate-row strong,
+  body.pmno-page-single .candidate-row small,
+  body.pmno-page-single .candidate-right b,
+  body.pmno-page-single .candidate-right small,
+  body.pmno-page-single .info-cell b,
+  body.pmno-page-single .info-cell small,
+  body.pmno-page-single .investment-cell b,
+  body.pmno-page-single .investment-cell small {
+    min-width:0 !important;
+    max-width:100% !important;
+    overflow-wrap:anywhere !important;
+    word-break:break-word !important;
+  }
+
+  body.pmno-page-single .info-grid {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  }
+
+  body.pmno-page-single .investment-row {
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  }
+
+  body.pmno-page-single .map-toolbar {
+    left:14px !important;
+    right:14px !important;
+    max-width:calc(100% - 28px) !important;
+    box-sizing:border-box !important;
+  }
+
+  body.pmno-page-single .map-summary {
+    max-width:calc(100% - 28px) !important;
+    min-width:0 !important;
+  }
+
+  body.pmno-page-single .legend {
+    max-width:calc(100% - 28px) !important;
+  }
+}
+
+@media (max-width:430px){
+  body.pmno-page-single .info-grid,
+  body.pmno-page-single .investment-row {
+    grid-template-columns:minmax(0,1fr) !important;
+  }
+
+  body.pmno-page-single .input-panel,
+  body.pmno-page-single .detail-panel {
+    padding-left:16px !important;
+    padding-right:16px !important;
+  }
+
+  body.pmno-page-single .map-toolbar {
+    left:8px !important;
+    right:8px !important;
+    max-width:calc(100% - 16px) !important;
+  }
+
+  body.pmno-page-single .map-overlay {
+    max-width:calc(100% - 16px) !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -4098,7 +4257,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V75-SINGLE-SITE-RESPONSIVE-FIXED";</script>
+<script>window.__PMNO_BUILD__="V76-SINGLE-SITE-FULL-RESPONSIVE-FIXED";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
