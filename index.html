@@ -1523,44 +1523,138 @@ body.pmno-page-single button {
 /* Final navigation binding: use the existing SPA router, without depending
    on the earlier capture listener. */
 </style>
-<script id="pmno-v79-final-nav-binding">
+
+
+
+<script id="pmno-v80-single-site-navigation">
 (function(){
   'use strict';
-  function bindPMNONav(){
-    const routes = {
-      dashboardMenu:'dashboard',
-      siteProfileMenu:'siteprofile',
-      singleMenu:'single',
-      bulkMenu:'bulk',
-      drmMenu:'drm',
-      masterDataMenu:'master'
-    };
-    Object.keys(routes).forEach(function(id){
-      const btn=document.getElementById(id);
-      if(!btn || btn.__pmnoV79Bound) return;
-      btn.__pmnoV79Bound=true;
-      btn.type='button';
-      btn.addEventListener('click',function(e){
+
+  const ROUTE_BY_ID = {
+    dashboardMenu: 'dashboard',
+    siteProfileMenu: 'siteprofile',
+    singleMenu: 'single',
+    bulkMenu: 'bulk',
+    drmMenu: 'drm',
+    masterDataMenu: 'master'
+  };
+
+  function bind(){
+    const menu = document.querySelector('.mode-menu');
+    if(!menu) return;
+
+    menu.querySelectorAll('button[id]').forEach(function(btn){
+      const page = ROUTE_BY_ID[btn.id];
+      if(!page || btn.__pmnoV80Nav) return;
+
+      btn.type = 'button';
+      btn.__pmnoV80Nav = true;
+
+      btn.addEventListener('click', function(e){
         e.preventDefault();
-        e.stopPropagation();
-        const page=routes[id];
-        if(typeof window.pmnoNavigate==='function'){
+        e.stopImmediatePropagation();
+
+        if(typeof window.pmnoNavigate === 'function'){
           window.pmnoNavigate(page);
         } else {
-          const hash='#'+page;
-          if(location.hash!==hash) location.hash=page;
+          location.hash = page;
         }
-      },false);
+      }, true);
     });
   }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',bindPMNONav,{once:true});
+
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', bind, {once:true});
   } else {
-    bindPMNONav();
+    bind();
   }
-  window.addEventListener('pageshow',function(){setTimeout(bindPMNONav,0);});
+
+  window.addEventListener('pageshow', function(){
+    setTimeout(bind, 0);
+  });
 })();
 </script>
+
+
+<style id="pmno-v80-navigation-exact">
+@media (max-width:700px){
+  body.pmno-page-single .mode-menu{
+    display:flex !important;
+    flex-direction:column !important;
+    gap:12px !important;
+    width:100% !important;
+  }
+
+  body.pmno-page-single .nav-group{
+    display:grid !important;
+    width:100% !important;
+    grid-template-columns:repeat(2,minmax(0,1fr)) !important;
+    gap:6px !important;
+  }
+
+  body.pmno-page-single .mode-menu button{
+    width:100% !important;
+    height:42px !important;
+    min-height:42px !important;
+    padding:0 7px !important;
+    border-radius:9px !important;
+    font-size:8px !important;
+    line-height:1.1 !important;
+    letter-spacing:.7px !important;
+    white-space:nowrap !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+    box-sizing:border-box !important;
+  }
+
+  body.pmno-page-single .nav-group-label{
+    font-size:7px !important;
+    letter-spacing:2px !important;
+  }
+}
+
+@media (max-width:430px){
+  body.pmno-page-single .topbar{
+    padding:14px 12px 16px !important;
+    gap:10px !important;
+  }
+
+  body.pmno-page-single .mode-menu{
+    gap:10px !important;
+  }
+
+  body.pmno-page-single .nav-group{
+    gap:5px !important;
+  }
+
+  body.pmno-page-single .nav-group-label{
+    font-size:6.5px !important;
+    letter-spacing:1.7px !important;
+  }
+
+  body.pmno-page-single .mode-menu button{
+    height:38px !important;
+    min-height:38px !important;
+    font-size:7px !important;
+    padding:0 5px !important;
+    letter-spacing:.55px !important;
+  }
+
+  /* iOS auto-zoom prevention applies ONLY to form controls. */
+  body.pmno-page-single input,
+  body.pmno-page-single select,
+  body.pmno-page-single textarea{
+    font-size:16px !important;
+    line-height:1.25 !important;
+    -webkit-text-size-adjust:100% !important;
+  }
+
+  body.pmno-page-single input[type="search"]{
+    -webkit-appearance:none !important;
+    appearance:none !important;
+  }
+}
+</style>
 
 </head>
 <body>
@@ -4580,7 +4674,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V79-SINGLE-SITE-NAV-IOS-FIX";</script>
+<script>window.__PMNO_BUILD__="V80-SINGLE-SITE-NAV-EXACT";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
@@ -4611,7 +4705,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 (function(){
   'use strict';
   const routeMap={
-    dashboard:'dashboard',
+    dashboardMenu:'dashboard',
     siteProfileMenu:'siteprofile',
     singleMenu:'single',
     bulkMenu:'bulk',
@@ -4754,4 +4848,4 @@ body.pmno-page-single .detail-panel{
   window.addEventListener('pageshow',fixSingleScroll,{passive:true});
 })();
 </script>
-<script>window.__PMNO_BUILD__="V79-SINGLE-SITE-NAV-IOS-FIX";</script>
+<script>window.__PMNO_BUILD__="V80-SINGLE-SITE-NAV-EXACT";</script>
