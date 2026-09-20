@@ -2184,6 +2184,9 @@ async function saveRun(){if(!state.project||!state.results.length)return;const a
 .master-fix-head button{border:1px solid rgba(53,200,255,.35);background:rgba(53,200,255,.08);color:#8edfff;border-radius:8px;padding:7px 10px;font-size:10px;font-weight:800;letter-spacing:.08em}
 .master-fix-item{padding:10px 0;border-top:1px solid rgba(255,255,255,.07);font-size:12px;line-height:1.5;color:#a8b8ca}.master-fix-item:first-child{border-top:0}.master-fix-item b{color:#eef5ff}.master-fix-item .bad{color:#ff9b9b}.master-fix-item .ok{color:#72e4b0}
 </style>
+<style id="pmno-customer-business-css">
+.customer-business-profile{display:flex;flex-direction:column;gap:12px}.cbp-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.cbp-kpi{border:1px solid rgba(93,144,191,.22);border-radius:14px;padding:13px 15px;background:rgba(8,22,39,.48)}.cbp-kpi span,.cbp-title{display:block;font-size:10px;font-weight:900;letter-spacing:.12em;color:#91a8bd}.cbp-kpi b{display:block;font-size:25px;line-height:1.1;margin:7px 0 4px;color:#eef5ff}.cbp-kpi small{font-size:10px;color:#6f879d}.cbp-kpi.warn b{color:#f2bf5c}.cbp-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.cbp-panel{border:1px solid rgba(93,144,191,.18);border-radius:14px;padding:14px;background:rgba(8,22,39,.34)}.cbp-title{margin-bottom:12px;color:#d7e3ef}.cbp-title small{font-weight:500;letter-spacing:0;color:#657e94;margin-left:7px}.cbp-row{display:grid;grid-template-columns:82px 1fr 62px 48px;gap:8px;align-items:center;margin:10px 0}.cbp-row span{font-size:11px;color:#9eb2c5}.cbp-row b{text-align:right;font-size:12px;color:#eef5ff}.cbp-row em{text-align:right;font-style:normal;font-size:10px;color:#7890a5}.cbp-track{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}.cbp-track i{display:block;height:100%;border-radius:99px;background:#38bdf8}.cbp-track i.npa{background:#f2bf5c}.cbp-highlight{margin-top:13px;padding:10px 12px;border:1px solid rgba(212,175,55,.35);border-radius:10px;background:rgba(212,175,55,.055);display:flex;align-items:baseline;gap:10px}.cbp-highlight b{font-size:20px;color:#f2bf5c}.cbp-highlight span{font-size:10px;color:#9eb2c5}.cbp-signal{padding:10px 0;border-bottom:1px solid rgba(148,163,184,.09);display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}.cbp-signal:last-child{border-bottom:0}.cbp-signal span{font-size:11px;color:#b6c6d6}.cbp-signal b{font-size:15px;color:#eef5ff}.cbp-signal small{grid-column:1/-1;font-size:9px;color:#657e94}.cbp-signal.muted b{font-size:10px;letter-spacing:.08em;color:#f2bf5c}.cbp-note{border:1px solid rgba(56,189,248,.14);border-radius:11px;padding:10px 12px;background:rgba(56,189,248,.035);display:flex;gap:9px;align-items:flex-start}.cbp-note b{font-size:10px;letter-spacing:.08em;color:#6ed5ff;white-space:nowrap}.cbp-note span{font-size:10px;line-height:1.5;color:#8399ad}@media(max-width:900px){.cbp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cbp-grid{grid-template-columns:1fr}}@media(max-width:560px){.cbp-kpis{grid-template-columns:1fr 1fr}.cbp-row{grid-template-columns:72px 1fr 52px 42px}.cbp-kpi b{font-size:20px}}
+</style>
 <script id="pmno-dashboard-controller">
 (function(){
 'use strict';
@@ -2692,9 +2695,40 @@ function renderDashboardSource(label){
  const tenantTotal=sm?Number(sm.total_tenant)||0:dashboardTenantTotal(filtered);
  const npa=sm?Number(sm.npa_sites)||0:siteNpaCount(filtered);
  const ratio=sm&&Number(sm.total_sites)?tenantTotal/Number(sm.total_sites):dashboardTenancyRatio(filtered);
- const t=$('dash-tenant');if(t)t.innerHTML=metricRows([
-  ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Site NPA · 0 tenant',fmtInt(sm?Number(sm.npa_sites)||0:siteNpaCount(filtered)),'warn'],['Site · 1 tenant',fmtInt(sm?Number(sm.one_tenant)||0:filtered.filter(r=>tenantCount(r)===1).length)],['Site · 2 tenant',fmtInt(sm?Number(sm.two_tenant)||0:filtered.filter(r=>tenantCount(r)===2).length)],['Site · 3 tenant',fmtInt(sm?Number(sm.three_tenant)||0:filtered.filter(r=>tenantCount(r)===3).length)],['Site · >3 tenant',fmtInt(sm?Number(sm.gt3_tenant)||0:filtered.filter(r=>tenantCount(r)>3).length)]
- ]);
+ const t=$('dash-tenant');if(t){
+  const totalSites=Number(sm?.total_sites)||0;
+  const npaSites=Number(sm?.npa_sites)||0;
+  const one=Number(sm?.one_tenant)||0, two=Number(sm?.two_tenant)||0, three=Number(sm?.three_tenant)||0, gt3=Number(sm?.gt3_tenant)||0;
+  const sitesWithTenant=Math.max(0,totalSites-npaSites);
+  const multiTenant=Math.max(0,two+three+gt3);
+  const singlePct=totalSites?one/totalSites*100:0;
+  const multiPct=totalSites?multiTenant/totalSites*100:0;
+  const npaPct=totalSites?npaSites/totalSites*100:0;
+  const revenueSites=Number(sm?.revenue_sites)||0;
+  t.innerHTML=`<div class="customer-business-profile">
+    <div class="cbp-kpis">
+      <div class="cbp-kpi"><span>TOTAL TENANT</span><b>${fmtInt(tenantTotal)}</b><small>Existing customer base</small></div>
+      <div class="cbp-kpi"><span>TENANCY RATIO</span><b>${ratio.toFixed(2)}x</b><small>Tenant / site</small></div>
+      <div class="cbp-kpi"><span>SITES WITH TENANT</span><b>${fmtInt(sitesWithTenant)}</b><small>${pct(sitesWithTenant,totalSites)}% of portfolio</small></div>
+      <div class="cbp-kpi warn"><span>NPA · 0 TENANT</span><b>${fmtInt(npaSites)}</b><small>${npaPct.toFixed(1)}% of portfolio</small></div>
+    </div>
+    <div class="cbp-grid">
+      <div class="cbp-panel">
+        <div class="cbp-title">SITE DISTRIBUTION BY TENANT COUNT <small>Portfolio composition</small></div>
+        ${[['0 tenant',npaSites,'npa'],['1 tenant',one,''],['2 tenant',two,''],['3 tenant',three,''],['>3 tenant',gt3,'']].map(([label,n,cls])=>`<div class="cbp-row"><span>${label}</span><div class="cbp-track"><i class="${cls}" style="width:${totalSites?Math.min(100,n/totalSites*100):0}%"></i></div><b>${fmtInt(n)}</b><em>${totalSites?(n/totalSites*100).toFixed(1):'0.0'}%</em></div>`).join('')}
+        <div class="cbp-highlight"><b>${multiPct.toFixed(1)}%</b><span>Multi-tenant sites (≥2 tenant)</span></div>
+      </div>
+      <div class="cbp-panel">
+        <div class="cbp-title">CUSTOMER BUSINESS VIEW <small>Internal fact-based indicators</small></div>
+        <div class="cbp-signal"><span>Single-tenant concentration</span><b>${singlePct.toFixed(1)}%</b><small>${fmtInt(one)} sites currently have 1 tenant</small></div>
+        <div class="cbp-signal"><span>Multi-tenant penetration</span><b>${multiPct.toFixed(1)}%</b><small>${fmtInt(multiTenant)} sites have ≥2 tenants</small></div>
+        <div class="cbp-signal"><span>Revenue-covered sites</span><b>${fmtInt(revenueSites)}</b><small>${pct(revenueSites,totalSites)}% of portfolio has mapped revenue</small></div>
+        <div class="cbp-signal muted"><span>Growth opportunity</span><b>CI / PREDICTIVE</b><small>Not inferred from tenancy data alone</small></div>
+      </div>
+    </div>
+    <div class="cbp-note"><b>Business interpretation</b><span>Single-tenant concentration shows portfolio white space, but it is not classified as growth opportunity until external CI / network-demand evidence is available.</span></div>
+  </div>`;
+ }
  const asset=$('dash-asset');if(asset){
   const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
   const assetOrigin=sm?[['BUILD',Number(sm.build_sites)||0],['ACQUISITION',Number(sm.acquisition_sites)||0]]:[];
