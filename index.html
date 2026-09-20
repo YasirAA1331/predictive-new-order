@@ -2829,16 +2829,18 @@ async function applyFilters(){
  dashboardFilterTimer=setTimeout(async()=>{
   const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
   try{
+   const source=$('dash-source');if(source)source.textContent='FILTERING · SERVER-SIDE…';
    const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_query',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null,p_offset:0,p_limit:1000})});
    if(!r.ok)throw new Error('pmno_dashboard_query HTTP '+r.status);
    const snap=await r.json();
+   if(!snap?.stats?.total_sites && !snap?.stats?.totalSites)throw new Error('Filtered summary missing stats.total_sites');
    window.__pmnoDashboardSummary=snap||null;
    window.__pmnoDashboardFilterOptions=snap?.filter_options||null;
-   applySnapshotSupport(snap||{});
+   // The filter response is a server-side summary plus a paged detail sample.
+   // Do not clear the live source maps just because this response is intentionally paged.
    window.__pmnoGeoPortfolio={status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,error:null,loading:null};
    rows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
    filtered=rows.slice();
-   applySnapshotSupport({sites:rows});
    renderDashboardSource('MASTER DATA · PMNO · server-side filter');
    if(window.__pmnoGeoReference?.status==='ready')pmnoLoadGeoPortfolio();
   }catch(e){
