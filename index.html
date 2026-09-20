@@ -3880,7 +3880,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V70-ADJACENCY-LAST-VALIDATION";</script>
+<script>window.__PMNO_BUILD__="V72-SINGLE-NAV-INTERACTION-FIX";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
@@ -3897,6 +3897,42 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
   window.addEventListener('pageshow',()=>setTimeout(masterReady,80));
   window.addEventListener('hashchange',()=>setTimeout(masterReady,80));
   setInterval(masterReady,1200);
+})();
+</script>
+
+<style id="pmno-single-nav-interaction-fix">
+/* V72 — navigation interaction fix: clickable on desktop + mobile */
+.topbar{position:relative!important;z-index:10000!important;pointer-events:auto!important;}
+.mode-menu{position:relative!important;z-index:10001!important;pointer-events:auto!important;}
+.mode-menu .nav-group,.mode-menu button{position:relative!important;z-index:10002!important;pointer-events:auto!important;touch-action:manipulation!important;}
+.mode-menu button{cursor:pointer!important;-webkit-tap-highlight-color:transparent!important;}
+</style>
+<script id="pmno-single-nav-interaction-v72">
+(function(){
+  'use strict';
+  const routeMap={
+    dashboard:'dashboard',
+    siteProfileMenu:'siteprofile',
+    singleMenu:'single',
+    bulkMenu:'bulk',
+    drmMenu:'drm',
+    masterDataMenu:'master'
+  };
+  function bind(){
+    const menu=document.querySelector('.mode-menu');
+    if(!menu)return;
+    menu.querySelectorAll('button[id]').forEach(btn=>{
+      btn.type='button';
+      btn.addEventListener('click',function(e){
+        e.preventDefault();
+        e.stopPropagation();
+        const page=routeMap[this.id];
+        if(page && typeof window.pmnoNavigate==='function') window.pmnoNavigate(page);
+      },true);
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});
+  else bind();
 })();
 </script>
 </body>
