@@ -2210,33 +2210,6 @@ function normalizeMasterRows(pmno,site){
  for(const r of source){const id=sid(r);if(id)map.set(id,{...r,site_id:id})}
  return [...map.values()];
 }
-function applySnapshotSupport(snap){
- const x=snap||{};
- const tenants=Array.isArray(x.tenants)?x.tenants:[];
- const powers=Array.isArray(x.power)?x.power:[];
- const maintenance=Array.isArray(x.maintenance)?x.maintenance:[];
- const legal=Array.isArray(x.legal)?x.legal:[];
- liveTenantStats={};
- for(const t of tenants){
-   const id=String(t.site_id??'').trim(); if(!id) continue;
-   liveTenantStats[id]={
-     total:Number(t.total_count)||0,
-     active:Number(t.active_count)||0,
-     revenue:Number(t.active_revenue_count)||0,
-     revenue_total:Number(t.revenue_count)||0,
-     revenue_year:Number(t.revenue_year)||0,
-     revenue_month:Number(t.revenue_month)||0
-   };
- }
- livePowerCount={};
- for(const x of powers){const id=String(x.site_id??'').trim();if(id)livePowerCount[id]=Number(x.count)||0;}
- liveLegalStats={};
- for(const x of legal){const id=String(x.site_id??'').trim();if(id)liveLegalStats[id]=x;}
- liveMaintenance={};
- for(const x of maintenance){const id=String(x.site_id??'').trim();if(id)liveMaintenance[id]=Number(x.count)||0;}
- // Keep the already-loaded child maps intact; only replace them when the snapshot carries actual rows.
- if(Array.isArray(x.tenant_rows)) setLiveChildren(x.tenant_rows,Array.isArray(x.power_rows)?x.power_rows:[],Array.isArray(x.maintenance_rows)?x.maintenance_rows:[]);
-}
 function setLiveChildren(tenantRows,powerRows,maintenanceRows){
  liveTenants={};livePower={};liveMaintenance={};
  for(const t of (tenantRows||[])){const id=String(val(t,'site_id','site_id_dmt','siteId')).trim();if(id)(liveTenants[id]??=[]).push(t)}
@@ -2278,7 +2251,7 @@ function siteAuditSnapshot(list){
 }
 function renderKpis(){
  const sm=window.__pmnoDashboardSummary?.stats||null;
- const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:Number(sm.power_sites)||0,leaseRisk:Number(sm.lease_risk_6m)||0,leaseExpired:Number(sm.lease_expired)||0}:siteAuditSnapshot(filtered);
+ const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:0,leaseRisk:0,leaseExpired:0}:siteAuditSnapshot(filtered);
  const tenancyTotal=sm?Number(sm.total_tenant)||0:dashboardTenantTotal(filtered);
  const tenancyRatio=a.total?tenancyTotal/a.total:0;
  const npa=sm?Number(sm.npa_sites)||0:siteNpaCount(filtered);
@@ -2539,7 +2512,7 @@ function renderDashboardSource(label){
   const geoProgress=geoReady?100:(Number(geo.progress)||0);
   const coordPct=geoReady&&a.total?geoValid/a.total*100:0;
   const pctOfTotal=n=>a.total?(n/a.total*100).toFixed(1)+'%':'0.0%';
-  const geoPhase=geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?(geo.total?`Validating ${fmtInt(geoProcessed)} of ${fmtInt(geo.total)}`:'Preparing geospatial reference…'):'Preparing…';
+  const geoPhase=geoReady?'Validation complete':geoError?'Validation failed':geoLoading?(geo.total?`Validating ${fmtInt(geoProcessed)} of ${fmtInt(geo.total)}`:'Preparing geospatial reference…'):'Preparing…';
   const geoElapsed=Number(geo.elapsedMs||0);
   const geoTime=geoElapsed<1000?Math.max(0,Math.round(geoElapsed))+' ms':(geoElapsed/1000).toFixed(1)+' s';
   const geoLiveClass=geoReady?'asset-readiness-live done':geoError?'asset-readiness-live error':'asset-readiness-live';
@@ -2551,7 +2524,7 @@ function renderDashboardSource(label){
     ${group('ASSET COMPOSITION',barRows(towerTypeRows))}
     ${group('ASSET MATURITY',barRows(ageBuckets))}
     ${group('PHYSICAL PROFILE · TOWER HEIGHT',barRows(heightBuckets))}
-    <div class="asset-profile-readiness"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':(geoError?'Unavailable':geoProgress.toFixed(0)+'%')}</b><em>${geoReady?'valid coordinates':(geoError?'geospatial validation unavailable':'geospatial validation running')}</em></div><div class="asset-readiness-progress"><div class="asset-readiness-progress-head"><span class="${geoLiveClass}"><i></i>${esc(geoPhase)}</span><b>${fmtInt(geoProcessed)} / ${fmtInt(Number(geo.total)||Number(a.total)||0)}</b></div><div class="asset-readiness-progress-track"><i style="width:${Math.min(100,geoProgress)}%"></i></div><div class="asset-readiness-progress-sub"><span>${geoReady?'All portfolio coordinates checked':geoError?'Validation unavailable — dashboard tetap aktif':'Live · browser remains responsive'}</span><span>${geoTime}</span></div></div><div class="asset-readiness-breakdown">
+    <div class="asset-profile-readiness"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':(geoError?'Unavailable':geoProgress.toFixed(0)+'%')}</b><em>${geoReady?'valid coordinates':(geoError?'geospatial validation unavailable':'geospatial validation running')}</em></div><div class="asset-readiness-progress"><div class="asset-readiness-progress-head"><span class="${geoLiveClass}"><i></i>${esc(geoPhase)}</span><b>${fmtInt(geoProcessed)} / ${fmtInt(Number(geo.total)||Number(a.total)||0)}</b></div><div class="asset-readiness-progress-track"><i style="width:${Math.min(100,geoProgress)}%"></i></div><div class="asset-readiness-progress-sub"><span>${geoReady?'All portfolio coordinates checked':geoError?'Check failed — retry after refresh':'Live · browser remains responsive'}</span><span>${geoTime}</span></div></div><div class="asset-readiness-breakdown">
       <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${geoReady?fmtInt(geoValid):'—'}</b><em>${geoReady?pctOfTotal(geoValid):(geoError?'Unavailable':'Loading')}</em></div>
       <div class="asset-readiness-row mismatch"><span>Location Mismatch</span><b>${geoReady?fmtInt(locationMismatch):'—'}</b><em>${geoReady?pctOfTotal(locationMismatch):(geoError?'Unavailable':'Loading')}</em></div>
       <div class="asset-readiness-row invalid"><span>Invalid Coordinate</span><b>${geoReady?fmtInt(invalidCoord):'—'}</b><em>${geoReady?pctOfTotal(invalidCoord):(geoError?'Unavailable':'Loading')}</em></div>
@@ -2833,18 +2806,13 @@ async function applyFilters(){
    if(!r.ok)throw new Error('pmno_dashboard_query HTTP '+r.status);
    const snap=await r.json();
    window.__pmnoDashboardSummary=snap||null;
-   window.__pmnoDashboardFilterOptions=snap?.filter_options||null;
-   applySnapshotSupport(snap||{});
    window.__pmnoGeoPortfolio={status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,error:null,loading:null};
    rows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
    filtered=rows.slice();
    applySnapshotSupport({sites:rows});
    renderDashboardSource('MASTER DATA · PMNO · server-side filter');
    if(window.__pmnoGeoReference?.status==='ready')pmnoLoadGeoPortfolio();
-  }catch(e){
-   console.error('[PMNO FILTER]',e);
-   const el=$('dash-kpis');if(el)el.innerHTML='<div class="dash-error">Filter gagal dimuat. Data sebelumnya tetap dipertahankan.</div>';
-  }
+  }catch(e){console.error('[PMNO FILTER]',e)}
  },220);
 }
 async function optional(getter,fallback=[]){try{return await getter()}catch(e){console.warn('Optional source failed:',e);return fallback}}
@@ -2873,13 +2841,10 @@ async function load(){
   };
   // Lightweight architecture: summary and detail page are independent.
   // Never make the whole dashboard depend on the 1,000-row query endpoint.
-  const [summaryResult, pageResult] = await Promise.allSettled([
+  const [summary, page] = await Promise.all([
     fetch(URL+'/rest/v1/rpc/pmno_dashboard_summary',{method:'POST',headers:H,body:'{}'}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_summary HTTP '+r.status);return r.json();}),
     fetch(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{method:'POST',headers:H,body:JSON.stringify({p_offset:0,p_limit:1000})}).then(async r=>{if(!r.ok)throw new Error('pmno_dashboard_site_page HTTP '+r.status);return r.json();})
   ]);
-  if(summaryResult.status==='rejected' && pageResult.status==='rejected') throw summaryResult.reason||pageResult.reason||new Error('Dashboard source unavailable');
-  const summary=summaryResult.status==='fulfilled'?summaryResult.value:{};
-  const page=pageResult.status==='fulfilled'?pageResult.value:{sites:[],total_sites:Number(summary?.stats?.total_sites)||0};
   const first={...(summary||{}),sites:Array.isArray(page?.sites)?page.sites:[],total_sites:Number(page?.total_sites||summary?.stats?.total_sites||0)};
   window.__pmnoDashboardSummary=first;
   window.__pmnoDashboardFilterOptions=first?.filter_options||null;
@@ -2953,18 +2918,7 @@ function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;loca
 function init(){
  if(!initialized){
   initialized=true;
-  // Select filters must use change (especially iOS/Safari); search keeps input.
-  ['dash-regional','dash-area','dash-province','dash-city'].forEach(id=>$(id)?.addEventListener('change',()=>{
-    if(id==='dash-regional'){
-      $('dash-area').value='';$('dash-province').value='';$('dash-city').value='';
-    } else if(id==='dash-area'){
-      $('dash-province').value='';$('dash-city').value='';
-    } else if(id==='dash-province'){
-      $('dash-city').value='';
-    }
-    applyFilters();
-  }));
-  $('dash-search')?.addEventListener('input',applyFilters);
+  ['dash-regional','dash-area','dash-province','dash-city','dash-search'].forEach(id=>$(id)?.addEventListener('input',applyFilters));
   $('dash-refresh')?.addEventListener('click',load);
   $('dash-open-site')?.addEventListener('click',navigateSite);
   $('sp-search-btn')?.addEventListener('click',()=>searchSite($('sp-search')?.value));
