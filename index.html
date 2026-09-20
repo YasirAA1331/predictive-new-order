@@ -2218,6 +2218,7 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const num=v=>{const n=Number(String(v??'').replace(/[^0-9.-]/g,''));return Number.isFinite(n)?n:0};
 const fmtInt=v=>num(v).toLocaleString('id-ID');
 const pct=(a,b)=>b?((num(a)/num(b))*100).toFixed(1):'0.0';
+const fmtPct=v=>Number.isFinite(Number(v))?Number(v).toFixed(1)+'%':'0.0%';
 let rows=[],filtered=[],liveTenants={},liveTenantStats={},livePower={},livePowerCount={},liveMaintenance={},liveLegalStats={},liveNbv={},liveFinancial={},dashMap=null,initialized=false,loading=false,mapCanvas=null,mapPoints=[];
 let dashboardMapNeedsReload=true;
 
@@ -3825,7 +3826,7 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 <!-- PMNO MASTER DATA ADDITION: END CONTROLLER -->
-<script>window.__PMNO_BUILD__="V67-ADJACENCY-DASHBOARD-FIXED";</script>
+<script>window.__PMNO_BUILD__="V68-ADJACENCY-OVERALL-FIXED";</script>
 
 <script id="pmno-navigation-watchdog-v26">
 (function(){
