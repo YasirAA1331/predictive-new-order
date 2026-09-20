@@ -2798,14 +2798,19 @@ async function load(){
 
   const total=Number(first.total_sites)||0;
   const offsets=[];for(let o=pageSize;o<total;o+=pageSize)offsets.push(o);
-  const batchSize=8;
+  const batchSize=2;
   window.__pmnoDashboardLoadingPages=true;
   for(let i=0;i<offsets.length;i+=batchSize){
    const batchOffsets=offsets.slice(i,i+batchSize);
    const snaps=await Promise.all(batchOffsets.map(fetchPage));
    for(const snap of snaps) mergePage(snap);
-   // Keep the UI thread free while pages arrive. Re-rendering the full dashboard for every batch freezes mobile Safari.
-   await new Promise(resolve=>setTimeout(resolve,0));
+   // Keep mobile responsive: yield to Safari, then refresh the dashboard at a controlled cadence.
+   if((i/batchSize)%2===1){
+    window.__pmnoDashboardLoadingPages=false;
+    renderDashboardSource('MASTER DATA · PMNO · '+fmtInt(rows.length)+' sites loaded');
+    window.__pmnoDashboardLoadingPages=true;
+   }
+   await new Promise(resolve=>setTimeout(resolve,120));
   }
   filtered=rows.slice();
   window.__pmnoDashboardLoadingPages=false;
