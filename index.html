@@ -2186,6 +2186,7 @@ async function saveRun(){if(!state.project||!state.results.length)return;const a
 </style>
 <style id="pmno-customer-business-css">
 .customer-business-profile{display:flex;flex-direction:column;gap:12px}.cbp-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.cbp-kpi{border:1px solid rgba(93,144,191,.22);border-radius:14px;padding:13px 15px;background:rgba(8,22,39,.48)}.cbp-kpi span,.cbp-title{display:block;font-size:10px;font-weight:900;letter-spacing:.12em;color:#91a8bd}.cbp-kpi b{display:block;font-size:25px;line-height:1.1;margin:7px 0 4px;color:#eef5ff}.cbp-kpi small{font-size:10px;color:#6f879d}.cbp-kpi.warn b{color:#f2bf5c}.cbp-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.cbp-panel{border:1px solid rgba(93,144,191,.18);border-radius:14px;padding:14px;background:rgba(8,22,39,.34)}.cbp-title{margin-bottom:12px;color:#d7e3ef}.cbp-title small{font-weight:500;letter-spacing:0;color:#657e94;margin-left:7px}.cbp-row{display:grid;grid-template-columns:82px 1fr 62px 48px;gap:8px;align-items:center;margin:10px 0}.cbp-row span{font-size:11px;color:#9eb2c5}.cbp-row b{text-align:right;font-size:12px;color:#eef5ff}.cbp-row em{text-align:right;font-style:normal;font-size:10px;color:#7890a5}.cbp-track{height:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}.cbp-track i{display:block;height:100%;border-radius:99px;background:#38bdf8}.cbp-track i.npa{background:#f2bf5c}.cbp-highlight{margin-top:13px;padding:10px 12px;border:1px solid rgba(212,175,55,.35);border-radius:10px;background:rgba(212,175,55,.055);display:flex;align-items:baseline;gap:10px}.cbp-highlight b{font-size:20px;color:#f2bf5c}.cbp-highlight span{font-size:10px;color:#9eb2c5}.cbp-signal{padding:10px 0;border-bottom:1px solid rgba(148,163,184,.09);display:grid;grid-template-columns:1fr auto;gap:2px 12px;align-items:center}.cbp-signal:last-child{border-bottom:0}.cbp-signal span{font-size:11px;color:#b6c6d6}.cbp-signal b{font-size:15px;color:#eef5ff}.cbp-signal small{grid-column:1/-1;font-size:9px;color:#657e94}.cbp-signal.muted b{font-size:10px;letter-spacing:.08em;color:#f2bf5c}.cbp-note{border:1px solid rgba(56,189,248,.14);border-radius:11px;padding:10px 12px;background:rgba(56,189,248,.035);display:flex;gap:9px;align-items:flex-start}.cbp-note b{font-size:10px;letter-spacing:.08em;color:#6ed5ff;white-space:nowrap}.cbp-note span{font-size:10px;line-height:1.5;color:#8399ad}@media(max-width:900px){.cbp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.cbp-grid{grid-template-columns:1fr}}@media(max-width:560px){.cbp-kpis{grid-template-columns:1fr 1fr}.cbp-row{grid-template-columns:72px 1fr 52px 42px}.cbp-kpi b{font-size:20px}}
+.cbp-table-wrap{overflow:auto;border:1px solid rgba(93,144,191,.18);border-radius:12px;background:rgba(8,22,39,.28)}.cbp-table{width:100%;border-collapse:collapse;min-width:760px}.cbp-table th,.cbp-table td{padding:9px 10px;border-bottom:1px solid rgba(148,163,184,.08);font-size:9px;white-space:nowrap}.cbp-table th{text-align:right;color:#718aa1;font-weight:900;letter-spacing:.08em;background:rgba(8,22,39,.58)}.cbp-table th:first-child,.cbp-table td:first-child{text-align:left}.cbp-table td{text-align:right;color:#dce8f4}.cbp-table td:first-child{font-weight:800;color:#eef5ff}.cbp-table tr:last-child td{border-bottom:0}.cbp-table .core{color:#e7f3ff}.cbp-table .fwa{color:#71d8ff}.cbp-table .other{color:#9eb2c5}.cbp-table .total td{background:rgba(212,175,55,.09);color:#f2c45e;font-weight:900}.cbp-subtitle{font-size:9px;color:#657e94;margin:-6px 0 10px}.cbp-money{font-variant-numeric:tabular-nums}.cbp-concentration{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-top:10px}.cbp-conc{padding:10px 12px;border:1px solid rgba(93,144,191,.15);border-radius:10px;background:rgba(8,22,39,.28)}.cbp-conc span{display:block;font-size:9px;color:#718aa1}.cbp-conc b{display:block;margin-top:4px;font-size:16px;color:#eef5ff}.cbp-conc small{font-size:8px;color:#657e94}@media(max-width:900px){.cbp-concentration{grid-template-columns:1fr 1fr}}
 </style>
 <script id="pmno-dashboard-controller">
 (function(){
@@ -2679,6 +2680,70 @@ function pmnoGetAggregateSummary(){
  // from the paged 1,000-row detail sample. The server-side summary is the source of truth.
  return window.__pmnoPortfolioSummary||window.__pmnoDashboardSummary||null;
 }
+let __pmnoCustomerBusinessSeq=0;
+function pmnoCustomerFilters(){
+ const clean=id=>String($(id)?.value||'').trim();
+ return {p_regional:clean('dash-regional')||null,p_area:clean('dash-area')||null,p_province:clean('dash-province')||null,p_city:clean('dash-city')||null,p_search:clean('dash-search')||null};
+}
+async function pmnoLoadCustomerBusinessView(){
+ const seq=++__pmnoCustomerBusinessSeq;
+ try{
+  const r=await fetch(URL+'/rest/v1/rpc/pmno_customer_business_summary',{method:'POST',headers:H,body:JSON.stringify(pmnoCustomerFilters())});
+  if(!r.ok)throw new Error('pmno_customer_business_summary HTTP '+r.status);
+  const data=normalizeRpcObject(await r.json());
+  if(seq!==__pmnoCustomerBusinessSeq)return;
+  window.__pmnoCustomerBusinessSummary=data||null;
+  pmnoRenderCustomerBusinessTable(data||{});
+ }catch(e){
+  console.warn('[PMNO CUSTOMER BUSINESS]',e);
+  if(seq!==__pmnoCustomerBusinessSeq)return;
+  window.__pmnoCustomerBusinessSummary=null;
+  const el=$('cbp-economics');
+  if(el)el.innerHTML='<div class="dash-empty-note">Customer economics belum dapat dimuat. Portfolio KPI tetap menggunakan summary utama.</div>';
+ }
+}
+function pmnoMoney(v){
+ const n=Number(v)||0;
+ if(!n)return 'Rp 0';
+ const abs=Math.abs(n);
+ if(abs>=1e12)return 'Rp '+(n/1e12).toFixed(2)+' T';
+ if(abs>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' M';
+ if(abs>=1e6)return 'Rp '+(n/1e6).toFixed(1)+' jt';
+ if(abs>=1e3)return 'Rp '+(n/1e3).toFixed(0)+' rb';
+ return 'Rp '+Math.round(n).toLocaleString('id-ID');
+}
+function pmnoRenderCustomerBusinessTable(data){
+ const el=$('cbp-economics'); if(!el)return;
+ const rows=Array.isArray(data.rows)?data.rows:[];
+ const fixed=['TSEL','IOH','XLSMART','SURGE','MORAREPUBLIC','OTHERS'];
+ const by=new Map(rows.map(x=>[String(x.customer||'').toUpperCase(),x]));
+ const out=fixed.map(k=>by.get(k)||{customer:k,tenant_count:0,site_count:0,site_share:0,tenant_share:0,revenue_year:0,revenue_share:0,avg_revenue_site:0,avg_revenue_tenant:0});
+ const total=data.total||{tenant_count:Number(data.tenant_total)||0,site_count:0,revenue_year:Number(data.revenue_year_total)||0,site_share:100,tenant_share:100,revenue_share:100,avg_revenue_site:0,avg_revenue_tenant:0};
+ const label={TSEL:'TSEL',IOH:'IOH',XLSMART:'XLSMART',SURGE:'Surge',MORAREPUBLIC:'MoraRepublic',OTHERS:'Others'};
+ const cat={TSEL:'Core MNO',IOH:'Core MNO',XLSMART:'Core MNO',SURGE:'FWA',MORAREPUBLIC:'FWA',OTHERS:'Other'};
+ const cls={TSEL:'core',IOH:'core',XLSMART:'core',SURGE:'fwa',MORAREPUBLIC:'fwa',OTHERS:'other'};
+ el.innerHTML=`
+  <div class="cbp-panel">
+   <div class="cbp-title">CUSTOMER SHARE <small>Existing portfolio footprint & revenue contribution</small></div>
+   <div class="cbp-subtitle">Site share is non-exclusive because one site can host multiple customers.</div>
+   <div class="cbp-table-wrap"><table class="cbp-table"><thead><tr><th>CUSTOMER</th><th>CATEGORY</th><th>SITES</th><th>SITE SHARE</th><th>TENANT</th><th>TENANT SHARE</th><th>REVENUE SHARE</th></tr></thead><tbody>
+   ${out.map(x=>{const k=String(x.customer).toUpperCase();return `<tr><td class="${cls[k]||'other'}">${label[k]||esc(x.customer)}</td><td>${cat[k]||'Other'}</td><td>${fmtInt(x.site_count)}</td><td>${Number(x.site_share||0).toFixed(1)}%</td><td>${fmtInt(x.tenant_count)}</td><td>${Number(x.tenant_share||0).toFixed(1)}%</td><td>${Number(x.revenue_share||0).toFixed(1)}%</td></tr>`}).join('')}
+   <tr class="total"><td>TOTAL</td><td>Portfolio</td><td>${fmtInt(total.site_count)}</td><td>100.0%</td><td>${fmtInt(total.tenant_count)}</td><td>100.0%</td><td>100.0%</td></tr>
+   </tbody></table></div>
+  </div>
+  <div class="cbp-panel">
+   <div class="cbp-title">CUSTOMER ECONOMICS <small>Annualized revenue based on existing tenant data</small></div>
+   <div class="cbp-table-wrap"><table class="cbp-table"><thead><tr><th>CUSTOMER</th><th>ANNUAL REVENUE</th><th>REVENUE SHARE</th><th>AVG REV / SITE</th><th>AVG REV / TENANT</th></tr></thead><tbody>
+   ${out.map(x=>{const k=String(x.customer).toUpperCase();return `<tr><td class="${cls[k]||'other'}">${label[k]||esc(x.customer)}</td><td class="cbp-money">${pmnoMoney(x.revenue_year)}</td><td>${Number(x.revenue_share||0).toFixed(1)}%</td><td class="cbp-money">${pmnoMoney(x.avg_revenue_site)}</td><td class="cbp-money">${pmnoMoney(x.avg_revenue_tenant)}</td></tr>`}).join('')}
+   <tr class="total"><td>TOTAL</td><td class="cbp-money">${pmnoMoney(total.revenue_year)}</td><td>100.0%</td><td class="cbp-money">${pmnoMoney(total.avg_revenue_site)}</td><td class="cbp-money">${pmnoMoney(total.avg_revenue_tenant)}</td></tr>
+   </tbody></table></div>
+   <div class="cbp-concentration">
+    <div class="cbp-conc"><span>TOP 1 REVENUE CONTRIBUTION</span><b>${Number(out[0]?.revenue_share||0).toFixed(1)}%</b><small>${label[String(out[0]?.customer||'').toUpperCase()]||'Top customer'}</small></div>
+    <div class="cbp-conc"><span>TOP 3 REVENUE CONTRIBUTION</span><b>${out.slice(0,3).reduce((n,x)=>n+Number(x.revenue_share||0),0).toFixed(1)}%</b><small>Core MNO concentration</small></div>
+   </div>
+  </div>`;
+}
+
 function renderDashboardSource(label){
  const aggregate=pmnoGetAggregateSummary();
  const sm=aggregate?.stats||null;
@@ -2723,11 +2788,13 @@ function renderDashboardSource(label){
         <div class="cbp-signal"><span>Single-tenant concentration</span><b>${singlePct.toFixed(1)}%</b><small>${fmtInt(one)} sites currently have 1 tenant</small></div>
         <div class="cbp-signal"><span>Multi-tenant penetration</span><b>${multiPct.toFixed(1)}%</b><small>${fmtInt(multiTenant)} sites have ≥2 tenants</small></div>
         <div class="cbp-signal"><span>Revenue-covered sites</span><b>${fmtInt(revenueSites)}</b><small>${pct(revenueSites,totalSites)}% of portfolio has mapped revenue</small></div>
-        <div class="cbp-signal muted"><span>Growth opportunity</span><b>CI / PREDICTIVE</b><small>Not inferred from tenancy data alone</small></div>
+        <div class="cbp-signal muted"><span>Growth opportunity</span><b>CI / PREDICTIVE</b><small>Requires external network-demand evidence</small></div>
       </div>
     </div>
-    <div class="cbp-note"><b>Business interpretation</b><span>Single-tenant concentration shows portfolio white space, but it is not classified as growth opportunity until external CI / network-demand evidence is available.</span></div>
+    <div id="cbp-economics" class="customer-business-profile"><div class="cbp-panel"><div class="cbp-title">CUSTOMER ECONOMICS <small>Loading existing customer commercial profile…</small></div></div></div>
+    <div class="cbp-note"><b>Business interpretation</b><span>Customer share and revenue/site are descriptive commercial facts. Growth opportunity is not inferred until external CI / network-demand evidence is available.</span></div>
   </div>`;
+  pmnoLoadCustomerBusinessView();
  }
  const asset=$('dash-asset');if(asset){
   const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
@@ -3054,6 +3121,7 @@ async function applyFilters(){
    rows=normalizeMasterRows(Array.isArray(snap?.sites)?snap.sites:[],[]);
    filtered=rows.slice();
    renderDashboardSource('MASTER DATA · PMNO · server-side filter');
+   pmnoLoadCustomerBusinessView();
    // One map refresh per completed filter request. Never refresh from the
    // summary renderer itself because geo validation calls that renderer many times.
    if(dashboardMapNeedsReload){dashboardMapNeedsReload=false;loadDashboardMapData();}
