@@ -2671,13 +2671,19 @@ function pmnoExportGeoIssues(){
 }
 document.addEventListener('click',e=>{const row=e.target?.closest?.('.geo-issue-row[data-geo-status]');if(row)pmnoOpenGeoIssues(row.dataset.geoStatus)});
 
+function pmnoGetAggregateSummary(){
+ // AUTHORITATIVE AGGREGATE STATE: never derive portfolio composition/maturity/height
+ // from the paged 1,000-row detail sample. The server-side summary is the source of truth.
+ return window.__pmnoPortfolioSummary||window.__pmnoDashboardSummary||null;
+}
 function renderDashboardSource(label){
- const sm=window.__pmnoDashboardSummary?.stats||null;
+ const aggregate=pmnoGetAggregateSummary();
+ const sm=aggregate?.stats||null;
  const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:Number(sm.power_sites)||0,leaseRisk:Number(sm.lease_risk_6m)||0,leaseExpired:Number(sm.lease_expired)||0,leaseExpirySites:Number(sm.lease_expiry_sites)||0,leaseNoExpiry:Number(sm.lease_no_expiry)||0,towerTypeSites:Number(sm.tower_type_sites)||0,towerHeightSites:Number(sm.tower_height_sites)||0,accessRoadSites:Number(sm.access_road_sites)||0,terrainSites:Number(sm.terrain_sites)||0,activeSites:Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0))}:siteAuditSnapshot(filtered);
  const activeSiteCount=sm?Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0)):a.activeSites;
  const byReg={};
  filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
- const fo=window.__pmnoDashboardSummary?.filter_options;
+ const fo=aggregate?.filter_options||window.__pmnoDashboardFilterOptions;
  setOptions('dash-regional',Array.isArray(fo?.regional)?fo.regional:uniq('regional').concat(uniq('region')).filter((v,i,a)=>a.indexOf(v)===i),'ALL REGIONAL');
  setOptions('dash-area',Array.isArray(fo?.area)?fo.area:uniq('area'),'ALL AREA');
  setOptions('dash-province',Array.isArray(fo?.province)?fo.province:uniq('province'),'ALL PROVINCE');
@@ -2690,14 +2696,12 @@ function renderDashboardSource(label){
   ['Total tenant',fmtInt(tenantTotal)],['Tenancy Ratio',ratio.toFixed(2)+'x','good'],['Site NPA · 0 tenant',fmtInt(sm?Number(sm.npa_sites)||0:siteNpaCount(filtered)),'warn'],['Site · 1 tenant',fmtInt(sm?Number(sm.one_tenant)||0:filtered.filter(r=>tenantCount(r)===1).length)],['Site · 2 tenant',fmtInt(sm?Number(sm.two_tenant)||0:filtered.filter(r=>tenantCount(r)===2).length)],['Site · 3 tenant',fmtInt(sm?Number(sm.three_tenant)||0:filtered.filter(r=>tenantCount(r)===3).length)],['Site · >3 tenant',fmtInt(sm?Number(sm.gt3_tenant)||0:filtered.filter(r=>tenantCount(r)>3).length)]
  ]);
  const asset=$('dash-asset');if(asset){
-  const towerTypeRows=Array.isArray(window.__pmnoDashboardSummary?.tower_type)?window.__pmnoDashboardSummary.tower_type:(()=>{const m=new Map();filtered.forEach(r=>{const k=String(val(r,'tower_type')||'UNKNOWN').trim()||'UNKNOWN';m.set(k,(m.get(k)||0)+1)});return [...m.entries()].sort((a,b)=>b[1]-a[1])})();
-  const assetOrigin=(window.__pmnoDashboardSummary?.stats)?[['BUILD',Number(window.__pmnoDashboardSummary.stats.build_sites)||0],['ACQUISITION',Number(window.__pmnoDashboardSummary.stats.acquisition_sites)||0]]:(()=>{let build=0,acquisition=0;filtered.forEach(r=>{const src=String(val(r,'project_source')).trim().toUpperCase();if(src==='DEVELOPMENT')build++;else acquisition++;});return [['BUILD',build],['ACQUISITION',acquisition]]})();
-  const portfolioDen=Number(window.__pmnoDashboardSummary?.stats?.total_sites)||filtered.length||0;
+  const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
+  const assetOrigin=sm?[['BUILD',Number(sm.build_sites)||0],['ACQUISITION',Number(sm.acquisition_sites)||0]]:[];
+  const portfolioDen=Number(sm?.total_sites)||0;
   const assetOriginRows=assetOrigin.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${portfolioDen?Math.min(100,n/portfolioDen*100):0}%"></i></div><b>${fmtInt(n)} <em style="font-style:normal;font-weight:500;color:#7f96aa">${portfolioDen?(n/portfolioDen*100).toFixed(1):'0.0'}%</em></b></div>`).join('');
-  const ageBuckets=Array.isArray(window.__pmnoDashboardSummary?.maturity)?window.__pmnoDashboardSummary.maturity:[['< 5 years',0],['5–10 years',0],['10–15 years',0],['> 15 years',0],['Unknown',0]];
-  if(!window.__pmnoDashboardSummary){const nowY=new Date().getFullYear();filtered.forEach(r=>{const raw=val(r,'asset_register_date');if(!String(raw).trim()){ageBuckets[4][1]++;return}const d=new Date(raw);if(!Number.isFinite(d.getTime())){ageBuckets[4][1]++;return}const age=Math.max(0,nowY-d.getFullYear());if(age<5)ageBuckets[0][1]++;else if(age<10)ageBuckets[1][1]++;else if(age<15)ageBuckets[2][1]++;else ageBuckets[3][1]++;});}
-    const heightBuckets=Array.isArray(window.__pmnoDashboardSummary?.height)?window.__pmnoDashboardSummary.height:[['< 30 m',0],['30–50 m',0],['50–70 m',0],['> 70 m',0],['Unknown',0]];
-  if(!window.__pmnoDashboardSummary){filtered.forEach(r=>{const n=Number(val(r,'tower_height_m'));if(!Number.isFinite(n)){heightBuckets[4][1]++;return}if(n<30)heightBuckets[0][1]++;else if(n<50)heightBuckets[1][1]++;else if(n<70)heightBuckets[2][1]++;else heightBuckets[3][1]++;});}
+  const ageBuckets=Array.isArray(aggregate?.maturity)?aggregate.maturity:[];
+    const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
     const geo=window.__pmnoGeoPortfolio||{};
   const geoReady=geo.status==='ready' && Number(geo.total)===Number(a.total);
   const geoError=geo.status==='error';
@@ -2775,7 +2779,7 @@ function renderDashboardSource(label){
  // Map rendering is deliberately decoupled from this source renderer.
  // renderDashboardSource() is also called repeatedly during geo-validation;
  // triggering a map reload here would race/clear the visible layer.
- const src=$('dash-source');if(src){const shownTotal=Number(window.__pmnoDashboardSummary?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
+ const src=$('dash-source');if(src){const shownTotal=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
  renderAuditData();
 }
 function auditFieldStats(list,fieldKeys){const total=list.length;let filled=0;for(const r of list){if(fieldKeys.some(k=>String(val(r,k)).trim()!==''))filled++}return {filled,missing:Math.max(0,total-filled),pct:total?filled/total*100:0}}
@@ -3009,6 +3013,7 @@ async function applyFilters(){
    const snap=await r.json();
    if(!snap?.stats?.total_sites && !snap?.stats?.totalSites)throw new Error('Filtered summary missing stats.total_sites');
    window.__pmnoDashboardSummary=snap||null;
+   window.__pmnoPortfolioSummary=snap||null;
    window.__pmnoDashboardFilterOptions=snap?.filter_options||null;
    // The filter response is a server-side summary plus a paged detail sample.
    // Do not clear the live source maps just because this response is intentionally paged.
@@ -3045,7 +3050,7 @@ async function load(){
  const refreshBtn=$('dash-refresh');
  if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
-  rows=[]; filtered=[]; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
+  rows=[]; filtered=[]; window.__pmnoPortfolioSummary=null; window.__pmnoDashboardSummary=null; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
   window.__pmnoDashboardPartial=true;
   const pageSize=1000;
   const fetchJson=(url,body)=>fetch(url,{method:'POST',headers:H,body:JSON.stringify(body)}).then(async r=>{if(!r.ok)throw new Error(url+' HTTP '+r.status);return normalizeRpcObject(await r.json())});
@@ -3059,6 +3064,7 @@ async function load(){
     summary=await summaryPromise;
     if(!summary?.stats?.total_sites) throw new Error('Summary response missing stats.total_sites');
     window.__pmnoDashboardSummary=summary;
+    window.__pmnoPortfolioSummary=summary;
     window.__pmnoDashboardFilterOptions=summary?.filter_options||null;
     // Render KPI/profile from the full server-side aggregate immediately.
     renderDashboardSource('MASTER DATA · PMNO · summary server-side');
@@ -3074,7 +3080,7 @@ async function load(){
     rows=pageRows.slice();
     filtered=rows.slice();
     // Keep the already-loaded full summary; only enrich it with page/filter metadata where present.
-    if(!window.__pmnoDashboardSummary) window.__pmnoDashboardSummary={...snap,stats:snap?.stats||{total_sites:Number(snap?.total_sites)||0}};
+    if(!window.__pmnoDashboardSummary){window.__pmnoDashboardSummary={...snap,stats:snap?.stats||{total_sites:Number(snap?.total_sites)||0}};window.__pmnoPortfolioSummary=window.__pmnoDashboardSummary;}
     if(snap?.filter_options) window.__pmnoDashboardFilterOptions=snap.filter_options;
     renderDashboardSource('MASTER DATA · PMNO · summary + detail page');
   }catch(e){
