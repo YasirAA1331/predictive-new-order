@@ -2771,9 +2771,8 @@ async function load(){
   };
   const mergePage=(snap)=>{
    const pageRows=normalizeMasterRows(snap.sites,[]);
-   const byId=new Map(rows.map(r=>[sid(r),r]));
-   for(const r of pageRows){const id=sid(r);if(id)byId.set(id,r)}
-   rows=Array.from(byId.values());
+   // Pages are disjoint; append directly instead of rebuilding the entire 40k-row Map on every page.
+   for(const r of pageRows){const id=sid(r);if(id)rows.push(r)}
    for(const x of (Array.isArray(snap.tenants)?snap.tenants:[])){
     const id=String(x?.site_id||'').trim();if(!id)continue;
     liveTenantStats[id]={total:Math.max(0,Number(x?.total_count)||0),active:Math.max(0,Number(x?.active_count)||0),revenue:Math.max(0,Number(x?.active_revenue_count)||0),revenue_total:Math.max(0,Number(x?.revenue_count)||0)};
@@ -2784,7 +2783,7 @@ async function load(){
    for(const x of (Array.isArray(snap.maintenance)?snap.maintenance:[])){
     const id=String(x?.site_id||'').trim(),cnt=Math.max(0,Number(x?.count)||0);if(id)liveMaintenance[id]={status:'RECORDED',count:cnt};
    }
-   rows.forEach(r=>r.tenant_count=Number(liveTenantStats[sid(r)]?.total||0));
+   for(const r of pageRows) r.tenant_count=Number(liveTenantStats[sid(r)]?.total||0);
    filtered=rows.slice();
    if(!window.__pmnoDashboardLoadingPages) renderDashboardSource('MASTER DATA · PMNO');
    return snap;
@@ -2805,11 +2804,8 @@ async function load(){
    const batchOffsets=offsets.slice(i,i+batchSize);
    const snaps=await Promise.all(batchOffsets.map(fetchPage));
    for(const snap of snaps) mergePage(snap);
-   // Keep the UI fresh after each batch rather than waiting for the full dataset.
-   window.__pmnoDashboardLoadingPages=false;
-   filtered=rows.slice();
-   renderDashboardSource('MASTER DATA · PMNO');
-   window.__pmnoDashboardLoadingPages=true;
+   // Keep the UI thread free while pages arrive. Re-rendering the full dashboard for every batch freezes mobile Safari.
+   await new Promise(resolve=>setTimeout(resolve,0));
   }
   filtered=rows.slice();
   window.__pmnoDashboardLoadingPages=false;
