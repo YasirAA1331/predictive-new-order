@@ -2285,14 +2285,34 @@ function dashboardMapPopup(r){
  const id=sid(r), name=val(r,'site_name')||'—', city=val(r,'city','kabupaten')||'—', province=val(r,'province')||'—', t=tenantCount(r);
  return `<div style="min-width:180px"><b>${esc(id)}</b><br><span>${esc(name)}</span><br><small>${esc(city)} · ${esc(province)}</small><br><strong>${fmtInt(t)} tenant</strong><br><button type="button" class="dash-site-open" data-site="${esc(id)}" style="margin-top:7px;padding:5px 8px;border:0;border-radius:5px;background:#35c4ff;color:#04111c;font-weight:800">OPEN SITE PROFILE</button></div>`;
 }
+let dashboardMapRequestId=0;
+async function loadDashboardMapData(){
+ const requestId=++dashboardMapRequestId;
+ const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
+ try{
+  const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_map_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
+  if(!r.ok)throw new Error('pmno_dashboard_map_points HTTP '+r.status);
+  const payload=await r.json();
+  if(requestId!==dashboardMapRequestId)return;
+  const points=Array.isArray(payload?.points)?payload.points:[];
+  const mapped=points.map(x=>({site_id:x.site_id,site_name:x.site_name,regional:x.regional,province:x.province,city:x.city,latitude:x.latitude,longitude:x.longitude,tenant_count:Number(x.tenant_count)||0}));
+  const m=initDashboardMap();if(!m)return;
+  m._siteData=mapped;
+  renderDashboardMap(mapped);
+  const src=$('dash-map-status');if(src)src.textContent=fmtInt(mapped.length)+' mapped sites';
+ }catch(e){
+  console.warn('[PMNO MAP]',e);
+  const m=initDashboardMap();if(m&&requestId===dashboardMapRequestId){m._siteData=[];renderDashboardMap([])}
+ }
+}
 function renderDashboardMap(data){
  const m=initDashboardMap(); if(!m)return;
  m._siteData=Array.isArray(data)?data:[];
- const valid=m._siteData.map(r=>{const lat=Number(val(r,'latitude')),lon=Number(val(r,'longitude'));return Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-11.5&&lat<=6.5&&lon>=94.5&&lon<=141.5?{r,lat,lon,t:tenantCount(r)}:null}).filter(Boolean);
+ const valid=m._siteData.map(r=>{const lat=Number(val(r,'latitude')),lon=Number(val(r,'longitude'));return Number.isFinite(lat)&&Number.isFinite(lon)&&lat>=-11.5&&lat<=6.5&&lon>=94.5&&lon<=141.5?{r,lat,lon,t:Number(r.tenant_count)||tenantCount(r)}:null}).filter(Boolean);
  m._siteLayer.clearLayers();
  const z=m.getZoom();
  if(!valid.length){m.setView([-2.2,118],5);return;}
- if(z>=7){
+ if(z>=9){
    const renderer=L.canvas({padding:.5});
    valid.forEach(x=>{
      const mk=L.circleMarker([x.lat,x.lon],{radius:2.7,weight:.7,color:'#07111c',fillColor:tenantColor(x.t),fillOpacity:.9,renderer}).addTo(m._siteLayer);
@@ -2554,7 +2574,7 @@ function renderDashboardSource(label){
    <div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div>`;
  };
  const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(siteNpaCount(filtered)),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
- renderDashboardMap(filtered);
+ loadDashboardMapData();
  const src=$('dash-source');if(src){const shownTotal=Number(window.__pmnoDashboardSummary?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
  renderAuditData();
 }
