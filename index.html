@@ -2455,7 +2455,7 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 
 function renderDashboardSource(label){
  const sm=window.__pmnoDashboardSummary?.stats||null;
- const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:0,leaseRisk:0,leaseExpired:0,activeSites:Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0))}:siteAuditSnapshot(filtered);
+ const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:Number(sm.power_sites)||0,leaseRisk:Number(sm.lease_risk_6m)||0,leaseExpired:Number(sm.lease_expired)||0,leaseExpirySites:Number(sm.lease_expiry_sites)||0,leaseNoExpiry:Number(sm.lease_no_expiry)||0,towerTypeSites:Number(sm.tower_type_sites)||0,towerHeightSites:Number(sm.tower_height_sites)||0,accessRoadSites:Number(sm.access_road_sites)||0,terrainSites:Number(sm.terrain_sites)||0,activeSites:Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0))}:siteAuditSnapshot(filtered);
  const activeSiteCount=sm?Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0)):a.activeSites;
  const byReg={};
  filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
@@ -2512,8 +2512,8 @@ function renderDashboardSource(label){
     </div><div class="asset-readiness-note">Validation uses detailed GADM 4.1 Indonesia land and province polygons. Sea/outside-land points are Invalid Coordinate; land points whose mapped province differs from the master province are Location Mismatch.</div></div>
   </div>`;
  }
- const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
- const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(filtered.filter(r=>val(r,'terrain_class')).length)]]);
+ const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(a.leaseExpirySites??filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(a.leaseNoExpiry??filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
+ const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(a.towerTypeSites??filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(a.towerHeightSites??filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(a.accessRoadSites??filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(a.terrainSites??filtered.filter(r=>val(r,'terrain_class')).length)]]);
  const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Productive site · active tenant',fmtInt(activeSiteCount),'good'],['Site with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
  const fin=$('dash-financial');if(fin){
   const hasNbv=id=>Object.prototype.hasOwnProperty.call(liveNbv,id);
