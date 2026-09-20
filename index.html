@@ -2402,7 +2402,9 @@ if(document.readyState==='loading') document.addEventListener('DOMContentLoaded'
 
 function renderDashboardSource(label){
  const sm=window.__pmnoDashboardSummary?.stats||null;
- const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:0,leaseRisk:0,leaseExpired:0}:siteAuditSnapshot(filtered), byReg={};
+ const a=sm?{total:Number(sm.total_sites)||0,revenueSites:Number(sm.revenue_sites)||0,powerSites:0,leaseRisk:0,leaseExpired:0,activeSites:Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0))}:siteAuditSnapshot(filtered);
+ const activeSiteCount=sm?Math.max(0,(Number(sm.total_sites)||0)-(Number(sm.npa_sites)||0)):a.activeSites;
+ const byReg={};
  filtered.forEach(r=>{const k=val(r,'regional','region')||'Unknown';byReg[k]=(byReg[k]||0)+1});
  const fo=window.__pmnoDashboardSummary?.filter_options;
  setOptions('dash-regional',Array.isArray(fo?.regional)?fo.regional:uniq('regional').concat(uniq('region')).filter((v,i,a)=>a.indexOf(v)===i),'ALL REGIONAL');
@@ -2452,7 +2454,7 @@ function renderDashboardSource(label){
  }
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(filtered.filter(r=>val(r,'terrain_class')).length)]]);
- const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Productive site · active tenant',fmtInt(active),'good'],['Site with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
+ const prod=$('dash-productivity');if(prod)prod.innerHTML=metricRows([['Productive site · active tenant',fmtInt(activeSiteCount),'good'],['Site with revenue',fmtInt(a.revenueSites)],['Revenue coverage',pct(a.revenueSites,a.total)+'%']]);
  const fin=$('dash-financial');if(fin){
   const hasNbv=id=>Object.prototype.hasOwnProperty.call(liveNbv,id);
   const npaRows=filtered.filter(r=>siteNpa(r)&&hasNbv(sid(r)));
