@@ -848,7 +848,7 @@ body.pmno-page-dashboard .workspace,body.pmno-page-dashboard #siteProfileView,bo
 body.pmno-page-siteprofile .workspace,body.pmno-page-siteprofile #dashboardView,body.pmno-page-siteprofile #bulkView,body.pmno-page-siteprofile #drmView,body.pmno-page-siteprofile #masterDataView,
 body.pmno-page-bulk .workspace,body.pmno-page-bulk #dashboardView,body.pmno-page-bulk #siteProfileView,body.pmno-page-bulk #drmView,body.pmno-page-bulk #masterDataView,
 body.pmno-page-drm .workspace,body.pmno-page-drm #dashboardView,body.pmno-page-drm #siteProfileView,body.pmno-page-drm #bulkView,body.pmno-page-drm #masterDataView,
-body.pmno-page-master .workspace,body.pmno-page-master #dashboardView,body.pmno-page-master #siteProfileView,body.pmno-page-master #bulkView,body.pmno-page-master #drmView{display:none!important;}
+body.pmno-page-master .workspace,body.pmno-page-master #dashboardView,body.pmno-page-master #assetProfileView,body.pmno-page-master #financialProfileView,body.pmno-page-master #siteProfileView,body.pmno-page-master #bulkView,body.pmno-page-master #drmView{display:none!important;}
 @media(max-width:760px){
   body .app{grid-template-rows:auto auto!important;min-height:100dvh!important;}
   body .workspace{grid-template-rows:auto minmax(430px,62dvh) auto;}
@@ -1627,6 +1627,47 @@ body.pmno-page-assetprofile .topbar{flex:none!important}
   </div>
 </section>
 
+
+<style id="pmno-financial-profile-page-v95">
+.financial-profile-page{width:100%;background:#06111f;color:#edf5fb;min-height:calc(100vh - 72px)}
+.fin-page-shell{width:min(1780px,calc(100% - 44px));margin:0 auto;padding:22px 0 48px}
+.fin-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16px}
+.fin-page-kicker{font-size:9px;letter-spacing:2.2px;font-weight:950;color:#6f879c}.fin-page-title{font-size:30px;line-height:1;font-weight:950;letter-spacing:-1px;margin-top:5px}.fin-page-title b{color:var(--cyan)}.fin-page-sub{font-size:10px;color:#7890a5;margin-top:7px}.fin-page-actions{display:flex;gap:8px}
+.fin-page-filterbar{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;gap:9px;margin-bottom:14px}.fin-page-filterbar label{font-size:8px;letter-spacing:1.1px;color:#7890a7;font-weight:900}.fin-page-filterbar select,.fin-page-filterbar input{display:block;width:100%;height:40px;margin-top:5px;border:1px solid #29435e;border-radius:9px;background:#071321;color:var(--text);padding:0 10px;font-size:12px;outline:none}.fin-page-filterbar select:focus,.fin-page-filterbar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(53,200,255,.08)}
+.fp-section{border:1px solid #20364f;background:#0a1727;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}.fp-section-head{display:flex;justify-content:space-between;align-items:end;gap:14px;padding:14px 16px;border-bottom:1px solid #20364f}.fp-section-head strong{font-size:10px;letter-spacing:1.5px}.fp-section-head small{font-size:8px;color:#6e879c}.fp-section-body{padding:14px 16px}
+.fp-kpis{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:10px}.fp-kpi{padding:16px;border:1px solid #20364f;border-radius:10px;background:#091827;min-height:105px}.fp-kpi.primary{background:linear-gradient(135deg,#0b2234,#0a1727)}.fp-kpi span{display:block;font-size:8px;letter-spacing:1.3px;color:#7890a5;font-weight:900}.fp-kpi b{display:block;font-size:25px;line-height:1.05;margin-top:9px;letter-spacing:-.7px}.fp-kpi.primary b{font-size:34px;color:var(--cyan)}.fp-kpi small{display:block;margin-top:5px;font-size:8px;color:#647d92}
+.fp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fp-card{border:1px solid #1d344b;border-radius:10px;background:#091827;padding:14px}.fp-card-title{font-size:9px;font-weight:950;letter-spacing:1.2px;color:#d9e6ef;margin-bottom:10px}.fp-row{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #172d42}.fp-row:last-child{border-bottom:0}.fp-row span{font-size:9px;color:#8ca1b2}.fp-row span small{display:block;font-size:7px;color:#647d92;margin-top:3px;line-height:1.35}.fp-row b{font-size:12px;text-align:right;white-space:nowrap}.fp-row b.na{color:#70869a;font-size:9px}.fp-row b.good{color:var(--green)}
+.fp-coverage{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.fp-coverage-card{padding:12px;border:1px solid #1d344b;border-radius:9px;background:#091827}.fp-coverage-card span{display:block;font-size:7px;letter-spacing:1px;color:#71899c;font-weight:900}.fp-coverage-card b{display:block;font-size:20px;margin-top:5px}.fp-coverage-card small{display:block;font-size:7px;color:#657d91;margin-top:3px}.fp-coverage-card.warn b{color:var(--amber)}
+.fp-formula{margin-top:10px;padding:10px;border:1px solid #3c3b25;border-radius:9px;background:rgba(212,175,55,.055);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:9px;color:#9eb0bf}.fp-formula strong{color:#d4af37;letter-spacing:.08em}.fp-note{margin-top:10px;padding:10px 11px;border:1px solid #1d344b;background:#081625;border-radius:8px;color:#71899c;font-size:8px;line-height:1.55}.fp-note b{color:#cdd9e4}.fp-loading,.fp-error{padding:22px;border:1px dashed #29445c;border-radius:9px;color:#71869a;font-size:10px}.fp-error{color:#ff9b9b;border-color:#5b3040}
+body.pmno-page-financialprofile .workspace,body.pmno-page-financialprofile #dashboardView,body.pmno-page-financialprofile #assetProfileView,body.pmno-page-financialprofile #siteProfileView,body.pmno-page-financialprofile #bulkView,body.pmno-page-financialprofile #drmView,body.pmno-page-financialprofile #masterDataView{display:none!important}
+body.pmno-page-financialprofile #financialProfileView{display:block!important}body.pmno-page-financialprofile .app{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important}body.pmno-page-financialprofile .topbar{flex:none!important}
+@media(max-width:1100px){.fin-page-shell{width:min(100% - 28px,1200px)}.fin-page-filterbar{grid-template-columns:1fr 1fr}.fin-page-filterbar label:last-child{grid-column:1/-1}.fp-kpis{grid-template-columns:1.2fr 1fr 1fr}.fp-kpi.primary{grid-row:span 2}.fp-grid{grid-template-columns:1fr}.fp-coverage{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.financial-profile-page{min-height:100dvh}.fin-page-shell{width:100%;padding:14px 12px 70px}.fin-page-head{flex-direction:column}.fin-page-actions{width:100%}.fin-page-actions .dash-btn{flex:1}.fin-page-filterbar{grid-template-columns:1fr 1fr}.fin-page-filterbar label:last-child{grid-column:1/-1}.fp-kpis{grid-template-columns:1fr 1fr}.fp-kpi.primary{grid-column:1/-1;grid-row:auto}.fp-coverage{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.fin-page-filterbar{grid-template-columns:1fr}.fin-page-filterbar label:last-child{grid-column:auto}.fp-kpis,.fp-coverage{grid-template-columns:1fr}.fp-kpi.primary{grid-column:auto}.fin-page-title{font-size:25px}.fp-row{grid-template-columns:1fr auto}}
+</style>
+
+
+<section id="financialProfileView" class="financial-profile-page" style="display:none">
+  <div class="fin-page-shell">
+    <div class="fin-page-head">
+      <div>
+        <div class="fin-page-kicker">MITRATEL · ASSET INTELLIGENCE</div>
+        <div class="fin-page-title">FINANCIAL <b>PROFILE</b></div>
+        <div class="fin-page-sub">Revenue, investment, operating cost, asset value and profitability build-up from the mapped financial source.</div>
+      </div>
+      <div class="fin-page-actions"><button type="button" class="dash-btn" id="financial-back-dashboard">← DASHBOARD</button><button type="button" class="dash-btn primary" id="financial-refresh">↻ REFRESH</button></div>
+    </div>
+    <div class="fin-page-filterbar">
+      <label>REGIONAL<select id="financial-regional"><option value="">ALL REGIONAL</option></select></label>
+      <label>AREA<select id="financial-area"><option value="">ALL AREA</option></select></label>
+      <label>PROVINCE<select id="financial-province"><option value="">ALL PROVINCE</option></select></label>
+      <label>KABUPATEN / KOTA<select id="financial-city"><option value="">ALL KABUPATEN / KOTA</option></select></label>
+      <label>SEARCH SITE<input id="financial-search" placeholder="Site ID / Site Name"></label>
+    </div>
+    <div id="financial-profile-page-content"><div class="fp-loading">Loading Financial Profile…</div></div>
+  </div>
+</section>
+
 <section id="siteProfileView" class="site-profile-view" style="display:none">
   <div class="sp-shell">
     <div class="sp-head"><div><div class="dash-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="dash-title">SITE <b>PROFILE</b></div><div class="dash-sub">One site, one consolidated view. Tenant, power, land, legal and maintenance stay separated from DRM analysis.</div></div><div class="sp-actions"><button id="sp-search-btn" class="dash-btn primary">SEARCH</button><button id="sp-open-analysis" class="dash-btn">OPEN SINGLE SITE ANALYSIS</button></div></div>
@@ -2366,13 +2407,90 @@ loadTenants().then(pmnoLoadRouteContext);
   window.pmnoSingleCandidateOptions=singleCandidateOptions;
 })();
 </script>
+
+<script id="pmno-financial-profile-page-v95-js">
+(function(){
+'use strict';
+const FURL='https://vzeitjesovdojfsfgyza.supabase.co';
+const FKEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
+const FH={'apikey':FKEY,'Authorization':'Bearer '+FKEY,'Content-Type':'application/json'};
+const $f=id=>document.getElementById(id);
+const escF=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nF=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+const iF=v=>nF(v).toLocaleString('id-ID');
+const mF=v=>{const n=nF(v);if(!n)return '—';if(Math.abs(n)>=1e9)return 'Rp '+(n/1e9).toFixed(2)+' B';if(Math.abs(n)>=1e6)return 'Rp '+(n/1e6).toFixed(0)+' M';return 'Rp '+Math.round(n).toLocaleString('id-ID')};
+const pF=(a,b)=>b?(nF(a)/nF(b)*100).toFixed(1)+'%':'0.0%';
+let fpLoading=false,fpTimer=null;
+async function fRpc(name,body){const r=await fetch(FURL+'/rest/v1/rpc/'+name,{method:'POST',headers:FH,body:JSON.stringify(body||{})});if(!r.ok)throw new Error(name+' HTTP '+r.status);return r.json()}
+async function loadFinancialSummary(){
+ const body={p_regional:$f('financial-regional')?.value||null,p_area:$f('financial-area')?.value||null,p_province:$f('financial-province')?.value||null,p_city:$f('financial-city')?.value||null,p_search:($f('financial-search')?.value||'').trim()||null};
+ const data=await fRpc('pmno_financial_profile_summary',body);renderFinancialProfile(data||{});
+}
+function fillFinancialFilters(fo){
+ const set=(id,arr,all)=>{const el=$f(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+all+'</option>'+((Array.isArray(arr)?arr:[]).map(v=>'<option value="'+escF(v)+'">'+escF(v)+'</option>').join(''));if((arr||[]).includes(old))el.value=old};
+ set('financial-regional',fo?.regional,'ALL REGIONAL');set('financial-area',fo?.area,'ALL AREA');set('financial-province',fo?.province,'ALL PROVINCE');set('financial-city',fo?.city,'ALL KABUPATEN / KOTA');
+}
+function row(label,value,note='',cls=''){return '<div class="fp-row"><span>'+escF(label)+(note?'<small>'+escF(note)+'</small>':'')+'</span><b class="'+cls+'">'+escF(value)+'</b></div>'}
+function card(title,body){return '<div class="fp-card"><div class="fp-card-title">'+escF(title)+'</div>'+body+'</div>'}
+function renderFinancialProfile(d){
+ const total=nF(d.site_count), records=nF(d.record_count), revSites=nF(d.revenue_sites), capexSites=nF(d.capex_sites), costSites=nF(d.cost_sites), nbvSites=nF(d.nbv_sites);
+ const revenueMonth=nF(d.revenue_month), revenueYear=nF(d.revenue_year), capex=nF(d.capex_total), b2s=nF(d.capex_b2s), collo=nF(d.capex_collo), qi=nF(d.capex_qi), om=nF(d.om_cost_year), land=nF(d.land_lease_cost_year), tax=nF(d.tax_year), opex=nF(d.opex_total_year), ebitda=nF(d.ebitda_proxy), nbv=nF(d.nbv_total);
+ const avgRev=revSites?revenueYear/revSites:0, avgNbv=nbvSites?nbv/nbvSites:0;
+ const el=$f('financial-profile-page-content');if(!el)return;
+ el.innerHTML='<section class="fp-section"><div class="fp-section-head"><div><strong>01 · FINANCIAL SNAPSHOT</strong><small>Mapped financial source on site basis</small></div></div><div class="fp-section-body"><div class="fp-kpis">'+
+   '<div class="fp-kpi primary"><span>SITES WITH FINANCIAL DATA</span><b>'+iF(total)+'</b><small>'+iF(records)+' financial records mapped</small></div>'+
+   '<div class="fp-kpi"><span>REVENUE COVERAGE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' sites with revenue</small></div>'+
+   '<div class="fp-kpi"><span>NBV MAPPED</span><b>'+mF(nbv)+'</b><small>'+iF(nbvSites)+' sites with NBV</small></div>'+
+   '<div class="fp-kpi"><span>REVENUE / YEAR</span><b>'+mF(revenueYear)+'</b><small>Revenue monthly × 12</small></div>'+
+   '<div class="fp-kpi"><span>EBITDA PROXY</span><b>'+mF(ebitda)+'</b><small>Revenue − mapped annual operating cost</small></div>'+
+ '</div></div></section>'+
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>02 · REVENUE & INCOME</strong><small>Revenue source currently mapped in Financial Profile</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('REVENUE',row('Revenue / Month',mF(revenueMonth),iF(revSites)+' site dengan revenue')+row('Revenue / Year',mF(revenueYear),'Revenue monthly × 12')+row('Average Revenue / Site / Year',mF(avgRev),'Total annual revenue ÷ site with revenue'))+
+   card('REVENUE COVERAGE',row('Sites with Revenue',iF(revSites),pF(revSites,total)+' of portfolio')+row('Sites without Revenue',iF(Math.max(0,total-revSites)),pF(Math.max(0,total-revSites),total)+' of portfolio')+row('Financial Records',iF(records),'Rows in site_financial_profile'))+
+ '</div></div></section>'+
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>03 · INVESTMENT & ASSET VALUE</strong><small>CAPEX and NBV currently mapped</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('CAPEX / INVESTMENT',row('CAPEX Total',mF(capex),iF(capexSites)+' sites with CAPEX')+row('CAPEX B2S',mF(b2s),'Mapped source field')+row('CAPEX Collo',mF(collo),'Mapped source field')+row('CAPEX QI',mF(qi),'Mapped source field'))+
+   card('ASSET VALUE',row('Total NBV',mF(nbv),iF(nbvSites)+' sites with NBV')+row('Average NBV / Site',mF(avgNbv),'Total NBV ÷ site with mapped NBV')+row('NBV Coverage',pF(nbvSites,total),iF(nbvSites)+' of '+iF(total)+' sites'))+
+ '</div><div class="fp-note"><b>NBV method:</b> one NBV value is taken per Site ID from the latest updated Financial Profile record to avoid double-counting repeated site value across tenant-level rows.</div></div></section>'+
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>04 · OPERATING COST & PROFITABILITY</strong><small>Mapped annual cost build-up</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('OPERATING COST',row('OM Cost / Year',mF(om),'site_financial_profile.om_cost_year')+row('Land Lease / Year',mF(land),'site_financial_profile.land_lease_cost_year')+row('Tax / Year',mF(tax),'site_financial_profile.tax_year')+row('Total Operating Cost / Year',mF(opex),'OM + land lease + tax'))+
+   card('PROFITABILITY BUILD-UP',row('Revenue / Year',mF(revenueYear))+row('Operating Cost / Year',mF(opex))+row('EBITDA Proxy',mF(ebitda),'Revenue − mapped annual operating cost','good')+row('IRR / Site','NOT MAPPED','IRR engine/source is not part of site_financial_profile','na'))+
+ '</div><div class="fp-formula"><strong>EBITDA PROXY</strong><span>Revenue / Year − OM Cost / Year − Land Lease / Year − Tax / Year</span></div><div class="fp-note"><b>Important:</b> EBITDA above is a descriptive proxy from the mapped Financial Profile fields. It is not an IRR/NPV calculation and does not replace the PMNO investment engine.</div></div></section>'+
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>05 · DATA COVERAGE</strong><small>Financial source completeness on current filter</small></div></div><div class="fp-section-body"><div class="fp-coverage">'+
+   '<div class="fp-coverage-card"><span>REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' sites</small></div>'+
+   '<div class="fp-coverage-card '+(capexSites?'':'warn')+'"><span>CAPEX</span><b>'+pF(capexSites,total)+'</b><small>'+iF(capexSites)+' sites</small></div>'+
+   '<div class="fp-coverage-card '+(costSites?'':'warn')+'"><span>OPERATING COST</span><b>'+pF(costSites,total)+'</b><small>'+iF(costSites)+' sites</small></div>'+
+   '<div class="fp-coverage-card"><span>NBV</span><b>'+pF(nbvSites,total)+'</b><small>'+iF(nbvSites)+' sites</small></div>'+
+ '</div></div></section>';
+}
+async function initFinancialProfile(){
+ if(fpLoading)return;fpLoading=true;const el=$f('financial-profile-page-content');if(el)el.innerHTML='<div class="fp-loading">Loading Financial Profile…</div>';
+ try{
+   let fo=window.__pmnoDashboardFilterOptions;
+   if(!fo){try{const s=await fRpc('pmno_dashboard_summary',{});fo=s?.filter_options||null;window.__pmnoDashboardFilterOptions=fo}catch(_){} }
+   fillFinancialFilters(fo||{});
+   await loadFinancialSummary();
+ }catch(e){console.error('[PMNO FINANCIAL PROFILE]',e);if(el)el.innerHTML='<div class="fp-error">Financial Profile gagal dimuat: '+escF(e.message)+'</div>'}
+ finally{fpLoading=false}
+}
+function bindFinancialProfile(){
+ $f('financial-back-dashboard')?.addEventListener('click',()=>window.pmnoNavigate?.('dashboard'));
+ $f('financial-refresh')?.addEventListener('click',()=>initFinancialProfile());
+ ['financial-regional','financial-area','financial-province','financial-city'].forEach(id=>$f(id)?.addEventListener('change',()=>{clearTimeout(fpTimer);fpTimer=setTimeout(()=>loadFinancialSummary().catch(e=>console.warn('[PMNO FIN FILTER]',e)),80)}));
+ $f('financial-search')?.addEventListener('input',()=>{clearTimeout(fpTimer);fpTimer=setTimeout(()=>loadFinancialSummary().catch(e=>console.warn('[PMNO FIN SEARCH]',e)),320)});
+}
+window.pmnoFinancialProfileInit=initFinancialProfile;window.pmnoFinancialProfileRender=renderFinancialProfile;
+bindFinancialProfile();
+})();
+</script>
+
 <script id="pmno-navigation-v26">
 (function(){
   'use strict';
   const KEY='pmno_active_page';
-  const ROUTES=new Set(['dashboard','assetprofile','siteprofile','bulk','single','drm','master']);
+  const ROUTES=new Set(['dashboard','assetprofile','financialprofile','siteprofile','bulk','single','drm','master']);
   const el=id=>document.getElementById(id);
-  const views={dashboard:el('dashboardView'),assetprofile:el('assetProfileView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
+  const views={dashboard:el('dashboardView'),assetprofile:el('assetProfileView'),financialprofile:el('financialProfileView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
   const menus={dashboard:el('dashboardMenu'),assetprofile:el('assetProfileMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
   const valid=p=>ROUTES.has(String(p||'').toLowerCase());
   const readHash=()=>{const h=String(location.hash||'').replace(/^#/,'').trim().toLowerCase();const r=h.split(/[?&/]/)[0];return valid(r)?r:null};
@@ -2387,7 +2505,7 @@ loadTenants().then(pmnoLoadRouteContext);
   }
   function apply(page,opts){
     page=valid(page)?page:'single';
-    document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-assetprofile','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');
+    document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-assetprofile','pmno-page-financialprofile','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');
     document.body.classList.add('pmno-page-'+page);
     Object.entries(views).forEach(([name,node])=>{if(!node)return;const on=name===page;node.hidden=!on;node.style.display=on?(name==='single'?'grid':'block'):'none'});
     document.body.classList.toggle('bulk-page',page==='bulk');
@@ -2399,6 +2517,7 @@ loadTenants().then(pmnoLoadRouteContext);
     window.dispatchEvent(new Event('resize'));
     if(page==='dashboard'&&typeof window.pmnoDashboardInit==='function')Promise.resolve(window.pmnoDashboardInit()).catch(e=>console.warn('[PMNO NAV] dashboard init',e));
     if(page==='assetprofile'&&typeof window.pmnoAssetProfileInit==='function')Promise.resolve(window.pmnoAssetProfileInit()).catch(e=>console.warn('[PMNO NAV] asset profile init',e));
+    if(page==='financialprofile'&&typeof window.pmnoFinancialProfileInit==='function')Promise.resolve(window.pmnoFinancialProfileInit()).catch(e=>console.warn('[PMNO NAV] financial profile init',e));
     if(page==='siteprofile'&&typeof window.pmnoSiteProfileInit==='function')Promise.resolve(window.pmnoSiteProfileInit()).catch(e=>console.warn('[PMNO NAV] site profile init',e));
     if(page==='master'&&typeof window.pmnoMasterInit==='function')Promise.resolve(window.pmnoMasterInit()).catch(e=>console.warn('[PMNO NAV] master init',e));
     return page;
@@ -3716,7 +3835,7 @@ function renderDashboardHub(){
  const nbv=typeof liveNbv!=='undefined'?Object.values(liveNbv||{}).reduce((n,v)=>n+Number(v||0),0):0;
  set('dash-financial',mini('NBV MAPPED',nbv?formatMoney(nbv):'BELUM TERSEDIA',nbv?'mapped Site ID':'source belum lengkap'));
  set('dash-lifecycle',mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':'')+mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':''));
- document.querySelectorAll('[data-open-profile]').forEach(btn=>{if(btn.dataset.bound)return;btn.dataset.bound='1';btn.addEventListener('click',()=>{const p=btn.dataset.openProfile;if(p==='assetprofile')window.pmnoNavigate?.('assetprofile');else btn.classList.add('pending');});});
+ document.querySelectorAll('[data-open-profile]').forEach(btn=>{if(btn.dataset.bound)return;btn.dataset.bound='1';btn.addEventListener('click',()=>{const p=btn.dataset.openProfile;if(p==='asset')window.pmnoNavigate?.('assetprofile');else if(p==='financial')window.pmnoNavigate?.('financialprofile');else if(p==='assetprofile')window.pmnoNavigate?.('assetprofile');else btn.classList.add('pending');});});
 }
 
 function auditFieldStats(list,fieldKeys){const total=list.length;let filled=0;for(const r of list){if(fieldKeys.some(k=>String(val(r,k)).trim()!==''))filled++}return {filled,missing:Math.max(0,total-filled),pct:total?filled/total*100:0}}
