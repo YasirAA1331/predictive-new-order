@@ -5034,3 +5034,64 @@ body.pmno-page-single .detail-panel{
 })();
 </script>
 <script>window.__PMNO_BUILD__="V83-ADJACENCY-PERSIST-LAST-RESULT";</script>
+
+
+<style id="pmno-dashboard-fullwidth-v82">
+/* V82 — Dashboard truly fills the available viewport.
+   Dashboard only. No changes to portrait/mobile or other modules. */
+@media (min-width:1101px){
+  html body.pmno-page-dashboard #dashboardView,
+  html body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:100%!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    box-sizing:border-box!important;
+  }
+  html body.pmno-page-dashboard #dashboardView .dash-shell{
+    padding-left:24px!important;
+    padding-right:24px!important;
+  }
+  html body.pmno-page-dashboard #dashboardView .dash-grid-top,
+  html body.pmno-page-dashboard #dashboardView .dash-grid-3,
+  html body.pmno-page-dashboard #dashboardView .dash-filterbar,
+  html body.pmno-page-dashboard #dashboardView .dash-kpis{
+    width:100%!important;
+    max-width:none!important;
+  }
+}
+@media (orientation:landscape) and (min-width:500px){
+  html body.pmno-page-dashboard #dashboardView,
+  html body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:100vw!important;
+    max-width:none!important;
+    min-width:0!important;
+    margin-left:0!important;
+    margin-right:0!important;
+    box-sizing:border-box!important;
+  }
+  html body.pmno-page-dashboard #dashboardView .dash-shell{
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+  html body.pmno-page-dashboard #dashboardView .dash-grid-top,
+  html body.pmno-page-dashboard #dashboardView .dash-grid-3,
+  html body.pmno-page-dashboard #dashboardView .dash-filterbar,
+  html body.pmno-page-dashboard #dashboardView .dash-kpis{
+    width:100%!important;
+    max-width:none!important;
+  }
+
+  /* Never leave an empty right rail: distribute every portfolio card. */
+  html body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3{
+    grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important;
+  }
+  html body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3 + .dash-grid-3{
+    grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)!important;
+  }
+  html body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card:nth-child(3){
+    grid-column:auto!important;
+  }
+}
+</style>
