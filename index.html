@@ -848,7 +848,7 @@ body.pmno-page-dashboard .workspace,body.pmno-page-dashboard #siteProfileView,bo
 body.pmno-page-siteprofile .workspace,body.pmno-page-siteprofile #dashboardView,body.pmno-page-siteprofile #bulkView,body.pmno-page-siteprofile #drmView,body.pmno-page-siteprofile #masterDataView,
 body.pmno-page-bulk .workspace,body.pmno-page-bulk #dashboardView,body.pmno-page-bulk #siteProfileView,body.pmno-page-bulk #drmView,body.pmno-page-bulk #masterDataView,
 body.pmno-page-drm .workspace,body.pmno-page-drm #dashboardView,body.pmno-page-drm #siteProfileView,body.pmno-page-drm #bulkView,body.pmno-page-drm #masterDataView,
-body.pmno-page-master .workspace,body.pmno-page-master #dashboardView,body.pmno-page-master #siteProfileView,body.pmno-page-master #bulkView,body.pmno-page-master #drmView{display:none!important;}
+body.pmno-page-master .workspace,body.pmno-page-master #dashboardView,body.pmno-page-master #assetProfileView,body.pmno-page-master #financialProfileView,body.pmno-page-master #siteProfileView,body.pmno-page-master #bulkView,body.pmno-page-master #drmView{display:none!important;}
 @media(max-width:760px){
   body .app{grid-template-rows:auto auto!important;min-height:100dvh!important;}
   body .workspace{grid-template-rows:auto minmax(430px,62dvh) auto;}
@@ -1471,10 +1471,38 @@ body.pmno-page-single .topbar .mode-menu button{
 }
 </style>
 
+<style id="pmno-dashboard-hub-v91">
+.hub-map-row{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(320px,.75fr);gap:12px;margin-bottom:18px}.hub-map-card #dash-map{height:455px}.hub-health-card{min-height:100%}.hub-health{padding:14px}.hub-health-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hub-mini{padding:10px;border:1px solid #1c344b;background:#091827;border-radius:9px}.hub-mini>span{display:block;font-size:7px;letter-spacing:.9px;color:#71899c;font-weight:900}.hub-mini>b{display:block;font-size:17px;margin-top:5px}.hub-mini>small{display:block;font-size:7px;color:#71899c;margin-top:3px}.hub-mini.warn>b{color:#f5c451}.hub-mini.bad>b{color:#ff5570}.hub-health-list{margin-top:10px;border-top:1px solid #1a3047}.hub-health-list>div{display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid #172d42}.hub-health-list span{font-size:8px;color:#8aa0b2}.hub-health-list b{font-size:10px}.hub-health-list b.warn{color:#f5c451}.hub-health-list b.bad{color:#ff5570}.hub-section-head{display:flex;align-items:flex-end;gap:10px;margin:3px 0 10px;padding:0 2px}.hub-section-head>span{font-size:8px;font-weight:950;color:var(--cyan)}.hub-section-head>div{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.hub-section-head strong{font-size:11px;letter-spacing:1.1px}.hub-section-head small{font-size:8px;color:#6f879b}.hub-profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.hub-profile-card{padding:14px;min-height:205px;display:flex;flex-direction:column;background:linear-gradient(145deg,#0a1727,#081522)}.hub-profile-top{display:flex;justify-content:space-between;align-items:center}.hub-profile-top>span{font-size:8px;color:var(--cyan);font-weight:950}.hub-profile-icon{width:28px;height:28px;border:1px solid #2a5068;border-radius:8px;display:grid;place-items:center;color:var(--cyan);font-size:10px;font-weight:950;background:#0b2133}.hub-profile-card>strong{font-size:11px;letter-spacing:1px;margin-top:13px}.hub-profile-card>p{font-size:8px;line-height:1.5;color:#72899d;margin:6px 0 10px;min-height:36px}.hub-profile-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:auto}.hub-profile-summary .hub-mini{padding:8px}.hub-profile-summary .hub-mini>b{font-size:12px}.hub-open{margin-top:10px;width:100%;height:32px;border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:7px;font-size:7px;font-weight:950;letter-spacing:.8px;cursor:pointer}.hub-open b{margin-left:5px;font-size:11px}.hub-open:hover{background:#0d2c43;border-color:#3d7894}
+@media(max-width:1200px){.hub-profile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hub-map-row{grid-template-columns:1fr}.hub-health-card{min-height:0}}
+@media(max-width:760px){.hub-map-row{grid-template-columns:1fr}.hub-map-card #dash-map{height:390px}.hub-profile-grid{grid-template-columns:1fr}.hub-profile-card{min-height:185px}.hub-health-kpis{grid-template-columns:1fr 1fr}}
+@media(orientation:landscape) and (max-width:900px){.hub-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hub-map-row{grid-template-columns:minmax(0,1.5fr) minmax(240px,.8fr)}.hub-map-card #dash-map{height:330px}}
+</style>
+<style id="pmno-asset-profile-page-v90">
+.asset-profile-page{width:100%;background:#06111f;color:#edf5fb;min-height:calc(100vh - 72px)}
+.asset-page-shell{width:min(1780px,calc(100% - 44px));margin:0 auto;padding:22px 0 48px}
+.asset-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16px}
+.asset-page-kicker{font-size:9px;letter-spacing:2.2px;font-weight:950;color:#6f879c}
+.asset-page-title{font-size:30px;line-height:1;font-weight:950;letter-spacing:-1px;margin-top:5px}.asset-page-title b{color:var(--cyan)}
+.asset-page-sub{font-size:10px;color:#7890a5;margin-top:7px}.asset-page-actions{display:flex;gap:8px}
+.asset-page-filterbar{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;gap:9px;margin-bottom:14px}.asset-page-filterbar label{font-size:8px;letter-spacing:1.1px;color:#7890a7;font-weight:900}.asset-page-filterbar select,.asset-page-filterbar input{display:block;width:100%;height:40px;margin-top:5px;border:1px solid #29435e;border-radius:9px;background:#071321;color:var(--text);padding:0 10px;font-size:12px;outline:none}.asset-page-filterbar select:focus,.asset-page-filterbar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(53,200,255,.08)}
+.ap-section{border:1px solid #20364f;background:#0a1727;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}.ap-section-head{display:flex;justify-content:space-between;align-items:end;gap:14px;padding:14px 16px;border-bottom:1px solid #20364f}.ap-section-head strong{font-size:10px;letter-spacing:1.5px}.ap-section-head small{font-size:8px;color:#6e879c}.ap-section-body{padding:14px 16px}.ap-snapshot{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:10px}.ap-kpi{padding:16px;border:1px solid #20364f;border-radius:10px;background:#091827;min-height:105px}.ap-kpi.primary{background:linear-gradient(135deg,#0b2234,#0a1727)}.ap-kpi span{display:block;font-size:8px;letter-spacing:1.3px;color:#7890a5;font-weight:900}.ap-kpi b{display:block;font-size:28px;line-height:1;margin-top:9px;letter-spacing:-1px}.ap-kpi.primary b{font-size:38px;color:var(--cyan)}.ap-kpi small{display:block;margin-top:5px;font-size:8px;color:#647d92}.ap-structure{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.ap-quad{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ap-module{border:1px solid #1d344b;border-radius:10px;background:#091827;padding:13px}.ap-module-title{font-size:9px;font-weight:950;letter-spacing:1.2px;color:#d9e6ef;margin-bottom:10px}.ap-bar{display:grid;gap:7px}.ap-bar-row{display:grid;grid-template-columns:minmax(90px,.65fr) minmax(90px,1.5fr) 72px;gap:9px;align-items:center}.ap-bar-row>span{font-size:8px;color:#8ca1b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ap-bar-track{height:7px;background:#14283a;border-radius:99px;overflow:hidden}.ap-bar-track i{display:block;height:100%;background:var(--cyan);border-radius:99px}.ap-bar-row b{text-align:right;font-size:9px}.ap-origin-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #172d42}.ap-origin-row:last-child{border-bottom:0}.ap-origin-row span{font-size:8px;color:#8ca1b2}.ap-origin-row b{font-size:11px}.ap-geo-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.ap-geo-main{border:1px solid #1d344b;border-radius:10px;background:#091827;padding:14px}.ap-geo-score{display:flex;align-items:end;gap:10px}.ap-geo-score strong{font-size:34px;line-height:1;color:var(--green)}.ap-geo-score b{font-size:18px;line-height:1.1}.ap-geo-score span{font-size:8px;color:#71899c;margin-bottom:2px}.ap-progress{margin-top:13px}.ap-progress-head,.ap-actionline{display:flex;justify-content:space-between;gap:10px;align-items:center}.ap-progress-head span,.ap-progress-head b{font-size:8px;color:#8097aa}.ap-progress-track{height:6px;margin-top:6px;background:#14283a;border-radius:99px;overflow:hidden}.ap-progress-track i{display:block;height:100%;background:var(--cyan);border-radius:99px}.ap-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.ap-break{padding:9px;border:1px solid #1d344b;border-radius:8px;background:#0a1a2a}.ap-break span{display:block;font-size:7px;color:#71899c;line-height:1.2}.ap-break b{display:block;font-size:14px;margin-top:5px}.ap-break em{display:block;font-style:normal;font-size:7px;color:#71899c;margin-top:2px}.ap-break.mismatch b{color:var(--amber)}.ap-break.invalid b,.ap-break.missing b{color:var(--red)}.ap-side{display:grid;gap:10px}.ap-side-card{padding:13px;border:1px solid #1d344b;border-radius:10px;background:#091827}.ap-side-card span{display:block;font-size:7px;letter-spacing:1px;color:#71899c;font-weight:900}.ap-side-card b{display:block;font-size:18px;margin-top:5px}.ap-side-card small{display:block;font-size:7px;color:#6d8498;margin-top:3px;line-height:1.35}.ap-btn{height:34px;padding:0 11px;border-radius:8px;border:1px solid #2b617c;background:#0a2234;color:var(--cyan);font-size:8px;font-weight:950;letter-spacing:.8px;cursor:pointer}.ap-spatial-top{display:grid;grid-template-columns:1.1fr repeat(4,1fr);gap:9px}.ap-spatial-kpi{padding:13px;border:1px solid #1d344b;border-radius:9px;background:#091827}.ap-spatial-kpi span{display:block;font-size:7px;color:#71899c;line-height:1.25}.ap-spatial-kpi b{display:block;font-size:19px;margin-top:5px}.ap-spatial-kpi.hero{background:linear-gradient(135deg,#0b2234,#091827)}.ap-spatial-kpi.hero b{color:var(--cyan);font-size:27px}.ap-matrix-wrap{overflow-x:auto;margin-top:12px;border:1px solid #1d344b;border-radius:9px;-webkit-overflow-scrolling:touch}.ap-matrix{width:100%;min-width:620px;border-collapse:collapse;font-size:8px}.ap-matrix th,.ap-matrix td{padding:9px;border-right:1px solid #1b3045;border-bottom:1px solid #1b3045;text-align:center;white-space:nowrap}.ap-matrix th{background:#10243a;color:#8ea3b5;font-size:7px;letter-spacing:.7px}.ap-matrix td{background:#091827;color:#dce8ef}.ap-matrix .muted{color:#4f6578}.ap-matrix .total{background:#0d2235;color:var(--cyan);font-weight:950}.ap-note{margin-top:9px;padding:9px 10px;border:1px solid #1d344b;background:#081625;border-radius:8px;color:#71899c;font-size:7px;line-height:1.5}.ap-actionline{margin-top:12px}.ap-actionline small{font-size:7px;color:#657d91}.ap-empty{padding:18px;border:1px dashed #29445c;border-radius:9px;color:#70869a;font-size:9px}
+@media(max-width:1100px){.asset-page-shell{width:min(100% - 28px,1200px)}.asset-page-filterbar{grid-template-columns:1fr 1fr}.asset-page-filterbar label:last-child{grid-column:1/-1}.ap-snapshot{grid-template-columns:1.2fr 1fr 1fr}.ap-structure,.ap-geo-grid{grid-template-columns:1fr}.ap-spatial-top{grid-template-columns:1.4fr 1fr 1fr 1fr 1fr}}
+@media(max-width:760px){.asset-profile-page{min-height:100dvh}.asset-page-shell{width:100%;padding:14px 12px 70px}.asset-page-head{flex-direction:column}.asset-page-actions{width:100%}.asset-page-actions .dash-btn{flex:1}.asset-page-filterbar{grid-template-columns:1fr 1fr}.asset-page-filterbar label:last-child{grid-column:1/-1}.ap-snapshot{grid-template-columns:1fr 1fr}.ap-kpi.primary{grid-column:1/-1}.ap-quad{grid-template-columns:1fr}.ap-breakdown{grid-template-columns:1fr 1fr}.ap-spatial-top{grid-template-columns:1fr 1fr}.ap-spatial-kpi.hero{grid-column:1/-1}.ap-actionline{align-items:flex-start;flex-direction:column}.ap-bar-row{grid-template-columns:80px minmax(70px,1fr) 58px}.asset-page-title{font-size:25px}}
+@media(max-width:430px){.asset-page-filterbar{grid-template-columns:1fr}.asset-page-filterbar label:last-child{grid-column:auto}.ap-snapshot{grid-template-columns:1fr}.ap-kpi.primary{grid-column:auto}.ap-breakdown,.ap-spatial-top{grid-template-columns:1fr}.ap-spatial-kpi.hero{grid-column:auto}.ap-geo-score strong{font-size:30px}.ap-page-title{font-size:23px}}
+body.pmno-page-assetprofile .workspace,body.pmno-page-assetprofile #dashboardView,body.pmno-page-assetprofile #siteProfileView,body.pmno-page-assetprofile #bulkView,body.pmno-page-assetprofile #drmView,body.pmno-page-assetprofile #masterDataView{display:none!important}
+body.pmno-page-assetprofile #assetProfileView{display:block!important}
+body.pmno-page-assetprofile .app{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important}
+body.pmno-page-assetprofile .topbar{flex:none!important}
+.dash-nav-card .dash-card-open{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:7px;padding:6px 8px;font-size:7px;font-weight:950;letter-spacing:.7px;cursor:pointer;white-space:nowrap}
+@media(max-width:760px){.dash-nav-card .dash-card-head{align-items:flex-start}.dash-nav-card .dash-card-open{margin-left:auto}}
+</style>
+<style id="pmno-asset-dashboard-mini-v90">
+.asset-overview-mini{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:9px}.asset-mini-total,.asset-mini-side{padding:11px;border:1px solid #1d344b;border-radius:9px;background:#091827}.asset-mini-total small,.asset-mini-label{display:block;font-size:7px;letter-spacing:1.1px;color:#71899c;font-weight:900}.asset-mini-total strong{display:block;font-size:25px;color:var(--cyan);margin-top:5px}.asset-mini-total span{display:block;font-size:7px;color:#6d8498;margin-top:3px}.asset-origin-mini,.asset-mini-type{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:5px 0;border-bottom:1px solid #172d42}.asset-origin-mini:last-child,.asset-mini-type:last-child{border-bottom:0}.asset-origin-mini span,.asset-mini-type span{font-size:8px;color:#8ca1b2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-origin-mini b,.asset-mini-type b{font-size:9px}.asset-origin-mini em{font-style:normal;font-size:7px;color:#6d8498}.asset-mini-footer{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:2px}.asset-mini-footer span{font-size:7px;color:#687f93}@media(max-width:1100px){.asset-overview-mini{grid-template-columns:1fr 1fr}.asset-mini-total{grid-column:1/-1}}@media(max-width:760px){.asset-overview-mini{grid-template-columns:1fr}.asset-mini-total{grid-column:auto}.asset-mini-footer{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
+<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="assetProfileMenu">ASSET PROFILE</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
 <main class="workspace">
 <aside class="panel input-panel">
 <div class="section-kicker">NEW ORDER INPUT</div>
@@ -1538,20 +1566,19 @@ body.pmno-page-single .topbar .mode-menu button{
       <button id="dash-mode-audit" class="dash-modebtn" type="button">AUDIT DATA</button>
     </div>
     <div id="dash-show-layer" class="dash-layer">
-      <div class="dash-grid-top">
-        <section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t0"></i>0 / NPA <i class="t1"></i>1 <i class="t2"></i>2 <i class="t3"></i>3 <i class="t4"></i>&gt;3</div></div><div id="dash-map"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>ASSET PROFILE</strong><small>What asset portfolio do we have?</small></div></div><div id="dash-asset" class="dash-panel-content"></div></section>
-      </div>
-      <div class="show-section-title">PORTFOLIO PROFILE</div>
-      <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>CUSTOMER PROFILE</strong><small>Tenant base and site distribution by tenant count.</small></div></div><div id="dash-tenant" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LAND &amp; LEGAL PROFILE</strong><small>Land tenure and legal status.</small></div></div><div id="dash-lease" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>TECHNICAL PROFILE</strong><small>Tower, access, terrain and power.</small></div></div><div id="dash-power" class="dash-panel-content"></div></section>
-      </div>
-      <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>PRODUCTIVITY PROFILE</strong><small>Revenue and productive-site profile.</small></div></div><div id="dash-productivity" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>FINANCIAL PROFILE</strong><small>Pendapatan, investasi, biaya, profitabilitas dan return aset.</small></div></div><div id="dash-financial" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>ASSET LIFECYCLE</strong><small>Site productivity, NPA and lease lifecycle signals.</small></div></div><div id="dash-lifecycle" class="dash-panel-content"></div></section>
+      <section class="hub-map-row">
+        <section class="dash-card dash-map-card hub-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t0"></i>0 / NPA <i class="t1"></i>1 <i class="t2"></i>2 <i class="t3"></i>3 <i class="t4"></i>&gt;3</div></div><div id="dash-map"></div></section>
+        <section class="dash-card hub-health-card"><div class="dash-card-head"><div><span>02</span><strong>PORTFOLIO HEALTH</strong><small>Executive signals before entering detailed profiles.</small></div></div><div id="dash-health" class="hub-health"></div></section>
+      </section>
+      <div class="hub-section-head"><div><span>03</span><strong>PROFILE INTELLIGENCE</strong><small>Open each profile independently. Dashboard only shows the headline condition.</small></div></div>
+      <div class="hub-profile-grid">
+        <section class="dash-card hub-profile-card" data-profile="assetprofile"><div class="hub-profile-top"><span>01</span><div class="hub-profile-icon">A</div></div><strong>ASSET PROFILE</strong><p>Physical portfolio, asset structure, coordinate quality and tower spatial intelligence.</p><div id="dash-asset" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="assetprofile">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="customer"><div class="hub-profile-top"><span>02</span><div class="hub-profile-icon">C</div></div><strong>CUSTOMER PROFILE</strong><p>Tenant base, tenancy distribution and productive customer footprint.</p><div id="dash-tenant" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="customer">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="landlegal"><div class="hub-profile-top"><span>03</span><div class="hub-profile-icon">L</div></div><strong>LAND &amp; LEGAL PROFILE</strong><p>Land tenure, lease timing and legal readiness signals.</p><div id="dash-lease" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="landlegal">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="technical"><div class="hub-profile-top"><span>04</span><div class="hub-profile-icon">T</div></div><strong>TECHNICAL PROFILE</strong><p>Tower, power, access road and terrain information.</p><div id="dash-power" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="technical">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="productivity"><div class="hub-profile-top"><span>05</span><div class="hub-profile-icon">P</div></div><strong>PRODUCTIVITY PROFILE</strong><p>Revenue coverage and productive-site condition.</p><div id="dash-productivity" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="productivity">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="financial"><div class="hub-profile-top"><span>06</span><div class="hub-profile-icon">F</div></div><strong>FINANCIAL PROFILE</strong><p>Revenue, asset value and currently mapped financial sources.</p><div id="dash-financial" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="financial">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="lifecycle"><div class="hub-profile-top"><span>07</span><div class="hub-profile-icon">L</div></div><strong>ASSET LIFECYCLE</strong><p>Tenant, NPA and lease lifecycle signals across the portfolio.</p><div id="dash-lifecycle" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="lifecycle">OPEN PROFILE <b>↗</b></button></section>
       </div>
     </div>
     <div id="dash-audit-layer" class="dash-layer hidden">
@@ -1579,6 +1606,68 @@ body.pmno-page-single .topbar .mode-menu button{
     </div>
   </div>
 </section>
+<section id="assetProfileView" class="asset-profile-page" style="display:none">
+  <div class="asset-page-shell">
+    <div class="asset-page-head">
+      <div>
+        <div class="asset-page-kicker">MITRATEL · ASSET INTELLIGENCE</div>
+        <div class="asset-page-title">ASSET <b>PROFILE</b></div>
+        <div class="asset-page-sub">Portfolio structure, physical composition and spatial intelligence.</div>
+      </div>
+      <div class="asset-page-actions"><button type="button" class="dash-btn" id="asset-back-dashboard">← DASHBOARD</button><button type="button" class="dash-btn primary" id="asset-refresh">↻ REFRESH</button></div>
+    </div>
+    <div class="asset-page-filterbar">
+      <label>REGIONAL<select id="asset-regional"><option value="">ALL REGIONAL</option></select></label>
+      <label>AREA<select id="asset-area"><option value="">ALL AREA</option></select></label>
+      <label>PROVINCE<select id="asset-province"><option value="">ALL PROVINCE</option></select></label>
+      <label>KABUPATEN / KOTA<select id="asset-city"><option value="">ALL KABUPATEN / KOTA</option></select></label>
+      <label>SEARCH SITE<input id="asset-search" placeholder="Site ID / Site Name"></label>
+    </div>
+    <div id="asset-profile-page-content"></div>
+  </div>
+</section>
+
+
+<style id="pmno-financial-profile-page-v95">
+.financial-profile-page{width:100%;background:#06111f;color:#edf5fb;min-height:calc(100vh - 72px)}
+.fin-page-shell{width:min(1780px,calc(100% - 44px));margin:0 auto;padding:22px 0 48px}
+.fin-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16px}
+.fin-page-kicker{font-size:9px;letter-spacing:2.2px;font-weight:950;color:#6f879c}.fin-page-title{font-size:30px;line-height:1;font-weight:950;letter-spacing:-1px;margin-top:5px}.fin-page-title b{color:var(--cyan)}.fin-page-sub{font-size:10px;color:#7890a5;margin-top:7px}.fin-page-actions{display:flex;gap:8px}
+.fin-page-filterbar{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;gap:9px;margin-bottom:14px}.fin-page-filterbar label{font-size:8px;letter-spacing:1.1px;color:#7890a7;font-weight:900}.fin-page-filterbar select,.fin-page-filterbar input{display:block;width:100%;height:40px;margin-top:5px;border:1px solid #29435e;border-radius:9px;background:#071321;color:var(--text);padding:0 10px;font-size:12px;outline:none}.fin-page-filterbar select:focus,.fin-page-filterbar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(53,200,255,.08)}
+.fp-section{border:1px solid #20364f;background:#0a1727;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}.fp-section-head{display:flex;justify-content:space-between;align-items:end;gap:14px;padding:14px 16px;border-bottom:1px solid #20364f}.fp-section-head strong{font-size:10px;letter-spacing:1.5px}.fp-section-head small{font-size:8px;color:#6e879c}.fp-section-body{padding:14px 16px}
+.fp-kpis{display:grid;grid-template-columns:1.2fr repeat(4,1fr);gap:10px}.fp-kpi{padding:16px;border:1px solid #20364f;border-radius:10px;background:#091827;min-height:105px}.fp-kpi.primary{background:linear-gradient(135deg,#0b2234,#0a1727)}.fp-kpi span{display:block;font-size:8px;letter-spacing:1.3px;color:#7890a5;font-weight:900}.fp-kpi b{display:block;font-size:25px;line-height:1.05;margin-top:9px;letter-spacing:-.7px}.fp-kpi.primary b{font-size:34px;color:var(--cyan)}.fp-kpi small{display:block;margin-top:5px;font-size:8px;color:#647d92}
+.fp-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.fp-card{border:1px solid #1d344b;border-radius:10px;background:#091827;padding:14px}.fp-card-title{font-size:9px;font-weight:950;letter-spacing:1.2px;color:#d9e6ef;margin-bottom:10px}.fp-row{display:grid;grid-template-columns:minmax(160px,1fr) auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid #172d42}.fp-row:last-child{border-bottom:0}.fp-row span{font-size:9px;color:#8ca1b2}.fp-row span small{display:block;font-size:7px;color:#647d92;margin-top:3px;line-height:1.35}.fp-row b{font-size:12px;text-align:right;white-space:nowrap}.fp-row b.na{color:#70869a;font-size:9px}.fp-row b.good{color:var(--green)}
+.fp-coverage{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.fp-coverage-card{padding:12px;border:1px solid #1d344b;border-radius:9px;background:#091827}.fp-coverage-card span{display:block;font-size:7px;letter-spacing:1px;color:#71899c;font-weight:900}.fp-coverage-card b{display:block;font-size:20px;margin-top:5px}.fp-coverage-card small{display:block;font-size:7px;color:#657d91;margin-top:3px}.fp-coverage-card.warn b{color:var(--amber)}
+.fp-formula{margin-top:10px;padding:10px;border:1px solid #3c3b25;border-radius:9px;background:rgba(212,175,55,.055);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:9px;color:#9eb0bf}.fp-formula strong{color:#d4af37;letter-spacing:.08em}.fp-note{margin-top:10px;padding:10px 11px;border:1px solid #1d344b;background:#081625;border-radius:8px;color:#71899c;font-size:8px;line-height:1.55}.fp-note b{color:#cdd9e4}.fp-loading,.fp-error{padding:22px;border:1px dashed #29445c;border-radius:9px;color:#71869a;font-size:10px}.fp-error{color:#ff9b9b;border-color:#5b3040}
+body.pmno-page-financialprofile .workspace,body.pmno-page-financialprofile #dashboardView,body.pmno-page-financialprofile #assetProfileView,body.pmno-page-financialprofile #siteProfileView,body.pmno-page-financialprofile #bulkView,body.pmno-page-financialprofile #drmView,body.pmno-page-financialprofile #masterDataView{display:none!important}
+body.pmno-page-financialprofile #financialProfileView{display:block!important}body.pmno-page-financialprofile .app{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important}body.pmno-page-financialprofile .topbar{flex:none!important}
+@media(max-width:1100px){.fin-page-shell{width:min(100% - 28px,1200px)}.fin-page-filterbar{grid-template-columns:1fr 1fr}.fin-page-filterbar label:last-child{grid-column:1/-1}.fp-kpis{grid-template-columns:1.2fr 1fr 1fr}.fp-kpi.primary{grid-row:span 2}.fp-grid{grid-template-columns:1fr}.fp-coverage{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.financial-profile-page{min-height:100dvh}.fin-page-shell{width:100%;padding:14px 12px 70px}.fin-page-head{flex-direction:column}.fin-page-actions{width:100%}.fin-page-actions .dash-btn{flex:1}.fin-page-filterbar{grid-template-columns:1fr 1fr}.fin-page-filterbar label:last-child{grid-column:1/-1}.fp-kpis{grid-template-columns:1fr 1fr}.fp-kpi.primary{grid-column:1/-1;grid-row:auto}.fp-coverage{grid-template-columns:1fr 1fr}}
+@media(max-width:430px){.fin-page-filterbar{grid-template-columns:1fr}.fin-page-filterbar label:last-child{grid-column:auto}.fp-kpis,.fp-coverage{grid-template-columns:1fr}.fp-kpi.primary{grid-column:auto}.fin-page-title{font-size:25px}.fp-row{grid-template-columns:1fr auto}}
+</style>
+
+
+<section id="financialProfileView" class="financial-profile-page" style="display:none">
+  <div class="fin-page-shell">
+    <div class="fin-page-head">
+      <div>
+        <div class="fin-page-kicker">MITRATEL · ASSET INTELLIGENCE</div>
+        <div class="fin-page-title">FINANCIAL <b>PROFILE</b></div>
+        <div class="fin-page-sub">Ringkasan pendapatan, investasi, biaya, nilai aset, dan profitabilitas berdasarkan data keuangan yang tersedia.</div>
+      </div>
+      <div class="fin-page-actions"><button type="button" class="dash-btn" id="financial-back-dashboard">← DASHBOARD</button><button type="button" class="dash-btn primary" id="financial-refresh">↻ REFRESH</button></div>
+    </div>
+    <div class="fin-page-filterbar">
+      <label>REGIONAL<select id="financial-regional"><option value="">ALL REGIONAL</option></select></label>
+      <label>AREA<select id="financial-area"><option value="">ALL AREA</option></select></label>
+      <label>PROVINCE<select id="financial-province"><option value="">ALL PROVINCE</option></select></label>
+      <label>KABUPATEN / KOTA<select id="financial-city"><option value="">ALL KABUPATEN / KOTA</option></select></label>
+      <label>SEARCH SITE<input id="financial-search" placeholder="Site ID / Site Name"></label>
+    </div>
+    <div id="financial-profile-page-content"><div class="fp-loading">Loading Financial Profile…</div></div>
+  </div>
+</section>
+
 <section id="siteProfileView" class="site-profile-view" style="display:none">
   <div class="sp-shell">
     <div class="sp-head"><div><div class="dash-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="dash-title">SITE <b>PROFILE</b></div><div class="dash-sub">One site, one consolidated view. Tenant, power, land, legal and maintenance stay separated from DRM analysis.</div></div><div class="sp-actions"><button id="sp-search-btn" class="dash-btn primary">SEARCH</button><button id="sp-open-analysis" class="dash-btn">OPEN SINGLE SITE ANALYSIS</button></div></div>
@@ -2318,14 +2407,99 @@ loadTenants().then(pmnoLoadRouteContext);
   window.pmnoSingleCandidateOptions=singleCandidateOptions;
 })();
 </script>
+
+<script id="pmno-financial-profile-page-v95-js">
+(function(){
+'use strict';
+const FURL='https://vzeitjesovdojfsfgyza.supabase.co';
+const FKEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
+const FH={'apikey':FKEY,'Authorization':'Bearer '+FKEY,'Content-Type':'application/json'};
+const $f=id=>document.getElementById(id);
+const escF=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nF=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+const iF=v=>nF(v).toLocaleString('id-ID');
+const mF=v=>{const n=nF(v);if(!Number.isFinite(n))return '—';const a=Math.abs(n);if(a>=1e12)return 'Rp '+(n/1e12).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' triliun';if(a>=1e9)return 'Rp '+(n/1e9).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' miliar';if(a>=1e6)return 'Rp '+(n/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' juta';return 'Rp '+Math.round(n).toLocaleString('id-ID')};
+const pF=(a,b)=>b?(nF(a)/nF(b)*100).toFixed(1)+'%':'0.0%';
+let fpLoading=false,fpTimer=null;
+async function fRpc(name,body){const r=await fetch(FURL+'/rest/v1/rpc/'+name,{method:'POST',headers:FH,body:JSON.stringify(body||{})});if(!r.ok)throw new Error(name+' HTTP '+r.status);return r.json()}
+async function loadFinancialSummary(){
+ const body={p_regional:$f('financial-regional')?.value||null,p_area:$f('financial-area')?.value||null,p_province:$f('financial-province')?.value||null,p_city:$f('financial-city')?.value||null,p_search:($f('financial-search')?.value||'').trim()||null};
+ const data=await fRpc('pmno_financial_profile_summary',body);renderFinancialProfile(data||{});
+}
+function fillFinancialFilters(fo){
+ const set=(id,arr,all)=>{const el=$f(id);if(!el)return;const old=el.value;el.innerHTML='<option value="">'+all+'</option>'+((Array.isArray(arr)?arr:[]).map(v=>'<option value="'+escF(v)+'">'+escF(v)+'</option>').join(''));if((arr||[]).includes(old))el.value=old};
+ set('financial-regional',fo?.regional,'ALL REGIONAL');set('financial-area',fo?.area,'ALL AREA');set('financial-province',fo?.province,'ALL PROVINCE');set('financial-city',fo?.city,'ALL KABUPATEN / KOTA');
+}
+function row(label,value,note='',cls=''){return '<div class="fp-row"><span>'+escF(label)+(note?'<small>'+escF(note)+'</small>':'')+'</span><b class="'+cls+'">'+escF(value)+'</b></div>'}
+function card(title,body){return '<div class="fp-card"><div class="fp-card-title">'+escF(title)+'</div>'+body+'</div>'}
+function renderFinancialProfile(d){
+ const total=nF(d.site_count), records=nF(d.record_count), revSites=nF(d.revenue_sites), capexSites=nF(d.capex_sites), costSites=nF(d.cost_sites), nbvSites=nF(d.nbv_sites);
+ const revenueMonth=nF(d.revenue_month), revenueYear=nF(d.revenue_year), capex=nF(d.capex_total), b2s=nF(d.capex_b2s), collo=nF(d.capex_collo), qi=nF(d.capex_qi), om=nF(d.om_cost_year), land=nF(d.land_lease_cost_year), tax=nF(d.tax_year), opex=nF(d.opex_total_year), ebitda=nF(d.ebitda_proxy), nbv=nF(d.nbv_total);
+ const avgRev=revSites?revenueYear/revSites:0, avgNbv=nbvSites?nbv/nbvSites:0;
+ const el=$f('financial-profile-page-content');if(!el)return;
+ el.innerHTML='<section class="fp-section"><div class="fp-section-head"><div><strong>01 · FINANCIAL SUMMARY</strong><small>Angka mengikuti Site ID pada filter aktif; setiap kelompok financial dipisahkan berdasarkan jenis dan periode</small></div></div><div class="fp-section-body"><div class="fp-kpis">'+
+   '<div class="fp-kpi primary"><span>SITE DENGAN DATA FINANCIAL</span><b>'+iF(total)+'</b><small>'+iF(records)+' baris data financial</small></div>'+ 
+   '<div class="fp-kpi"><span>SITE DENGAN REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' site</small></div>'+ 
+   '<div class="fp-kpi"><span>NBV</span><b>'+mF(nbv)+'</b><small>'+iF(nbvSites)+' site memiliki NBV</small></div>'+ 
+   '<div class="fp-kpi"><span>REVENUE / TAHUN</span><b>'+mF(revenueYear)+'</b><small>Revenue bulanan × 12</small></div>'+ 
+   '<div class="fp-kpi"><span>EBITDA</span><b>'+mF(ebitda)+'</b><small>Revenue tahunan − Cost tahunan yang tersedia</small></div>'+ 
+ '</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>02 · REVENUE</strong><small>Revenue dipisahkan dari CAPEX, Cost, dan NBV agar basis angka jelas</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('REVENUE',row('Revenue / Bulan',mF(revenueMonth),iF(revSites)+' site dengan revenue')+row('Revenue / Tahun',mF(revenueYear),'Revenue bulanan × 12')+row('Rata-rata Revenue / Site / Tahun',mF(avgRev),'Total revenue tahunan ÷ site dengan revenue'))+
+   card('KELENGKAPAN DATA REVENUE',row('Site dengan Revenue',iF(revSites),pF(revSites,total)+' dari total site')+row('Site tanpa Revenue',iF(Math.max(0,total-revSites)),pF(Math.max(0,total-revSites),total)+' dari total site')+row('Jumlah Data Financial',iF(records),'Baris data pada sumber Financial Profile'))+
+ '</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>03 · CAPEX / INVESTASI</strong><small>CAPEX dipisahkan dari Revenue, Cost, dan NBV agar tidak tercampur antar basis financial</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('INVESTASI (CAPEX)',row('Total Investasi (CAPEX)',mF(capex),iF(capexSites)+' site dengan nilai CAPEX')+row('CAPEX B2S',mF(b2s),'Nilai dari sumber Financial Profile')+row('CAPEX Collo',mF(collo),'Nilai dari sumber Financial Profile')+row('CAPEX QI',mF(qi),'Nilai dari sumber Financial Profile'))+
+   card('KETERSEDIAAN DATA INVESTASI',row('Site dengan Nilai CAPEX',iF(capexSites),pF(capexSites,total)+' dari total site')+row('Site tanpa Nilai CAPEX',iF(Math.max(0,total-capexSites)),pF(Math.max(0,total-capexSites),total)+' dari total site'))+
+ '</div><div class="fp-note"><b>Catatan:</b> Nilai CAPEX mengikuti data yang tersedia pada sumber Financial Profile. Jika sumber bernilai 0, angka ditampilkan sebagai Rp 0; tidak diganti dengan asumsi.</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>04 · COST</strong><small>Seluruh biaya dinyatakan per tahun agar mudah dibandingkan dengan revenue tahunan</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('COST / TAHUN',row('OM Cost / Tahun',mF(om),'Data biaya OM tahunan pada Financial Profile')+row('Land Lease Cost / Tahun',mF(land),'Data sewa lahan tahunan pada Financial Profile')+row('Tax / Tahun',mF(tax),'Data pajak tahunan pada Financial Profile')+row('Total Cost / Tahun',mF(opex),'OM Cost + Land Lease Cost + Tax'))+
+   card('KETERSEDIAAN DATA COST',row('Site dengan Data Cost',iF(costSites),pF(costSites,total)+' dari total site')+row('Site tanpa Data Cost',iF(Math.max(0,total-costSites)),pF(Math.max(0,total-costSites),total)+' dari total site'))+
+ '</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>05 · NBV</strong><small>NBV dihitung satu kali per Site ID agar tidak terjadi penggandaan nilai</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('NBV',row('Total NBV',mF(nbv),iF(nbvSites)+' site memiliki NBV')+row('Rata-rata NBV / Site',mF(avgNbv),'Total NBV ÷ site dengan NBV')+row('Site dengan NBV',iF(nbvSites),pF(nbvSites,total)+' dari total site'))+
+   card('DASAR PERHITUNGAN',row('Basis', '1 nilai / Site ID','Nilai NBV terakhir yang diperbarui digunakan untuk setiap Site ID')+row('Site tanpa NBV',iF(Math.max(0,total-nbvSites)),pF(Math.max(0,total-nbvSites),total)+' dari total site'))+
+ '</div><div class="fp-note"><b>Catatan NBV:</b> satu nilai NBV digunakan untuk setiap Site ID dari data Financial Profile yang paling terakhir diperbarui. Tujuannya agar nilai aset tidak terhitung berulang ketika satu Site ID memiliki beberapa baris tenant.</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>06 · PROFITABILITAS</strong><small>Perbandingan Revenue tahunan dengan Cost tahunan yang tersedia; CAPEX dan NBV tidak dicampur ke perhitungan ini</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+   card('EBITDA',row('Revenue / Tahun',mF(revenueYear))+row('Cost / Tahun',mF(opex))+row('EBITDA',mF(ebitda),'Revenue tahunan − Cost tahunan yang tersedia','good'))+
+   card('INDIKATOR INVESTASI',row('IRR / Site','BELUM TERSEDIA','Sumber/perhitungan IRR belum tersedia pada Financial Profile','na')+row('NPV / Site','BELUM TERSEDIA','Sumber/perhitungan NPV belum tersedia pada Financial Profile','na'))+
+ '</div><div class="fp-formula"><strong>EBITDA</strong><span>Revenue / Tahun − OM Cost / Tahun − Land Lease Cost / Tahun − Tax / Tahun</span></div><div class="fp-note"><b>Catatan:</b> EBITDA hanya menggunakan komponen Cost yang tersedia pada sumber Financial Profile. Angka ini bukan hasil perhitungan IRR atau NPV.</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · KELENGKAPAN DATA FINANCIAL</strong><small>Menunjukkan jumlah site yang memiliki data pada masing-masing kelompok financial</small></div></div><div class="fp-section-body"><div class="fp-kelengkapan">'+
+   '<div class="fp-kelengkapan-card"><span>REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' site</small></div>'+ 
+   '<div class="fp-kelengkapan-card '+(capexSites?'':'warn')+'"><span>INVESTASI (CAPEX)</span><b>'+pF(capexSites,total)+'</b><small>'+iF(capexSites)+' site</small></div>'+ 
+   '<div class="fp-kelengkapan-card '+(costSites?'':'warn')+'"><span>COST</span><b>'+pF(costSites,total)+'</b><small>'+iF(costSites)+' site</small></div>'+ 
+   '<div class="fp-kelengkapan-card"><span>NBV</span><b>'+pF(nbvSites,total)+'</b><small>'+iF(nbvSites)+' site</small></div>'+ 
+ '</div></div></section>';
+}
+async function initFinancialProfile(){
+ if(fpLoading)return;fpLoading=true;const el=$f('financial-profile-page-content');if(el)el.innerHTML='<div class="fp-loading">Loading Financial Profile…</div>';
+ try{
+   let fo=window.__pmnoDashboardFilterOptions;
+   if(!fo){try{const s=await fRpc('pmno_dashboard_summary',{});fo=s?.filter_options||null;window.__pmnoDashboardFilterOptions=fo}catch(_){} }
+   fillFinancialFilters(fo||{});
+   await loadFinancialSummary();
+ }catch(e){console.error('[PMNO FINANCIAL PROFILE]',e);if(el)el.innerHTML='<div class="fp-error">Financial Profile gagal dimuat: '+escF(e.message)+'</div>'}
+ finally{fpLoading=false}
+}
+function bindFinancialProfile(){
+ $f('financial-back-dashboard')?.addEventListener('click',()=>window.pmnoNavigate?.('dashboard'));
+ $f('financial-refresh')?.addEventListener('click',()=>initFinancialProfile());
+ ['financial-regional','financial-area','financial-province','financial-city'].forEach(id=>$f(id)?.addEventListener('change',()=>{clearTimeout(fpTimer);fpTimer=setTimeout(()=>loadFinancialSummary().catch(e=>console.warn('[PMNO FIN FILTER]',e)),80)}));
+ $f('financial-search')?.addEventListener('input',()=>{clearTimeout(fpTimer);fpTimer=setTimeout(()=>loadFinancialSummary().catch(e=>console.warn('[PMNO FIN SEARCH]',e)),320)});
+}
+window.pmnoFinancialProfileInit=initFinancialProfile;window.pmnoFinancialProfileRender=renderFinancialProfile;
+bindFinancialProfile();
+})();
+</script>
+
 <script id="pmno-navigation-v26">
 (function(){
   'use strict';
   const KEY='pmno_active_page';
-  const ROUTES=new Set(['dashboard','siteprofile','bulk','single','drm','master']);
+  const ROUTES=new Set(['dashboard','assetprofile','financialprofile','siteprofile','bulk','single','drm','master']);
   const el=id=>document.getElementById(id);
-  const views={dashboard:el('dashboardView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
-  const menus={dashboard:el('dashboardMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
+  const views={dashboard:el('dashboardView'),assetprofile:el('assetProfileView'),financialprofile:el('financialProfileView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
+  const menus={dashboard:el('dashboardMenu'),assetprofile:el('assetProfileMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
   const valid=p=>ROUTES.has(String(p||'').toLowerCase());
   const readHash=()=>{const h=String(location.hash||'').replace(/^#/,'').trim().toLowerCase();const r=h.split(/[?&/]/)[0];return valid(r)?r:null};
   const readSaved=()=>{try{const p=String(localStorage.getItem(KEY)||'').toLowerCase();return valid(p)?p:null}catch(_){return null}};
@@ -2339,7 +2513,7 @@ loadTenants().then(pmnoLoadRouteContext);
   }
   function apply(page,opts){
     page=valid(page)?page:'single';
-    document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');
+    document.body.classList.remove('pmno-page-single','pmno-page-dashboard','pmno-page-assetprofile','pmno-page-financialprofile','pmno-page-siteprofile','pmno-page-bulk','pmno-page-drm','pmno-page-master');
     document.body.classList.add('pmno-page-'+page);
     Object.entries(views).forEach(([name,node])=>{if(!node)return;const on=name===page;node.hidden=!on;node.style.display=on?(name==='single'?'grid':'block'):'none'});
     document.body.classList.toggle('bulk-page',page==='bulk');
@@ -2350,6 +2524,8 @@ loadTenants().then(pmnoLoadRouteContext);
     if(opts?.scroll!==false)requestAnimationFrame(()=>window.scrollTo(0,0));
     window.dispatchEvent(new Event('resize'));
     if(page==='dashboard'&&typeof window.pmnoDashboardInit==='function')Promise.resolve(window.pmnoDashboardInit()).catch(e=>console.warn('[PMNO NAV] dashboard init',e));
+    if(page==='assetprofile'&&typeof window.pmnoAssetProfileInit==='function')Promise.resolve(window.pmnoAssetProfileInit()).catch(e=>console.warn('[PMNO NAV] asset profile init',e));
+    if(page==='financialprofile'&&typeof window.pmnoFinancialProfileInit==='function')Promise.resolve(window.pmnoFinancialProfileInit()).catch(e=>console.warn('[PMNO NAV] financial profile init',e));
     if(page==='siteprofile'&&typeof window.pmnoSiteProfileInit==='function')Promise.resolve(window.pmnoSiteProfileInit()).catch(e=>console.warn('[PMNO NAV] site profile init',e));
     if(page==='master'&&typeof window.pmnoMasterInit==='function')Promise.resolve(window.pmnoMasterInit()).catch(e=>console.warn('[PMNO NAV] master init',e));
     return page;
@@ -3490,6 +3666,46 @@ function pmnoRenderCustomerBusinessTable(data){
   </div>`;
 }
 
+function renderAssetProfilePage(){
+ const root=$('asset-profile-page-content'); if(!root)return;
+ const a=pmnoGetAggregateSummary()?.stats||{};
+ const aggregate=pmnoGetAggregateSummary()||{};
+ const sm=a;
+ const geo=window.__pmnoGeoPortfolio||{};
+ const ad=window.__pmnoTowerAdjacency||{};
+ const total=Number(a.total_sites)||0;
+ const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
+ const ageBuckets=Array.isArray(aggregate?.maturity)?aggregate.maturity:[];
+ const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
+ const origin=sm?[['BUILD',Number(sm.build_sites)||0],['ACQUISITION',Number(sm.acquisition_sites)||0]]:[];
+ const pctOf=n=>total?(n/total*100).toFixed(1)+'%':'0.0%';
+ const barRows=rows=>rows.map(([k,n])=>`<div class="ap-bar-row"><span>${esc(k)}</span><div class="ap-bar-track"><i style="width:${total?Math.min(100,n/total*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
+ const originRows=origin.map(([k,n])=>`<div class="ap-origin-row"><span>${esc(k)}</span><b>${fmtInt(n)} <em style="font-style:normal;color:#71899c;font-weight:500">${pctOf(n)}</em></b></div>`).join('');
+ const geoReady=geo.status==='ready'&&Number(geo.total)===total, geoLoading=geo.status==='loading', geoError=geo.status==='error';
+ const gv=Number(geo.valid)||0, gm=Number(geo.mismatch)||0, gi=Number(geo.invalid)||0, gn=Number(geo.missing)||0, gp=geoReady?100:Number(geo.progress)||0;
+ const adReady=ad.status==='ready', adLoading=ad.status==='loading', adError=ad.status==='error';
+ const adTotal=Number(ad.total)||0, adj=Number(ad.adjacentSites)||0, pairs=Number(ad.adjacentPairs)||0, non=Number(ad.nonAdjacentSites)||0, share=Number(ad.adjacentSiteShare)||0, adProg=Number(ad.progress)||0;
+ let matrix='';
+ if(adReady&&Array.isArray(ad.heightMatrix)){
+   const labs=['<30 m','30–50 m','50–70 m','>70 m'],m=ad.heightMatrix;
+   const rowTotals=labs.map((_,i)=>labs.reduce((n,__,j)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));
+   const colTotals=labs.map((_,j)=>labs.reduce((n,__,i)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));
+   matrix=`<div class="ap-matrix-wrap"><table class="ap-matrix"><thead><tr><th>TINGGI TOWER</th>${labs.map(x=>`<th>${x}</th>`).join('')}<th>TOTAL BARIS</th></tr></thead><tbody>${labs.map((r,i)=>`<tr><th>${r}</th>${labs.map((_,j)=>j<i?'<td class="muted">—</td>':`<td>${fmtInt(Number(m?.[i]?.[j])||0)}</td>`).join('')}<td class="total">${fmtInt(rowTotals[i])}</td></tr>`).join('')}<tr><th class="total">TOTAL KOLOM</th>${labs.map((_,j)=>`<td class="total">${fmtInt(colTotals[j])}</td>`).join('')}<td class="total">${fmtInt(pairs)}</td></tr></tbody></table></div>`;
+ }
+ root.innerHTML=`
+ <section class="ap-section"><div class="ap-section-head"><div><strong>01 · PORTFOLIO SNAPSHOT</strong><small> Core size and asset origin</small></div></div><div class="ap-section-body"><div class="ap-snapshot">
+   <div class="ap-kpi primary"><span>PORTFOLIO SIZE</span><b>${fmtInt(total)}</b><small>Sites / Towers in current filter</small></div>
+   <div class="ap-kpi"><span>BUILD</span><b>${fmtInt(origin[0]?.[1]||0)}</b><small>${pctOf(origin[0]?.[1]||0)} of portfolio</small></div>
+   <div class="ap-kpi"><span>ACQUISITION</span><b>${fmtInt(origin[1]?.[1]||0)}</b><small>${pctOf(origin[1]?.[1]||0)} of portfolio</small></div>
+ </div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>02 · ASSET STRUCTURE</strong><small> Composition, origin, maturity and physical profile</small></div></div><div class="ap-section-body"><div class="ap-structure"><div class="ap-module"><div class="ap-module-title">ASSET COMPOSITION · TOWER TYPE</div><div class="ap-bar">${barRows(towerTypeRows)||'<div class="ap-empty">No tower type data in current filter.</div>'}</div></div><div class="ap-module"><div class="ap-module-title">ASSET ORIGIN</div>${originRows||'<div class="ap-empty">Origin summary unavailable.</div>'}</div><div class="ap-module"><div class="ap-module-title">ASSET MATURITY</div><div class="ap-bar">${barRows(ageBuckets)||'<div class="ap-empty">No maturity data in current filter.</div>'}</div></div><div class="ap-module"><div class="ap-module-title">PHYSICAL PROFILE · TOWER HEIGHT</div><div class="ap-bar">${barRows(heightBuckets)||'<div class="ap-empty">No tower height data in current filter.</div>'}</div></div></div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>03 · LOCATION INTELLIGENCE</strong><small>Tower coordinate validity and geospatial readiness</small></div><button type="button" class="ap-btn" id="asset-page-geo">${geoLoading?'VALIDATING…':'↻ VALIDATE COORDINATE'}</button></div><div class="ap-section-body"><div class="ap-geo-grid"><div class="ap-geo-main"><div class="ap-geo-score"><strong>${geoReady?fmtInt(gv):'—'}</strong><b>${geoReady?(total?((gv/total)*100).toFixed(1):'0.0')+'%':geoError?'Unavailable':geoLoading?gp.toFixed(0)+'%':'—'}</b><span>valid coordinates</span></div><div class="ap-progress"><div class="ap-progress-head"><span>${geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?'Validation running':'Not validated yet'}</span><b>${fmtInt(Math.min(Number(geo.processed)||0,total))} / ${fmtInt(Number(geo.total)||total)}</b></div><div class="ap-progress-track"><i style="width:${Math.min(100,gp)}%"></i></div></div><div class="ap-breakdown"><div class="ap-break"><span>VALID</span><b>${geoReady?fmtInt(gv):'—'}</b><em>${geoReady?pctOf(gv):'—'}</em></div><div class="ap-break mismatch"><span>LOCATION MISMATCH</span><b>${geoReady?fmtInt(gm):'—'}</b><em>${geoReady?pctOf(gm):'—'}</em></div><div class="ap-break invalid"><span>INVALID COORDINATE</span><b>${geoReady?fmtInt(gi):'—'}</b><em>${geoReady?pctOf(gi):'—'}</em></div><div class="ap-break missing"><span>MISSING COORDINATE</span><b>${geoReady?fmtInt(gn):'—'}</b><em>${geoReady?pctOf(gn):'—'}</em></div></div></div><div class="ap-side"><div class="ap-side-card"><span>LAST VALIDATION</span><b>${geo.lastRunAt?esc(new Date(geo.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})):'Not validated yet'}</b><small>Filter changes do not automatically rerun validation.</small></div><div class="ap-side-card"><span>REFERENCE</span><b>GADM 4.1</b><small>Province polygons with normalized province aliases.</small></div></div></div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>04 · TOWER SPATIAL INTELLIGENCE</strong><small>Tower adjacency within &lt;100 m</small></div><button type="button" class="ap-btn" id="asset-page-adj">${adLoading?'⟳ MENGHITUNG…':'↻ HITUNG &lt;100 M'}</button></div><div class="ap-section-body"><div class="ap-spatial-top"><div class="ap-spatial-kpi hero"><span>ADJACENT TOWERS</span><b>${adReady?fmtInt(adj):'—'}</b><small>${adReady?share.toFixed(1)+'% of portfolio':'Result not available'}</small></div><div class="ap-spatial-kpi"><span>VALID COORDINATES</span><b>${adReady?fmtInt(adTotal):'—'}</b></div><div class="ap-spatial-kpi"><span>UNIQUE PAIRS</span><b>${adReady?fmtInt(pairs):'—'}</b></div><div class="ap-spatial-kpi"><span>NOT ADJACENT</span><b>${adReady?fmtInt(non):'—'}</b></div><div class="ap-spatial-kpi"><span>NOT COUNTED</span><b>${adReady?fmtInt(Math.max(0,total-adTotal)):'—'}</b></div></div>${matrix||'<div class="ap-empty" style="margin-top:12px">Height matrix will appear after the &lt;100 m calculation is completed.</div>'}<div class="ap-note">Perhitungan jarak hanya menggunakan tower dengan koordinat valid. Tower teridentifikasi bersebelahan berarti memiliki minimal 1 tower lain dalam jarak <b>&lt;100 m</b>. Pasangan tower dihitung unik satu kali; jarak tepat 100,0 m tidak termasuk. Hasil terakhir dipertahankan sampai perhitungan berikutnya selesai.</div></div></section>`;
+ $('asset-page-geo')?.addEventListener('click',()=>document.getElementById('pmnoGeoValidateBtn')?.click());
+ $('asset-page-adj')?.addEventListener('click',()=>document.getElementById('pmnoAdjCalcBtn')?.click());
+}
+window.pmnoAssetProfileRender=renderAssetProfilePage;
+
 function renderDashboardSource(label){
  const aggregate=pmnoGetAggregateSummary();
  const sm=aggregate?.stats||null;
@@ -3552,50 +3768,14 @@ function renderDashboardSource(label){
  const asset=$('dash-asset');if(asset){
   const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
   const assetOrigin=sm?[['BUILD',Number(sm.build_sites)||0],['ACQUISITION',Number(sm.acquisition_sites)||0]]:[];
-  const portfolioDen=Number(sm?.total_sites)||0;
-  const assetOriginRows=assetOrigin.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${portfolioDen?Math.min(100,n/portfolioDen*100):0}%"></i></div><b>${fmtInt(n)} <em style="font-style:normal;font-weight:500;color:#7f96aa">${portfolioDen?(n/portfolioDen*100).toFixed(1):'0.0'}%</em></b></div>`).join('');
+  const portfolioDen=Number(sm?.total_sites)||Number(a.total)||0;
   const ageBuckets=Array.isArray(aggregate?.maturity)?aggregate.maturity:[];
-    const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
-    const geo=window.__pmnoGeoPortfolio||{};
-  const geoReady=geo.status==='ready' && Number(geo.total)===Number(a.total);
-  const geoError=geo.status==='error';
-  const geoLoading=geo.status==='loading'||(!geoReady&&!geoError);
-  const geoValid=Number(geo.valid)||0;
-  const locationMismatch=Number(geo.mismatch)||0;
-  const invalidCoord=Number(geo.invalid)||0;
-  const missingCoord=Number(geo.missing)||0;
-  const geoProcessed=Math.min(Number(geo.processed)||0,Number(geo.total)||Number(a.total)||0);
-  const geoProgress=geoReady?100:(Number(geo.progress)||0);
-  const coordPct=geoReady&&a.total?geoValid/a.total*100:0;
-  const pctOfTotal=n=>a.total?(n/a.total*100).toFixed(1)+'%':'0.0%';
-  const geoPhase=geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?(geo.total?`Validating ${fmtInt(geoProcessed)} of ${fmtInt(geo.total)}`:'Preparing geospatial reference…'):'Preparing…';
-  const geoElapsed=Number(geo.elapsedMs||0);
-  const geoTime=geoElapsed<1000?Math.max(0,Math.round(geoElapsed))+' ms':(geoElapsed/1000).toFixed(1)+' s';
-  const geoLiveClass=geoReady?'asset-readiness-live done':geoError?'asset-readiness-live error':'asset-readiness-live';
-  const barRows=(rows)=>rows.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${a.total?Math.min(100,n/a.total*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
-  const group=(title,body)=>`<div class="asset-profile-group"><div class="asset-profile-group-title">${esc(title)}</div>${body}</div>`;
-  asset.innerHTML=`<div class="asset-profile-grid">
-    <div class="asset-profile-hero"><small>PORTFOLIO SIZE</small><strong>${fmtInt(a.total)}</strong><span>Sites / Towers</span></div>
-    ${group('ASSET ORIGIN',assetOriginRows)}
-    ${group('ASSET COMPOSITION',barRows(towerTypeRows))}
-    ${group('ASSET MATURITY',barRows(ageBuckets))}
-    ${group('PHYSICAL PROFILE · TOWER HEIGHT',barRows(heightBuckets))}
-    <div class="asset-profile-readiness"><div class="geo-head"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':(geoError?'Unavailable':geoLoading?geoProgress.toFixed(0)+'%':'—')}</b><em>${geoReady?'valid coordinates':(geoError?'geospatial validation unavailable':geoLoading?'geospatial validation running':'not validated yet')}</em></div><div class="asset-readiness-progress"><div class="asset-readiness-progress-head"><span class="${geoLiveClass}"><i></i>${esc(geoPhase)}</span><b>${fmtInt(geoProcessed)} / ${fmtInt(Number(geo.total)||Number(a.total)||0)}</b></div><div class="asset-readiness-progress-track"><i style="width:${Math.min(100,geoProgress)}%"></i></div><div class="asset-readiness-progress-sub"><span>${geoReady?'Latest completed validation':geoError?'Validation unavailable — dashboard tetap aktif':geoLoading?'Live · browser remains responsive':'No validation run yet'}</span><span>${geoTime}</span></div></div><div class="asset-readiness-breakdown">
-      <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${geoReady?fmtInt(geoValid):'—'}</b><em>${geoReady?pctOfTotal(geoValid):(geoError?'Unavailable':'—')}</em></div>
-      <div class="asset-readiness-row mismatch geo-issue-row ${geoReady&&locationMismatch>0?'has-issues':''}" data-geo-status="LOCATION_MISMATCH" title="Klik untuk melihat daftar site"><span>Location Mismatch</span><b>${geoReady?fmtInt(locationMismatch):'—'}</b><em>${geoReady?pctOfTotal(locationMismatch):(geoError?'Unavailable':'—')}</em></div>
-      <div class="asset-readiness-row invalid geo-issue-row ${geoReady&&invalidCoord>0?'has-issues':''}" data-geo-status="INVALID_COORDINATE" title="Klik untuk melihat daftar site"><span>Invalid Coordinate</span><b>${geoReady?fmtInt(invalidCoord):'—'}</b><em>${geoReady?pctOfTotal(invalidCoord):(geoError?'Unavailable':'—')}</em></div>
-      <div class="asset-readiness-row missing geo-issue-row ${geoReady&&missingCoord>0?'has-issues':''}" data-geo-status="MISSING_COORDINATE" title="Klik untuk melihat daftar site"><span>Missing Coordinate</span><b>${geoReady?fmtInt(missingCoord):'—'}</b><em>${geoReady?pctOfTotal(missingCoord):(geoError?'Unavailable':'—')}</em></div>
-    </div><div class="asset-readiness-actions"><button type="button" id="pmnoGeoValidateBtn" class="geo-validate-btn" ${geoLoading?'disabled':''}>${geoLoading?'VALIDATING…':'↻ VALIDATE COORDINATE'}</button><span class="geo-last-run">${geo.lastRunAt?`Last run · <b>${esc(new Date(geo.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}))}</b> · ${esc(pmnoGeoFilterLabel(geo.lastContext||{}))}`:'Not validated yet'}</span></div><div class="asset-readiness-note">Validation is manual. The dashboard keeps the latest completed result visible until the next validation. Validation uses GADM 4.1 province polygons with normalized province aliases. Filter changes do not automatically rerun or erase the last completed validation.</div>
-    ${(()=>{const ad=window.__pmnoTowerAdjacency||{};const ready=ad.status==='ready',loading=ad.status==='loading',error=ad.status==='error';const total=Number(ad.total)||0,portfolioTotal=Number(ad.portfolioTotal)||Number(a.total)||0,adj=Number(ad.adjacentSites)||0,pairs=Number(ad.adjacentPairs)||0,non=Number(ad.nonAdjacentSites)||0,share=Number(ad.adjacentSiteShare)||0,processed=Math.min(Number(ad.processed)||0,total),progress=total?Math.min(100,Number(ad.progress)||0):0,elapsed=Number(ad.elapsedMs)||0;const time=elapsed<1000?Math.max(0,Math.round(elapsed))+' ms':(elapsed/1000).toFixed(1)+' s';const phase=loading?(total?`Menghitung ${fmtInt(processed)} dari ${fmtInt(total)} tower`:'Menyiapkan perhitungan…'):ready?'Perhitungan selesai':error?'Perhitungan gagal':'Belum dihitung';const liveClass=loading?'asset-readiness-live':ready?'asset-readiness-live done':error?'asset-readiness-live error':'asset-readiness-live';return `<div class="asset-profile-readiness"><div class="geo-head"><div><small>ASSET INTELLIGENCE</small><span>Tower Bersebelahan · &lt;100 M</span></div></div><div class="tower-adj-value"><strong>${ready?fmtInt(adj):'—'}</strong><b>${ready?share.toFixed(1)+'%':'—'}</b><em>tower dengan tower lain dalam jarak &lt;100 m</em></div><div class="tower-adj-meta">
-  <div><span>Total Tower Portfolio</span><b>${ready?fmtInt(portfolioTotal):'—'}</b></div>
-  <div><span>Tower dengan Koordinat Valid</span><b>${ready?fmtInt(total)+' tower · '+(portfolioTotal?fmtPct(total/portfolioTotal*100):'—'):'—'}</b></div>
-  <div><span>Tower Tidak Terhitung</span><b>${ready?fmtInt(portfolioTotal-total)+' tower':'—'}</b></div>
-  <div><span>Tower Teridentifikasi Bersebelahan</span><b>${ready?fmtInt(adj):'—'}</b></div>
-  <div><span>Pasangan Tower &lt;100 M</span><b>${ready?fmtInt(pairs):'—'}</b></div>
-  <div><span>Tower Tidak Bersebelahan</span><b>${ready?fmtInt(non):'—'}</b></div>
-</div>${ready&&Array.isArray(ad.heightMatrix)?(()=>{const labs=['<30 m','30–50 m','50–70 m','>70 m'],m=ad.heightMatrix;const rowTotals=labs.map((_,i)=>labs.reduce((n,__,j)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));const colTotals=labs.map((_,j)=>labs.reduce((n,__,i)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));return `<div class="tower-adj-height"><div class="tower-adj-height-title">Tower Bersebelahan Berdasarkan Tinggi</div><div class="tower-adj-height-wrap"><table class="tower-adj-height-table"><thead><tr><th>TINGGI TOWER</th>${labs.map(x=>`<th>${x}</th>`).join('')}<th>TOTAL BARIS</th></tr></thead><tbody>${labs.map((r,i)=>`<tr><th>${r}</th>${labs.map((_,j)=>j<i?'<td class="muted">—</td>':`<td>${fmtInt(Number(m?.[i]?.[j])||0)}</td>`).join('')}<td class="matrix-total">${fmtInt(rowTotals[i])}</td></tr>`).join('')}<tr class="matrix-total-row"><th>TOTAL KOLOM</th>${labs.map((_,j)=>`<td>${fmtInt(colTotals[j])}</td>`).join('')}<td class="matrix-grand-total">${fmtInt(pairs)}</td></tr></tbody></table></div><div class="tower-adj-height-note"><b>Baris</b> menunjukkan kelompok tinggi tower pertama. <b>Kolom</b> menunjukkan kelompok tinggi tower kedua. Setiap pasangan tower hanya dihitung <b>1 kali</b>. Total matrix = jumlah <b>pasangan tower</b>, bukan jumlah tower.</div></div>`})():''}${loading?`<div class="tower-adj-progress"><div class="tower-adj-progress-head"><span>SEDANG MENGHITUNG</span><b>${progress.toFixed(0)}%</b></div><div class="tower-adj-progress-track"><i style="width:${progress}%"></i></div><div class="tower-adj-progress-sub"><span>${esc(phase)}</span><span>${esc(pmnoAdjFilterLabel({regional:String($('dash-regional')?.value||''),area:String($('dash-area')?.value||''),province:String($('dash-province')?.value||''),city:String($('dash-city')?.value||''),search:String($('dash-search')?.value||'').trim()}))}</span></div></div>`:''}<div class="asset-readiness-actions"><button type="button" id="pmnoAdjCalcBtn" class="geo-validate-btn" ${loading?'disabled':''}>${loading?'⟳ MENGHITUNG…':'↻ HITUNG &lt;100 M'}</button><span class="geo-last-run ${liveClass}"><i></i>${loading?'Sedang menghitung…':ad.lastRunAt?`Terakhir dihitung · <b>${esc(new Date(ad.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}))}</b> · ${esc(pmnoAdjFilterLabel(ad.lastContext||{}))}`:error?'Perhitungan gagal':'Belum dihitung'}</span></div>${error?`<div class="tower-adj-error">${esc(ad.error?.message||'Tower adjacency calculation failed. Please calculate again.')}</div>`:''}<div class="tower-adj-note">Total tower portfolio tetap mengikuti master. Perhitungan jarak hanya menggunakan tower dengan koordinat valid. Tower teridentifikasi bersebelahan = tower yang memiliki minimal 1 tower lain dalam jarak <b>&lt;100 m</b>. Pasangan tower = pasangan unik yang berjarak <b>&lt;100 m</b>. Jarak 100,0 m tidak termasuk. Tower dengan koordinat tidak valid tidak ikut perhitungan jarak. Perubahan filter tidak menghitung ulang otomatis dan hasil terakhir tetap ditampilkan sampai perhitungan berikutnya selesai.</div></div>`})()}
-
-  </div>`;
+  const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
+  const topType=towerTypeRows.slice().sort((x,y)=>Number(y[1]||0)-Number(x[1]||0)).slice(0,3);
+  const originRows=assetOrigin.map(([k,n])=>`<div class="asset-origin-mini"><span>${esc(k)}</span><b>${fmtInt(n)}</b><em>${portfolioDen?(n/portfolioDen*100).toFixed(1):'0.0'}%</em></div>`).join('');
+  asset.innerHTML=`<div class="asset-overview-mini"><div class="asset-mini-total"><small>PORTFOLIO SIZE</small><strong>${fmtInt(portfolioDen)}</strong><span>Sites / Towers</span></div><div class="asset-mini-side"><div class="asset-mini-label">ASSET ORIGIN</div>${originRows}</div><div class="asset-mini-side"><div class="asset-mini-label">TOP TOWER TYPE</div>${topType.length?topType.map(([k,n])=>`<div class="asset-mini-type"><span>${esc(k)}</span><b>${fmtInt(n)}</b></div>`).join(''):'<div class="asset-mini-type"><span>No data</span></div>'}</div><div class="asset-mini-footer"><span>${ageBuckets.length} maturity buckets · ${heightBuckets.length} height buckets</span><button type="button" id="dash-open-asset-inline" class="ap-btn">VIEW FULL PROFILE ↗</button></div></div>`;
+  $('dash-open-asset-inline')?.addEventListener('click',()=>window.pmnoNavigate?.('assetprofile'));
+  renderAssetProfilePage();
  }
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(a.leaseExpirySites??filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(a.leaseNoExpiry??filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(a.towerTypeSites??filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(a.towerHeightSites??filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(a.accessRoadSites??filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(a.terrainSites??filtered.filter(r=>val(r,'terrain_class')).length)]]);
@@ -3609,15 +3789,10 @@ function renderDashboardSource(label){
   const npaExposurePct=totalNbv>0?npaNbv/totalNbv*100:0;
   const revRows=filtered.map(r=>liveFinancial[sid(r)]).filter(Boolean);
   const totalRevMonth=revRows.reduce((n,x)=>n+Number(x.revenue_month||0),0);
-  const totalRevYear=revRows.reduce((n,x)=>n+Number(x.revenue_year||Number(x.revenue_month||0)*12),0);
+  const totalRevYear=revRows.reduce((n,x)=>n+Number(x.revenue_year||0),0);
   const revSites=revRows.filter(x=>Number(x.revenue_month||x.revenue_year||0)>0).length;
-  const avgRevSite=revSites?totalRevMonth/revSites:0;
-  const avgRevSiteYear=revSites?totalRevYear/revSites:0;
-  const totalOmYear=revRows.reduce((n,x)=>n+Number(x.om_cost_year||0),0);
-  const totalLandYear=revRows.reduce((n,x)=>n+Number(x.land_lease_cost_year||0),0);
-  const totalTaxYear=revRows.reduce((n,x)=>n+Number(x.tax_year||0),0);
-  const totalCostYear=totalOmYear+totalLandYear;
-  const costRows=revRows.filter(x=>Number(x.om_cost_year||x.land_lease_cost_year||0)!==0);
+  const avgRevSite=filtered.length?totalRevMonth/filtered.length:0;
+  const avgRevSiteYear=filtered.length?totalRevYear/filtered.length:0;
   const moneyOrNA=(v,ok)=>ok?formatMoney(v):'BELUM TERSEDIA';
   const sourceRow=(label,value,note='')=>`<div class="metric-row"><div class="fin-row-label"><span>${esc(label)}</span>${note?`<small>${esc(note)}</small>`:''}</div><b>${esc(value)}</b></div>`;
   const group=(title,body)=>`<div class="fin-group"><div class="fin-group-title">${esc(title)}</div><div class="metric-list">${body}</div></div>`;
@@ -3625,18 +3800,16 @@ function renderDashboardSource(label){
   const na='BELUM TERSEDIA';
   fin.innerHTML=`
    <div class="fin-grid">
-    ${group('REVENUE',sourceRow('Revenue / Month',moneyOrNA(totalRevMonth,revAvailable),'Source financial profile')+sourceRow('Revenue / Year',moneyOrNA(totalRevYear,revAvailable),'Revenue / Month × 12 bila Revenue / Year tidak tersedia')+sourceRow('Revenue per Site / Month',moneyOrNA(avgRevSite,revAvailable),revAvailable?`${fmtInt(revSites)} site memiliki revenue`:'Source tenant revenue belum terhubung')+sourceRow('Revenue per Site / Year',moneyOrNA(avgRevSiteYear,revAvailable),'Total Revenue / Year ÷ site dengan Revenue'))}
-    ${group('CAPEX / INVESTMENT',sourceRow('CAPEX / Site',na,'Sumber CAPEX site-level belum terhubung di Financial Profile')+sourceRow('CAPEX B2S / Site',na,'Hasil engine B2S')+sourceRow('CAPEX Collo / Site',na,'Hasil engine COLLO')+sourceRow('CAPEX QI / Site',na,'Hasil engine QI'))}
-    ${group('OPERATING COST',sourceRow('OM Cost / Month',moneyOrNA(totalOmYear/12,costRows.length),'OM Cost / Year ÷ 12')+sourceRow('OM Cost / Year',moneyOrNA(totalOmYear,costRows.length),'Source financial profile')+sourceRow('Land Lease Cost / Month',moneyOrNA(totalLandYear/12,costRows.length),'Land Lease Cost / Year ÷ 12')+sourceRow('Land Lease Cost / Year',moneyOrNA(totalLandYear,costRows.length),'Source financial profile')+sourceRow('Total Cost / Month',moneyOrNA(totalCostYear/12,costRows.length),'OM Cost + Land Lease Cost')+sourceRow('Total Cost / Year',moneyOrNA(totalCostYear,costRows.length),'OM Cost + Land Lease Cost'))}
-    ${group('TAX',sourceRow('Tax / Year',totalTaxYear?formatMoney(totalTaxYear):na,totalTaxYear?'Nilai tersimpan pada financial profile':'Auto calculation engine · hasil belum tersedia di renderer ini')+sourceRow('Tax / Month',totalTaxYear?formatMoney(totalTaxYear/12):na,totalTaxYear?'Tax / Year ÷ 12':'Mengikuti auto calculation engine'))}
+    ${group('REVENUE',sourceRow('Revenue / Site',moneyOrNA(avgRevSite,revAvailable),revAvailable?`${fmtInt(revSites)} site memiliki revenue`:'Source tenant revenue belum terhubung')+sourceRow('Revenue / Site / Tahun',moneyOrNA(avgRevSiteYear,revAvailable),'Revenue bulanan × 12; revenue_year dipakai bila tersedia')+sourceRow('Total Revenue / Tahun',moneyOrNA(totalRevYear,revAvailable)))}
+    ${group('CAPEX / INVESTMENT',sourceRow('CAPEX / Site',na,'Sumber CAPEX site-level belum terhubung')+sourceRow('CAPEX B2S / Site',na,'Sumber hasil B2S site-level belum terhubung')+sourceRow('CAPEX Collo / Site',na,'Sumber hasil Collo site-level belum terhubung')+sourceRow('CAPEX QI / Site',na,'Sumber QI site-level belum terhubung'))}
+    ${group('OPERATING COST',sourceRow('Cost OM / Site',na,'Sumber OM site-level belum terhubung')+sourceRow('Cost OM / Site / Tahun',na,'Sumber OM site-level belum terhubung')+sourceRow('Cost Sewa Lahan / Site',na,'Sumber sewa lahan site-level belum terhubung')+sourceRow('Cost Sewa Lahan / Site / Tahun',na,'Sumber sewa tahunan site-level belum terhubung'))}
+    ${group('TAX',sourceRow('Tax / Site / Tahun',na,'Sumber tax site-level belum terhubung'))}
    </div>
     ${group('PROFITABILITY BUILD-UP',
-      sourceRow('EBITDA',na,'Mengikuti economic engine PMNO')+
-      sourceRow('EBIT',na,'Mengikuti economic engine PMNO')+
-      sourceRow('Cashflow / Site / Month',na,'Mengikuti economic engine PMNO')+
-      sourceRow('IRR · Bulk / Portfolio',na,'Mengikuti engine IRR PMNO · bulk')+
-      sourceRow('IRR · Per Site',na,'Mengikuti engine IRR PMNO · per site')+
-      sourceRow('NPV',na,'Mengikuti economic engine PMNO'))}
+      sourceRow('EBITDA',na,'Revenue − OM Cost − Sewa Lahan − biaya operasional lainnya')+
+      sourceRow('EBIT',na,'EBITDA − depreciation')+
+      sourceRow('Cashflow / Site / Bulan',na,'Monthly cashflow dari engine PMNO')+
+      sourceRow('IRR / Site',na,'Menggunakan engine IRR PMNO yang sama'))}
     ${group('ASSET VALUE',
       sourceRow('Total NBV',mappedRows.length?formatMoney(totalNbv):na,mappedRows.length?'NBV yang terpetakan ke Site ID':'Data NBV belum tersedia')+
       sourceRow('Avg NBV / Site',mappedRows.length?formatMoney(totalNbv/mappedRows.length):na,mappedRows.length?'Total NBV ÷ site dengan NBV':'Data NBV belum tersedia')+
@@ -3650,8 +3823,29 @@ function renderDashboardSource(label){
  // renderDashboardSource() is also called repeatedly during geo-validation;
  // triggering a map reload here would race/clear the visible layer.
  const src=$('dash-source');if(src){const shownTotal=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
+ renderDashboardHub();
  renderAuditData();
 }
+function renderDashboardHub(){
+ const sm=pmnoGetAggregateSummary()?.stats||{};
+ const total=Number(sm.total_sites)||0, tenants=Number(sm.total_tenant)||0, npa=Number(sm.npa_sites)||0;
+ const revenue=Number(sm.revenue_sites)||0, power=Number(sm.power_sites)||0;
+ const leaseRisk=Number(sm.lease_risk_6m)||0, expired=Number(sm.lease_expired)||0;
+ const ratio=total?tenants/total:0;
+ const set=(id,html)=>{const n=$(id);if(n)n.innerHTML=html};
+ const mini=(label,value,sub,cls='')=>`<div class="hub-mini ${cls}"><span>${esc(label)}</span><b>${esc(value)}</b><small>${esc(sub)}</small></div>`;
+ set('dash-health',`<div class="hub-health-kpis">${mini('ACTIVE / PRODUCTIVE',fmtInt(Math.max(0,total-npa)),'site setelah NPA')} ${mini('REVENUE COVERAGE',fmtPct(total?revenue/total*100:0)+'%',fmtInt(revenue)+' site')} ${mini('POWER COVERAGE',fmtPct(total?power/total*100:0)+'%',fmtInt(power)+' site')} ${mini('LEASE RISK',fmtInt(leaseRisk),leaseRisk+' site < 6 bulan',leaseRisk?'warn':'')}</div><div class="hub-health-list"><div><span>Tenancy Ratio</span><b>${ratio.toFixed(2)}</b></div><div><span>Site NPA / 0 Tenant</span><b class="${npa?'warn':''}">${fmtInt(npa)}</b></div><div><span>Lease Expired</span><b class="${expired?'bad':''}">${fmtInt(expired)}</b></div></div>`);
+ set('dash-asset',mini('PORTFOLIO',''+fmtInt(total),'sites / towers'));
+ set('dash-tenant',mini('TENANTS',fmtInt(tenants),'total tenant')+mini('TENANCY',ratio.toFixed(2),'tenant / site'));
+ set('dash-lease',mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':'')+mini('EXPIRED',fmtInt(expired),'lease expired',expired?'bad':''));
+ set('dash-power',mini('POWER',fmtInt(power),total?fmtPct(power/total*100)+'% coverage':'—')+mini('TOWER HEIGHT',fmtInt(Number(sm.tower_height_sites)||0),'site with height'));
+ set('dash-productivity',mini('REVENUE SITE',fmtInt(revenue),total?fmtPct(revenue/total*100)+'% coverage':'—')+mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':''));
+ const nbv=typeof liveNbv!=='undefined'?Object.values(liveNbv||{}).reduce((n,v)=>n+Number(v||0),0):0;
+ set('dash-financial',mini('NBV MAPPED',nbv?formatMoney(nbv):'BELUM TERSEDIA',nbv?'mapped Site ID':'source belum lengkap'));
+ set('dash-lifecycle',mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':'')+mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':''));
+ document.querySelectorAll('[data-open-profile]').forEach(btn=>{if(btn.dataset.bound)return;btn.dataset.bound='1';btn.addEventListener('click',()=>{const p=btn.dataset.openProfile;if(p==='asset')window.pmnoNavigate?.('assetprofile');else if(p==='financial')window.pmnoNavigate?.('financialprofile');else if(p==='assetprofile')window.pmnoNavigate?.('assetprofile');else btn.classList.add('pending');});});
+}
+
 function auditFieldStats(list,fieldKeys){const total=list.length;let filled=0;for(const r of list){if(fieldKeys.some(k=>String(val(r,k)).trim()!==''))filled++}return {filled,missing:Math.max(0,total-filled),pct:total?filled/total*100:0}}
 function auditPct(values){
  const v=values.filter(x=>x!==null&&Number.isFinite(Number(x))).map(Number);
@@ -4024,6 +4218,18 @@ async function renderSiteProfile(r){
   if($('sp-attention'))$('sp-attention').innerHTML='<div class="dash-empty-note">Site Master loaded, but child data could not be read: '+esc(e.message)+'</div>';
  }
 }
+window.pmnoAssetProfileInit=async function(){
+  if(typeof window.pmnoDashboardInit==='function') await window.pmnoDashboardInit();
+  renderAssetProfilePage();
+  setupAssetProfileFilters();
+};
+function setupAssetProfileFilters(){
+  const pairs=[['dash-regional','asset-regional'],['dash-area','asset-area'],['dash-province','asset-province'],['dash-city','asset-city'],['dash-search','asset-search']];
+  pairs.forEach(([src,dst])=>{const a=$(src),b=$(dst);if(!a||!b)return; if(b.dataset.bound)return; b.dataset.bound='1'; if(a.tagName==='SELECT') b.innerHTML=a.innerHTML; b.value=a.value||''; const ev=()=>{a.value=b.value; a.dispatchEvent(new Event('change',{bubbles:true}));}; b.addEventListener('change',ev); b.addEventListener('input',ev);});
+  $('asset-back-dashboard')?.addEventListener('click',()=>window.pmnoNavigate?.('dashboard'));
+  $('asset-refresh')?.addEventListener('click',()=>window.pmnoAssetProfileInit?.());
+}
+
 function navigateSite(){const q=$('dash-search')?.value?.trim();if(q)searchSite(q);else location.hash='#siteprofile'}
 function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;location.hash='#single';setTimeout(()=>{$('lat')&&($('lat').value=val(r,'latitude'));$('lon')&&($('lon').value=val(r,'longitude'))},40)}
 function init(){
@@ -4042,6 +4248,7 @@ function init(){
   }));
   $('dash-search')?.addEventListener('input',applyFilters);
   $('dash-refresh')?.addEventListener('click',load);
+  $('dash-open-asset')?.addEventListener('click',()=>window.pmnoNavigate?.('assetprofile'));
   $('dash-open-site')?.addEventListener('click',navigateSite);
   $('sp-search-btn')?.addEventListener('click',()=>searchSite($('sp-search')?.value));
   $('sp-search')?.addEventListener('input',()=>renderSiteSearchResults($('sp-search').value));
@@ -4214,8 +4421,8 @@ function normalizeMasterRows(code,rows){
 }
 function apiHeaders(){return {'apikey':KEY,'Authorization':'Bearer '+KEY,'Content-Type':'application/json'}}
 async function getModules(){
- const fallback=Object.entries(codeByName).map(([module_name,module_code])=>({module_code,module_name,data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',target_table:({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()}));
- try{const r=await fetch(URL+'/rest/v1/pmno_master_module?select=module_code,module_name,data_category,upload_mode,target_table&active=eq.true&order=module_code',{headers:apiHeaders()});if(!r.ok)throw Error();const db=await r.json();const byCode=Object.fromEntries(db.map(x=>[x.module_code,x]));return fallback.map(x=>byCode[x.module_code]?{...x,...byCode[x.module_code]}:x)}catch(e){return fallback}
+ const fallback=Object.entries(codeByName).map(([module_name,module_code])=>({module_code,module_name,data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',target_table:targetTableByCode[module_code]||({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()}));
+ try{const r=await fetch(URL+'/rest/v1/pmno_master_module?select=module_code,module_name,data_category,upload_mode,target_table&active=eq.true&order=module_code',{headers:apiHeaders()});if(!r.ok)throw Error();const db=await r.json();const byCode=Object.fromEntries(db.map(x=>[x.module_code,x]));return fallback.map(x=>({...(byCode[x.module_code]||{}),...x,target_table:targetTableByCode[x.module_code]||byCode[x.module_code]?.target_table||x.target_table}))}catch(e){return fallback}
 }
 async function rowCount(table){try{const select=table==='pmno_site_master'?'site_id':'*';const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&limit=1',{headers:{...apiHeaders(),'Prefer':'count=exact'}});const cr=r.headers.get('content-range');if(cr&&cr.includes('/'))return Number(cr.split('/')[1]);return '—'}catch(e){return '—'}}
 async function render(){
@@ -4228,7 +4435,7 @@ async function render(){
     module_code,module_name,
     data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',
     upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',
-    target_table:({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()
+    target_table:targetTableByCode[module_code]||({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()
   }));
   const paint=(mods)=>{
     const byCode=Object.fromEntries(mods.map(x=>[x.module_code,x]));
