@@ -4502,6 +4502,14 @@ async function exportModule(code){
     if(btn){btn.disabled=true;btn.textContent='EXPORTING…';}
     $('masterUploadInfo').textContent='Preparing secure download…';
 
+    // Detect iOS before the async export request and open a user-gesture-owned tab now.
+    // Safari may block window.open() when it is called only after await/fetch completes.
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    let iosDownloadTab=null;
+    if(isIOS){
+      try{iosDownloadTab=window.open('about:blank','_blank');if(iosDownloadTab)iosDownloadTab.opener=null}catch(_){}
+    }
+
     const endpoint=URL+'/functions/v1/pmno-master-export-fast';
     const r=await fetch(endpoint,{
       method:'POST',
@@ -4523,9 +4531,9 @@ async function exportModule(code){
     // The export service must return a Supabase Storage URL. Normalize relative
     // responses as a safety net so Safari can never resolve them against Vercel.
     let downloadUrl;
-    try{ downloadUrl=new URL(rawDownloadUrl,SUPABASE_URL).href; }
+    try{ downloadUrl=new globalThis.URL(rawDownloadUrl,SUPABASE_URL).href; }
     catch(_){ throw new Error('Download URL export tidak valid.'); }
-    const downloadHost=new URL(downloadUrl).hostname;
+    const downloadHost=new globalThis.URL(downloadUrl).hostname;
     if(downloadHost!=='vzeitjesovdojfsfgyza.supabase.co'){
       throw new Error('Download URL salah host: '+downloadHost+'. Export tidak dijalankan.');
     }
@@ -4536,29 +4544,22 @@ async function exportModule(code){
     const rows=payload?.rows||'';
     const format=String(payload?.format||'xlsx').toUpperCase();
 
-    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
     if(isIOS){
-      // iOS Safari is sensitive to programmatic navigation into a download response.
-      // Preserve the original tap gesture by opening a blank tab synchronously, then
-      // point that user-created tab at the HTTPS Storage URL after the export is ready.
-      // No Blob, blob:, createObjectURL(), or download attribute is used on iOS.
-      const downloadTab=window.open('about:blank','_blank');
-      if(downloadTab){
-        try{downloadTab.opener=null}catch(_){}
-        downloadTab.location.href=downloadUrl;
+        if(iosDownloadTab && !iosDownloadTab.closed){
+          iosDownloadTab.location.href=downloadUrl;
+        }else{
+          // Popup blocking fallback: expose a normal user-click link instead of forcing
+          // Safari to navigate programmatically.
+          const a=document.createElement('a');
+          a.href=downloadUrl;
+          a.target='_blank';
+          a.rel='noopener noreferrer';
+          a.textContent='TAP TO DOWNLOAD '+filename;
+          a.style.cssText='position:fixed;z-index:999999;left:50%;top:50%;transform:translate(-50%,-50%);padding:16px 22px;border-radius:12px;background:#d9ad5b;color:#07111d;font:800 14px Arial,sans-serif;text-decoration:none;box-shadow:0 12px 40px rgba(0,0,0,.35)';
+          document.body.appendChild(a);
+          $('masterUploadInfo').textContent='Export ready · tap the DOWNLOAD button to continue in Safari.';
+        }
       }else{
-        // Popup blocking fallback: expose a normal user-click link instead of forcing
-        // Safari to navigate programmatically.
-        const a=document.createElement('a');
-        a.href=downloadUrl;
-        a.target='_blank';
-        a.rel='noopener noreferrer';
-        a.textContent='TAP TO DOWNLOAD '+filename;
-        a.style.cssText='position:fixed;z-index:999999;left:50%;top:50%;transform:translate(-50%,-50%);padding:16px 22px;border-radius:12px;background:#d9ad5b;color:#07111d;font:800 14px Arial,sans-serif;text-decoration:none;box-shadow:0 12px 40px rgba(0,0,0,.35)';
-        document.body.appendChild(a);
-        $('masterUploadInfo').textContent='Export ready · tap the DOWNLOAD button to continue in Safari.';
-      }
-    }else{
       const a=document.createElement('a');
       a.href=downloadUrl;
       a.download=filename;
@@ -4567,10 +4568,11 @@ async function exportModule(code){
       document.body.appendChild(a);
       a.click();
       a.remove();
-    }
+      }
 
     $('masterUploadInfo').textContent=`Export ready · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · ${format} · secure download`;
   }catch(e){
+    try{if(typeof iosDownloadTab!=='undefined'&&iosDownloadTab&&!iosDownloadTab.closed)iosDownloadTab.close()}catch(_){}
     console.error('[PMNO EXPORT]',e);
     $('masterUploadInfo').textContent=`EXPORT GAGAL · ${e.message}`;
     alert('Export gagal: '+e.message);
