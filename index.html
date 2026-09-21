@@ -1471,6 +1471,227 @@ body.pmno-page-single .topbar .mode-menu button{
 }
 </style>
 
+
+<style id="pmno-dashboard-desktop-landscape-proper">
+/* PMNO — DASHBOARD DESKTOP + LANDSCAPE COMPOSITION
+   Only the dashboard presentation layer is overridden.
+   Mobile portrait and other menus are intentionally left alone. */
+
+@media (min-width:901px){
+  body.pmno-page-dashboard #dashboardView{
+    width:100%!important;
+    min-width:0!important;
+    overflow-x:hidden!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:calc(100% - 48px)!important;
+    max-width:1720px!important;
+    margin:0 auto!important;
+    padding:20px 0 44px!important;
+  }
+
+  /* 1. HEADER */
+  body.pmno-page-dashboard #dashboardView .dash-head{
+    display:flex!important;
+    align-items:flex-end!important;
+    justify-content:space-between!important;
+    gap:24px!important;
+    margin-bottom:14px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-title{
+    font-size:26px!important;
+    line-height:1.05!important;
+    letter-spacing:-.6px!important;
+  }
+
+  /* 2. FILTER BAR — one horizontal control rail */
+  body.pmno-page-dashboard #dashboardView .dash-filterbar{
+    grid-template-columns:repeat(4,minmax(135px,1fr)) minmax(260px,2fr)!important;
+    gap:8px!important;
+    padding:9px!important;
+    margin-bottom:12px!important;
+    border-radius:11px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label{
+    min-width:0!important;
+  }
+
+  /* 3. KPI RIBBON */
+  body.pmno-page-dashboard #dashboardView .dash-kpis{
+    grid-template-columns:repeat(8,minmax(0,1fr))!important;
+    gap:8px!important;
+    margin-bottom:14px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-width:0!important;
+    min-height:76px!important;
+    padding:10px 11px!important;
+  }
+
+  /* 4. HERO AREA — map gets visual priority */
+  body.pmno-page-dashboard #dashboardView .dash-grid-top{
+    grid-template-columns:minmax(0,1.72fr) minmax(320px,.78fr)!important;
+    gap:12px!important;
+    align-items:stretch!important;
+    margin-bottom:14px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > *{
+    min-width:0!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:440px!important;
+  }
+
+  /* 5. PROFILE CARDS — true 3-column executive grid */
+  body.pmno-page-dashboard #dashboardView .dash-grid-3{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:12px!important;
+    align-items:stretch!important;
+    margin-bottom:12px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-3 > *{
+    min-width:0!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-3 .dash-card{
+    min-width:0!important;
+    height:100%!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-card{
+    border-radius:12px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-card-head{
+    min-height:54px!important;
+    padding:11px 13px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-panel-content{
+    min-width:0!important;
+    padding:12px!important;
+  }
+
+  /* Internal grids must wrap inside their own card, never stretch the page */
+  body.pmno-page-dashboard #dashboardView .dash-card *{
+    min-width:0;
+  }
+}
+
+/* =========================================================
+   LANDSCAPE — dedicated composition, NOT desktop squeezed
+   ========================================================= */
+@media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
+  body.pmno-page-dashboard #dashboardView{
+    overflow-x:hidden!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:calc(100% - 28px)!important;
+    max-width:none!important;
+    margin:0 auto!important;
+    padding:14px 0 34px!important;
+  }
+
+  /* compact header */
+  body.pmno-page-dashboard #dashboardView .dash-head{
+    align-items:center!important;
+    gap:14px!important;
+    margin-bottom:9px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-title{
+    font-size:21px!important;
+    letter-spacing:-.3px!important;
+  }
+
+  /* filters become two clean rows rather than a crushed 5-column strip */
+  body.pmno-page-dashboard #dashboardView .dash-filterbar{
+    grid-template-columns:repeat(4,minmax(120px,1fr))!important;
+    gap:7px!important;
+    padding:8px!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label:last-child{
+    grid-column:1 / -1!important;
+  }
+
+  /* KPI ribbon = 4 x 2 */
+  body.pmno-page-dashboard #dashboardView .dash-kpis{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:7px!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-height:62px!important;
+    padding:8px 9px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi b{
+    font-size:16px!important;
+  }
+
+  /* Hero stays side-by-side: map dominant, profile compact */
+  body.pmno-page-dashboard #dashboardView .dash-grid-top{
+    grid-template-columns:minmax(0,1.58fr) minmax(245px,.82fr)!important;
+    gap:10px!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:350px!important;
+  }
+
+  /* Profile cards: 3 across on landscape where there is enough width.
+     This prevents the ugly full-height 2-column stack. */
+  body.pmno-page-dashboard #dashboardView .dash-grid-3{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    gap:10px!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-card-head{
+    min-height:50px!important;
+    padding:9px 10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-panel-content{
+    padding:9px!important;
+  }
+}
+
+/* Extra-wide desktop: breathe without becoming oversized */
+@media (min-width:1500px){
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:calc(100% - 64px)!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:455px!important;
+  }
+}
+
+/* Keep phone portrait behavior untouched */
+@media (max-width:760px){
+  body.pmno-page-dashboard #dashboardView .dash-shell,
+  body.pmno-page-dashboard #dashboardView .dash-filterbar,
+  body.pmno-page-dashboard #dashboardView .dash-kpis,
+  body.pmno-page-dashboard #dashboardView .dash-grid-top,
+  body.pmno-page-dashboard #dashboardView .dash-grid-3{
+    /* no desktop/landscape overrides here */
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -4556,149 +4777,6 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 
-
-<style id="pmno-dashboard-responsive-v85">
-/* V85 — dashboard-only responsive correction.
-   Keeps existing desktop design; fixes tablet/landscape card stretching and cramped financial rows.
-   No DB, routing, business logic, Single Site, Bulk, DRM or Master changes. */
-
-/* Desktop: use the full canvas cleanly. */
-@media (min-width:1101px){
-  body.pmno-page-dashboard .dash-shell{
-    width:100%;
-    max-width:1800px;
-    box-sizing:border-box;
-  }
-  body.pmno-page-dashboard .dash-grid-3{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    align-items:start;
-  }
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.75fr) minmax(360px,.85fr);
-    align-items:start;
-  }
-}
-
-/* Landscape tablet / compact desktop:
-   keep the 2-column portfolio structure, but never stretch a short card
-   to the height of the financial card. */
-@media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
-  body.pmno-page-dashboard .dash-shell{
-    width:100%;
-    max-width:none;
-    box-sizing:border-box;
-    padding:18px 20px 42px;
-  }
-
-  body.pmno-page-dashboard .dash-head{
-    margin-bottom:14px;
-  }
-
-  body.pmno-page-dashboard .dash-title{
-    font-size:21px;
-  }
-
-  body.pmno-page-dashboard .dash-filterbar{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-  body.pmno-page-dashboard .dash-filterbar label:last-child{
-    grid-column:1 / -1;
-  }
-
-  body.pmno-page-dashboard .dash-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.45fr) minmax(300px,1fr);
-    align-items:start;
-  }
-
-  body.pmno-page-dashboard .dash-grid-3{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    align-items:start;
-  }
-
-  /* Financial card becomes one readable column instead of
-     squeezing long source notes into half-width cells. */
-  body.pmno-page-dashboard .fin-grid{
-    grid-template-columns:1fr;
-  }
-
-  body.pmno-page-dashboard .dash-panel-content{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .metric-row{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .fin-row-label{
-    min-width:0;
-    flex:1 1 auto;
-  }
-
-  body.pmno-page-dashboard .fin-group .metric-row b{
-    flex:0 0 auto;
-  }
-
-  body.pmno-page-dashboard .dash-card-head{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .dash-card-head div:first-child{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .dash-card-head small{
-    overflow-wrap:anywhere;
-  }
-
-  body.pmno-page-dashboard .dash-map-card #dash-map{
-    height:420px;
-  }
-}
-
-/* Landscape at the narrower end: preserve the same structure,
-   but give the two columns a little more breathing room. */
-@media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-dashboard .dash-shell{
-    padding:14px 14px 36px;
-  }
-
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.35fr) minmax(270px,1fr);
-    gap:10px;
-  }
-
-  body.pmno-page-dashboard .dash-grid-3{
-    gap:10px;
-  }
-
-  body.pmno-page-dashboard .dash-card-head{
-    padding:11px 12px;
-  }
-
-  body.pmno-page-dashboard .dash-panel-content{
-    padding:12px;
-  }
-
-  body.pmno-page-dashboard .dash-map-card #dash-map{
-    height:390px;
-  }
-}
-
-/* Never let a long dashboard child widen the viewport. */
-body.pmno-page-dashboard .dash-shell,
-body.pmno-page-dashboard .dash-grid-top,
-body.pmno-page-dashboard .dash-grid-3,
-body.pmno-page-dashboard .dash-card,
-body.pmno-page-dashboard .dash-panel-content,
-body.pmno-page-dashboard .fin-grid{
-  min-width:0;
-  box-sizing:border-box;
-}
-</style>
 </body>
 </html>
 
