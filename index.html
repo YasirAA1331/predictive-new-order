@@ -4500,7 +4500,8 @@ async function exportModule(code){
     const schema=headersFor(code)||[];
     if(!schema.length)throw new Error('Mapping kolom export belum tersedia untuk '+moduleName(code)+'.');
     if(btn){btn.disabled=true;btn.textContent='EXPORTING…';}
-    $('masterUploadInfo').textContent='Preparing server-side export…';
+    $('masterUploadInfo').textContent='Preparing secure download…';
+
     const endpoint=URL+'/functions/v1/pmno-master-export-fast';
     const r=await fetch(endpoint,{
       method:'POST',
@@ -4509,24 +4510,36 @@ async function exportModule(code){
     });
     if(!r.ok){
       let msg='HTTP '+r.status;
-      try{const j=await r.json();msg=j?.error||j?.message||msg}catch(_){}
+      try{const j=await r.json();msg=j?.error||j?.message||msg}catch(_){ }
       throw new Error(msg);
     }
-    const blob=await r.blob();
-    if(!blob.size)throw new Error('File export kosong.');
-    const cd=r.headers.get('Content-Disposition')||'';
-    const match=cd.match(/filename="?([^";]+)"?/i);
-    const contentType=(r.headers.get('Content-Type')||'').toLowerCase();
-    const defaultExt=contentType.includes('text/csv')?'.csv':'.xlsx';
-    const filename=match?.[1]||`PMNO_${code}_Current${defaultExt}`;
-    const objectUrl=globalThis.URL.createObjectURL(blob);
-    const a=document.createElement('a');
-    a.href=objectUrl;a.download=filename;a.style.display='none';
-    document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>globalThis.URL.revokeObjectURL(objectUrl),15000);
-    const rows=r.headers.get('X-PMNO-Rows')||'';
-    const format=contentType.includes('text/csv')?'CSV stream':'XLSX';
-    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · ${format} · server-side`;
+
+    // V5 returns a short-lived HTTPS Storage signed URL instead of a Blob URL.
+    // This avoids iOS Safari/WebKitBlobResource failures on large streamed exports.
+    const payload=await r.json();
+    const downloadUrl=payload?.download_url;
+    if(!downloadUrl)throw new Error('Download URL export tidak tersedia.');
+    const filename=payload?.filename||`PMNO_${code}_Current.${payload?.format||'xlsx'}`;
+    const rows=payload?.rows||'';
+    const format=String(payload?.format||'xlsx').toUpperCase();
+
+    const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+    if(isIOS){
+      // Navigate directly to the signed Storage URL. The URL carries download=true,
+      // so Safari handles the file as a browser download without creating a blob: URL.
+      window.location.assign(downloadUrl);
+    }else{
+      const a=document.createElement('a');
+      a.href=downloadUrl;
+      a.download=filename;
+      a.rel='noopener';
+      a.style.display='none';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
+    $('masterUploadInfo').textContent=`Export ready · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · ${format} · secure download`;
   }catch(e){
     console.error('[PMNO EXPORT]',e);
     $('masterUploadInfo').textContent=`EXPORT GAGAL · ${e.message}`;
