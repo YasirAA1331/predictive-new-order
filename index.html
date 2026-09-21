@@ -2438,37 +2438,37 @@ function renderFinancialProfile(d){
  const avgRev=revSites?revenueYear/revSites:0, avgNbv=nbvSites?nbv/nbvSites:0;
  const el=$f('financial-profile-page-content');if(!el)return;
  el.innerHTML='<section class="fp-section"><div class="fp-section-head"><div><strong>01 · FINANCIAL SUMMARY</strong><small>Angka mengikuti Site ID pada filter aktif; setiap kelompok financial dipisahkan berdasarkan jenis dan periode</small></div></div><div class="fp-section-body"><div class="fp-kpis">'+
-   '<div class="fp-kpi primary"><span>SITUS DENGAN DATA FINANCIAL</span><b>'+iF(total)+'</b><small>'+iF(records)+' baris data financial</small></div>'+ 
-   '<div class="fp-kpi"><span>SITUS DENGAN REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' situs</small></div>'+ 
-   '<div class="fp-kpi"><span>NBV</span><b>'+mF(nbv)+'</b><small>'+iF(nbvSites)+' situs memiliki NBV</small></div>'+ 
+   '<div class="fp-kpi primary"><span>SITE DENGAN DATA FINANCIAL</span><b>'+iF(total)+'</b><small>'+iF(records)+' baris data financial</small></div>'+ 
+   '<div class="fp-kpi"><span>SITE DENGAN REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' site</small></div>'+ 
+   '<div class="fp-kpi"><span>NBV</span><b>'+mF(nbv)+'</b><small>'+iF(nbvSites)+' site memiliki NBV</small></div>'+ 
    '<div class="fp-kpi"><span>REVENUE / TAHUN</span><b>'+mF(revenueYear)+'</b><small>Revenue bulanan × 12</small></div>'+ 
-   '<div class="fp-kpi"><span>EBITDA (PERKIRAAN)</span><b>'+mF(ebitda)+'</b><small>Revenue tahunan − Cost tahunan yang tersedia</small></div>'+ 
+   '<div class="fp-kpi"><span>EBITDA</span><b>'+mF(ebitda)+'</b><small>Revenue tahunan − Cost tahunan yang tersedia</small></div>'+ 
  '</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>02 · REVENUE</strong><small>Revenue dipisahkan dari CAPEX, Cost, dan NBV agar basis angka jelas</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
-   card('REVENUE',row('Revenue / Bulan',mF(revenueMonth),iF(revSites)+' situs dengan revenue')+row('Revenue / Tahun',mF(revenueYear),'Revenue bulanan × 12')+row('Rata-rata Revenue / Situs / Tahun',mF(avgRev),'Total revenue tahunan ÷ situs dengan revenue'))+
-   card('KELENGKAPAN DATA REVENUE',row('Situs dengan Revenue',iF(revSites),pF(revSites,total)+' dari total situs')+row('Situs tanpa Revenue',iF(Math.max(0,total-revSites)),pF(Math.max(0,total-revSites),total)+' dari total situs')+row('Jumlah Data Financial',iF(records),'Baris data pada sumber Financial Profile'))+
+   card('REVENUE',row('Revenue / Bulan',mF(revenueMonth),iF(revSites)+' site dengan revenue')+row('Revenue / Tahun',mF(revenueYear),'Revenue bulanan × 12')+row('Rata-rata Revenue / Site / Tahun',mF(avgRev),'Total revenue tahunan ÷ site dengan revenue'))+
+   card('KELENGKAPAN DATA REVENUE',row('Site dengan Revenue',iF(revSites),pF(revSites,total)+' dari total site')+row('Site tanpa Revenue',iF(Math.max(0,total-revSites)),pF(Math.max(0,total-revSites),total)+' dari total site')+row('Jumlah Data Financial',iF(records),'Baris data pada sumber Financial Profile'))+
  '</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>03 · CAPEX / INVESTASI</strong><small>CAPEX dipisahkan dari Revenue, Cost, dan NBV agar tidak tercampur antar basis financial</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
-   card('INVESTASI (CAPEX)',row('Total Investasi (CAPEX)',mF(capex),iF(capexSites)+' situs dengan nilai CAPEX')+row('CAPEX B2S',mF(b2s),'Nilai dari sumber Financial Profile')+row('CAPEX Collo',mF(collo),'Nilai dari sumber Financial Profile')+row('CAPEX QI',mF(qi),'Nilai dari sumber Financial Profile'))+
-   card('KETERSEDIAAN DATA INVESTASI',row('Situs dengan Nilai CAPEX',iF(capexSites),pF(capexSites,total)+' dari total situs')+row('Situs tanpa Nilai CAPEX',iF(Math.max(0,total-capexSites)),pF(Math.max(0,total-capexSites),total)+' dari total situs'))+
+   card('INVESTASI (CAPEX)',row('Total Investasi (CAPEX)',mF(capex),iF(capexSites)+' site dengan nilai CAPEX')+row('CAPEX B2S',mF(b2s),'Nilai dari sumber Financial Profile')+row('CAPEX Collo',mF(collo),'Nilai dari sumber Financial Profile')+row('CAPEX QI',mF(qi),'Nilai dari sumber Financial Profile'))+
+   card('KETERSEDIAAN DATA INVESTASI',row('Site dengan Nilai CAPEX',iF(capexSites),pF(capexSites,total)+' dari total site')+row('Site tanpa Nilai CAPEX',iF(Math.max(0,total-capexSites)),pF(Math.max(0,total-capexSites),total)+' dari total site'))+
  '</div><div class="fp-note"><b>Catatan:</b> Nilai CAPEX mengikuti data yang tersedia pada sumber Financial Profile. Jika sumber bernilai 0, angka ditampilkan sebagai Rp 0; tidak diganti dengan asumsi.</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>04 · COST</strong><small>Seluruh biaya dinyatakan per tahun agar mudah dibandingkan dengan revenue tahunan</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
    card('COST / TAHUN',row('OM Cost / Tahun',mF(om),'Data biaya OM tahunan pada Financial Profile')+row('Land Lease Cost / Tahun',mF(land),'Data sewa lahan tahunan pada Financial Profile')+row('Tax / Tahun',mF(tax),'Data pajak tahunan pada Financial Profile')+row('Total Cost / Tahun',mF(opex),'OM Cost + Land Lease Cost + Tax'))+
-   card('KETERSEDIAAN DATA COST',row('Situs dengan Data Cost',iF(costSites),pF(costSites,total)+' dari total situs')+row('Situs tanpa Data Cost',iF(Math.max(0,total-costSites)),pF(Math.max(0,total-costSites),total)+' dari total situs'))+
+   card('KETERSEDIAAN DATA COST',row('Site dengan Data Cost',iF(costSites),pF(costSites,total)+' dari total site')+row('Site tanpa Data Cost',iF(Math.max(0,total-costSites)),pF(Math.max(0,total-costSites),total)+' dari total site'))+
  '</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>05 · NBV</strong><small>NBV dihitung satu kali per Site ID agar tidak terjadi penggandaan nilai</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
-   card('NBV',row('Total NBV',mF(nbv),iF(nbvSites)+' situs memiliki NBV')+row('Rata-rata NBV / Situs',mF(avgNbv),'Total NBV ÷ situs dengan NBV')+row('Situs dengan NBV',iF(nbvSites),pF(nbvSites,total)+' dari total situs'))+
-   card('DASAR PERHITUNGAN',row('Basis', '1 nilai / Site ID','Nilai NBV terakhir yang diperbarui digunakan untuk setiap Site ID')+row('Situs tanpa NBV',iF(Math.max(0,total-nbvSites)),pF(Math.max(0,total-nbvSites),total)+' dari total situs'))+
+   card('NBV',row('Total NBV',mF(nbv),iF(nbvSites)+' site memiliki NBV')+row('Rata-rata NBV / Site',mF(avgNbv),'Total NBV ÷ site dengan NBV')+row('Site dengan NBV',iF(nbvSites),pF(nbvSites,total)+' dari total site'))+
+   card('DASAR PERHITUNGAN',row('Basis', '1 nilai / Site ID','Nilai NBV terakhir yang diperbarui digunakan untuk setiap Site ID')+row('Site tanpa NBV',iF(Math.max(0,total-nbvSites)),pF(Math.max(0,total-nbvSites),total)+' dari total site'))+
  '</div><div class="fp-note"><b>Catatan NBV:</b> satu nilai NBV digunakan untuk setiap Site ID dari data Financial Profile yang paling terakhir diperbarui. Tujuannya agar nilai aset tidak terhitung berulang ketika satu Site ID memiliki beberapa baris tenant.</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>06 · PROFITABILITAS</strong><small>Perbandingan Revenue tahunan dengan Cost tahunan yang tersedia; CAPEX dan NBV tidak dicampur ke perhitungan ini</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
-   card('EBITDA (PERKIRAAN)',row('Revenue / Tahun',mF(revenueYear))+row('Cost / Tahun',mF(opex))+row('Perkiraan EBITDA',mF(ebitda),'Revenue tahunan − Cost tahunan yang tersedia','good'))+
-   card('INDIKATOR INVESTASI',row('IRR / Situs','BELUM TERSEDIA','Sumber/perhitungan IRR belum tersedia pada Financial Profile','na')+row('NPV / Situs','BELUM TERSEDIA','Sumber/perhitungan NPV belum tersedia pada Financial Profile','na'))+
- '</div><div class="fp-formula"><strong>EBITDA (PERKIRAAN)</strong><span>Revenue / Tahun − OM Cost / Tahun − Land Lease Cost / Tahun − Tax / Tahun</span></div><div class="fp-note"><b>Catatan:</b> EBITDA (Perkiraan) hanya menggunakan komponen Cost yang tersedia pada sumber Financial Profile. Angka ini bukan hasil perhitungan IRR atau NPV.</div></div></section>'+ 
- '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · KELENGKAPAN DATA FINANCIAL</strong><small>Menunjukkan jumlah situs yang memiliki data pada masing-masing kelompok financial</small></div></div><div class="fp-section-body"><div class="fp-kelengkapan">'+
-   '<div class="fp-kelengkapan-card"><span>REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' situs</small></div>'+ 
-   '<div class="fp-kelengkapan-card '+(capexSites?'':'warn')+'"><span>INVESTASI (CAPEX)</span><b>'+pF(capexSites,total)+'</b><small>'+iF(capexSites)+' situs</small></div>'+ 
-   '<div class="fp-kelengkapan-card '+(costSites?'':'warn')+'"><span>COST</span><b>'+pF(costSites,total)+'</b><small>'+iF(costSites)+' situs</small></div>'+ 
-   '<div class="fp-kelengkapan-card"><span>NBV</span><b>'+pF(nbvSites,total)+'</b><small>'+iF(nbvSites)+' situs</small></div>'+ 
+   card('EBITDA',row('Revenue / Tahun',mF(revenueYear))+row('Cost / Tahun',mF(opex))+row('EBITDA',mF(ebitda),'Revenue tahunan − Cost tahunan yang tersedia','good'))+
+   card('INDIKATOR INVESTASI',row('IRR / Site','BELUM TERSEDIA','Sumber/perhitungan IRR belum tersedia pada Financial Profile','na')+row('NPV / Site','BELUM TERSEDIA','Sumber/perhitungan NPV belum tersedia pada Financial Profile','na'))+
+ '</div><div class="fp-formula"><strong>EBITDA</strong><span>Revenue / Tahun − OM Cost / Tahun − Land Lease Cost / Tahun − Tax / Tahun</span></div><div class="fp-note"><b>Catatan:</b> EBITDA hanya menggunakan komponen Cost yang tersedia pada sumber Financial Profile. Angka ini bukan hasil perhitungan IRR atau NPV.</div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · KELENGKAPAN DATA FINANCIAL</strong><small>Menunjukkan jumlah site yang memiliki data pada masing-masing kelompok financial</small></div></div><div class="fp-section-body"><div class="fp-kelengkapan">'+
+   '<div class="fp-kelengkapan-card"><span>REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' site</small></div>'+ 
+   '<div class="fp-kelengkapan-card '+(capexSites?'':'warn')+'"><span>INVESTASI (CAPEX)</span><b>'+pF(capexSites,total)+'</b><small>'+iF(capexSites)+' site</small></div>'+ 
+   '<div class="fp-kelengkapan-card '+(costSites?'':'warn')+'"><span>COST</span><b>'+pF(costSites,total)+'</b><small>'+iF(costSites)+' site</small></div>'+ 
+   '<div class="fp-kelengkapan-card"><span>NBV</span><b>'+pF(nbvSites,total)+'</b><small>'+iF(nbvSites)+' site</small></div>'+ 
  '</div></div></section>';
 }
 async function initFinancialProfile(){
