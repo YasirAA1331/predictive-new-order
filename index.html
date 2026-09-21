@@ -2469,8 +2469,8 @@ function renderFinancialProfile(d){
    card('KELENGKAPAN DATA REVENUE',row('Site dengan Revenue',iF(revSites),pF(revSites,total)+' dari total site')+row('Site tanpa Revenue',iF(Math.max(0,total-revSites)),pF(Math.max(0,total-revSites),total)+' dari total site')+row('Jumlah Data Financial',iF(records),'Baris data pada sumber Financial Profile'))+
  '</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>03 · COST</strong><small>Month ditampilkan sebagai annual ÷ 12; Year mengikuti nilai tahunan dari source. Cost per Site menggunakan site dengan Cost.</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
-   card('COST / MONTH',row('OM Cost / Month',mF(omMonth),'OM Cost / Year ÷ 12')+row('OM Cost per Site / Month',mF(costSites?omMonth/costSites:0),'OM Cost / Month ÷ site dengan Cost')+row('Land Lease Cost / Month',mF(landMonth),'Land Lease Cost / Year ÷ 12')+row('Land Lease Cost per Site / Month',mF(costSites?landMonth/costSites:0),'Land Lease Cost / Month ÷ site dengan Cost')+row('Tax / Month',mF(taxMonth),'Tax / Year ÷ 12')+row('Tax per Site / Month',mF(costSites?taxMonth/costSites:0),'Tax / Month ÷ site dengan Cost')+row('TOTAL COST / MONTH',mF(costMonth),'Total Cost / Year ÷ 12','good')+row('Cost per Site / Month',mF(avgCostMonth),'Total Cost / Month ÷ site dengan Cost'))+
-   card('COST / YEAR',row('OM Cost / Year',mF(om),'Source Financial Profile')+row('OM Cost per Site / Year',mF(costSites?om/costSites:0),'OM Cost / Year ÷ site dengan Cost')+row('Land Lease Cost / Year',mF(land),'Source Financial Profile')+row('Land Lease Cost per Site / Year',mF(costSites?land/costSites:0),'Land Lease Cost / Year ÷ site dengan Cost')+row('Tax / Year',mF(tax),'Source Financial Profile')+row('Tax per Site / Year',mF(costSites?tax/costSites:0),'Tax / Year ÷ site dengan Cost')+row('TOTAL COST / YEAR',mF(opex),'OM + Land Lease + Tax','good')+row('Cost per Site / Year',mF(avgCostYear),'Total Cost / Year ÷ site dengan Cost'))+
+   card('COST / MONTH',row('OM Cost / Month',mF(omMonth),'OM Cost / Year ÷ 12')+row('Land Lease Cost / Month',mF(landMonth),'Land Lease Cost / Year ÷ 12')+row('Tax / Month',mF(taxMonth),'Tax / Year ÷ 12')+row('TOTAL COST / MONTH',mF(costMonth),'Total Cost / Year ÷ 12','good')+row('Cost per Site / Month',mF(avgCostMonth),'Total Cost / Month ÷ site dengan Cost'))+
+   card('COST / YEAR',row('OM Cost / Year',mF(om),'Source Financial Profile')+row('Land Lease Cost / Year',mF(land),'Source Financial Profile')+row('Tax / Year',mF(tax),'Source Financial Profile')+row('TOTAL COST / YEAR',mF(opex),'OM + Land Lease + Tax','good')+row('Cost per Site / Year',mF(avgCostYear),'Total Cost / Year ÷ site dengan Cost'))+
  '</div><div class="fp-note"><b>Tax:</b> pada backend saat ini belum terdapat RPC economic engine khusus Tax/PPH. Karena itu angka Tax di halaman ini tetap berasal dari <code>site_financial_profile.tax_year</code>; tidak dibuat asumsi tarif pajak baru.</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>04 · CAPEX / INVESTMENT</strong><small>CAPEX dipisahkan dari Revenue, Cost, dan NBV.</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
    card('INVESTASI (CAPEX)',row('Total CAPEX',mF(capex),iF(capexSites)+' site dengan nilai CAPEX')+row('CAPEX B2S',mF(b2s),'Source Financial Profile')+row('CAPEX Collo',mF(collo),'Source Financial Profile')+row('CAPEX QI',mF(qi),'Source Financial Profile'))+
@@ -2480,13 +2480,13 @@ function renderFinancialProfile(d){
    card('NBV',row('Total NBV',mF(nbv),iF(nbvSites)+' site memiliki NBV')+row('NBV per Site',mF(avgNbv),'Total NBV ÷ site dengan NBV')+row('Site dengan NBV',iF(nbvSites),pF(nbvSites,total)+' dari total site'))+
    card('BASIS',row('Basis','1 nilai / Site ID','Nilai NBV terakhir yang diperbarui digunakan untuk setiap Site ID')+row('Site tanpa NBV',iF(Math.max(0,total-nbvSites)),pF(Math.max(0,total-nbvSites),total)+' dari total site'))+
  '</div><div class="fp-note"><b>Catatan NBV:</b> satu nilai NBV digunakan per Site ID dari data Financial Profile yang paling terakhir diperbarui.</div></div></section>'+ 
- '<section class="fp-section"><div class="fp-section-head"><div><strong>06 · PROFITABILITAS</strong><small>EBITDA memakai Revenue dan Cost yang tersedia; IRR/NPV tidak dihitung ulang di FE.</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>06 · PROFITABILITAS</strong><small>EBITDA memakai Revenue dan Cost yang tersedia. IRR/NPV sepenuhnya berasal dari PMNO Economic Engine.</small></div></div><div class="fp-section-body"><div class="fp-grid">'+
    card('EBITDA',row('Revenue / Year',mF(revenueYear))+row('Total Cost / Year',mF(opex))+row('EBITDA',mF(ebitda),'Revenue / Year − Total Cost / Year','good'))+
-   card('STATUS ECONOMIC ENGINE',row('IRR / Portfolio','BELUM TERSEDIA','Belum ada RPC portfolio IRR pada backend Financial Profile','na')+row('NPV / Portfolio','BELUM TERSEDIA','Belum ada RPC portfolio NPV pada backend Financial Profile','na'))+
- '</div><div class="fp-formula"><strong>EBITDA</strong><span>Revenue / Year − OM Cost / Year − Land Lease Cost / Year − Tax / Year</span></div></div></section>'+ 
- '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · ECONOMIC ENGINE</strong><small>Per Site menggunakan economic engine PMNO yang sudah dipakai Single Site; tidak membuat rumus IRR/NPV baru di FE.</small></div></div><div class="fp-section-body"><div class="fin-engine-grid">'+
-   '<div class="fp-engine-card"><div class="fp-card-title">PORTFOLIO / BULK</div>'+row('Existing IRR','BELUM TERSEDIA','Backend saat ini hanya mengekspos engine scenario per site / B2S','na')+row('Estimated IRR','BELUM TERSEDIA','Belum ada aggregate economic-engine RPC','na')+row('NPV','BELUM TERSEDIA','Belum ada aggregate economic-engine RPC','na')+'<div class="fp-engine-status">Tidak gue isi dengan EBITDA ÷ NBV atau rata-rata IRR karena itu akan menjadi rumus baru dan bisa berbeda dari economic engine PMNO.</div></div>'+
-   '<div class="fp-engine-card"><div class="fp-card-title">PER SITE · ENGINE CHECK</div><div class="fp-engine-action"><input id="financial-engine-site" placeholder="Masukkan Site ID"><button type="button" id="financial-engine-run">RUN ENGINE</button></div><div id="financial-engine-result" class="fp-engine-result">'+row('Existing IRR','—','Economic engine')+row('Estimated IRR','—','Economic engine')+row('NPV','—','Economic engine')+'</div><div class="fp-source">Engine source: <code>pmno_candidate_detail_by_site_id</code>. Parameter mengikuti konfigurasi Single Site yang sudah ada di aplikasi.</div></div>'+ 
+   card('ECONOMIC ENGINE',row('Calculation Version','V1_MONTHLY_40Y','Backend IRR engine')+row('Period Type','MONTHLY','Cashflow per bulan')+row('Asset Life','40 Tahun','480 periode bulanan')+row('WACC','8,73%','Backend assumption'))+
+ '</div><div class="fp-formula"><strong>IRR / NPV</strong><span>Backend monthly cashflow → 480 bulan → PMNO Economic Engine. FE hanya membaca hasil.</span></div></div></section>'+ 
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · ECONOMIC ENGINE</strong><small>Existing IRR dihitung dari cashflow bulanan Site berdasarkan Asset Register Date. Tidak ada lagi rumus IRR hardcode di FE.</small></div></div><div class="fp-section-body"><div class="fin-engine-grid">'+
+   '<div class="fp-engine-card"><div class="fp-card-title">PORTFOLIO / BULK</div>'+row('Existing IRR','BELUM DIHITUNG','Portfolio IRR harus berasal dari aggregate monthly cashflow, bukan average IRR site','na')+row('NPV','BELUM DIHITUNG','Portfolio NPV harus berasal dari aggregate monthly cashflow','na')+'<div class="fp-engine-status">Source of truth: <code>pmno_irr_cashflow_monthly</code> → aggregate per period → IRR/NPV backend. Tidak menggunakan rata-rata IRR site.</div></div>'+
+   '<div class="fp-engine-card"><div class="fp-card-title">PER SITE · MONTHLY ENGINE</div><div class="fp-engine-action"><input id="financial-engine-site" placeholder="Masukkan Site ID"><button type="button" id="financial-engine-run">RUN 40Y ENGINE</button></div><div id="financial-engine-result" class="fp-engine-result">'+row('Existing IRR','—','V1_MONTHLY_40Y')+row('NPV','—','Monthly cashflow · 480 bulan')+row('Cashflow / Month','—','Revenue − OM − Land Lease − Tax')+'</div><div class="fp-source">Engine source: <code>pmno_irr_generate_existing_monthly</code>. Asset Register Date menjadi titik awal 480 periode.</div></div>'+ 
  '</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>08 · FINANCIAL DATA COVERAGE</strong><small>Coverage berdasarkan Site ID pada filter aktif.</small></div></div><div class="fp-section-body"><div class="fp-kelengkapan">'+
    '<div class="fp-kelengkapan-card"><span>REVENUE</span><b>'+pF(revSites,total)+'</b><small>'+iF(revSites)+' site</small></div>'+ 
@@ -2500,17 +2500,23 @@ function bindEngineRunner(){
  const btn=$f('financial-engine-run'),input=$f('financial-engine-site'),result=$f('financial-engine-result');
  if(!btn||!input||!result)return;
  btn.onclick=async()=>{
-   const site=String(input.value||'').trim();if(!site){result.innerHTML=row('Status','Masukkan Site ID','Site ID diperlukan untuk menjalankan economic engine','na');return}
-   btn.disabled=true;btn.textContent='RUNNING…';result.innerHTML=row('Status','Running…','Memanggil economic engine PMNO');
+   const site=String(input.value||'').trim();
+   if(!site){result.innerHTML=row('Status','Masukkan Site ID','Site ID diperlukan untuk menjalankan monthly economic engine','na');return}
+   btn.disabled=true;btn.textContent='RUNNING…';result.innerHTML=row('Status','Running…','Generate 480 monthly cashflow dari Asset Register Date');
    try{
-     const raw=await fRpc('pmno_candidate_detail_by_site_id',{p_site_id:site,p_target_tenant:'IOH',p_added_device_count:7,p_added_load_kw:12,p_annual_revenue:120000000,p_annual_opex_ratio:.20,p_horizon_years:20,p_revenue_growth:0,p_wacc:.0873,p_option:'COLLO'});
-     const inv=raw?.investment||{};
-     result.innerHTML=row('Existing IRR',irrF(inv.existing_irr),'Economic engine')+row('Estimated IRR',irrF(inv.estimated_irr),'Existing + COLLO scenario','good')+row('NPV',mF(inv.npv),'Economic engine')+row('CAPEX',mF(inv.capex_total),'Economic engine');
+     const raw=await fRpc('pmno_irr_generate_existing_monthly',{p_site_id:site});
+     if(!raw?.ok){throw new Error(raw?.reason||'Monthly engine gagal dijalankan')}
+     result.innerHTML=row('Existing IRR',irrF(raw.existing_irr),'V1_MONTHLY_40Y · annualized from monthly IRR')+
+       row('NPV',mF(raw.npv),'Monthly cashflow · 480 bulan')+
+       row('Cashflow / Month',mF(raw.monthly_cashflow),'Revenue − OM Cost − Land Lease Cost − Tax')+
+       row('Asset Register Date',raw.asset_register_date||'—','Titik awal periode 1')+
+       row('Horizon','480 bulan','40 tahun · MONTHLY');
    }catch(e){result.innerHTML=row('Status','ENGINE ERROR',e.message,'na')}
-   finally{btn.disabled=false;btn.textContent='RUN ENGINE'}
+   finally{btn.disabled=false;btn.textContent='RUN 40Y ENGINE'}
  };
  input.onkeydown=e=>{if(e.key==='Enter')btn.click()};
 }
+
 async function initFinancialProfile(){
  if(fpLoading)return;fpLoading=true;const el=$f('financial-profile-page-content');if(el)el.innerHTML='<div class="fp-loading">Loading Financial Profile…</div>';
  try{
