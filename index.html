@@ -1471,27 +1471,28 @@ body.pmno-page-single .topbar .mode-menu button{
 }
 </style>
 
-
-<style id="pmno-asset-profile-v86">
-/* V86 — dedicated Asset Profile page. Structural redesign; source metrics remain unchanged. */
-.asset-profile-page{background:#06111f;color:#edf5fb;min-height:calc(100dvh - 72px);width:100%;}
-body.pmno-page-assetprofile .app{display:block!important;width:100%!important;height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important}
+<style id="pmno-asset-profile-page-v90">
+.asset-profile-page{width:100%;background:#06111f;color:#edf5fb;min-height:calc(100vh - 72px)}
+.asset-page-shell{width:min(1780px,calc(100% - 44px));margin:0 auto;padding:22px 0 48px}
+.asset-page-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:16px}
+.asset-page-kicker{font-size:9px;letter-spacing:2.2px;font-weight:950;color:#6f879c}
+.asset-page-title{font-size:30px;line-height:1;font-weight:950;letter-spacing:-1px;margin-top:5px}.asset-page-title b{color:var(--cyan)}
+.asset-page-sub{font-size:10px;color:#7890a5;margin-top:7px}.asset-page-actions{display:flex;gap:8px}
+.asset-page-filterbar{display:grid;grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;gap:9px;margin-bottom:14px}.asset-page-filterbar label{font-size:8px;letter-spacing:1.1px;color:#7890a7;font-weight:900}.asset-page-filterbar select,.asset-page-filterbar input{display:block;width:100%;height:40px;margin-top:5px;border:1px solid #29435e;border-radius:9px;background:#071321;color:var(--text);padding:0 10px;font-size:12px;outline:none}.asset-page-filterbar select:focus,.asset-page-filterbar input:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(53,200,255,.08)}
+.ap-section{border:1px solid #20364f;background:#0a1727;border-radius:12px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px}.ap-section-head{display:flex;justify-content:space-between;align-items:end;gap:14px;padding:14px 16px;border-bottom:1px solid #20364f}.ap-section-head strong{font-size:10px;letter-spacing:1.5px}.ap-section-head small{font-size:8px;color:#6e879c}.ap-section-body{padding:14px 16px}.ap-snapshot{display:grid;grid-template-columns:1.35fr 1fr 1fr;gap:10px}.ap-kpi{padding:16px;border:1px solid #20364f;border-radius:10px;background:#091827;min-height:105px}.ap-kpi.primary{background:linear-gradient(135deg,#0b2234,#0a1727)}.ap-kpi span{display:block;font-size:8px;letter-spacing:1.3px;color:#7890a5;font-weight:900}.ap-kpi b{display:block;font-size:28px;line-height:1;margin-top:9px;letter-spacing:-1px}.ap-kpi.primary b{font-size:38px;color:var(--cyan)}.ap-kpi small{display:block;margin-top:5px;font-size:8px;color:#647d92}.ap-structure{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.ap-quad{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ap-module{border:1px solid #1d344b;border-radius:10px;background:#091827;padding:13px}.ap-module-title{font-size:9px;font-weight:950;letter-spacing:1.2px;color:#d9e6ef;margin-bottom:10px}.ap-bar{display:grid;gap:7px}.ap-bar-row{display:grid;grid-template-columns:minmax(90px,.65fr) minmax(90px,1.5fr) 72px;gap:9px;align-items:center}.ap-bar-row>span{font-size:8px;color:#8ca1b2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ap-bar-track{height:7px;background:#14283a;border-radius:99px;overflow:hidden}.ap-bar-track i{display:block;height:100%;background:var(--cyan);border-radius:99px}.ap-bar-row b{text-align:right;font-size:9px}.ap-origin-row{display:grid;grid-template-columns:1fr auto;gap:8px;padding:9px 0;border-bottom:1px solid #172d42}.ap-origin-row:last-child{border-bottom:0}.ap-origin-row span{font-size:8px;color:#8ca1b2}.ap-origin-row b{font-size:11px}.ap-geo-grid{display:grid;grid-template-columns:1.2fr .8fr;gap:12px}.ap-geo-main{border:1px solid #1d344b;border-radius:10px;background:#091827;padding:14px}.ap-geo-score{display:flex;align-items:end;gap:10px}.ap-geo-score strong{font-size:34px;line-height:1;color:var(--green)}.ap-geo-score b{font-size:18px;line-height:1.1}.ap-geo-score span{font-size:8px;color:#71899c;margin-bottom:2px}.ap-progress{margin-top:13px}.ap-progress-head,.ap-actionline{display:flex;justify-content:space-between;gap:10px;align-items:center}.ap-progress-head span,.ap-progress-head b{font-size:8px;color:#8097aa}.ap-progress-track{height:6px;margin-top:6px;background:#14283a;border-radius:99px;overflow:hidden}.ap-progress-track i{display:block;height:100%;background:var(--cyan);border-radius:99px}.ap-breakdown{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:13px}.ap-break{padding:9px;border:1px solid #1d344b;border-radius:8px;background:#0a1a2a}.ap-break span{display:block;font-size:7px;color:#71899c;line-height:1.2}.ap-break b{display:block;font-size:14px;margin-top:5px}.ap-break em{display:block;font-style:normal;font-size:7px;color:#71899c;margin-top:2px}.ap-break.mismatch b{color:var(--amber)}.ap-break.invalid b,.ap-break.missing b{color:var(--red)}.ap-side{display:grid;gap:10px}.ap-side-card{padding:13px;border:1px solid #1d344b;border-radius:10px;background:#091827}.ap-side-card span{display:block;font-size:7px;letter-spacing:1px;color:#71899c;font-weight:900}.ap-side-card b{display:block;font-size:18px;margin-top:5px}.ap-side-card small{display:block;font-size:7px;color:#6d8498;margin-top:3px;line-height:1.35}.ap-btn{height:34px;padding:0 11px;border-radius:8px;border:1px solid #2b617c;background:#0a2234;color:var(--cyan);font-size:8px;font-weight:950;letter-spacing:.8px;cursor:pointer}.ap-spatial-top{display:grid;grid-template-columns:1.1fr repeat(4,1fr);gap:9px}.ap-spatial-kpi{padding:13px;border:1px solid #1d344b;border-radius:9px;background:#091827}.ap-spatial-kpi span{display:block;font-size:7px;color:#71899c;line-height:1.25}.ap-spatial-kpi b{display:block;font-size:19px;margin-top:5px}.ap-spatial-kpi.hero{background:linear-gradient(135deg,#0b2234,#091827)}.ap-spatial-kpi.hero b{color:var(--cyan);font-size:27px}.ap-matrix-wrap{overflow-x:auto;margin-top:12px;border:1px solid #1d344b;border-radius:9px;-webkit-overflow-scrolling:touch}.ap-matrix{width:100%;min-width:620px;border-collapse:collapse;font-size:8px}.ap-matrix th,.ap-matrix td{padding:9px;border-right:1px solid #1b3045;border-bottom:1px solid #1b3045;text-align:center;white-space:nowrap}.ap-matrix th{background:#10243a;color:#8ea3b5;font-size:7px;letter-spacing:.7px}.ap-matrix td{background:#091827;color:#dce8ef}.ap-matrix .muted{color:#4f6578}.ap-matrix .total{background:#0d2235;color:var(--cyan);font-weight:950}.ap-note{margin-top:9px;padding:9px 10px;border:1px solid #1d344b;background:#081625;border-radius:8px;color:#71899c;font-size:7px;line-height:1.5}.ap-actionline{margin-top:12px}.ap-actionline small{font-size:7px;color:#657d91}.ap-empty{padding:18px;border:1px dashed #29445c;border-radius:9px;color:#70869a;font-size:9px}
+@media(max-width:1100px){.asset-page-shell{width:min(100% - 28px,1200px)}.asset-page-filterbar{grid-template-columns:1fr 1fr}.asset-page-filterbar label:last-child{grid-column:1/-1}.ap-snapshot{grid-template-columns:1.2fr 1fr 1fr}.ap-structure,.ap-geo-grid{grid-template-columns:1fr}.ap-spatial-top{grid-template-columns:1.4fr 1fr 1fr 1fr 1fr}}
+@media(max-width:760px){.asset-profile-page{min-height:100dvh}.asset-page-shell{width:100%;padding:14px 12px 70px}.asset-page-head{flex-direction:column}.asset-page-actions{width:100%}.asset-page-actions .dash-btn{flex:1}.asset-page-filterbar{grid-template-columns:1fr 1fr}.asset-page-filterbar label:last-child{grid-column:1/-1}.ap-snapshot{grid-template-columns:1fr 1fr}.ap-kpi.primary{grid-column:1/-1}.ap-quad{grid-template-columns:1fr}.ap-breakdown{grid-template-columns:1fr 1fr}.ap-spatial-top{grid-template-columns:1fr 1fr}.ap-spatial-kpi.hero{grid-column:1/-1}.ap-actionline{align-items:flex-start;flex-direction:column}.ap-bar-row{grid-template-columns:80px minmax(70px,1fr) 58px}.asset-page-title{font-size:25px}}
+@media(max-width:430px){.asset-page-filterbar{grid-template-columns:1fr}.asset-page-filterbar label:last-child{grid-column:auto}.ap-snapshot{grid-template-columns:1fr}.ap-kpi.primary{grid-column:auto}.ap-breakdown,.ap-spatial-top{grid-template-columns:1fr}.ap-spatial-kpi.hero{grid-column:auto}.ap-geo-score strong{font-size:30px}.ap-page-title{font-size:23px}}
+body.pmno-page-assetprofile .workspace,body.pmno-page-assetprofile #dashboardView,body.pmno-page-assetprofile #siteProfileView,body.pmno-page-assetprofile #bulkView,body.pmno-page-assetprofile #drmView,body.pmno-page-assetprofile #masterDataView{display:none!important}
+body.pmno-page-assetprofile #assetProfileView{display:block!important}
+body.pmno-page-assetprofile .app{display:block!important;height:auto!important;min-height:0!important;overflow:visible!important}
 body.pmno-page-assetprofile .topbar{flex:none!important}
-body.pmno-page-assetprofile #dashboardView,body.pmno-page-assetprofile #siteProfileView,body.pmno-page-assetprofile #bulkView,body.pmno-page-assetprofile #drmView,body.pmno-page-assetprofile #masterDataView{display:none!important}
-body.pmno-page-assetprofile #assetProfileView{display:block!important;position:relative!important;width:100%!important;height:auto!important;min-height:0!important;margin:0!important;top:auto!important;transform:none!important}
-.assetp-shell{width:min(1800px,calc(100% - 44px));margin:0 auto;padding:22px 0 60px;}
-.assetp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;margin-bottom:18px}.assetp-kicker{font-size:9px;letter-spacing:2px;font-weight:900;color:#71889e}.assetp-title{font-size:27px;font-weight:950;letter-spacing:-.8px;margin-top:4px}.assetp-title b{color:#35c8ff}.assetp-sub{font-size:10px;color:#7e93a8;margin-top:5px}.assetp-head-actions{display:flex;gap:8px}.assetp-btn,.assetp-action{border:1px solid #29445d;background:#0a1c2d;color:#b8cad7;border-radius:9px;height:38px;padding:0 12px;font-size:8px;font-weight:950;letter-spacing:1px;cursor:pointer}.assetp-btn.primary,.assetp-action{color:#35c8ff;border-color:#28617c}.assetp-btn:disabled,.assetp-action:disabled{opacity:.55;cursor:wait}
-.assetp-filterbar{display:grid;grid-template-columns:1fr 1fr 1.1fr 1.2fr 2fr;gap:9px;margin-bottom:12px}.assetp-filterbar label{font-size:8px;letter-spacing:1.2px;font-weight:900;color:#7890a7}.assetp-filterbar select,.assetp-filterbar input{width:100%;height:40px;margin-top:6px;border:1px solid #29435e;border-radius:9px;background:#071321;color:#edf5fb;padding:0 10px;font-size:12px;outline:none}.assetp-filterbar select:focus,.assetp-filterbar input:focus{border-color:#35c8ff;box-shadow:0 0 0 3px rgba(53,200,255,.08)}
-.assetp-snapshot{display:grid;grid-template-columns:minmax(260px,.85fr) minmax(0,2fr);gap:1px;border:1px solid #20364f;border-radius:12px;background:#20364f;overflow:hidden;margin-bottom:22px}.assetp-snapshot-main{padding:22px 24px;background:#0a1727}.assetp-snapshot-main span,.assetp-snapshot-side span{display:block;font-size:8px;letter-spacing:1.5px;color:#7890a7;font-weight:950}.assetp-snapshot-main strong{display:block;font-size:38px;line-height:1;margin:8px 0 4px;font-weight:950;letter-spacing:-1.5px}.assetp-snapshot-main small{font-size:8px;color:#607990;font-weight:800;letter-spacing:1px}.assetp-snapshot-side{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:#20364f}.assetp-snapshot-side>div{padding:22px 24px;background:#0a1727}.assetp-snapshot-side b{display:block;font-size:24px;margin-top:8px}.assetp-snapshot-side small{display:block;font-size:9px;color:#71889d;margin-top:2px}
-.assetp-section{margin-top:20px}.assetp-section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:15px;margin-bottom:10px}.assetp-section-head>div{min-width:0}.assetp-section-head span{font-size:8px;color:#35c8ff;font-weight:950;margin-right:8px}.assetp-section-head strong{font-size:11px;letter-spacing:1.3px}.assetp-section-head small{display:block;color:#657d92;font-size:8px;margin-top:4px;margin-left:21px}.assetp-structure-grid{display:grid;grid-template-columns:1.25fr .85fr;gap:12px}.assetp-card{min-width:0;border:1px solid #1e344b;border-radius:11px;background:#0a1727;padding:15px}.assetp-card-wide{min-height:150px}.assetp-card-title{font-size:9px;letter-spacing:1.2px;font-weight:950;color:#d8e5ee;margin-bottom:12px}.assetp-card-title small{float:right;color:#60788e;font-size:7px;font-weight:700;letter-spacing:.3px}.assetp-bars{display:grid;gap:10px}.assetp-bar-row{display:grid;grid-template-columns:minmax(85px,.65fr) minmax(90px,1.6fr) auto;gap:9px;align-items:center}.assetp-bar-row>span{font-size:8px;color:#91a6b8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.assetp-bar-track{height:7px;border-radius:99px;background:#15283a;overflow:hidden}.assetp-bar-track i{display:block;height:100%;border-radius:99px;background:#35c8ff}.assetp-bar-row b{font-size:9px;text-align:right;white-space:nowrap}.assetp-bar-row b em{font-style:normal;color:#70879b;font-weight:600;margin-left:4px}
-.assetp-location-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:12px}.assetp-location-main,.assetp-location-breakdown{border:1px solid #1e344b;border-radius:11px;background:#0a1727;padding:16px}.assetp-bigmetric{display:grid;grid-template-columns:auto auto;column-gap:15px;align-items:end}.assetp-bigmetric span{grid-column:1/-1;font-size:8px;letter-spacing:1.5px;color:#7890a7;font-weight:950}.assetp-bigmetric strong{font-size:38px;line-height:1;margin-top:8px}.assetp-bigmetric b{font-size:18px;color:#43e0a0;padding-bottom:2px}.assetp-bigmetric small{grid-column:1/-1;color:#71899c;font-size:8px;margin-top:5px}.assetp-progress{margin-top:18px}.assetp-progress>div{display:flex;justify-content:space-between;gap:10px;font-size:8px;color:#71899c;margin-bottom:6px}.assetp-progress>div b{color:#b7c9d5}.assetp-progress>i{display:block;height:7px;border-radius:99px;background:#15283a;overflow:hidden}.assetp-progress>i:after{content:'';display:block;height:100%;width:var(--progress,0%);background:#43e0a0;border-radius:99px}.assetp-last-run{margin-top:12px;padding-top:10px;border-top:1px solid #1b3146;color:#647d92;font-size:8px}.assetp-breakdown-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:10px;padding:9px 0;border-bottom:1px solid #182d42;align-items:center}.assetp-breakdown-row:last-child{border-bottom:0}.assetp-breakdown-row span{font-size:8px;color:#8da2b3}.assetp-breakdown-row b{font-size:10px}.assetp-breakdown-row em{font-style:normal;font-size:8px;color:#71899c;text-align:right}.assetp-breakdown-row.issue b{color:#f5bf5c}.assetp-note{margin-top:9px;padding:10px 12px;border:1px solid #1b344b;border-radius:9px;background:#091827;color:#71899c;font-size:8px;line-height:1.5}.assetp-adj-kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:#20364f;border:1px solid #20364f;border-radius:11px;overflow:hidden}.assetp-adj-kpis>div{background:#0a1727;padding:15px}.assetp-adj-kpis span{display:block;font-size:7px;letter-spacing:1.2px;color:#71899c;font-weight:950}.assetp-adj-kpis strong{display:block;font-size:23px;margin-top:7px}.assetp-adj-kpis small{display:block;color:#637c91;font-size:7px;margin-top:2px}.assetp-adj-grid{display:grid;grid-template-columns:.8fr 1.2fr;gap:12px;margin-top:12px}.assetp-basis{display:grid;gap:0}.assetp-basis-row{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid #182d42;font-size:8px}.assetp-basis-row:last-child{border-bottom:0}.assetp-basis-row span{color:#71899c}.assetp-basis-row b{text-align:right}.assetp-matrix-wrap{overflow:auto}.assetp-matrix{width:100%;border-collapse:collapse;font-size:8px}.assetp-matrix th,.assetp-matrix td{padding:8px;border-bottom:1px solid #1b3146;border-right:1px solid #1b3146;text-align:center;white-space:nowrap}.assetp-matrix th{color:#7890a7;font-size:7px;letter-spacing:.6px}.assetp-matrix td{color:#dce8ef}.assetp-matrix .muted{color:#3f566b}.assetp-matrix .total{font-weight:950;color:#35c8ff}.assetp-matrix .grand{color:#43e0a0}.assetp-empty{color:#637b8f;font-size:9px;padding:10px 0}.assetp-error{color:#ff8d9f;font-size:8px}
-.dash-profile-open{border:1px solid #28546b;background:#091c2b;color:#35c8ff;border-radius:7px;padding:6px 8px;font-size:7px;font-weight:950;letter-spacing:.8px;cursor:pointer;white-space:nowrap}.dash-profile-entry .dash-card-head{align-items:flex-start}
-@media(max-width:1100px){.assetp-shell{width:calc(100% - 32px)}.assetp-filterbar{grid-template-columns:repeat(4,minmax(0,1fr))}.assetp-filterbar label:last-child{grid-column:1/-1}.assetp-structure-grid{grid-template-columns:1fr 1fr}.assetp-location-grid{grid-template-columns:1fr}.assetp-adj-grid{grid-template-columns:1fr}}
-@media(orientation:landscape) and (min-width:761px) and (max-width:1100px){.assetp-head{margin-bottom:12px}.assetp-title{font-size:22px}.assetp-snapshot-main{padding:17px}.assetp-snapshot-side>div{padding:17px}.assetp-snapshot-main strong{font-size:31px}.assetp-structure-grid{grid-template-columns:1.2fr .8fr}.assetp-location-grid{grid-template-columns:1.1fr .9fr}.assetp-adj-kpis{grid-template-columns:repeat(4,1fr)}}
-@media(max-width:760px){.asset-profile-page{min-height:100dvh}.assetp-shell{width:100%;padding:14px 12px 70px}.assetp-head{flex-direction:column;gap:12px}.assetp-title{font-size:22px}.assetp-head-actions{width:100%}.assetp-head-actions button{flex:1}.assetp-filterbar{grid-template-columns:1fr 1fr}.assetp-filterbar label:last-child{grid-column:1/-1}.assetp-snapshot{grid-template-columns:1fr}.assetp-snapshot-main{padding:18px}.assetp-snapshot-main strong{font-size:34px}.assetp-snapshot-side>div{padding:16px}.assetp-structure-grid{grid-template-columns:1fr}.assetp-card-wide{min-height:0}.assetp-section-head{align-items:flex-start}.assetp-section-head{flex-direction:column}.assetp-section-head .assetp-action{align-self:stretch}.assetp-adj-kpis{grid-template-columns:1fr 1fr}.assetp-adj-grid{grid-template-columns:1fr}.assetp-bar-row{grid-template-columns:minmax(80px,.75fr) minmax(70px,1.3fr) auto}.assetp-breakdown-row{grid-template-columns:minmax(0,1fr) auto auto}}
-@media(max-width:430px){.assetp-filterbar{grid-template-columns:1fr}.assetp-filterbar label:last-child{grid-column:auto}.assetp-snapshot-side{grid-template-columns:1fr 1fr}.assetp-adj-kpis{grid-template-columns:1fr}.assetp-bigmetric strong{font-size:31px}.assetp-bigmetric b{font-size:15px}}
+.dash-nav-card .dash-card-open{border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:7px;padding:6px 8px;font-size:7px;font-weight:950;letter-spacing:.7px;cursor:pointer;white-space:nowrap}
+@media(max-width:760px){.dash-nav-card .dash-card-head{align-items:flex-start}.dash-nav-card .dash-card-open{margin-left:auto}}
 </style>
-
+<style id="pmno-asset-dashboard-mini-v90">
+.asset-overview-mini{display:grid;grid-template-columns:1.15fr 1fr 1fr;gap:9px}.asset-mini-total,.asset-mini-side{padding:11px;border:1px solid #1d344b;border-radius:9px;background:#091827}.asset-mini-total small,.asset-mini-label{display:block;font-size:7px;letter-spacing:1.1px;color:#71899c;font-weight:900}.asset-mini-total strong{display:block;font-size:25px;color:var(--cyan);margin-top:5px}.asset-mini-total span{display:block;font-size:7px;color:#6d8498;margin-top:3px}.asset-origin-mini,.asset-mini-type{display:grid;grid-template-columns:1fr auto auto;gap:7px;align-items:center;padding:5px 0;border-bottom:1px solid #172d42}.asset-origin-mini:last-child,.asset-mini-type:last-child{border-bottom:0}.asset-origin-mini span,.asset-mini-type span{font-size:8px;color:#8ca1b2;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.asset-origin-mini b,.asset-mini-type b{font-size:9px}.asset-origin-mini em{font-style:normal;font-size:7px;color:#6d8498}.asset-mini-footer{grid-column:1/-1;display:flex;justify-content:space-between;align-items:center;gap:8px;padding-top:2px}.asset-mini-footer span{font-size:7px;color:#687f93}@media(max-width:1100px){.asset-overview-mini{grid-template-columns:1fr 1fr}.asset-mini-total{grid-column:1/-1}}@media(max-width:760px){.asset-overview-mini{grid-template-columns:1fr}.asset-mini-total{grid-column:auto}.asset-mini-footer{align-items:flex-start;flex-direction:column}}
+</style>
 </head>
 <body>
 <div class="app">
@@ -1561,7 +1562,7 @@ body.pmno-page-assetprofile #assetProfileView{display:block!important;position:r
     <div id="dash-show-layer" class="dash-layer">
       <div class="dash-grid-top">
         <section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t0"></i>0 / NPA <i class="t1"></i>1 <i class="t2"></i>2 <i class="t3"></i>3 <i class="t4"></i>&gt;3</div></div><div id="dash-map"></div></section>
-        <section class="dash-card dash-profile-entry"><div class="dash-card-head"><div><span>02</span><strong>ASSET PROFILE</strong><small>What asset portfolio do we have?</small></div><button id="dash-open-asset" class="dash-profile-open" type="button">OPEN PROFILE ↗</button></div><div id="dash-asset" class="dash-panel-content"></div></section>
+        <section class="dash-card dash-nav-card"><div class="dash-card-head"><div><span>02</span><strong>ASSET PROFILE</strong><small>Portfolio structure, physical profile and spatial intelligence.</small></div><button type="button" class="dash-card-open" id="dash-open-asset">OPEN PROFILE ↗</button></div><div id="dash-asset" class="dash-panel-content"></div></section>
       </div>
       <div class="show-section-title">PORTFOLIO PROFILE</div>
       <div class="dash-grid-3">
@@ -1600,56 +1601,24 @@ body.pmno-page-assetprofile #assetProfileView{display:block!important;position:r
     </div>
   </div>
 </section>
-</section>
-
 <section id="assetProfileView" class="asset-profile-page" style="display:none">
-  <div class="assetp-shell">
-    <div class="assetp-head">
+  <div class="asset-page-shell">
+    <div class="asset-page-head">
       <div>
-        <div class="assetp-kicker">MITRATEL · ASSET INTELLIGENCE</div>
-        <div class="assetp-title">ASSET <b>PROFILE</b></div>
-        <div class="assetp-sub">Physical portfolio structure, location quality and tower spatial intelligence.</div>
+        <div class="asset-page-kicker">MITRATEL · ASSET INTELLIGENCE</div>
+        <div class="asset-page-title">ASSET <b>PROFILE</b></div>
+        <div class="asset-page-sub">Portfolio structure, physical composition and spatial intelligence.</div>
       </div>
-      <div class="assetp-head-actions"><button id="assetp-back" type="button" class="assetp-btn">← DASHBOARD</button><button id="assetp-refresh" type="button" class="assetp-btn primary">↻ REFRESH</button></div>
+      <div class="asset-page-actions"><button type="button" class="dash-btn" id="asset-back-dashboard">← DASHBOARD</button><button type="button" class="dash-btn primary" id="asset-refresh">↻ REFRESH</button></div>
     </div>
-    <div class="assetp-filterbar">
-      <label>REGIONAL<select id="assetp-regional"><option value="">ALL REGIONAL</option></select></label>
-      <label>AREA<select id="assetp-area"><option value="">ALL AREA</option></select></label>
-      <label>PROVINCE<select id="assetp-province"><option value="">ALL PROVINCE</option></select></label>
-      <label>KABUPATEN / KOTA<select id="assetp-city"><option value="">ALL KABUPATEN / KOTA</option></select></label>
-      <label>SEARCH SITE<input id="assetp-search" placeholder="Site ID / Site Name"></label>
+    <div class="asset-page-filterbar">
+      <label>REGIONAL<select id="asset-regional"><option value="">ALL REGIONAL</option></select></label>
+      <label>AREA<select id="asset-area"><option value="">ALL AREA</option></select></label>
+      <label>PROVINCE<select id="asset-province"><option value="">ALL PROVINCE</option></select></label>
+      <label>KABUPATEN / KOTA<select id="asset-city"><option value="">ALL KABUPATEN / KOTA</option></select></label>
+      <label>SEARCH SITE<input id="asset-search" placeholder="Site ID / Site Name"></label>
     </div>
-
-    <section class="assetp-snapshot">
-      <div class="assetp-snapshot-main"><span>PORTFOLIO SIZE</span><strong id="assetp-total">—</strong><small>SITES / TOWERS</small></div>
-      <div class="assetp-snapshot-side"><div><span>BUILD</span><b id="assetp-build">—</b><small id="assetp-build-pct">—</small></div><div><span>ACQUISITION</span><b id="assetp-acq">—</b><small id="assetp-acq-pct">—</small></div></div>
-    </section>
-
-    <section class="assetp-section">
-      <div class="assetp-section-head"><div><span>01</span><strong>ASSET STRUCTURE</strong><small>How the physical portfolio is composed.</small></div></div>
-      <div class="assetp-structure-grid">
-        <article class="assetp-card assetp-card-wide"><div class="assetp-card-title">ASSET COMPOSITION <small>Tower type distribution</small></div><div id="assetp-composition" class="assetp-bars"></div></article>
-        <article class="assetp-card"><div class="assetp-card-title">ASSET ORIGIN <small>Build vs acquisition</small></div><div id="assetp-origin" class="assetp-bars"></div></article>
-        <article class="assetp-card"><div class="assetp-card-title">ASSET MATURITY <small>Portfolio age buckets</small></div><div id="assetp-maturity" class="assetp-bars"></div></article>
-        <article class="assetp-card assetp-card-wide"><div class="assetp-card-title">PHYSICAL PROFILE <small>Tower height distribution</small></div><div id="assetp-height" class="assetp-bars"></div></article>
-      </div>
-    </section>
-
-    <section class="assetp-section">
-      <div class="assetp-section-head"><div><span>02</span><strong>LOCATION INTELLIGENCE</strong><small>Coordinate quality and validation status.</small></div><button id="assetp-geo-btn" class="assetp-action" type="button">↻ VALIDATE COORDINATE</button></div>
-      <div class="assetp-location-grid">
-        <article class="assetp-location-main"><div class="assetp-bigmetric"><span>VALID COORDINATE</span><strong id="assetp-geo-valid">—</strong><b id="assetp-geo-pct">—</b><small id="assetp-geo-status">Not validated yet</small></div><div class="assetp-progress"><div><span id="assetp-geo-phase">No validation run yet</span><b id="assetp-geo-progress-text">—</b></div><i id="assetp-geo-progress"></i></div><div id="assetp-geo-last" class="assetp-last-run">Not validated yet</div></article>
-        <article class="assetp-location-breakdown"><div class="assetp-card-title">VALIDATION BREAKDOWN <small>Site-level result</small></div><div id="assetp-geo-breakdown"></div></article>
-      </div>
-      <div class="assetp-note">Validation is manual. The latest completed result remains visible until the next validation. Filter changes do not automatically rerun or erase the latest completed result.</div>
-    </section>
-
-    <section class="assetp-section">
-      <div class="assetp-section-head"><div><span>03</span><strong>TOWER SPATIAL INTELLIGENCE</strong><small>Tower bersebelahan within &lt;100 m.</small></div><button id="assetp-adj-btn" class="assetp-action" type="button">↻ HITUNG &lt;100 M</button></div>
-      <div class="assetp-adj-kpis"><div><span>ADJACENT TOWERS</span><strong id="assetp-adj-sites">—</strong><small>tower with ≥1 neighbour</small></div><div><span>PORTFOLIO SHARE</span><strong id="assetp-adj-share">—</strong><small>of valid-coordinate towers</small></div><div><span>UNIQUE PAIRS</span><strong id="assetp-adj-pairs">—</strong><small>pairs under 100 m</small></div><div><span>NOT ADJACENT</span><strong id="assetp-adj-non">—</strong><small>valid-coordinate towers</small></div></div>
-      <div class="assetp-adj-grid"><article class="assetp-card"><div class="assetp-card-title">CALCULATION BASIS <small>Current portfolio context</small></div><div id="assetp-adj-basis" class="assetp-basis"></div></article><article class="assetp-card assetp-card-matrix"><div class="assetp-card-title">HEIGHT MATRIX <small>Unique tower pairs</small></div><div id="assetp-matrix" class="assetp-matrix-wrap"></div></article></div>
-      <div id="assetp-adj-status" class="assetp-note">Belum dihitung.</div>
-    </section>
+    <div id="asset-profile-page-content"></div>
   </div>
 </section>
 
@@ -2399,7 +2368,7 @@ loadTenants().then(pmnoLoadRouteContext);
   const ROUTES=new Set(['dashboard','assetprofile','siteprofile','bulk','single','drm','master']);
   const el=id=>document.getElementById(id);
   const views={dashboard:el('dashboardView'),assetprofile:el('assetProfileView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
-  const menus={dashboard:el('dashboardMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
+  const menus={dashboard:el('dashboardMenu'),assetprofile:el('assetProfileMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
   const valid=p=>ROUTES.has(String(p||'').toLowerCase());
   const readHash=()=>{const h=String(location.hash||'').replace(/^#/,'').trim().toLowerCase();const r=h.split(/[?&/]/)[0];return valid(r)?r:null};
   const readSaved=()=>{try{const p=String(localStorage.getItem(KEY)||'').toLowerCase();return valid(p)?p:null}catch(_){return null}};
@@ -3565,6 +3534,46 @@ function pmnoRenderCustomerBusinessTable(data){
   </div>`;
 }
 
+function renderAssetProfilePage(){
+ const root=$('asset-profile-page-content'); if(!root)return;
+ const a=pmnoGetAggregateSummary()?.stats||{};
+ const aggregate=pmnoGetAggregateSummary()?.aggregate||{};
+ const sm=window.__pmnoSiteMasterSummary||null;
+ const geo=window.__pmnoGeoPortfolio||{};
+ const ad=window.__pmnoTowerAdjacency||{};
+ const total=Number(a.total)||Number(sm?.total_sites)||0;
+ const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
+ const ageBuckets=Array.isArray(aggregate?.maturity)?aggregate.maturity:[];
+ const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
+ const origin=sm?[['BUILD',Number(sm.build_sites)||0],['ACQUISITION',Number(sm.acquisition_sites)||0]]:[];
+ const pctOf=n=>total?(n/total*100).toFixed(1)+'%':'0.0%';
+ const barRows=rows=>rows.map(([k,n])=>`<div class="ap-bar-row"><span>${esc(k)}</span><div class="ap-bar-track"><i style="width:${total?Math.min(100,n/total*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
+ const originRows=origin.map(([k,n])=>`<div class="ap-origin-row"><span>${esc(k)}</span><b>${fmtInt(n)} <em style="font-style:normal;color:#71899c;font-weight:500">${pctOf(n)}</em></b></div>`).join('');
+ const geoReady=geo.status==='ready'&&Number(geo.total)===total, geoLoading=geo.status==='loading', geoError=geo.status==='error';
+ const gv=Number(geo.valid)||0, gm=Number(geo.mismatch)||0, gi=Number(geo.invalid)||0, gn=Number(geo.missing)||0, gp=geoReady?100:Number(geo.progress)||0;
+ const adReady=ad.status==='ready', adLoading=ad.status==='loading', adError=ad.status==='error';
+ const adTotal=Number(ad.total)||0, adj=Number(ad.adjacentSites)||0, pairs=Number(ad.adjacentPairs)||0, non=Number(ad.nonAdjacentSites)||0, share=Number(ad.adjacentSiteShare)||0, adProg=Number(ad.progress)||0;
+ let matrix='';
+ if(adReady&&Array.isArray(ad.heightMatrix)){
+   const labs=['<30 m','30–50 m','50–70 m','>70 m'],m=ad.heightMatrix;
+   const rowTotals=labs.map((_,i)=>labs.reduce((n,__,j)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));
+   const colTotals=labs.map((_,j)=>labs.reduce((n,__,i)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));
+   matrix=`<div class="ap-matrix-wrap"><table class="ap-matrix"><thead><tr><th>TINGGI TOWER</th>${labs.map(x=>`<th>${x}</th>`).join('')}<th>TOTAL BARIS</th></tr></thead><tbody>${labs.map((r,i)=>`<tr><th>${r}</th>${labs.map((_,j)=>j<i?'<td class="muted">—</td>':`<td>${fmtInt(Number(m?.[i]?.[j])||0)}</td>`).join('')}<td class="total">${fmtInt(rowTotals[i])}</td></tr>`).join('')}<tr><th class="total">TOTAL KOLOM</th>${labs.map((_,j)=>`<td class="total">${fmtInt(colTotals[j])}</td>`).join('')}<td class="total">${fmtInt(pairs)}</td></tr></tbody></table></div>`;
+ }
+ root.innerHTML=`
+ <section class="ap-section"><div class="ap-section-head"><div><strong>01 · PORTFOLIO SNAPSHOT</strong><small> Core size and asset origin</small></div></div><div class="ap-section-body"><div class="ap-snapshot">
+   <div class="ap-kpi primary"><span>PORTFOLIO SIZE</span><b>${fmtInt(total)}</b><small>Sites / Towers in current filter</small></div>
+   <div class="ap-kpi"><span>BUILD</span><b>${fmtInt(origin[0]?.[1]||0)}</b><small>${pctOf(origin[0]?.[1]||0)} of portfolio</small></div>
+   <div class="ap-kpi"><span>ACQUISITION</span><b>${fmtInt(origin[1]?.[1]||0)}</b><small>${pctOf(origin[1]?.[1]||0)} of portfolio</small></div>
+ </div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>02 · ASSET STRUCTURE</strong><small> Composition, origin, maturity and physical profile</small></div></div><div class="ap-section-body"><div class="ap-structure"><div class="ap-module"><div class="ap-module-title">ASSET COMPOSITION · TOWER TYPE</div><div class="ap-bar">${barRows(towerTypeRows)||'<div class="ap-empty">No tower type data in current filter.</div>'}</div></div><div class="ap-module"><div class="ap-module-title">ASSET ORIGIN</div>${originRows||'<div class="ap-empty">Origin summary unavailable.</div>'}</div><div class="ap-module"><div class="ap-module-title">ASSET MATURITY</div><div class="ap-bar">${barRows(ageBuckets)||'<div class="ap-empty">No maturity data in current filter.</div>'}</div></div><div class="ap-module"><div class="ap-module-title">PHYSICAL PROFILE · TOWER HEIGHT</div><div class="ap-bar">${barRows(heightBuckets)||'<div class="ap-empty">No tower height data in current filter.</div>'}</div></div></div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>03 · LOCATION INTELLIGENCE</strong><small>Tower coordinate validity and geospatial readiness</small></div><button type="button" class="ap-btn" id="asset-page-geo">${geoLoading?'VALIDATING…':'↻ VALIDATE COORDINATE'}</button></div><div class="ap-section-body"><div class="ap-geo-grid"><div class="ap-geo-main"><div class="ap-geo-score"><strong>${geoReady?fmtInt(gv):'—'}</strong><b>${geoReady?(total?((gv/total)*100).toFixed(1):'0.0')+'%':geoError?'Unavailable':geoLoading?gp.toFixed(0)+'%':'—'}</b><span>valid coordinates</span></div><div class="ap-progress"><div class="ap-progress-head"><span>${geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?'Validation running':'Not validated yet'}</span><b>${fmtInt(Math.min(Number(geo.processed)||0,total))} / ${fmtInt(Number(geo.total)||total)}</b></div><div class="ap-progress-track"><i style="width:${Math.min(100,gp)}%"></i></div></div><div class="ap-breakdown"><div class="ap-break"><span>VALID</span><b>${geoReady?fmtInt(gv):'—'}</b><em>${geoReady?pctOf(gv):'—'}</em></div><div class="ap-break mismatch"><span>LOCATION MISMATCH</span><b>${geoReady?fmtInt(gm):'—'}</b><em>${geoReady?pctOf(gm):'—'}</em></div><div class="ap-break invalid"><span>INVALID COORDINATE</span><b>${geoReady?fmtInt(gi):'—'}</b><em>${geoReady?pctOf(gi):'—'}</em></div><div class="ap-break missing"><span>MISSING COORDINATE</span><b>${geoReady?fmtInt(gn):'—'}</b><em>${geoReady?pctOf(gn):'—'}</em></div></div></div><div class="ap-side"><div class="ap-side-card"><span>LAST VALIDATION</span><b>${geo.lastRunAt?esc(new Date(geo.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})):'Not validated yet'}</b><small>Filter changes do not automatically rerun validation.</small></div><div class="ap-side-card"><span>REFERENCE</span><b>GADM 4.1</b><small>Province polygons with normalized province aliases.</small></div></div></div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>04 · TOWER SPATIAL INTELLIGENCE</strong><small>Tower adjacency within &lt;100 m</small></div><button type="button" class="ap-btn" id="asset-page-adj">${adLoading?'⟳ MENGHITUNG…':'↻ HITUNG &lt;100 M'}</button></div><div class="ap-section-body"><div class="ap-spatial-top"><div class="ap-spatial-kpi hero"><span>ADJACENT TOWERS</span><b>${adReady?fmtInt(adj):'—'}</b><small>${adReady?share.toFixed(1)+'% of portfolio':'Result not available'}</small></div><div class="ap-spatial-kpi"><span>VALID COORDINATES</span><b>${adReady?fmtInt(adTotal):'—'}</b></div><div class="ap-spatial-kpi"><span>UNIQUE PAIRS</span><b>${adReady?fmtInt(pairs):'—'}</b></div><div class="ap-spatial-kpi"><span>NOT ADJACENT</span><b>${adReady?fmtInt(non):'—'}</b></div><div class="ap-spatial-kpi"><span>NOT COUNTED</span><b>${adReady?fmtInt(Math.max(0,total-adTotal)):'—'}</b></div></div>${matrix||'<div class="ap-empty" style="margin-top:12px">Height matrix will appear after the &lt;100 m calculation is completed.</div>'}<div class="ap-note">Perhitungan jarak hanya menggunakan tower dengan koordinat valid. Tower teridentifikasi bersebelahan berarti memiliki minimal 1 tower lain dalam jarak <b>&lt;100 m</b>. Pasangan tower dihitung unik satu kali; jarak tepat 100,0 m tidak termasuk. Hasil terakhir dipertahankan sampai perhitungan berikutnya selesai.</div></div></section>`;
+ $('asset-page-geo')?.addEventListener('click',()=>document.getElementById('pmnoGeoValidateBtn')?.click());
+ $('asset-page-adj')?.addEventListener('click',()=>document.getElementById('pmnoAdjCalcBtn')?.click());
+}
+window.pmnoAssetProfileRender=renderAssetProfilePage;
+
 function renderDashboardSource(label){
  const aggregate=pmnoGetAggregateSummary();
  const sm=aggregate?.stats||null;
@@ -3627,50 +3636,14 @@ function renderDashboardSource(label){
  const asset=$('dash-asset');if(asset){
   const towerTypeRows=Array.isArray(aggregate?.tower_type)?aggregate.tower_type:[];
   const assetOrigin=sm?[['BUILD',Number(sm.build_sites)||0],['ACQUISITION',Number(sm.acquisition_sites)||0]]:[];
-  const portfolioDen=Number(sm?.total_sites)||0;
-  const assetOriginRows=assetOrigin.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${portfolioDen?Math.min(100,n/portfolioDen*100):0}%"></i></div><b>${fmtInt(n)} <em style="font-style:normal;font-weight:500;color:#7f96aa">${portfolioDen?(n/portfolioDen*100).toFixed(1):'0.0'}%</em></b></div>`).join('');
+  const portfolioDen=Number(sm?.total_sites)||Number(a.total)||0;
   const ageBuckets=Array.isArray(aggregate?.maturity)?aggregate.maturity:[];
-    const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
-    const geo=window.__pmnoGeoPortfolio||{};
-  const geoReady=geo.status==='ready' && Number(geo.total)===Number(a.total);
-  const geoError=geo.status==='error';
-  const geoLoading=geo.status==='loading'||(!geoReady&&!geoError);
-  const geoValid=Number(geo.valid)||0;
-  const locationMismatch=Number(geo.mismatch)||0;
-  const invalidCoord=Number(geo.invalid)||0;
-  const missingCoord=Number(geo.missing)||0;
-  const geoProcessed=Math.min(Number(geo.processed)||0,Number(geo.total)||Number(a.total)||0);
-  const geoProgress=geoReady?100:(Number(geo.progress)||0);
-  const coordPct=geoReady&&a.total?geoValid/a.total*100:0;
-  const pctOfTotal=n=>a.total?(n/a.total*100).toFixed(1)+'%':'0.0%';
-  const geoPhase=geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?(geo.total?`Validating ${fmtInt(geoProcessed)} of ${fmtInt(geo.total)}`:'Preparing geospatial reference…'):'Preparing…';
-  const geoElapsed=Number(geo.elapsedMs||0);
-  const geoTime=geoElapsed<1000?Math.max(0,Math.round(geoElapsed))+' ms':(geoElapsed/1000).toFixed(1)+' s';
-  const geoLiveClass=geoReady?'asset-readiness-live done':geoError?'asset-readiness-live error':'asset-readiness-live';
-  const barRows=(rows)=>rows.map(([k,n])=>`<div class="asset-bar-row"><span>${esc(k)}</span><div class="asset-bar-track"><i style="width:${a.total?Math.min(100,n/a.total*100):0}%"></i></div><b>${fmtInt(n)}</b></div>`).join('');
-  const group=(title,body)=>`<div class="asset-profile-group"><div class="asset-profile-group-title">${esc(title)}</div>${body}</div>`;
-  asset.innerHTML=`<div class="asset-profile-grid">
-    <div class="asset-profile-hero"><small>PORTFOLIO SIZE</small><strong>${fmtInt(a.total)}</strong><span>Sites / Towers</span></div>
-    ${group('ASSET ORIGIN',assetOriginRows)}
-    ${group('ASSET COMPOSITION',barRows(towerTypeRows))}
-    ${group('ASSET MATURITY',barRows(ageBuckets))}
-    ${group('PHYSICAL PROFILE · TOWER HEIGHT',barRows(heightBuckets))}
-    <div class="asset-profile-readiness"><div class="geo-head"><div><small>ASSET INTELLIGENCE READINESS</small><span>Tower Coordinate Validity</span></div></div><div class="asset-readiness-value"><strong>${geoReady?fmtInt(geoValid):'—'}</strong><b>${geoReady?coordPct.toFixed(1)+'%':(geoError?'Unavailable':geoLoading?geoProgress.toFixed(0)+'%':'—')}</b><em>${geoReady?'valid coordinates':(geoError?'geospatial validation unavailable':geoLoading?'geospatial validation running':'not validated yet')}</em></div><div class="asset-readiness-progress"><div class="asset-readiness-progress-head"><span class="${geoLiveClass}"><i></i>${esc(geoPhase)}</span><b>${fmtInt(geoProcessed)} / ${fmtInt(Number(geo.total)||Number(a.total)||0)}</b></div><div class="asset-readiness-progress-track"><i style="width:${Math.min(100,geoProgress)}%"></i></div><div class="asset-readiness-progress-sub"><span>${geoReady?'Latest completed validation':geoError?'Validation unavailable — dashboard tetap aktif':geoLoading?'Live · browser remains responsive':'No validation run yet'}</span><span>${geoTime}</span></div></div><div class="asset-readiness-breakdown">
-      <div class="asset-readiness-row valid"><span>Valid Coordinate</span><b>${geoReady?fmtInt(geoValid):'—'}</b><em>${geoReady?pctOfTotal(geoValid):(geoError?'Unavailable':'—')}</em></div>
-      <div class="asset-readiness-row mismatch geo-issue-row ${geoReady&&locationMismatch>0?'has-issues':''}" data-geo-status="LOCATION_MISMATCH" title="Klik untuk melihat daftar site"><span>Location Mismatch</span><b>${geoReady?fmtInt(locationMismatch):'—'}</b><em>${geoReady?pctOfTotal(locationMismatch):(geoError?'Unavailable':'—')}</em></div>
-      <div class="asset-readiness-row invalid geo-issue-row ${geoReady&&invalidCoord>0?'has-issues':''}" data-geo-status="INVALID_COORDINATE" title="Klik untuk melihat daftar site"><span>Invalid Coordinate</span><b>${geoReady?fmtInt(invalidCoord):'—'}</b><em>${geoReady?pctOfTotal(invalidCoord):(geoError?'Unavailable':'—')}</em></div>
-      <div class="asset-readiness-row missing geo-issue-row ${geoReady&&missingCoord>0?'has-issues':''}" data-geo-status="MISSING_COORDINATE" title="Klik untuk melihat daftar site"><span>Missing Coordinate</span><b>${geoReady?fmtInt(missingCoord):'—'}</b><em>${geoReady?pctOfTotal(missingCoord):(geoError?'Unavailable':'—')}</em></div>
-    </div><div class="asset-readiness-actions"><button type="button" id="pmnoGeoValidateBtn" class="geo-validate-btn" ${geoLoading?'disabled':''}>${geoLoading?'VALIDATING…':'↻ VALIDATE COORDINATE'}</button><span class="geo-last-run">${geo.lastRunAt?`Last run · <b>${esc(new Date(geo.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}))}</b> · ${esc(pmnoGeoFilterLabel(geo.lastContext||{}))}`:'Not validated yet'}</span></div><div class="asset-readiness-note">Validation is manual. The dashboard keeps the latest completed result visible until the next validation. Validation uses GADM 4.1 province polygons with normalized province aliases. Filter changes do not automatically rerun or erase the last completed validation.</div>
-    ${(()=>{const ad=window.__pmnoTowerAdjacency||{};const ready=ad.status==='ready',loading=ad.status==='loading',error=ad.status==='error';const total=Number(ad.total)||0,portfolioTotal=Number(ad.portfolioTotal)||Number(a.total)||0,adj=Number(ad.adjacentSites)||0,pairs=Number(ad.adjacentPairs)||0,non=Number(ad.nonAdjacentSites)||0,share=Number(ad.adjacentSiteShare)||0,processed=Math.min(Number(ad.processed)||0,total),progress=total?Math.min(100,Number(ad.progress)||0):0,elapsed=Number(ad.elapsedMs)||0;const time=elapsed<1000?Math.max(0,Math.round(elapsed))+' ms':(elapsed/1000).toFixed(1)+' s';const phase=loading?(total?`Menghitung ${fmtInt(processed)} dari ${fmtInt(total)} tower`:'Menyiapkan perhitungan…'):ready?'Perhitungan selesai':error?'Perhitungan gagal':'Belum dihitung';const liveClass=loading?'asset-readiness-live':ready?'asset-readiness-live done':error?'asset-readiness-live error':'asset-readiness-live';return `<div class="asset-profile-readiness"><div class="geo-head"><div><small>ASSET INTELLIGENCE</small><span>Tower Bersebelahan · &lt;100 M</span></div></div><div class="tower-adj-value"><strong>${ready?fmtInt(adj):'—'}</strong><b>${ready?share.toFixed(1)+'%':'—'}</b><em>tower dengan tower lain dalam jarak &lt;100 m</em></div><div class="tower-adj-meta">
-  <div><span>Total Tower Portfolio</span><b>${ready?fmtInt(portfolioTotal):'—'}</b></div>
-  <div><span>Tower dengan Koordinat Valid</span><b>${ready?fmtInt(total)+' tower · '+(portfolioTotal?fmtPct(total/portfolioTotal*100):'—'):'—'}</b></div>
-  <div><span>Tower Tidak Terhitung</span><b>${ready?fmtInt(portfolioTotal-total)+' tower':'—'}</b></div>
-  <div><span>Tower Teridentifikasi Bersebelahan</span><b>${ready?fmtInt(adj):'—'}</b></div>
-  <div><span>Pasangan Tower &lt;100 M</span><b>${ready?fmtInt(pairs):'—'}</b></div>
-  <div><span>Tower Tidak Bersebelahan</span><b>${ready?fmtInt(non):'—'}</b></div>
-</div>${ready&&Array.isArray(ad.heightMatrix)?(()=>{const labs=['<30 m','30–50 m','50–70 m','>70 m'],m=ad.heightMatrix;const rowTotals=labs.map((_,i)=>labs.reduce((n,__,j)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));const colTotals=labs.map((_,j)=>labs.reduce((n,__,i)=>n+(j>=i?Number(m?.[i]?.[j])||0:0),0));return `<div class="tower-adj-height"><div class="tower-adj-height-title">Tower Bersebelahan Berdasarkan Tinggi</div><div class="tower-adj-height-wrap"><table class="tower-adj-height-table"><thead><tr><th>TINGGI TOWER</th>${labs.map(x=>`<th>${x}</th>`).join('')}<th>TOTAL BARIS</th></tr></thead><tbody>${labs.map((r,i)=>`<tr><th>${r}</th>${labs.map((_,j)=>j<i?'<td class="muted">—</td>':`<td>${fmtInt(Number(m?.[i]?.[j])||0)}</td>`).join('')}<td class="matrix-total">${fmtInt(rowTotals[i])}</td></tr>`).join('')}<tr class="matrix-total-row"><th>TOTAL KOLOM</th>${labs.map((_,j)=>`<td>${fmtInt(colTotals[j])}</td>`).join('')}<td class="matrix-grand-total">${fmtInt(pairs)}</td></tr></tbody></table></div><div class="tower-adj-height-note"><b>Baris</b> menunjukkan kelompok tinggi tower pertama. <b>Kolom</b> menunjukkan kelompok tinggi tower kedua. Setiap pasangan tower hanya dihitung <b>1 kali</b>. Total matrix = jumlah <b>pasangan tower</b>, bukan jumlah tower.</div></div>`})():''}${loading?`<div class="tower-adj-progress"><div class="tower-adj-progress-head"><span>SEDANG MENGHITUNG</span><b>${progress.toFixed(0)}%</b></div><div class="tower-adj-progress-track"><i style="width:${progress}%"></i></div><div class="tower-adj-progress-sub"><span>${esc(phase)}</span><span>${esc(pmnoAdjFilterLabel({regional:String($('dash-regional')?.value||''),area:String($('dash-area')?.value||''),province:String($('dash-province')?.value||''),city:String($('dash-city')?.value||''),search:String($('dash-search')?.value||'').trim()}))}</span></div></div>`:''}<div class="asset-readiness-actions"><button type="button" id="pmnoAdjCalcBtn" class="geo-validate-btn" ${loading?'disabled':''}>${loading?'⟳ MENGHITUNG…':'↻ HITUNG &lt;100 M'}</button><span class="geo-last-run ${liveClass}"><i></i>${loading?'Sedang menghitung…':ad.lastRunAt?`Terakhir dihitung · <b>${esc(new Date(ad.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'}))}</b> · ${esc(pmnoAdjFilterLabel(ad.lastContext||{}))}`:error?'Perhitungan gagal':'Belum dihitung'}</span></div>${error?`<div class="tower-adj-error">${esc(ad.error?.message||'Tower adjacency calculation failed. Please calculate again.')}</div>`:''}<div class="tower-adj-note">Total tower portfolio tetap mengikuti master. Perhitungan jarak hanya menggunakan tower dengan koordinat valid. Tower teridentifikasi bersebelahan = tower yang memiliki minimal 1 tower lain dalam jarak <b>&lt;100 m</b>. Pasangan tower = pasangan unik yang berjarak <b>&lt;100 m</b>. Jarak 100,0 m tidak termasuk. Tower dengan koordinat tidak valid tidak ikut perhitungan jarak. Perubahan filter tidak menghitung ulang otomatis dan hasil terakhir tetap ditampilkan sampai perhitungan berikutnya selesai.</div></div>`})()}
-
-  </div>`;
+  const heightBuckets=Array.isArray(aggregate?.height)?aggregate.height:[];
+  const topType=towerTypeRows.slice().sort((x,y)=>Number(y[1]||0)-Number(x[1]||0)).slice(0,3);
+  const originRows=assetOrigin.map(([k,n])=>`<div class="asset-origin-mini"><span>${esc(k)}</span><b>${fmtInt(n)}</b><em>${portfolioDen?(n/portfolioDen*100).toFixed(1):'0.0'}%</em></div>`).join('');
+  asset.innerHTML=`<div class="asset-overview-mini"><div class="asset-mini-total"><small>PORTFOLIO SIZE</small><strong>${fmtInt(portfolioDen)}</strong><span>Sites / Towers</span></div><div class="asset-mini-side"><div class="asset-mini-label">ASSET ORIGIN</div>${originRows}</div><div class="asset-mini-side"><div class="asset-mini-label">TOP TOWER TYPE</div>${topType.length?topType.map(([k,n])=>`<div class="asset-mini-type"><span>${esc(k)}</span><b>${fmtInt(n)}</b></div>`).join(''):'<div class="asset-mini-type"><span>No data</span></div>'}</div><div class="asset-mini-footer"><span>${ageBuckets.length} maturity buckets · ${heightBuckets.length} height buckets</span><button type="button" id="dash-open-asset-inline" class="ap-btn">VIEW FULL PROFILE ↗</button></div></div>`;
+  $('dash-open-asset-inline')?.addEventListener('click',()=>window.pmnoNavigate?.('assetprofile'));
+  renderAssetProfilePage();
  }
  const l=$('dash-lease');if(l)l.innerHTML=metricRows([['Site with lease expiry',fmtInt(a.leaseExpirySites??filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease < 6 months',fmtInt(a.leaseRisk),'warn'],['Expired lease',fmtInt(a.leaseExpired),'bad'],['No expiry date',fmtInt(a.leaseNoExpiry??filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  const p=$('dash-power');if(p)p.innerHTML=metricRows([['Site with power',fmtInt(a.powerSites)],['Tower type',fmtInt(a.towerTypeSites??filtered.filter(r=>val(r,'tower_type')).length)],['Tower height',fmtInt(a.towerHeightSites??filtered.filter(r=>val(r,'tower_height_m')).length)],['Access road',fmtInt(a.accessRoadSites??filtered.filter(r=>val(r,'access_level')).length)],['Terrain',fmtInt(a.terrainSites??filtered.filter(r=>val(r,'terrain_class')).length)]]);
@@ -4092,6 +4065,18 @@ async function renderSiteProfile(r){
   if($('sp-attention'))$('sp-attention').innerHTML='<div class="dash-empty-note">Site Master loaded, but child data could not be read: '+esc(e.message)+'</div>';
  }
 }
+window.pmnoAssetProfileInit=async function(){
+  if(typeof window.pmnoDashboardInit==='function') await window.pmnoDashboardInit();
+  renderAssetProfilePage();
+  setupAssetProfileFilters();
+};
+function setupAssetProfileFilters(){
+  const pairs=[['dash-regional','asset-regional'],['dash-area','asset-area'],['dash-province','asset-province'],['dash-city','asset-city'],['dash-search','asset-search']];
+  pairs.forEach(([src,dst])=>{const a=$(src),b=$(dst);if(!a||!b)return; if(b.dataset.bound)return; b.dataset.bound='1'; if(a.tagName==='SELECT') b.innerHTML=a.innerHTML; b.value=a.value||''; const ev=()=>{a.value=b.value; a.dispatchEvent(new Event('change',{bubbles:true}));}; b.addEventListener('change',ev); b.addEventListener('input',ev);});
+  $('asset-back-dashboard')?.addEventListener('click',()=>window.pmnoNavigate?.('dashboard'));
+  $('asset-refresh')?.addEventListener('click',()=>window.pmnoAssetProfileInit?.());
+}
+
 function navigateSite(){const q=$('dash-search')?.value?.trim();if(q)searchSite(q);else location.hash='#siteprofile'}
 function openSingleAnalysis(){const r=window._pmnoSelectedSite;if(!r)return;location.hash='#single';setTimeout(()=>{$('lat')&&($('lat').value=val(r,'latitude'));$('lon')&&($('lon').value=val(r,'longitude'))},40)}
 function init(){
@@ -4110,6 +4095,7 @@ function init(){
   }));
   $('dash-search')?.addEventListener('input',applyFilters);
   $('dash-refresh')?.addEventListener('click',load);
+  $('dash-open-asset')?.addEventListener('click',()=>window.pmnoNavigate?.('assetprofile'));
   $('dash-open-site')?.addEventListener('click',navigateSite);
   $('sp-search-btn')?.addEventListener('click',()=>searchSite($('sp-search')?.value));
   $('sp-search')?.addEventListener('input',()=>renderSiteSearchResults($('sp-search').value));
@@ -4628,224 +4614,6 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
     document.addEventListener('DOMContentLoaded',()=>setTimeout(ensure,0),{once:true});
   }else setTimeout(ensure,0);
   window.addEventListener('pageshow',()=>setTimeout(ensure,0));
-})();
-</script>
-
-
-<style id="pmno-dashboard-responsive-v85">
-/* V85 — dashboard-only responsive correction.
-   Keeps existing desktop design; fixes tablet/landscape card stretching and cramped financial rows.
-   No DB, routing, business logic, Single Site, Bulk, DRM or Master changes. */
-
-/* Desktop: use the full canvas cleanly. */
-@media (min-width:1101px){
-  body.pmno-page-dashboard .dash-shell{
-    width:100%;
-    max-width:1800px;
-    box-sizing:border-box;
-  }
-  body.pmno-page-dashboard .dash-grid-3{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    align-items:start;
-  }
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.75fr) minmax(360px,.85fr);
-    align-items:start;
-  }
-}
-
-/* Landscape tablet / compact desktop:
-   keep the 2-column portfolio structure, but never stretch a short card
-   to the height of the financial card. */
-@media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
-  body.pmno-page-dashboard .dash-shell{
-    width:100%;
-    max-width:none;
-    box-sizing:border-box;
-    padding:18px 20px 42px;
-  }
-
-  body.pmno-page-dashboard .dash-head{
-    margin-bottom:14px;
-  }
-
-  body.pmno-page-dashboard .dash-title{
-    font-size:21px;
-  }
-
-  body.pmno-page-dashboard .dash-filterbar{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-  body.pmno-page-dashboard .dash-filterbar label:last-child{
-    grid-column:1 / -1;
-  }
-
-  body.pmno-page-dashboard .dash-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr));
-  }
-
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.45fr) minmax(300px,1fr);
-    align-items:start;
-  }
-
-  body.pmno-page-dashboard .dash-grid-3{
-    grid-template-columns:repeat(2,minmax(0,1fr));
-    align-items:start;
-  }
-
-  /* Financial card becomes one readable column instead of
-     squeezing long source notes into half-width cells. */
-  body.pmno-page-dashboard .fin-grid{
-    grid-template-columns:1fr;
-  }
-
-  body.pmno-page-dashboard .dash-panel-content{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .metric-row{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .fin-row-label{
-    min-width:0;
-    flex:1 1 auto;
-  }
-
-  body.pmno-page-dashboard .fin-group .metric-row b{
-    flex:0 0 auto;
-  }
-
-  body.pmno-page-dashboard .dash-card-head{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .dash-card-head div:first-child{
-    min-width:0;
-  }
-
-  body.pmno-page-dashboard .dash-card-head small{
-    overflow-wrap:anywhere;
-  }
-
-  body.pmno-page-dashboard .dash-map-card #dash-map{
-    height:420px;
-  }
-}
-
-/* Landscape at the narrower end: preserve the same structure,
-   but give the two columns a little more breathing room. */
-@media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-dashboard .dash-shell{
-    padding:14px 14px 36px;
-  }
-
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.35fr) minmax(270px,1fr);
-    gap:10px;
-  }
-
-  body.pmno-page-dashboard .dash-grid-3{
-    gap:10px;
-  }
-
-  body.pmno-page-dashboard .dash-card-head{
-    padding:11px 12px;
-  }
-
-  body.pmno-page-dashboard .dash-panel-content{
-    padding:12px;
-  }
-
-  body.pmno-page-dashboard .dash-map-card #dash-map{
-    height:390px;
-  }
-}
-
-/* Never let a long dashboard child widen the viewport. */
-body.pmno-page-dashboard .dash-shell,
-body.pmno-page-dashboard .dash-grid-top,
-body.pmno-page-dashboard .dash-grid-3,
-body.pmno-page-dashboard .dash-card,
-body.pmno-page-dashboard .dash-panel-content,
-body.pmno-page-dashboard .fin-grid{
-  min-width:0;
-  box-sizing:border-box;
-}
-</style>
-
-<script id="pmno-asset-profile-v86-js">
-(function(){
-  'use strict';
-  const $=id=>document.getElementById(id);
-  let filterTimer=null;
-  const num=v=>Number.isFinite(Number(v))?Number(v):0;
-  const pct=(n,d)=>d?((num(n)/num(d))*100).toFixed(1)+'%':'0.0%';
-  const bars=(rows,total,showPct=false)=>{
-    if(!rows?.length)return '<div class="assetp-empty">No current data.</div>';
-    return rows.map(([k,n])=>{const w=total?Math.min(100,num(n)/total*100):0;return `<div class="assetp-bar-row"><span>${esc(k)}</span><div class="assetp-bar-track"><i style="width:${w}%"></i></div><b>${fmtInt(n)}${showPct?` <em>${pct(n,total)}</em>`:''}</b></div>`}).join('');
-  };
-  function currentStats(){const s=window.__pmnoDashboardSummary?.stats||window.__pmnoPortfolioSummary?.stats||{};return s}
-  function syncToDashboard(){
-    const map=[['assetp-regional','dash-regional'],['assetp-area','dash-area'],['assetp-province','dash-province'],['assetp-city','dash-city']];
-    map.forEach(([a,b])=>{if($(a)&&$(b))$(b).value=$(a).value});
-    if($('assetp-search')&&$('dash-search'))$('dash-search').value=$('assetp-search').value;
-  }
-  function fillFilterOptions(){
-    const fo=window.__pmnoDashboardFilterOptions||{};
-    const cfg=[['assetp-regional',fo.regional||[],'ALL REGIONAL'],['assetp-area',fo.area||[],'ALL AREA'],['assetp-province',fo.province||[],'ALL PROVINCE'],['assetp-city',fo.city||[],'ALL KABUPATEN / KOTA']];
-    cfg.forEach(([id,vals,placeholder])=>{const el=$(id);if(!el)return;const keep=el.value;el.innerHTML=`<option value="">${placeholder}</option>`+(Array.isArray(vals)?vals.filter(Boolean).map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join(''):'');el.value=keep});
-  }
-  function renderGeo(){
-    const a=currentStats(),total=num(a.total_sites),g=window.__pmnoGeoPortfolio||{},ready=g.status==='ready'&&num(g.total)===total,loading=g.status==='loading',error=g.status==='error';
-    const valid=num(g.valid),mismatch=num(g.mismatch),invalid=num(g.invalid),missing=num(g.missing),processed=Math.min(num(g.processed),num(g.total)||total),progress=ready?100:num(g.progress); 
-    $('assetp-geo-valid').textContent=ready?fmtInt(valid):'—';$('assetp-geo-pct').textContent=ready?pct(valid,total):loading?progress.toFixed(0)+'%':'—';
-    $('assetp-geo-status').textContent=ready?'valid coordinates':error?'geospatial validation unavailable':loading?'geospatial validation running':'Not validated yet';
-    $('assetp-geo-phase').textContent=ready?'Validation complete':error?'Validation unavailable':loading?(g.total?`Validating ${fmtInt(processed)} of ${fmtInt(g.total)}`:'Preparing geospatial reference…'):'No validation run yet';
-    $('assetp-geo-progress-text').textContent=ready?`${fmtInt(total)} / ${fmtInt(total)}`:`${fmtInt(processed)} / ${fmtInt(num(g.total)||total)}`;
-    $('assetp-geo-progress').style.setProperty('--progress',Math.min(100,progress)+'%');
-    $('assetp-geo-last').textContent=g.lastRunAt?`Last run · ${new Date(g.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})} · ${pmnoGeoFilterLabel(g.lastContext||{})}`:'Not validated yet';
-    $('assetp-geo-breakdown').innerHTML=[['Valid Coordinate',valid,false],['Location Mismatch',mismatch,true],['Invalid Coordinate',invalid,true],['Missing Coordinate',missing,true]].map(([k,n,issue])=>`<div class="assetp-breakdown-row ${issue?'issue':''}"><span>${k}</span><b>${ready?fmtInt(n):'—'}</b><em>${ready?pct(n,total):(error?'Unavailable':'—')}</em></div>`).join('');
-    $('assetp-geo-btn').disabled=loading;
-  }
-  function renderAdj(){
-    const a=currentStats(),ad=window.__pmnoTowerAdjacency||{},ready=ad.status==='ready',loading=ad.status==='loading',error=ad.status==='error';
-    $('assetp-adj-sites').textContent=ready?fmtInt(num(ad.adjacentSites)):'—';$('assetp-adj-share').textContent=ready?num(ad.adjacentSiteShare).toFixed(1)+'%':'—';$('assetp-adj-pairs').textContent=ready?fmtInt(num(ad.adjacentPairs)):'—';$('assetp-adj-non').textContent=ready?fmtInt(num(ad.nonAdjacentSites)):'—';
-    const portfolio=ready?num(ad.portfolioTotal)||num(a.total_sites):num(a.total_sites),valid=ready?num(ad.total):0;
-    $('assetp-adj-basis').innerHTML=[['Total tower portfolio',ready?fmtInt(portfolio):'—'],['Tower dengan koordinat valid',ready?fmtInt(valid):'—'],['Tower tidak terhitung',ready?fmtInt(Math.max(0,portfolio-valid)):'—'],['Unique pairs <100 m',ready?fmtInt(num(ad.adjacentPairs)):'—'],['Coordinate basis',ready?'VALID COORDINATE':'—']].map(([k,v])=>`<div class="assetp-basis-row"><span>${k}</span><b>${v}</b></div>`).join('');
-    if(ready&&Array.isArray(ad.heightMatrix)){
-      const labs=['<30 m','30–50 m','50–70 m','>70 m'],m=ad.heightMatrix;
-      $('assetp-matrix').innerHTML=`<table class="assetp-matrix"><thead><tr><th>TINGGI</th>${labs.map(x=>`<th>${x}</th>`).join('')}<th>TOTAL</th></tr></thead><tbody>${labs.map((r,i)=>{const rt=labs.reduce((n,_,j)=>n+(j>=i?num(m?.[i]?.[j]):0),0);return `<tr><th>${r}</th>${labs.map((_,j)=>j<i?'<td class="muted">—</td>':`<td>${fmtInt(num(m?.[i]?.[j]))}</td>`).join('')}<td class="total">${fmtInt(rt)}</td></tr>`}).join('')}<tr><th>TOTAL</th>${labs.map((_,j)=>`<td class="total">${fmtInt(labs.reduce((n,__,i)=>n+(j>=i?num(m?.[i]?.[j]):0),0))}</td>`).join('')}<td class="grand">${fmtInt(num(ad.adjacentPairs))}</td></tr></tbody></table>`;
-    }else $('assetp-matrix').innerHTML='<div class="assetp-empty">'+(loading?'Calculation in progress…':error?'Calculation failed.':'Belum dihitung.')+'</div>';
-    $('assetp-adj-status').textContent=loading?'Sedang menghitung tower adjacency…':error?('Perhitungan gagal: '+String(ad.error?.message||'unknown error')):ready?`Last calculation · ${new Date(ad.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})} · ${pmnoAdjFilterLabel(ad.lastContext||{})}`:'Belum dihitung. Calculation uses valid coordinates only; distance exactly 100 m is excluded.';
-    $('assetp-adj-btn').disabled=loading;
-  }
-  function render(){
-    const a=currentStats(),total=num(a.total_sites),origin=[['BUILD',num(a.build_sites)],['ACQUISITION',num(a.acquisition_sites)]];
-    $('assetp-total').textContent=fmtInt(total);$('assetp-build').textContent=fmtInt(origin[0][1]);$('assetp-acq').textContent=fmtInt(origin[1][1]);$('assetp-build-pct').textContent=pct(origin[0][1],total);$('assetp-acq-pct').textContent=pct(origin[1][1],total);
-    const agg=window.__pmnoDashboardSummary||window.__pmnoPortfolioSummary||{};
-    $('assetp-origin').innerHTML=bars(origin,total,true);
-    $('assetp-composition').innerHTML=bars(Array.isArray(agg?.tower_type)?agg.tower_type:[],total);
-    $('assetp-maturity').innerHTML=bars(Array.isArray(agg?.maturity)?agg.maturity:[],total);
-    $('assetp-height').innerHTML=bars(Array.isArray(agg?.height)?agg.height:[],total);
-    renderGeo();renderAdj();
-  }
-  async function init(){
-    if(typeof window.pmnoDashboardInit==='function' && !(window.__pmnoDashboardSummary||window.__pmnoPortfolioSummary)) await window.pmnoDashboardInit();
-    fillFilterOptions();render();
-  }
-  function scheduleFilter(){
-    syncToDashboard();clearTimeout(filterTimer);filterTimer=setTimeout(()=>{if(typeof applyFilters==='function')applyFilters();setTimeout(()=>{fillFilterOptions();render()},550)},260);
-  }
-  document.addEventListener('change',e=>{if(e.target?.id?.startsWith('assetp-')&&e.target.tagName==='SELECT')scheduleFilter()});
-  $('assetp-search')?.addEventListener('input',scheduleFilter);
-  $('assetp-back')?.addEventListener('click',()=>window.pmnoNavigate('dashboard'));
-  $('assetp-refresh')?.addEventListener('click',async()=>{if(typeof window.pmnoDashboardRefresh==='function')await window.pmnoDashboardRefresh();fillFilterOptions();render()});
-  $('dash-open-asset')?.addEventListener('click',()=>window.pmnoNavigate('assetprofile'));
-  $('assetp-geo-btn')?.addEventListener('click',async()=>{syncToDashboard();await window.__pmnoRunGeoValidation();renderGeo()});
-  $('assetp-adj-btn')?.addEventListener('click',async()=>{syncToDashboard();await window.__pmnoRunTowerAdjacency();renderAdj()});
-  window.pmnoAssetProfileInit=init;
 })();
 </script>
 
