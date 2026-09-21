@@ -1471,6 +1471,12 @@ body.pmno-page-single .topbar .mode-menu button{
 }
 </style>
 
+<style id="pmno-dashboard-hub-v91">
+.hub-map-row{display:grid;grid-template-columns:minmax(0,1.75fr) minmax(320px,.75fr);gap:12px;margin-bottom:18px}.hub-map-card #dash-map{height:455px}.hub-health-card{min-height:100%}.hub-health{padding:14px}.hub-health-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.hub-mini{padding:10px;border:1px solid #1c344b;background:#091827;border-radius:9px}.hub-mini>span{display:block;font-size:7px;letter-spacing:.9px;color:#71899c;font-weight:900}.hub-mini>b{display:block;font-size:17px;margin-top:5px}.hub-mini>small{display:block;font-size:7px;color:#71899c;margin-top:3px}.hub-mini.warn>b{color:#f5c451}.hub-mini.bad>b{color:#ff5570}.hub-health-list{margin-top:10px;border-top:1px solid #1a3047}.hub-health-list>div{display:flex;justify-content:space-between;gap:10px;padding:10px 2px;border-bottom:1px solid #172d42}.hub-health-list span{font-size:8px;color:#8aa0b2}.hub-health-list b{font-size:10px}.hub-health-list b.warn{color:#f5c451}.hub-health-list b.bad{color:#ff5570}.hub-section-head{display:flex;align-items:flex-end;gap:10px;margin:3px 0 10px;padding:0 2px}.hub-section-head>span{font-size:8px;font-weight:950;color:var(--cyan)}.hub-section-head>div{display:flex;align-items:baseline;gap:9px;flex-wrap:wrap}.hub-section-head strong{font-size:11px;letter-spacing:1.1px}.hub-section-head small{font-size:8px;color:#6f879b}.hub-profile-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.hub-profile-card{padding:14px;min-height:205px;display:flex;flex-direction:column;background:linear-gradient(145deg,#0a1727,#081522)}.hub-profile-top{display:flex;justify-content:space-between;align-items:center}.hub-profile-top>span{font-size:8px;color:var(--cyan);font-weight:950}.hub-profile-icon{width:28px;height:28px;border:1px solid #2a5068;border-radius:8px;display:grid;place-items:center;color:var(--cyan);font-size:10px;font-weight:950;background:#0b2133}.hub-profile-card>strong{font-size:11px;letter-spacing:1px;margin-top:13px}.hub-profile-card>p{font-size:8px;line-height:1.5;color:#72899d;margin:6px 0 10px;min-height:36px}.hub-profile-summary{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:auto}.hub-profile-summary .hub-mini{padding:8px}.hub-profile-summary .hub-mini>b{font-size:12px}.hub-open{margin-top:10px;width:100%;height:32px;border:1px solid #2b617c;background:#0a2234;color:var(--cyan);border-radius:7px;font-size:7px;font-weight:950;letter-spacing:.8px;cursor:pointer}.hub-open b{margin-left:5px;font-size:11px}.hub-open:hover{background:#0d2c43;border-color:#3d7894}
+@media(max-width:1200px){.hub-profile-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.hub-map-row{grid-template-columns:1fr}.hub-health-card{min-height:0}}
+@media(max-width:760px){.hub-map-row{grid-template-columns:1fr}.hub-map-card #dash-map{height:390px}.hub-profile-grid{grid-template-columns:1fr}.hub-profile-card{min-height:185px}.hub-health-kpis{grid-template-columns:1fr 1fr}}
+@media(orientation:landscape) and (max-width:900px){.hub-profile-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.hub-map-row{grid-template-columns:minmax(0,1.5fr) minmax(240px,.8fr)}.hub-map-card #dash-map{height:330px}}
+</style>
 <style id="pmno-asset-profile-page-v90">
 .asset-profile-page{width:100%;background:#06111f;color:#edf5fb;min-height:calc(100vh - 72px)}
 .asset-page-shell{width:min(1780px,calc(100% - 44px));margin:0 auto;padding:22px 0 48px}
@@ -1496,7 +1502,7 @@ body.pmno-page-assetprofile .topbar{flex:none!important}
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
+<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="assetProfileMenu">ASSET PROFILE</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
 <main class="workspace">
 <aside class="panel input-panel">
 <div class="section-kicker">NEW ORDER INPUT</div>
@@ -1560,20 +1566,19 @@ body.pmno-page-assetprofile .topbar{flex:none!important}
       <button id="dash-mode-audit" class="dash-modebtn" type="button">AUDIT DATA</button>
     </div>
     <div id="dash-show-layer" class="dash-layer">
-      <div class="dash-grid-top">
-        <section class="dash-card dash-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t0"></i>0 / NPA <i class="t1"></i>1 <i class="t2"></i>2 <i class="t3"></i>3 <i class="t4"></i>&gt;3</div></div><div id="dash-map"></div></section>
-        <section class="dash-card dash-nav-card"><div class="dash-card-head"><div><span>02</span><strong>ASSET PROFILE</strong><small>Portfolio structure, physical profile and spatial intelligence.</small></div><button type="button" class="dash-card-open" id="dash-open-asset">OPEN PROFILE ↗</button></div><div id="dash-asset" class="dash-panel-content"></div></section>
-      </div>
-      <div class="show-section-title">PORTFOLIO PROFILE</div>
-      <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>CUSTOMER PROFILE</strong><small>Tenant base and site distribution by tenant count.</small></div></div><div id="dash-tenant" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LAND &amp; LEGAL PROFILE</strong><small>Land tenure and legal status.</small></div></div><div id="dash-lease" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>TECHNICAL PROFILE</strong><small>Tower, access, terrain and power.</small></div></div><div id="dash-power" class="dash-panel-content"></div></section>
-      </div>
-      <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>PRODUCTIVITY PROFILE</strong><small>Revenue and productive-site profile.</small></div></div><div id="dash-productivity" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>FINANCIAL PROFILE</strong><small>Pendapatan, investasi, biaya, profitabilitas dan return aset.</small></div></div><div id="dash-financial" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>ASSET LIFECYCLE</strong><small>Site productivity, NPA and lease lifecycle signals.</small></div></div><div id="dash-lifecycle" class="dash-panel-content"></div></section>
+      <section class="hub-map-row">
+        <section class="dash-card dash-map-card hub-map-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET LOCATION</strong><small>Portfolio geography · marker color follows tenant count.</small></div><div class="dash-map-legend"><i class="t0"></i>0 / NPA <i class="t1"></i>1 <i class="t2"></i>2 <i class="t3"></i>3 <i class="t4"></i>&gt;3</div></div><div id="dash-map"></div></section>
+        <section class="dash-card hub-health-card"><div class="dash-card-head"><div><span>02</span><strong>PORTFOLIO HEALTH</strong><small>Executive signals before entering detailed profiles.</small></div></div><div id="dash-health" class="hub-health"></div></section>
+      </section>
+      <div class="hub-section-head"><div><span>03</span><strong>PROFILE INTELLIGENCE</strong><small>Open each profile independently. Dashboard only shows the headline condition.</small></div></div>
+      <div class="hub-profile-grid">
+        <section class="dash-card hub-profile-card" data-profile="assetprofile"><div class="hub-profile-top"><span>01</span><div class="hub-profile-icon">A</div></div><strong>ASSET PROFILE</strong><p>Physical portfolio, asset structure, coordinate quality and tower spatial intelligence.</p><div id="dash-asset" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="assetprofile">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="customer"><div class="hub-profile-top"><span>02</span><div class="hub-profile-icon">C</div></div><strong>CUSTOMER PROFILE</strong><p>Tenant base, tenancy distribution and productive customer footprint.</p><div id="dash-tenant" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="customer">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="landlegal"><div class="hub-profile-top"><span>03</span><div class="hub-profile-icon">L</div></div><strong>LAND &amp; LEGAL PROFILE</strong><p>Land tenure, lease timing and legal readiness signals.</p><div id="dash-lease" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="landlegal">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="technical"><div class="hub-profile-top"><span>04</span><div class="hub-profile-icon">T</div></div><strong>TECHNICAL PROFILE</strong><p>Tower, power, access road and terrain information.</p><div id="dash-power" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="technical">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="productivity"><div class="hub-profile-top"><span>05</span><div class="hub-profile-icon">P</div></div><strong>PRODUCTIVITY PROFILE</strong><p>Revenue coverage and productive-site condition.</p><div id="dash-productivity" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="productivity">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="financial"><div class="hub-profile-top"><span>06</span><div class="hub-profile-icon">F</div></div><strong>FINANCIAL PROFILE</strong><p>Revenue, asset value and currently mapped financial sources.</p><div id="dash-financial" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="financial">OPEN PROFILE <b>↗</b></button></section>
+        <section class="dash-card hub-profile-card" data-profile="lifecycle"><div class="hub-profile-top"><span>07</span><div class="hub-profile-icon">L</div></div><strong>ASSET LIFECYCLE</strong><p>Tenant, NPA and lease lifecycle signals across the portfolio.</p><div id="dash-lifecycle" class="hub-profile-summary"></div><button type="button" class="hub-open" data-open-profile="lifecycle">OPEN PROFILE <b>↗</b></button></section>
       </div>
     </div>
     <div id="dash-audit-layer" class="dash-layer hidden">
@@ -3691,8 +3696,29 @@ function renderDashboardSource(label){
  // renderDashboardSource() is also called repeatedly during geo-validation;
  // triggering a map reload here would race/clear the visible layer.
  const src=$('dash-source');if(src){const shownTotal=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
+ renderDashboardHub();
  renderAuditData();
 }
+function renderDashboardHub(){
+ const sm=pmnoGetAggregateSummary()?.stats||{};
+ const total=Number(sm.total_sites)||0, tenants=Number(sm.total_tenant)||0, npa=Number(sm.npa_sites)||0;
+ const revenue=Number(sm.revenue_sites)||0, power=Number(sm.power_sites)||0;
+ const leaseRisk=Number(sm.lease_risk_6m)||0, expired=Number(sm.lease_expired)||0;
+ const ratio=total?tenants/total:0;
+ const set=(id,html)=>{const n=$(id);if(n)n.innerHTML=html};
+ const mini=(label,value,sub,cls='')=>`<div class="hub-mini ${cls}"><span>${esc(label)}</span><b>${esc(value)}</b><small>${esc(sub)}</small></div>`;
+ set('dash-health',`<div class="hub-health-kpis">${mini('ACTIVE / PRODUCTIVE',fmtInt(Math.max(0,total-npa)),'site setelah NPA')} ${mini('REVENUE COVERAGE',fmtPct(total?revenue/total*100:0)+'%',fmtInt(revenue)+' site')} ${mini('POWER COVERAGE',fmtPct(total?power/total*100:0)+'%',fmtInt(power)+' site')} ${mini('LEASE RISK',fmtInt(leaseRisk),leaseRisk+' site < 6 bulan',leaseRisk?'warn':'')}</div><div class="hub-health-list"><div><span>Tenancy Ratio</span><b>${ratio.toFixed(2)}</b></div><div><span>Site NPA / 0 Tenant</span><b class="${npa?'warn':''}">${fmtInt(npa)}</b></div><div><span>Lease Expired</span><b class="${expired?'bad':''}">${fmtInt(expired)}</b></div></div>`);
+ set('dash-asset',mini('PORTFOLIO',''+fmtInt(total),'sites / towers'));
+ set('dash-tenant',mini('TENANTS',fmtInt(tenants),'total tenant')+mini('TENANCY',ratio.toFixed(2),'tenant / site'));
+ set('dash-lease',mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':'')+mini('EXPIRED',fmtInt(expired),'lease expired',expired?'bad':''));
+ set('dash-power',mini('POWER',fmtInt(power),total?fmtPct(power/total*100)+'% coverage':'—')+mini('TOWER HEIGHT',fmtInt(Number(sm.tower_height_sites)||0),'site with height'));
+ set('dash-productivity',mini('REVENUE SITE',fmtInt(revenue),total?fmtPct(revenue/total*100)+'% coverage':'—')+mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':''));
+ const nbv=typeof liveNbv!=='undefined'?Object.values(liveNbv||{}).reduce((n,v)=>n+Number(v||0),0):0;
+ set('dash-financial',mini('NBV MAPPED',nbv?formatMoney(nbv):'BELUM TERSEDIA',nbv?'mapped Site ID':'source belum lengkap'));
+ set('dash-lifecycle',mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':'')+mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':''));
+ document.querySelectorAll('[data-open-profile]').forEach(btn=>{if(btn.dataset.bound)return;btn.dataset.bound='1';btn.addEventListener('click',()=>{const p=btn.dataset.openProfile;if(p==='assetprofile')window.pmnoNavigate?.('assetprofile');else btn.classList.add('pending');});});
+}
+
 function auditFieldStats(list,fieldKeys){const total=list.length;let filled=0;for(const r of list){if(fieldKeys.some(k=>String(val(r,k)).trim()!==''))filled++}return {filled,missing:Math.max(0,total-filled),pct:total?filled/total*100:0}}
 function auditPct(values){
  const v=values.filter(x=>x!==null&&Number.isFinite(Number(x))).map(Number);
