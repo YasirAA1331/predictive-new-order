@@ -4517,8 +4517,21 @@ async function exportModule(code){
     // V5 returns a short-lived HTTPS Storage signed URL instead of a Blob URL.
     // This avoids iOS Safari/WebKitBlobResource failures on large streamed exports.
     const payload=await r.json();
-    const downloadUrl=payload?.download_url;
-    if(!downloadUrl)throw new Error('Download URL export tidak tersedia.');
+    const rawDownloadUrl=String(payload?.download_url||'').trim();
+    if(!rawDownloadUrl)throw new Error('Download URL export tidak tersedia.');
+
+    // The export service must return a Supabase Storage URL. Normalize relative
+    // responses as a safety net so Safari can never resolve them against Vercel.
+    let downloadUrl;
+    try{ downloadUrl=new URL(rawDownloadUrl,SUPABASE_URL).href; }
+    catch(_){ throw new Error('Download URL export tidak valid.'); }
+    const downloadHost=new URL(downloadUrl).hostname;
+    if(downloadHost!=='vzeitjesovdojfsfgyza.supabase.co'){
+      throw new Error('Download URL salah host: '+downloadHost+'. Export tidak dijalankan.');
+    }
+    if(!downloadUrl.includes('/storage/v1/object/sign/')){
+      throw new Error('Download URL bukan signed Storage URL.');
+    }
     const filename=payload?.filename||`PMNO_${code}_Current.${payload?.format||'xlsx'}`;
     const rows=payload?.rows||'';
     const format=String(payload?.format||'xlsx').toUpperCase();
