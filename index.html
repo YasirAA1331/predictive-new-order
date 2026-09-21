@@ -4557,184 +4557,148 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 </script>
 
 
-<style id="pmno-responsive-v84b-fix">
-/* V84B — conservative responsive correction
-   Only adjusts the active page's existing layout. No global grid rewrite. */
+<style id="pmno-dashboard-responsive-v85">
+/* V85 — dashboard-only responsive correction.
+   Keeps existing desktop design; fixes tablet/landscape card stretching and cramped financial rows.
+   No DB, routing, business logic, Single Site, Bulk, DRM or Master changes. */
 
-html,body{max-width:100%;overflow-x:hidden!important}
-
-/* ===== SINGLE SITE ===== */
-@media (min-width:761px) and (max-width:1200px){
-  body.pmno-page-single .workspace{
-    grid-template-columns:220px minmax(0,1fr) 330px!important;
-  }
-  body.pmno-page-single .input-panel{padding:17px!important}
-  body.pmno-page-single .detail-panel{padding:16px!important}
-}
-@media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-single .app{
-    height:100dvh!important;
-    min-height:0!important;
-    overflow:hidden!important;
-  }
-  body.pmno-page-single .topbar{
-    height:64px!important;
-    min-height:64px!important;
-    flex:0 0 64px!important;
-  }
-  body.pmno-page-single .workspace{
-    height:calc(100dvh - 64px)!important;
-    min-height:0!important;
-    grid-template-columns:190px minmax(0,1fr) 285px!important;
-    grid-template-rows:minmax(0,1fr)!important;
-    overflow:hidden!important;
-  }
-  body.pmno-page-single .input-panel,
-  body.pmno-page-single .detail-panel{
-    height:100%!important;
-    min-height:0!important;
-    overflow-y:auto!important;
-    overflow-x:hidden!important;
-  }
-  body.pmno-page-single .input-panel{padding:13px!important}
-  body.pmno-page-single .detail-panel{padding:13px!important}
-  body.pmno-page-single .map-stage{height:100%!important;min-height:0!important}
-}
-
-/* ===== DASHBOARD ===== */
-@media (min-width:901px){
-  body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 48px)!important;
-    max-width:1600px!important;
-    margin:0 auto!important;
-  }
-  body.pmno-page-dashboard .dash-filterbar{
-    grid-template-columns:repeat(5,minmax(0,1fr))!important;
-  }
-}
-@media (min-width:901px) and (max-width:1250px){
-  body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 32px)!important;
-  }
-  body.pmno-page-dashboard .dash-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  }
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.5fr) minmax(280px,1fr)!important;
-  }
-  body.pmno-page-dashboard #dash-map{
-    height:430px!important;
-  }
-}
-@media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-dashboard .topbar{
-    height:64px!important;
-    min-height:64px!important;
-  }
-  body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 24px)!important;
-    padding-bottom:30px!important;
-  }
-  body.pmno-page-dashboard .dash-head{
-    gap:10px!important;
-  }
-  body.pmno-page-dashboard .dash-title{
-    font-size:24px!important;
-  }
-  body.pmno-page-dashboard .dash-filterbar{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  }
-  body.pmno-page-dashboard .dash-filterbar label:last-child{
-    grid-column:1/-1!important;
-  }
-  body.pmno-page-dashboard .dash-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  }
-  body.pmno-page-dashboard .dash-grid-top{
-    grid-template-columns:minmax(0,1.6fr) minmax(260px,1fr)!important;
-  }
-  body.pmno-page-dashboard #dash-map{
-    height:390px!important;
+/* Desktop: use the full canvas cleanly. */
+@media (min-width:1101px){
+  body.pmno-page-dashboard .dash-shell{
+    width:100%;
+    max-width:1800px;
+    box-sizing:border-box;
   }
   body.pmno-page-dashboard .dash-grid-3{
-    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    align-items:start;
+  }
+  body.pmno-page-dashboard .dash-grid-top{
+    grid-template-columns:minmax(0,1.75fr) minmax(360px,.85fr);
+    align-items:start;
   }
 }
 
-/* ===== SITE PROFILE ===== */
-@media (min-width:901px){
-  body.pmno-page-siteprofile #siteProfileView .sp-shell{
-    width:calc(100% - 48px)!important;
-    max-width:1600px!important;
-    margin:0 auto!important;
+/* Landscape tablet / compact desktop:
+   keep the 2-column portfolio structure, but never stretch a short card
+   to the height of the financial card. */
+@media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
+  body.pmno-page-dashboard .dash-shell{
+    width:100%;
+    max-width:none;
+    box-sizing:border-box;
+    padding:18px 20px 42px;
   }
-}
-@media (min-width:901px) and (max-width:1250px){
-  body.pmno-page-siteprofile #siteProfileView .sp-shell{
-    width:calc(100% - 32px)!important;
+
+  body.pmno-page-dashboard .dash-head{
+    margin-bottom:14px;
   }
-}
-@media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-siteprofile .topbar{
-    height:64px!important;
-    min-height:64px!important;
+
+  body.pmno-page-dashboard .dash-title{
+    font-size:21px;
   }
-  body.pmno-page-siteprofile #siteProfileView .sp-shell{
-    width:calc(100% - 24px)!important;
+
+  body.pmno-page-dashboard .dash-filterbar{
+    grid-template-columns:repeat(4,minmax(0,1fr));
   }
-  body.pmno-page-siteprofile .sp-head{
-    gap:10px!important;
+  body.pmno-page-dashboard .dash-filterbar label:last-child{
+    grid-column:1 / -1;
+  }
+
+  body.pmno-page-dashboard .dash-kpis{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  body.pmno-page-dashboard .dash-grid-top{
+    grid-template-columns:minmax(0,1.45fr) minmax(300px,1fr);
+    align-items:start;
+  }
+
+  body.pmno-page-dashboard .dash-grid-3{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:start;
+  }
+
+  /* Financial card becomes one readable column instead of
+     squeezing long source notes into half-width cells. */
+  body.pmno-page-dashboard .fin-grid{
+    grid-template-columns:1fr;
+  }
+
+  body.pmno-page-dashboard .dash-panel-content{
+    min-width:0;
+  }
+
+  body.pmno-page-dashboard .metric-row{
+    min-width:0;
+  }
+
+  body.pmno-page-dashboard .fin-row-label{
+    min-width:0;
+    flex:1 1 auto;
+  }
+
+  body.pmno-page-dashboard .fin-group .metric-row b{
+    flex:0 0 auto;
+  }
+
+  body.pmno-page-dashboard .dash-card-head{
+    min-width:0;
+  }
+
+  body.pmno-page-dashboard .dash-card-head div:first-child{
+    min-width:0;
+  }
+
+  body.pmno-page-dashboard .dash-card-head small{
+    overflow-wrap:anywhere;
+  }
+
+  body.pmno-page-dashboard .dash-map-card #dash-map{
+    height:420px;
   }
 }
 
-/* ===== DRM ===== */
-@media (min-width:901px){
-  body.pmno-page-drm .drm-shell{
-    width:calc(100% - 56px)!important;
-    max-width:1600px!important;
-    margin:0 auto!important;
-  }
-}
-@media (min-width:901px) and (max-width:1250px){
-  body.pmno-page-drm .drm-shell{
-    width:calc(100% - 32px)!important;
-  }
-  body.pmno-page-drm .drm-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  }
-}
+/* Landscape at the narrower end: preserve the same structure,
+   but give the two columns a little more breathing room. */
 @media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-drm .drm-shell{
-    width:calc(100% - 24px)!important;
-    padding:14px 0 50px!important;
+  body.pmno-page-dashboard .dash-shell{
+    padding:14px 14px 36px;
   }
-  body.pmno-page-drm .drm-title{font-size:24px!important}
-  body.pmno-page-drm .drm-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+
+  body.pmno-page-dashboard .dash-grid-top{
+    grid-template-columns:minmax(0,1.35fr) minmax(270px,1fr);
+    gap:10px;
   }
-  body.pmno-page-drm .drm-table-wrap{
-    max-height:calc(100dvh - 270px)!important;
-    min-height:360px!important;
+
+  body.pmno-page-dashboard .dash-grid-3{
+    gap:10px;
+  }
+
+  body.pmno-page-dashboard .dash-card-head{
+    padding:11px 12px;
+  }
+
+  body.pmno-page-dashboard .dash-panel-content{
+    padding:12px;
+  }
+
+  body.pmno-page-dashboard .dash-map-card #dash-map{
+    height:390px;
   }
 }
 
-/* ===== BULK ===== */
-@media (orientation:landscape) and (min-width:761px) and (max-width:900px){
-  body.pmno-page-bulk .bulk-view .wrap{
-    width:100%!important;
-    max-width:none!important;
-    padding:12px 12px 50px!important;
-  }
-  body.pmno-page-bulk .bulk-view .summary{
-    grid-template-columns:repeat(6,minmax(110px,1fr))!important;
-  }
-  body.pmno-page-bulk .bulk-view .bulk-table-wrap{
-    max-width:100%!important;
-    overflow-x:auto!important;
-  }
+/* Never let a long dashboard child widen the viewport. */
+body.pmno-page-dashboard .dash-shell,
+body.pmno-page-dashboard .dash-grid-top,
+body.pmno-page-dashboard .dash-grid-3,
+body.pmno-page-dashboard .dash-card,
+body.pmno-page-dashboard .dash-panel-content,
+body.pmno-page-dashboard .fin-grid{
+  min-width:0;
+  box-sizing:border-box;
 }
 </style>
-
 </body>
 </html>
 
