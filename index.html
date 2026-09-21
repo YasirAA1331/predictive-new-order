@@ -1472,359 +1472,426 @@ body.pmno-page-single .topbar .mode-menu button{
 </style>
 
 
-<style id="pmno-dashboard-layout-v81">
-/* V81 — Dashboard composition fix
-   ONLY: Dashboard × Desktop + Landscape.
-   Portrait/mobile remains governed by the original responsive rules. */
+<style id="pmno-dashboard-layout-proper-v1">
+/* =========================================================
+   DASHBOARD REDESIGN — DESKTOP + LANDSCAPE ONLY
+   Scope: #dashboardView only
+   Mobile portrait intentionally untouched.
+   ========================================================= */
 
+/* ---------- DESKTOP EXECUTIVE COMPOSITION ---------- */
 @media (min-width:1101px){
   body.pmno-page-dashboard #dashboardView{
-    display:block!important;
-    grid-column:1 / -1!important;
-    width:100%!important;
-    max-width:none!important;
-    min-width:0!important;
-    justify-self:stretch!important;
-    overflow:visible!important;
-    box-sizing:border-box!important;
+    min-height:calc(100vh - 72px);
+    width:100%;
+    overflow:visible;
   }
-
   body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 48px)!important;
-    max-width:1900px!important;
-    min-width:0!important;
-    margin:0 auto!important;
-    padding:18px 0 36px!important;
-    box-sizing:border-box!important;
+    width:calc(100% - 36px);
+    max-width:none;
+    margin:0 auto;
+    padding:18px 0 34px;
   }
 
-  /* Executive header */
+  /* Header = title block + action rail */
   body.pmno-page-dashboard #dashboardView .dash-head{
-    display:flex!important;
-    justify-content:space-between!important;
-    align-items:flex-end!important;
-    gap:24px!important;
-    margin-bottom:12px!important;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    align-items:end;
+    gap:24px;
+    margin-bottom:12px;
+    padding:0 2px 2px;
   }
-
+  body.pmno-page-dashboard #dashboardView .dash-kicker{
+    font-size:8px;
+    letter-spacing:2.2px;
+  }
   body.pmno-page-dashboard #dashboardView .dash-title{
-    font-size:26px!important;
-    line-height:1!important;
+    font-size:26px;
+    line-height:1.05;
+    letter-spacing:.2px;
   }
-
-  /* Filters read as one control surface */
-  body.pmno-page-dashboard #dashboardView .dash-filterbar{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:1fr 1fr 1.05fr 1.15fr 2fr!important;
-    gap:8px!important;
-    padding:9px!important;
-    margin-bottom:10px!important;
-    box-sizing:border-box!important;
-    border-radius:10px!important;
-  }
-
-  /* KPI ribbon */
-  body.pmno-page-dashboard #dashboardView .dash-kpis{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:repeat(8,minmax(0,1fr))!important;
-    gap:8px!important;
-    margin-bottom:10px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-kpi{
-    min-width:0!important;
-    padding:11px 12px!important;
-    border-radius:9px!important;
-  }
-
-  /* Show/Audit switch sits as a control, not a content block */
-  body.pmno-page-dashboard #dashboardView .dash-modebar{
-    margin:0 0 12px!important;
-  }
-
-  /* MAIN STORY: Location dominates, Asset Profile is the analytical rail */
-  body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,8fr) minmax(390px,4fr)!important;
-    gap:12px!important;
-    align-items:start!important;
-    margin-bottom:14px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    align-self:start!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
-    height:410px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-card-head{
-    min-height:54px!important;
-    padding:11px 13px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-panel-content{
-    min-width:0!important;
-    min-height:0!important;
-    padding:12px!important;
-    box-sizing:border-box!important;
-  }
-
-  /* Asset Profile gets a deliberate editorial layout */
-  body.pmno-page-dashboard #dashboardView .asset-profile-grid{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:8px!important;
-    min-width:0!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .asset-profile-hero{
-    grid-column:1 / -1!important;
-    min-width:0!important;
-    min-height:94px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{
-    grid-column:1 / -1!important;
-    min-width:0!important;
-  }
-
-  /* Portfolio profile is intentionally asymmetric: density follows content */
-  body.pmno-page-dashboard #dashboardView .show-section-title{
-    margin:3px 0 9px!important;
-    padding:0 2px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,5fr) minmax(0,4fr) minmax(0,3fr)!important;
-    gap:12px!important;
-    align-items:start!important;
-    margin-bottom:12px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3 + .dash-grid-3{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,4fr) minmax(0,5fr) minmax(0,3fr)!important;
-    gap:12px!important;
-    align-items:start!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card{
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    align-self:start!important;
-  }
-}
-
-/* LANDSCAPE — separate composition, including narrow landscape browser widths.
-   This intentionally overrides the original max-width:760px mobile stacking,
-   but ONLY when the device is actually landscape. */
-@media (orientation:landscape) and (min-width:500px){
-  body.pmno-page-dashboard #dashboardView{
-    display:block!important;
-    width:100%!important;
-    max-width:none!important;
-    min-width:0!important;
-    grid-column:1 / -1!important;
-    justify-self:stretch!important;
-    overflow:visible!important;
-    box-sizing:border-box!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 24px)!important;
-    max-width:1400px!important;
-    min-width:0!important;
-    margin:0 auto!important;
-    padding:12px 0 24px!important;
-    box-sizing:border-box!important;
-  }
-
-  /* compact two-row header */
-  body.pmno-page-dashboard #dashboardView .dash-head{
-    display:flex!important;
-    flex-direction:row!important;
-    justify-content:space-between!important;
-    align-items:center!important;
-    gap:12px!important;
-    margin-bottom:8px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-title{
-    font-size:20px!important;
-    line-height:1!important;
-  }
-
   body.pmno-page-dashboard #dashboardView .dash-sub{
-    font-size:9px!important;
-    max-width:520px!important;
+    font-size:10px;
+    margin-top:6px;
+    max-width:760px;
   }
-
   body.pmno-page-dashboard #dashboardView .dash-actions{
-    width:auto!important;
-    flex:0 0 auto!important;
+    justify-content:flex-end;
+    align-items:center;
   }
 
-  /* filters: compact 2-row control panel */
+  /* Filter = one deliberate control band */
   body.pmno-page-dashboard #dashboardView .dash-filterbar{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-    gap:6px!important;
-    padding:7px!important;
-    margin-bottom:8px!important;
-    box-sizing:border-box!important;
+    grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;
+    gap:0;
+    margin:0 0 10px;
+    padding:8px;
+    background:#081625;
+    border:1px solid #1d344a;
+    border-radius:11px;
+    box-shadow:0 8px 28px rgba(0,0,0,.12);
   }
-
-  body.pmno-page-dashboard #dashboardView .dash-filterbar label:last-child{
-    grid-column:1 / -1!important;
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label{
+    padding:0 9px;
+    min-width:0;
   }
-
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label+label{
+    border-left:1px solid #172d42;
+  }
   body.pmno-page-dashboard #dashboardView .dash-filterbar input,
   body.pmno-page-dashboard #dashboardView .dash-filterbar select{
-    height:32px!important;
+    height:34px;
+    margin-top:4px;
+    border-radius:7px;
+    background:#0a1929;
   }
 
-  /* KPI board: four columns, two rows */
+  /* KPI ribbon — one visual unit */
   body.pmno-page-dashboard #dashboardView .dash-kpis{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;
-    gap:6px!important;
-    margin-bottom:8px!important;
+    grid-template-columns:repeat(8,minmax(0,1fr));
+    gap:0;
+    margin-bottom:10px;
+    overflow:hidden;
+    border:1px solid #20394f;
+    border-radius:11px;
+    background:#091827;
   }
-
   body.pmno-page-dashboard #dashboardView .dash-kpi{
-    min-width:0!important;
-    min-height:62px!important;
-    padding:8px 9px!important;
+    min-width:0;
+    border:0;
+    border-right:1px solid #1b3349;
+    border-radius:0;
+    padding:10px 12px;
+    background:transparent;
   }
-
+  body.pmno-page-dashboard #dashboardView .dash-kpi:last-child{
+    border-right:0;
+  }
   body.pmno-page-dashboard #dashboardView .dash-kpi b{
-    font-size:17px!important;
+    font-size:20px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi small{
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
   }
 
+  /* SHOW / AUDIT segmented control */
   body.pmno-page-dashboard #dashboardView .dash-modebar{
-    margin:0 0 9px!important;
+    display:flex;
+    justify-content:flex-end;
+    margin:0 0 10px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-modebar .dash-modebtn{
+    min-width:118px;
+    margin-left:-1px;
+    border-radius:0;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-modebar .dash-modebtn:first-child{
+    border-radius:7px 0 0 7px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-modebar .dash-modebtn:last-child{
+    border-radius:0 7px 7px 0;
   }
 
-  /* Main composition: map + profile rail */
+  /* Main composition: visual anchor + analytical rail */
   body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1.55fr) minmax(260px,.85fr)!important;
-    gap:8px!important;
-    align-items:start!important;
-    margin-bottom:10px!important;
+    display:grid;
+    grid-template-columns:minmax(0,1.62fr) minmax(390px,.98fr);
+    gap:12px;
+    margin-bottom:13px;
+    align-items:stretch;
   }
-
   body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{
-    min-width:0!important;
-    width:100%!important;
-    height:auto!important;
+    min-width:0;
   }
-
+  body.pmno-page-dashboard #dashboardView .dash-map-card{
+    min-width:0;
+  }
   body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
-    height:285px!important;
+    height:430px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card:not(.dash-map-card){
+    display:flex;
+    flex-direction:column;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card:not(.dash-map-card) .dash-panel-content{
+    flex:1;
+    min-height:0;
   }
 
-  body.pmno-page-dashboard #dashboardView .dash-card-head{
-    min-height:47px!important;
-    padding:8px 10px!important;
+  /* Strong section divider */
+  body.pmno-page-dashboard #dashboardView .show-section-title{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    margin:2px 0 8px;
+    color:#7891a5;
+    font-size:8px;
+    letter-spacing:1.8px;
+  }
+  body.pmno-page-dashboard #dashboardView .show-section-title::after{
+    content:"";
+    height:1px;
+    flex:1;
+    background:#1a3046;
+  }
+
+  /* Portfolio row 1: content-weighted 5 / 4 / 3 */
+  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-3{
+    display:grid;
+    grid-template-columns:5fr 4fr 3fr;
+    gap:12px;
+    align-items:start;
+    margin-bottom:12px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-3 > .dash-card{
+    min-width:0;
+    height:auto;
+    align-self:start;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-3:nth-of-type(2){
+    grid-template-columns:4fr 5fr 3fr;
   }
 
   body.pmno-page-dashboard #dashboardView .dash-panel-content{
-    min-width:0!important;
-    min-height:0!important;
-    padding:9px!important;
-    box-sizing:border-box!important;
+    min-height:0;
+    padding:12px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card-head{
+    min-height:54px;
+    padding:11px 13px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card-head strong{
+    font-size:9.5px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card-head small{
+    font-size:7.5px;
   }
 
+  /* Asset Profile: editorial two-column internals where space permits */
   body.pmno-page-dashboard #dashboardView .asset-profile-grid{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:repeat(2,minmax(0,1fr))!important;
-    gap:6px!important;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    align-items:start;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid > .asset-profile-hero,
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid > .asset-profile-readiness{
+    grid-column:1/-1;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-profile-group{
+    min-width:0;
   }
 
-  body.pmno-page-dashboard #dashboardView .asset-profile-hero{
-    grid-column:1 / -1!important;
-    min-height:72px!important;
+  /* Audit follows the same deliberate rhythm */
+  body.pmno-page-dashboard #dashboardView .audit-headline{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:12px;
   }
-
-  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{
-    grid-column:1 / -1!important;
-  }
-
-  /* Portfolio rows: two-column analytical cards */
-  body.pmno-page-dashboard #dashboardView .show-section-title{
-    margin:2px 0 7px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3,
-  body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3 + .dash-grid-3{
-    width:100%!important;
-    display:grid!important;
-    grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr)!important;
-    gap:8px!important;
-    align-items:start!important;
-    margin-bottom:8px!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card{
-    width:100%!important;
-    min-width:0!important;
-    height:auto!important;
-    align-self:start!important;
-  }
-
-  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card:nth-child(3){
-    grid-column:1 / -1!important;
+  body.pmno-page-dashboard #dashboardView .audit-headline .audit-kpi{
+    padding:12px 14px;
   }
 }
 
-/* Very narrow landscape: preserve landscape composition without horizontal overflow. */
-@media (orientation:landscape) and (min-width:500px) and (max-width:620px){
+/* ---------- LANDSCAPE: ITS OWN COMPOSITION ---------- */
+@media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
+  body.pmno-page-dashboard #dashboardView{
+    min-height:100dvh;
+    width:100%;
+    overflow:visible;
+  }
   body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 16px)!important;
+    width:calc(100% - 24px);
+    max-width:none;
+    margin:0 auto;
+    padding:12px 0 24px;
   }
 
+  /* Compact horizontal masthead */
   body.pmno-page-dashboard #dashboardView .dash-head{
-    align-items:flex-start!important;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:14px;
+    align-items:end;
+    margin-bottom:8px;
   }
-
   body.pmno-page-dashboard #dashboardView .dash-title{
-    font-size:18px!important;
+    font-size:21px;
+    line-height:1;
   }
-
   body.pmno-page-dashboard #dashboardView .dash-sub{
-    display:none!important;
+    margin-top:4px;
+    font-size:8px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-actions{
+    justify-content:flex-end;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-btn{
+    padding:8px 10px;
+    font-size:8px;
   }
 
-  body.pmno-page-dashboard #dashboardView .dash-actions .dash-btn{
-    min-width:0!important;
-    padding-left:8px!important;
-    padding-right:8px!important;
+  /* Landscape filter band */
+  body.pmno-page-dashboard #dashboardView .dash-filterbar{
+    grid-template-columns:1fr 1fr 1fr 1.15fr 1.65fr;
+    gap:0;
+    padding:6px;
+    margin-bottom:8px;
+    background:#081625;
+    border:1px solid #1d344a;
+    border-radius:9px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label{
+    padding:0 7px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label+label{
+    border-left:1px solid #172d42;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-filterbar input,
+  body.pmno-page-dashboard #dashboardView .dash-filterbar select{
+    height:31px;
+    margin-top:3px;
+    font-size:9px;
+    padding:0 8px;
+    border-radius:6px;
   }
 
+  /* 4x2 KPI matrix: fits short landscape height */
+  body.pmno-page-dashboard #dashboardView .dash-kpis{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:0;
+    margin-bottom:8px;
+    border:1px solid #20394f;
+    border-radius:9px;
+    overflow:hidden;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-width:0;
+    border:0;
+    border-right:1px solid #1b3349;
+    border-bottom:1px solid #1b3349;
+    border-radius:0;
+    padding:7px 9px;
+    min-height:50px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi:nth-child(4n){
+    border-right:0;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi:nth-last-child(-n+4){
+    border-bottom:0;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi b{
+    font-size:16px;
+    margin-top:3px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi small{
+    font-size:6px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-modebar{
+    justify-content:flex-end;
+    margin-bottom:8px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-modebtn{
+    padding:7px 11px;
+    font-size:7px;
+  }
+
+  /* Main landscape: map + profile rail */
   body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    grid-template-columns:minmax(0,1.25fr) minmax(210px,.75fr)!important;
+    display:grid;
+    grid-template-columns:minmax(0,1.68fr) minmax(300px,1fr);
+    gap:10px;
+    margin-bottom:10px;
+    align-items:stretch;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:300px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card:not(.dash-map-card){
+    display:flex;
+    flex-direction:column;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card:not(.dash-map-card) .dash-panel-content{
+    flex:1;
+    min-height:0;
   }
 
-  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
-    height:245px!important;
+  body.pmno-page-dashboard #dashboardView .show-section-title{
+    margin:1px 0 6px;
+    font-size:7px;
+    letter-spacing:1.6px;
+  }
+
+  /* Landscape portfolio = 3 purposeful columns */
+  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-3{
+    display:grid;
+    grid-template-columns:1.35fr 1.1fr .9fr;
+    gap:10px;
+    align-items:start;
+    margin-bottom:10px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-3 > .dash-card{
+    min-width:0;
+    height:auto;
+    align-self:start;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-panel-content{
+    min-height:0;
+    padding:10px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card-head{
+    min-height:46px;
+    padding:9px 11px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card-head strong{
+    font-size:8.5px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card-head small{
+    font-size:6.5px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid{
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:7px;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid > .asset-profile-hero,
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid > .asset-profile-readiness{
+    grid-column:1/-1;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero{
+    padding:9px 10px;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero strong{
+    font-size:23px;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-profile-group{
+    padding:8px 9px;
+  }
+  body.pmno-page-dashboard #dashboardView .asset-bar-row{
+    grid-template-columns:70px minmax(0,1fr) 38px;
+  }
+
+  /* Audit also becomes a compact landscape matrix */
+  body.pmno-page-dashboard #dashboardView .audit-headline{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:8px;
+  }
+  body.pmno-page-dashboard #dashboardView .audit-kpi{
+    padding:9px 10px;
+  }
+}
+
+/* Never allow the desktop/landscape redesign to create horizontal overflow */
+@media (min-width:761px){
+  body.pmno-page-dashboard #dashboardView,
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    box-sizing:border-box;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-card,
+  body.pmno-page-dashboard #dashboardView .dash-kpi,
+  body.pmno-page-dashboard #dashboardView .dash-filterbar{
+    min-width:0;
   }
 }
 </style>
@@ -5034,64 +5101,3 @@ body.pmno-page-single .detail-panel{
 })();
 </script>
 <script>window.__PMNO_BUILD__="V83-ADJACENCY-PERSIST-LAST-RESULT";</script>
-
-
-<style id="pmno-dashboard-fullwidth-v82">
-/* V82 — Dashboard truly fills the available viewport.
-   Dashboard only. No changes to portrait/mobile or other modules. */
-@media (min-width:1101px){
-  html body.pmno-page-dashboard #dashboardView,
-  html body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:100%!important;
-    max-width:none!important;
-    min-width:0!important;
-    margin-left:0!important;
-    margin-right:0!important;
-    box-sizing:border-box!important;
-  }
-  html body.pmno-page-dashboard #dashboardView .dash-shell{
-    padding-left:24px!important;
-    padding-right:24px!important;
-  }
-  html body.pmno-page-dashboard #dashboardView .dash-grid-top,
-  html body.pmno-page-dashboard #dashboardView .dash-grid-3,
-  html body.pmno-page-dashboard #dashboardView .dash-filterbar,
-  html body.pmno-page-dashboard #dashboardView .dash-kpis{
-    width:100%!important;
-    max-width:none!important;
-  }
-}
-@media (orientation:landscape) and (min-width:500px){
-  html body.pmno-page-dashboard #dashboardView,
-  html body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:100vw!important;
-    max-width:none!important;
-    min-width:0!important;
-    margin-left:0!important;
-    margin-right:0!important;
-    box-sizing:border-box!important;
-  }
-  html body.pmno-page-dashboard #dashboardView .dash-shell{
-    padding-left:12px!important;
-    padding-right:12px!important;
-  }
-  html body.pmno-page-dashboard #dashboardView .dash-grid-top,
-  html body.pmno-page-dashboard #dashboardView .dash-grid-3,
-  html body.pmno-page-dashboard #dashboardView .dash-filterbar,
-  html body.pmno-page-dashboard #dashboardView .dash-kpis{
-    width:100%!important;
-    max-width:none!important;
-  }
-
-  /* Never leave an empty right rail: distribute every portfolio card. */
-  html body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3{
-    grid-template-columns:minmax(0,1.25fr) minmax(0,1fr)!important;
-  }
-  html body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3 + .dash-grid-3{
-    grid-template-columns:minmax(0,1fr) minmax(0,1.25fr)!important;
-  }
-  html body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card:nth-child(3){
-    grid-column:auto!important;
-  }
-}
-</style>
