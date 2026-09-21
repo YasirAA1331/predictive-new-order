@@ -1586,6 +1586,80 @@ body.pmno-page-dashboard #dashboardView .asset-profile-grid{grid-template-column
  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:270px!important}
 }
 </style>
+
+<style id="pmno-dashboard-profile-pages-v11">
+/* V11 — Dashboard as an independent profile hub.
+   Each profile gets its own page shell so responsive changes stay isolated. */
+body.pmno-page-dashboard #dashboardView .dash-shell{max-width:none!important;width:min(1860px,calc(100% - 44px))!important;margin:0 auto!important;padding:18px 0 42px!important}
+body.pmno-page-dashboard .dash-profile-nav{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+body.pmno-page-dashboard .dash-profile-tile{position:relative;display:flex;flex-direction:column;justify-content:space-between;min-height:126px;padding:15px;border:1px solid #20384f;border-radius:13px;background:linear-gradient(145deg,#0d2032,#091724);color:#e9f2f8;text-align:left;cursor:pointer;transition:transform .16s ease,border-color .16s ease,background .16s ease,box-shadow .16s ease}
+body.pmno-page-dashboard .dash-profile-tile:hover{transform:translateY(-2px);border-color:#2d6785;background:linear-gradient(145deg,#10283d,#0a1b2b);box-shadow:0 12px 30px rgba(0,0,0,.18)}
+body.pmno-page-dashboard .dash-profile-tile .tile-no{font-size:9px;font-weight:950;letter-spacing:1.8px;color:#d9ad5b}
+body.pmno-page-dashboard .dash-profile-tile strong{display:block;margin-top:7px;font-size:12px;letter-spacing:1px}
+body.pmno-page-dashboard .dash-profile-tile small{display:block;margin-top:5px;color:#7890a4;font-size:9px;line-height:1.45}
+body.pmno-page-dashboard .dash-profile-tile .tile-open{align-self:flex-end;margin-top:12px;color:#56c7f3;font-size:9px;font-weight:950;letter-spacing:1.2px}
+body.pmno-page-dashboard .dash-profile-tile.primary{border-color:#2a526c;background:linear-gradient(145deg,#102d42,#0a1b2b)}
+body.pmno-page-dashboard .dash-overview-banner{display:flex;align-items:center;justify-content:space-between;gap:16px;margin:0 0 12px;padding:13px 15px;border:1px solid #1d344b;border-radius:12px;background:#081522}
+body.pmno-page-dashboard .dash-overview-banner strong{font-size:11px;letter-spacing:1.2px}
+body.pmno-page-dashboard .dash-overview-banner span{color:#7d94a7;font-size:9px;line-height:1.4}
+body.pmno-page-dashboard .dash-subnav{display:flex;gap:7px;overflow:auto;padding:2px 1px 9px;margin:0 0 4px;scrollbar-width:none}
+body.pmno-page-dashboard .dash-subnav::-webkit-scrollbar{display:none}
+body.pmno-page-dashboard .dash-subnav button{flex:0 0 auto;border:1px solid #1d344a;border-radius:9px;background:#081522;color:#7890a4;padding:8px 11px;font-size:8px;font-weight:950;letter-spacing:1px;cursor:pointer}
+body.pmno-page-dashboard .dash-subnav button.active{border-color:#2b7696;background:#0d2b3e;color:#65cff6;box-shadow:inset 0 0 0 1px rgba(83,199,243,.08)}
+body.pmno-page-dashboard .dash-subpage{display:none;min-width:0}
+body.pmno-page-dashboard .dash-subpage.active{display:block;animation:pmnoDashPageIn .18s ease}
+@keyframes pmnoDashPageIn{from{opacity:.25;transform:translateY(4px)}to{opacity:1;transform:none}}
+body.pmno-page-dashboard .dash-subpage-head{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin:2px 0 12px;padding:2px 1px}
+body.pmno-page-dashboard .dash-subpage-head .eyebrow{color:#d9ad5b;font-size:8px;font-weight:950;letter-spacing:1.8px}
+body.pmno-page-dashboard .dash-subpage-head h2{margin:4px 0 0;font-size:21px;letter-spacing:-.35px}
+body.pmno-page-dashboard .dash-subpage-head p{margin:4px 0 0;color:#7890a4;font-size:9px;line-height:1.45}
+body.pmno-page-dashboard .dash-back-btn{border:1px solid #29455c;border-radius:9px;background:#0a1928;color:#b8c9d6;padding:9px 12px;font-size:8px;font-weight:950;letter-spacing:1px;cursor:pointer}
+body.pmno-page-dashboard .dash-back-btn:hover{border-color:#3a7896;color:#6ed5fa}
+body.pmno-page-dashboard .dash-subpage-body{display:grid;grid-template-columns:minmax(0,1fr);gap:12px}
+body.pmno-page-dashboard .dash-subpage-body>.dash-card{min-width:0}
+body.pmno-page-dashboard .dash-profile-audit{margin-top:12px;border-top:1px solid #1c334a;padding-top:12px}
+body.pmno-page-dashboard .dash-profile-audit .dash-card-head{background:linear-gradient(180deg,rgba(14,31,48,.45),rgba(10,23,39,0))}
+body.pmno-page-dashboard .dash-audit-page-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+body.pmno-page-dashboard .dash-location-slot{min-width:0}
+body.pmno-page-dashboard .dash-location-slot .dash-map-card{height:auto}
+body.pmno-page-dashboard .dash-location-slot #dash-map{height:calc(100dvh - 290px)!important;min-height:420px!important;max-height:760px!important}
+body.pmno-page-dashboard .dash-overview-map-slot{margin-top:12px}
+body.pmno-page-dashboard .dash-overview-map-slot #dash-map{height:330px!important}
+body.pmno-page-dashboard .dash-overview-map-slot .dash-card-head{min-height:52px!important}
+body.pmno-page-dashboard .dash-page-note{padding:12px 14px;border:1px dashed #29445b;border-radius:10px;background:#081522;color:#71899c;font-size:9px;line-height:1.5}
+body.pmno-page-dashboard .dash-page-note b{color:#b9cbd7}
+@media(min-width:1101px){
+ body.pmno-page-dashboard .dash-profile-nav{grid-template-columns:repeat(4,minmax(0,1fr))}
+ body.pmno-page-dashboard .dash-subpage-body.profile-wide{grid-template-columns:minmax(0,1.35fr) minmax(0,.65fr)}
+ body.pmno-page-dashboard .dash-subpage-body.profile-two{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(orientation:landscape) and (min-width:761px) and (max-width:1100px){
+ body.pmno-page-dashboard #dashboardView .dash-shell{width:calc(100% - 28px)!important;padding:12px 0 28px!important}
+ body.pmno-page-dashboard .dash-profile-nav{grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}
+ body.pmno-page-dashboard .dash-profile-tile{min-height:104px;padding:11px}
+ body.pmno-page-dashboard .dash-profile-tile strong{font-size:10px}
+ body.pmno-page-dashboard .dash-profile-tile small{font-size:7px}
+ body.pmno-page-dashboard .dash-subpage-head h2{font-size:18px}
+ body.pmno-page-dashboard .dash-subpage-body.profile-wide{grid-template-columns:minmax(0,1.3fr) minmax(0,.7fr)}
+ body.pmno-page-dashboard .dash-location-slot #dash-map{height:320px!important;min-height:320px!important}
+}
+@media(max-width:760px){
+ body.pmno-page-dashboard #dashboardView .dash-shell{width:100%!important;padding:12px 12px 80px!important}
+ body.pmno-page-dashboard .dash-profile-nav{grid-template-columns:1fr 1fr;gap:8px}
+ body.pmno-page-dashboard .dash-profile-tile{min-height:112px;padding:11px;border-radius:11px}
+ body.pmno-page-dashboard .dash-profile-tile strong{font-size:10px}
+ body.pmno-page-dashboard .dash-profile-tile small{font-size:7px}
+ body.pmno-page-dashboard .dash-overview-banner{align-items:flex-start;flex-direction:column;gap:5px}
+ body.pmno-page-dashboard .dash-subpage-head{align-items:flex-start;flex-direction:column;gap:9px}
+ body.pmno-page-dashboard .dash-subpage-head h2{font-size:19px}
+ body.pmno-page-dashboard .dash-back-btn{width:100%}
+ body.pmno-page-dashboard .dash-audit-page-grid{grid-template-columns:1fr}
+ body.pmno-page-dashboard .dash-location-slot #dash-map{height:360px!important;min-height:360px!important;max-height:none!important}
+ body.pmno-page-dashboard .dash-overview-map-slot #dash-map{height:280px!important}
+}
+@media(max-width:390px){body.pmno-page-dashboard .dash-profile-nav{gap:6px}body.pmno-page-dashboard .dash-profile-tile{min-height:105px;padding:9px}body.pmno-page-dashboard .dash-profile-tile strong{font-size:9px}body.pmno-page-dashboard .dash-profile-tile small{font-size:6.8px}}
+</style>
+
 </head>
 <body>
 <div class="app">
@@ -4696,6 +4770,104 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
     document.addEventListener('DOMContentLoaded',()=>setTimeout(ensure,0),{once:true});
   }else setTimeout(ensure,0);
   window.addEventListener('pageshow',()=>setTimeout(ensure,0));
+})();
+</script>
+
+
+<script id="pmno-dashboard-profile-pages-v11">
+(function(){
+ 'use strict';
+ const $=id=>document.getElementById(id);
+ const profiles=[
+  {key:'overview',label:'OVERVIEW',title:'PORTFOLIO OVERVIEW',desc:'Executive entry point. Use the profile pages below for dedicated analysis.',target:null},
+  {key:'location',label:'ASSET LOCATION',title:'ASSET LOCATION',desc:'Portfolio geography and tenant-density map.',target:'dash-map-card'},
+  {key:'asset',label:'ASSET PROFILE',title:'ASSET PROFILE',desc:'Asset composition, maturity, physical profile and readiness.',target:'dash-asset'},
+  {key:'customer',label:'CUSTOMER PROFILE',title:'CUSTOMER PROFILE',desc:'Tenant base, tenancy ratio and customer distribution.',target:'dash-tenant'},
+  {key:'land',label:'LAND & LEGAL',title:'LAND & LEGAL PROFILE',desc:'Land tenure, lease exposure and legal status signals.',target:'dash-lease'},
+  {key:'technical',label:'TECHNICAL',title:'TECHNICAL PROFILE',desc:'Tower, access, terrain and power profile.',target:'dash-power'},
+  {key:'productivity',label:'PRODUCTIVITY',title:'PRODUCTIVITY PROFILE',desc:'Revenue coverage and productive-site profile.',target:'dash-productivity'},
+  {key:'financial',label:'FINANCIAL',title:'FINANCIAL PROFILE',desc:'Revenue, investment, cost, profitability and asset value.',target:'dash-financial'},
+  {key:'lifecycle',label:'LIFECYCLE',title:'ASSET LIFECYCLE',desc:'NPA, lease expiry and lifecycle signals.',target:'dash-lifecycle'},
+  {key:'audit',label:'AUDIT DATA',title:'AUDIT DATA',desc:'Completeness, validity and consistency by profile.',target:null}
+ ];
+ const map={asset:'dash-asset',customer:'dash-tenant',land:'dash-lease',technical:'dash-power',productivity:'dash-productivity',financial:'dash-financial',lifecycle:'dash-lifecycle'};
+ let built=false,active='overview',mapHome=null,mapPageSlot=null;
+ function mk(tag,cls){const n=document.createElement(tag);if(cls)n.className=cls;return n}
+ function build(){
+  if(built)return;
+  const root=$('dashboardView'), show=$('dash-show-layer'), audit=$('dash-audit-layer'); if(!root||!show)return;
+  const dashTitle=root.querySelector('.dash-title'); if(dashTitle)dashTitle.innerHTML='PORTFOLIO <b>DASHBOARD</b>';
+  const dashSub=root.querySelector('.dash-sub'); if(dashSub)dashSub.textContent='Executive portfolio overview with dedicated workspaces for each asset profile.';
+  const shell=root.querySelector('.dash-shell'); if(!shell)return;
+  // Preserve the existing filters/KPIs, then replace the old card-grid composition with page containers.
+  const modebar=$('dash-mode-show')?.parentElement;
+  if(modebar)modebar.remove();
+  const oldTop=show.querySelector('.dash-grid-top');
+  const oldTitles=show.querySelectorAll('.show-section-title');
+  const oldGrids=show.querySelectorAll('.dash-grid-3');
+  mapHome=oldTop?.querySelector('.dash-map-card')||null;
+  const assetCard=oldTop?.querySelector('#dash-asset')?.closest('.dash-card')||null;
+  const cards={asset:assetCard};
+  [['customer','#dash-tenant'],['land','#dash-lease'],['technical','#dash-power'],['productivity','#dash-productivity'],['financial','#dash-financial'],['lifecycle','#dash-lifecycle']].forEach(([k,sel])=>cards[k]=show.querySelector(sel)?.closest('.dash-card')||null);
+  const pageHost=mk('div','dash-pages');
+  const nav=mk('div','dash-subnav');
+  const overview=mk('div','dash-subpage active');overview.dataset.page='overview';
+  const banner=mk('div','dash-overview-banner');banner.innerHTML='<div><strong>PORTFOLIO INTELLIGENCE</strong><span> Select a profile to open its dedicated workspace. Each profile can evolve independently without changing the others.</span></div><button type="button" class="dash-back-btn" data-page="audit">OPEN AUDIT DATA →</button>';
+  overview.appendChild(banner);
+  const tileGrid=mk('div','dash-profile-nav');
+  const tileData=profiles.filter(p=>!['overview','audit'].includes(p.key));
+  tileData.forEach(p=>{const b=mk('button','dash-profile-tile');b.type='button';b.dataset.page=p.key;b.innerHTML=`<span class="tile-no">${String(tileData.indexOf(p)+1).padStart(2,'0')}</span><strong>${p.label}</strong><small>${p.desc}</small><span class="tile-open">OPEN PROFILE →</span>`;tileGrid.appendChild(b)});
+  overview.appendChild(tileGrid);
+  const overviewMap=mk('div','dash-overview-map-slot');
+  if(mapHome){overviewMap.appendChild(mapHome);mapHome.querySelector('.dash-card-head strong')?.replaceWith(Object.assign(document.createElement('strong'),{textContent:'ASSET LOCATION SNAPSHOT'}));}
+  overview.appendChild(overviewMap);
+  const overviewNote=mk('div','dash-page-note');overviewNote.innerHTML='<b>Design rule:</b> Dashboard is the portfolio entry point. Detailed content lives inside independent profile pages so desktop, landscape and portrait layouts can be adjusted per profile without cascading changes.';overview.appendChild(overviewNote);
+  pageHost.appendChild(overview);
+  tileData.forEach(p=>{
+   const pg=mk('div','dash-subpage');pg.dataset.page=p.key;
+   const head=mk('div','dash-subpage-head');head.innerHTML=`<div><div class="eyebrow">PORTFOLIO PROFILE</div><h2>${p.title}</h2><p>${p.desc}</p></div><button type="button" class="dash-back-btn" data-page="overview">← BACK TO OVERVIEW</button>`;pg.appendChild(head);
+   const body=mk('div','dash-subpage-body');
+   if(cards[p.key]){cards[p.key].classList.add('dash-profile-main-card');body.appendChild(cards[p.key]);}
+   pg.appendChild(body);
+   pageHost.appendChild(pg);
+  });
+  // Audit becomes a dedicated page; move its existing content intact.
+  if(audit){
+   audit.classList.remove('dash-layer','hidden');audit.style.display='none';
+   const auditPage=mk('div','dash-subpage');auditPage.dataset.page='audit';
+   const head=mk('div','dash-subpage-head');head.innerHTML='<div><div class="eyebrow">DATA QUALITY</div><h2>AUDIT DATA</h2><p>Completeness, validity and consistency of the current portfolio dataset.</p></div><button type="button" class="dash-back-btn" data-page="overview">← BACK TO OVERVIEW</button>';auditPage.appendChild(head);
+   const content=mk('div','dash-subpage-body');
+   while(audit.firstChild)content.appendChild(audit.firstChild);
+   // Existing audit children retain their IDs and render targets.
+   auditPage.appendChild(content);pageHost.appendChild(auditPage);audit.remove();
+  }
+  // Replace old show layer with the page host.
+  show.innerHTML='';show.appendChild(pageHost);
+  // Remove stale references from old grids/titles already detached.
+  oldTitles.forEach(n=>n.remove());oldGrids.forEach(n=>n.remove());
+  profiles.forEach(p=>{
+   const b=mk('button','');b.type='button';b.dataset.page=p.key;b.textContent=p.label;nav.appendChild(b);
+  });
+  shell.insertBefore(nav,shell.querySelector('.dash-filterbar'));
+  nav.addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)switchPage(b.dataset.page)});
+  pageHost.addEventListener('click',e=>{const b=e.target.closest('button[data-page]');if(b)switchPage(b.dataset.page)});
+  built=true;
+ }
+ function switchPage(page){
+  if(!built)build();
+  if(!profiles.some(p=>p.key===page))page='overview';
+  active=page;
+  document.querySelectorAll('#dashboardView .dash-subpage').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+  document.querySelectorAll('#dashboardView .dash-subnav button').forEach(x=>x.classList.toggle('active',x.dataset.page===page));
+  if(page==='audit'){const ap=document.querySelector('#dashboardView .dash-subpage[data-page="audit"]');const host=ap?.querySelector('.dash-subpage-body');if(host)host.querySelector('#dash-audit-layer')?.style.removeProperty('display');try{renderAuditData()}catch(_){} }
+  if(mapHome){const title=mapHome.querySelector('.dash-card-head strong'); if(title) title.textContent=page==='location'?'ASSET LOCATION':'ASSET LOCATION SNAPSHOT';}
+  if(page==='location'&&mapHome){const pg=document.querySelector('#dashboardView .dash-subpage[data-page="location"]');const body=pg?.querySelector('.dash-subpage-body');if(body&&!body.contains(mapHome))body.appendChild(mapHome);setTimeout(()=>window.__pmnoDashMap?.invalidateSize?.({animate:false}),80)}
+  if(page!=='location'&&mapHome){const overviewMap=document.querySelector('#dashboardView .dash-overview-map-slot');if(overviewMap&&!overviewMap.contains(mapHome))overviewMap.appendChild(mapHome);if(window.__pmnoDashMap)setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),80)}
+  window.scrollTo({top:0,behavior:'smooth'});
+ }
+ window.pmnoDashboardProfilePages={build,switchPage,get active(){return active}};
+ document.addEventListener('DOMContentLoaded',build,{once:true});
+ setTimeout(build,0);
 })();
 </script>
 
