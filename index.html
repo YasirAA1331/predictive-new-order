@@ -1472,153 +1472,352 @@ body.pmno-page-single .topbar .mode-menu button{
 </style>
 
 
-<style id="pmno-dashboard-desktop-landscape-redesign-v1">
-/* PMNO DASHBOARD — desktop / landscape composition only.
-   Mobile portrait and all non-dashboard modules intentionally untouched. */
+<style id="pmno-dashboard-composition-v80">
+/* V80 — Dashboard composition redesign.
+   Scope: Dashboard only × Desktop/Landscape.
+   Mobile portrait and all other modules are intentionally untouched. */
+
+body.pmno-page-dashboard #dashboardView{
+  background:
+    radial-gradient(circle at 82% 0%,rgba(53,200,255,.055),transparent 34%),
+    #06111f;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-shell{
+  width:calc(100% - 40px);
+  max-width:1900px;
+  margin:0 auto;
+  padding:18px 0 34px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-head{
+  margin-bottom:12px;
+  padding:0 2px;
+  align-items:flex-end;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-title{
+  font-size:25px;
+  line-height:1;
+  letter-spacing:-.3px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-sub{
+  max-width:760px;
+  line-height:1.45;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-actions{
+  flex:0 0 auto;
+  align-items:center;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-filterbar{
+  grid-template-columns:1fr 1fr 1.05fr 1.15fr 2.1fr;
+  gap:7px;
+  padding:9px;
+  margin-bottom:9px;
+  border:1px solid #1b3047;
+  border-radius:10px;
+  background:linear-gradient(180deg,#091827,#081522);
+  box-shadow:0 10px 30px rgba(0,0,0,.16);
+}
+
+body.pmno-page-dashboard #dashboardView .dash-filterbar label{
+  min-width:0;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-filterbar input,
+body.pmno-page-dashboard #dashboardView .dash-filterbar select{
+  height:35px;
+  margin-top:4px;
+  border-radius:7px;
+  background:#071321;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-kpis{
+  grid-template-columns:repeat(8,minmax(0,1fr));
+  gap:7px;
+  margin-bottom:9px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-kpi{
+  min-width:0;
+  padding:10px 11px;
+  border-radius:9px;
+  background:linear-gradient(180deg,#0b1a2a,#091725);
+  border-color:#1d344b;
+  position:relative;
+  overflow:hidden;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-kpi::before{
+  content:"";
+  position:absolute;
+  left:0;
+  top:0;
+  right:0;
+  height:2px;
+  background:rgba(53,200,255,.24);
+}
+
+body.pmno-page-dashboard #dashboardView .dash-kpi b{
+  font-size:18px;
+  line-height:1;
+  letter-spacing:-.3px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-modebar{
+  margin:0 0 11px;
+  padding:4px;
+  width:max-content;
+  max-width:100%;
+  border:1px solid #1b344b;
+  border-radius:9px;
+  background:#081522;
+  display:flex;
+  gap:3px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-modebtn{
+  min-width:112px;
+  height:30px;
+  border-radius:6px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-grid-top{
+  display:grid;
+  grid-template-columns:minmax(0,7.7fr) minmax(390px,4.3fr);
+  gap:10px;
+  margin-bottom:15px;
+  align-items:start;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{
+  min-width:0;
+  height:auto;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+  height:400px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-card{
+  border-radius:10px;
+  box-shadow:0 10px 30px rgba(0,0,0,.12);
+}
+
+body.pmno-page-dashboard #dashboardView .dash-card-head{
+  min-height:55px;
+  padding:11px 13px;
+  background:linear-gradient(180deg,rgba(13,29,49,.72),rgba(10,23,39,.3));
+}
+
+body.pmno-page-dashboard #dashboardView .dash-panel-content{
+  min-height:0;
+  padding:12px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-grid-top #dash-asset{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:8px;
+}
+
+body.pmno-page-dashboard #dashboardView .asset-profile-grid{
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  align-items:start;
+}
+
+body.pmno-page-dashboard #dashboardView .asset-profile-hero{
+  grid-column:1/-1;
+  min-height:94px;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  padding:12px 14px;
+}
+
+body.pmno-page-dashboard #dashboardView .asset-profile-hero strong{
+  font-size:30px;
+}
+
+body.pmno-page-dashboard #dashboardView .asset-profile-readiness{
+  grid-column:1/-1;
+}
+
+body.pmno-page-dashboard #dashboardView .show-section-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin:2px 0 9px;
+  padding:0 2px;
+  color:#8298ab;
+  font-size:8px;
+  letter-spacing:2px;
+  font-weight:950;
+}
+
+body.pmno-page-dashboard #dashboardView .show-section-title::after{
+  content:"";
+  height:1px;
+  flex:1;
+  background:linear-gradient(90deg,#20384e,transparent);
+}
+
+body.pmno-page-dashboard #dashboardView .dash-layer > .dash-grid-3{
+  display:grid;
+  gap:10px;
+  align-items:start;
+  margin-bottom:10px;
+}
+
+body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3{
+  grid-template-columns:minmax(0,5fr) minmax(0,4fr) minmax(0,3fr);
+}
+
+body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3 + .dash-grid-3{
+  grid-template-columns:minmax(0,4fr) minmax(0,5fr) minmax(0,3fr);
+}
+
+body.pmno-page-dashboard #dashboardView .dash-layer > .dash-grid-3 > .dash-card{
+  min-width:0;
+  height:auto;
+  align-self:start;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-layer > .dash-grid-3 > .dash-card .dash-panel-content{
+  height:auto;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-layer > .dash-grid-3 > .dash-card .dash-card-head{
+  min-height:52px;
+}
+
+body.pmno-page-dashboard #dashboardView .dash-layer > .dash-grid-3 + .dash-grid-3{
+  margin-top:0;
+}
+
 @media (min-width:1101px){
   body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 40px);
-    max-width:1880px;
-    margin:0 auto;
-    padding:16px 0 34px;
+    padding-top:16px;
   }
   body.pmno-page-dashboard #dashboardView .dash-head{
-    align-items:center;
-    gap:22px;
-    margin-bottom:12px;
+    min-height:48px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-actions{flex-shrink:0}
-  body.pmno-page-dashboard #dashboardView .dash-filterbar{
-    grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;
-    gap:8px;
-    margin-bottom:10px;
-  }
-  body.pmno-page-dashboard #dashboardView .dash-filterbar input,
-  body.pmno-page-dashboard #dashboardView .dash-filterbar select{height:36px}
-  body.pmno-page-dashboard #dashboardView .dash-kpis{
-    grid-template-columns:repeat(8,minmax(0,1fr));
-    gap:8px;
-    margin-bottom:12px;
-  }
-  body.pmno-page-dashboard #dashboardView .dash-kpi{
-    min-width:0;
-    padding:10px 11px;
-  }
-  body.pmno-page-dashboard #dashboardView .dash-kpi b{font-size:18px}
-  body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    grid-template-columns:minmax(0,2fr) minmax(430px,1fr);
-    gap:10px;
-    margin-bottom:13px;
-    align-items:start;
-  }
-  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:390px}
-  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card:nth-child(2){min-width:0}
-  body.pmno-page-dashboard #dashboardView .dash-grid-top .dash-panel-content{
-    padding:11px;
-    min-height:0;
-  }
-  body.pmno-page-dashboard #dashboardView .asset-profile-grid{gap:7px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-hero{padding:10px 11px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-hero strong{font-size:25px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-group{padding:8px 9px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{padding:9px}
-  body.pmno-page-dashboard #dashboardView .asset-readiness-breakdown{grid-template-columns:1fr 1fr;gap:5px}
-  body.pmno-page-dashboard #dashboardView .asset-readiness-note{font-size:6.5px;line-height:1.35}
-
-  body.pmno-page-dashboard #dashboardView .show-section-title{
-    margin:15px 2px 7px;
-  }
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .dash-grid-3{
-    grid-template-columns:repeat(12,minmax(0,1fr));
-    gap:10px;
-    margin-bottom:10px;
-    align-items:start;
-  }
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 5}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 4}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 4}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 5}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-card{height:auto}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-panel-content{min-height:0;padding:11px}
-
-  /* Audit follows the same compact executive rhythm, but only on desktop. */
-  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-grid-3{
-    grid-template-columns:repeat(3,minmax(0,1fr));
-    gap:10px;
-    align-items:start;
-  }
-  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-card{height:auto}
-  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-panel-content{min-height:0;padding:11px}
 }
 
+/* Landscape tablet / smaller desktop:
+   composition is rebuilt as 4 KPI columns + 2-column content,
+   rather than shrinking the desktop composition. */
 @media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
   body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 20px);
-    max-width:none;
-    margin:0 auto;
-    padding:10px 0 24px;
+    width:calc(100% - 24px);
+    padding:12px 0 24px;
   }
+
   body.pmno-page-dashboard #dashboardView .dash-head{
+    margin-bottom:9px;
     align-items:center;
-    margin-bottom:9px;
-    gap:14px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-title{font-size:20px}
-  body.pmno-page-dashboard #dashboardView .dash-sub{margin-top:3px}
+
+  body.pmno-page-dashboard #dashboardView .dash-title{
+    font-size:20px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-sub{
+    font-size:9px;
+  }
+
   body.pmno-page-dashboard #dashboardView .dash-filterbar{
-    grid-template-columns:1fr 1fr 1fr 1.15fr;
-    gap:7px;
-    margin-bottom:9px;
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:6px;
+    padding:7px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-filterbar label:last-child{grid-column:1/-1}
+
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label:last-child{
+    grid-column:1/-1;
+  }
+
   body.pmno-page-dashboard #dashboardView .dash-filterbar input,
-  body.pmno-page-dashboard #dashboardView .dash-filterbar select{height:34px}
+  body.pmno-page-dashboard #dashboardView .dash-filterbar select{
+    height:32px;
+  }
+
   body.pmno-page-dashboard #dashboardView .dash-kpis{
     grid-template-columns:repeat(4,minmax(0,1fr));
-    gap:7px;
-    margin-bottom:9px;
+    gap:6px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-kpi{padding:8px 10px}
-  body.pmno-page-dashboard #dashboardView .dash-kpi b{font-size:16px}
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-height:67px;
+    padding:8px 10px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi b{
+    font-size:17px;
+  }
+
   body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);
-    gap:9px;
-    margin-bottom:10px;
-    align-items:start;
-  }
-  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:300px}
-  body.pmno-page-dashboard #dashboardView .dash-grid-top .dash-panel-content{padding:9px;min-height:0}
-  body.pmno-page-dashboard #dashboardView .asset-profile-grid{gap:6px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-hero{padding:8px 9px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-hero strong{font-size:22px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-group{padding:7px 8px}
-  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{padding:8px}
-  body.pmno-page-dashboard #dashboardView .asset-readiness-breakdown{grid-template-columns:1fr 1fr;gap:4px}
-  body.pmno-page-dashboard #dashboardView .asset-readiness-note{font-size:6px;line-height:1.3}
-
-  body.pmno-page-dashboard #dashboardView .show-section-title{margin:12px 2px 6px}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .dash-grid-3{
-    grid-template-columns:repeat(12,minmax(0,1fr));
+    grid-template-columns:minmax(0,1.45fr) minmax(300px,.85fr);
     gap:8px;
-    margin-bottom:8px;
-    align-items:start;
   }
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 5}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 4}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 4}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 5}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-card{height:auto}
-  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-panel-content{min-height:0;padding:9px}
 
-  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-grid-3{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:start}
-  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-card{height:auto}
-  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-panel-content{min-height:0;padding:9px}
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:300px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid{
+    grid-template-columns:1fr 1fr;
+    gap:6px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero{
+    min-height:76px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{
+    grid-column:1/-1;
+  }
+
+  body.pmno-page-dashboard #dashboardView .show-section-title{
+    margin-bottom:7px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3{
+    grid-template-columns:1.2fr 1fr 1fr;
+  }
+
+  body.pmno-page-dashboard #dashboardView .show-section-title + .dash-grid-3 + .dash-grid-3{
+    grid-template-columns:1fr 1.2fr 1fr;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-layer > .dash-grid-3{
+    gap:8px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-card-head{
+    min-height:48px;
+    padding:9px 10px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-panel-content{
+    padding:9px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .asset-profile-group{
+    padding:8px 9px;
+  }
+
+  body.pmno-page-dashboard #dashboardView .asset-bar-row{
+    grid-template-columns:70px minmax(0,1fr) 36px;
+    gap:5px;
+    margin:5px 0;
+  }
 }
 </style>
+
 </head>
 <body>
 <div class="app">
