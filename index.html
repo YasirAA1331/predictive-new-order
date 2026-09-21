@@ -1472,113 +1472,151 @@ body.pmno-page-single .topbar .mode-menu button{
 </style>
 
 
-<style id="pmno-dashboard-desktop-landscape-v3">
-/* V3 — Dashboard-only composition. Desktop + landscape only. Mobile is intentionally untouched. */
+<style id="pmno-dashboard-desktop-landscape-redesign-v1">
+/* PMNO DASHBOARD — desktop / landscape composition only.
+   Mobile portrait and all non-dashboard modules intentionally untouched. */
 @media (min-width:1101px){
   body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 32px)!important;max-width:1880px!important;margin:0 auto!important;
-    padding:16px 0 34px!important;
+    width:calc(100% - 40px);
+    max-width:1880px;
+    margin:0 auto;
+    padding:16px 0 34px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-head{margin-bottom:10px!important;align-items:center!important;gap:20px!important}
-  body.pmno-page-dashboard #dashboardView .dash-title{font-size:22px!important}
-  body.pmno-page-dashboard #dashboardView .dash-sub{font-size:9px!important;margin-top:4px!important}
-  body.pmno-page-dashboard #dashboardView .dash-actions{flex-shrink:0!important}
+  body.pmno-page-dashboard #dashboardView .dash-head{
+    align-items:center;
+    gap:22px;
+    margin-bottom:12px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-actions{flex-shrink:0}
   body.pmno-page-dashboard #dashboardView .dash-filterbar{
-    grid-template-columns:1fr 1fr 1fr 1.15fr 2.2fr!important;gap:7px!important;margin-bottom:9px!important
+    grid-template-columns:1fr 1fr 1fr 1.15fr 2fr;
+    gap:8px;
+    margin-bottom:10px;
   }
   body.pmno-page-dashboard #dashboardView .dash-filterbar input,
-  body.pmno-page-dashboard #dashboardView .dash-filterbar select{height:36px!important}
+  body.pmno-page-dashboard #dashboardView .dash-filterbar select{height:36px}
   body.pmno-page-dashboard #dashboardView .dash-kpis{
-    grid-template-columns:repeat(8,minmax(0,1fr))!important;gap:7px!important;margin-bottom:9px!important
+    grid-template-columns:repeat(8,minmax(0,1fr));
+    gap:8px;
+    margin-bottom:12px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-kpi{min-height:64px!important;padding:9px 10px!important}
-  body.pmno-page-dashboard #dashboardView .dash-kpi b{font-size:18px!important;margin-top:4px!important}
-  body.pmno-page-dashboard #dashboardView .dash-modebar{margin-bottom:9px!important}
-
-  /* Main analysis: map is dominant, asset profile is a compact intelligence rail. */
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-width:0;
+    padding:10px 11px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-kpi b{font-size:18px}
   body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    display:grid!important;grid-template-columns:minmax(0,8fr) minmax(330px,4fr)!important;
-    gap:10px!important;align-items:start!important;margin-bottom:12px!important
+    grid-template-columns:minmax(0,2fr) minmax(430px,1fr);
+    gap:10px;
+    margin-bottom:13px;
+    align-items:start;
   }
-  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{height:auto!important;min-height:0!important;align-self:start!important}
-  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:400px!important}
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:390px}
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card:nth-child(2){min-width:0}
   body.pmno-page-dashboard #dashboardView .dash-grid-top .dash-panel-content{
-    padding:11px!important;min-height:0!important;height:auto!important
+    padding:11px;
+    min-height:0;
   }
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid{gap:7px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero{padding:10px 11px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero strong{font-size:25px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-group{padding:8px 9px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{padding:9px}
+  body.pmno-page-dashboard #dashboardView .asset-readiness-breakdown{grid-template-columns:1fr 1fr;gap:5px}
+  body.pmno-page-dashboard #dashboardView .asset-readiness-note{font-size:6.5px;line-height:1.35}
 
-  /* Profile rows use a 12-column editorial grid so cards keep their own content height. */
-  body.pmno-page-dashboard #dashboardView .dash-grid-3{
-    display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
-    gap:10px!important;align-items:start!important;margin-bottom:10px!important
+  body.pmno-page-dashboard #dashboardView .show-section-title{
+    margin:15px 2px 7px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(1) > .dash-card:nth-child(1){grid-column:span 5!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(1) > .dash-card:nth-child(2){grid-column:span 3!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(1) > .dash-card:nth-child(3){grid-column:span 4!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(2) > .dash-card:nth-child(1){grid-column:span 4!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(2) > .dash-card:nth-child(2){grid-column:span 5!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(2) > .dash-card:nth-child(3){grid-column:span 3!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card{
-    height:auto!important;min-height:0!important;align-self:start!important
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .dash-grid-3{
+    grid-template-columns:repeat(12,minmax(0,1fr));
+    gap:10px;
+    margin-bottom:10px;
+    align-items:start;
   }
-  body.pmno-page-dashboard #dashboardView .dash-card-head{padding:11px 12px!important}
-  body.pmno-page-dashboard #dashboardView .dash-panel-content{padding:11px 12px!important;min-height:0!important;height:auto!important}
-  body.pmno-page-dashboard #dashboardView .show-section-title{margin:2px 0 7px!important}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 5}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 4}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 4}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 5}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-card{height:auto}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-panel-content{min-height:0;padding:11px}
 
-  /* Audit gets the same compact composition without changing audit logic. */
-  body.pmno-page-dashboard #dashboardView .audit-headline{
-    display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important;margin-bottom:10px!important
+  /* Audit follows the same compact executive rhythm, but only on desktop. */
+  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-grid-3{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:10px;
+    align-items:start;
   }
-  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-top,
-  body.pmno-page-dashboard #dashboardView .dash-layer .dash-grid-3{margin-bottom:10px!important}
-  body.pmno-page-dashboard #dashboardView .dash-layer .dash-card{height:auto!important;min-height:0!important}
+  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-card{height:auto}
+  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-panel-content{min-height:0;padding:11px}
 }
 
 @media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
   body.pmno-page-dashboard #dashboardView .dash-shell{
-    width:calc(100% - 20px)!important;max-width:none!important;margin:0 auto!important;
-    padding:10px 0 24px!important;
+    width:calc(100% - 20px);
+    max-width:none;
+    margin:0 auto;
+    padding:10px 0 24px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-head{margin-bottom:7px!important;gap:12px!important;align-items:center!important}
-  body.pmno-page-dashboard #dashboardView .dash-title{font-size:18px!important}
-  body.pmno-page-dashboard #dashboardView .dash-sub{font-size:8px!important;margin-top:3px!important}
+  body.pmno-page-dashboard #dashboardView .dash-head{
+    align-items:center;
+    margin-bottom:9px;
+    gap:14px;
+  }
+  body.pmno-page-dashboard #dashboardView .dash-title{font-size:20px}
+  body.pmno-page-dashboard #dashboardView .dash-sub{margin-top:3px}
   body.pmno-page-dashboard #dashboardView .dash-filterbar{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin-bottom:7px!important
+    grid-template-columns:1fr 1fr 1fr 1.15fr;
+    gap:7px;
+    margin-bottom:9px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-filterbar > label:last-child{grid-column:1 / -1!important}
+  body.pmno-page-dashboard #dashboardView .dash-filterbar label:last-child{grid-column:1/-1}
   body.pmno-page-dashboard #dashboardView .dash-filterbar input,
-  body.pmno-page-dashboard #dashboardView .dash-filterbar select{height:33px!important;margin-top:4px!important}
+  body.pmno-page-dashboard #dashboardView .dash-filterbar select{height:34px}
   body.pmno-page-dashboard #dashboardView .dash-kpis{
-    grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin-bottom:7px!important
+    grid-template-columns:repeat(4,minmax(0,1fr));
+    gap:7px;
+    margin-bottom:9px;
   }
-  body.pmno-page-dashboard #dashboardView .dash-kpi{min-height:54px!important;padding:7px 9px!important}
-  body.pmno-page-dashboard #dashboardView .dash-kpi b{font-size:16px!important;margin-top:3px!important}
-  body.pmno-page-dashboard #dashboardView .dash-modebar{margin-bottom:7px!important}
-
-  /* Landscape is its own composition, not a squeezed desktop. */
+  body.pmno-page-dashboard #dashboardView .dash-kpi{padding:8px 10px}
+  body.pmno-page-dashboard #dashboardView .dash-kpi b{font-size:16px}
   body.pmno-page-dashboard #dashboardView .dash-grid-top{
-    display:grid!important;grid-template-columns:minmax(0,7fr) minmax(250px,5fr)!important;
-    gap:8px!important;align-items:start!important;margin-bottom:9px!important
+    grid-template-columns:minmax(0,1.55fr) minmax(330px,1fr);
+    gap:9px;
+    margin-bottom:10px;
+    align-items:start;
   }
-  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{height:auto!important;min-height:0!important;align-self:start!important}
-  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:300px!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-top .dash-panel-content{padding:9px!important;min-height:0!important;height:auto!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3{
-    display:grid!important;grid-template-columns:repeat(12,minmax(0,1fr))!important;
-    gap:8px!important;align-items:start!important;margin-bottom:8px!important
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{height:300px}
+  body.pmno-page-dashboard #dashboardView .dash-grid-top .dash-panel-content{padding:9px;min-height:0}
+  body.pmno-page-dashboard #dashboardView .asset-profile-grid{gap:6px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero{padding:8px 9px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-hero strong{font-size:22px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-group{padding:7px 8px}
+  body.pmno-page-dashboard #dashboardView .asset-profile-readiness{padding:8px}
+  body.pmno-page-dashboard #dashboardView .asset-readiness-breakdown{grid-template-columns:1fr 1fr;gap:4px}
+  body.pmno-page-dashboard #dashboardView .asset-readiness-note{font-size:6px;line-height:1.3}
+
+  body.pmno-page-dashboard #dashboardView .show-section-title{margin:12px 2px 6px}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .dash-grid-3{
+    grid-template-columns:repeat(12,minmax(0,1fr));
+    gap:8px;
+    margin-bottom:8px;
+    align-items:start;
   }
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(1) > .dash-card:nth-child(1){grid-column:span 5!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(1) > .dash-card:nth-child(2){grid-column:span 3!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(1) > .dash-card:nth-child(3){grid-column:span 4!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(2) > .dash-card:nth-child(1){grid-column:span 4!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(2) > .dash-card:nth-child(2){grid-column:span 5!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3:nth-of-type(2) > .dash-card:nth-child(3){grid-column:span 3!important}
-  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card{height:auto!important;min-height:0!important;align-self:start!important}
-  body.pmno-page-dashboard #dashboardView .dash-card-head{padding:8px 10px!important}
-  body.pmno-page-dashboard #dashboardView .dash-card-head strong{font-size:9px!important}
-  body.pmno-page-dashboard #dashboardView .dash-card-head small{font-size:7px!important}
-  body.pmno-page-dashboard #dashboardView .dash-panel-content{padding:8px 10px!important;min-height:0!important;height:auto!important}
-  body.pmno-page-dashboard #dashboardView .show-section-title{margin:1px 0 6px!important}
-  body.pmno-page-dashboard #dashboardView .audit-headline{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:6px!important;margin-bottom:8px!important}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 5}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 4}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(1){grid-column:span 4}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(2){grid-column:span 5}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer > .show-section-title + .dash-grid-3 + .dash-grid-3 > .dash-card:nth-child(3){grid-column:span 3}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-card{height:auto}
+  body.pmno-page-dashboard #dashboardView #dash-show-layer .dash-panel-content{min-height:0;padding:9px}
+
+  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-grid-3{grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;align-items:start}
+  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-card{height:auto}
+  body.pmno-page-dashboard #dashboardView #dash-audit-layer .dash-panel-content{min-height:0;padding:9px}
 }
 </style>
 </head>
