@@ -3542,7 +3542,7 @@ function pmnoRenderCustomerBusinessTable(data){
 function renderAssetProfilePage(){
  const root=$('asset-profile-page-content'); if(!root)return;
  const a=pmnoGetAggregateSummary()?.stats||{};
- const aggregate=pmnoGetAggregateSummary()?.aggregate||{};
+ const aggregate=pmnoGetAggregateSummary()||{};
  const sm=a;
  const geo=window.__pmnoGeoPortfolio||{};
  const ad=window.__pmnoTowerAdjacency||{};
