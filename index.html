@@ -4497,7 +4497,6 @@ async function exportModule(code){
   const original=btn?.textContent||'EXPORT CURRENT';
   try{
     if(!code)throw new Error('Module export belum dipilih.');
-    if(typeof XLSX==='undefined')throw new Error('Library Excel belum termuat. Refresh halaman lalu coba lagi.');
     const schema=headersFor(code)||[];
     if(!schema.length)throw new Error('Mapping kolom export belum tersedia untuk '+moduleName(code)+'.');
     if(btn){btn.disabled=true;btn.textContent='EXPORTING…';}
@@ -4517,14 +4516,17 @@ async function exportModule(code){
     if(!blob.size)throw new Error('File export kosong.');
     const cd=r.headers.get('Content-Disposition')||'';
     const match=cd.match(/filename="?([^";]+)"?/i);
-    const filename=match?.[1]||`PMNO_${code}_Current.xlsx`;
+    const contentType=(r.headers.get('Content-Type')||'').toLowerCase();
+    const defaultExt=contentType.includes('text/csv')?'.csv':'.xlsx';
+    const filename=match?.[1]||`PMNO_${code}_Current${defaultExt}`;
     const objectUrl=globalThis.URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=objectUrl;a.download=filename;a.style.display='none';
     document.body.appendChild(a);a.click();a.remove();
     setTimeout(()=>globalThis.URL.revokeObjectURL(objectUrl),15000);
     const rows=r.headers.get('X-PMNO-Rows')||'';
-    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · server-side`;
+    const format=contentType.includes('text/csv')?'CSV stream':'XLSX';
+    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · ${format} · server-side`;
   }catch(e){
     console.error('[PMNO EXPORT]',e);
     $('masterUploadInfo').textContent=`EXPORT GAGAL · ${e.message}`;
