@@ -3609,19 +3609,15 @@ function renderDashboardSource(label){
   const npaExposurePct=totalNbv>0?npaNbv/totalNbv*100:0;
   const revRows=filtered.map(r=>liveFinancial[sid(r)]).filter(Boolean);
   const totalRevMonth=revRows.reduce((n,x)=>n+Number(x.revenue_month||0),0);
-  const totalRevYear=revRows.reduce((n,x)=>n+Number(x.revenue_year||0),0);
+  const totalRevYear=revRows.reduce((n,x)=>n+Number(x.revenue_year||Number(x.revenue_month||0)*12),0);
   const revSites=revRows.filter(x=>Number(x.revenue_month||x.revenue_year||0)>0).length;
   const avgRevSite=revSites?totalRevMonth/revSites:0;
   const avgRevSiteYear=revSites?totalRevYear/revSites:0;
-  const finRows=filtered.map(r=>liveFinancial[sid(r)]).filter(Boolean);
-  const sumNum=k=>finRows.reduce((n,x)=>n+Number(x?.[k]||0),0);
-  const omCostYear=sumNum('om_cost_year');
-  const landLeaseCostYear=sumNum('land_lease_cost_year');
-  const totalCostYear=omCostYear+landLeaseCostYear;
-  const omCostMonth=omCostYear/12;
-  const landLeaseCostMonth=landLeaseCostYear/12;
-  const totalCostMonth=totalCostYear/12;
-  const costRows=finRows.filter(x=>Number(x.om_cost_year||x.land_lease_cost_year||0)>0);
+  const totalOmYear=revRows.reduce((n,x)=>n+Number(x.om_cost_year||0),0);
+  const totalLandYear=revRows.reduce((n,x)=>n+Number(x.land_lease_cost_year||0),0);
+  const totalTaxYear=revRows.reduce((n,x)=>n+Number(x.tax_year||0),0);
+  const totalCostYear=totalOmYear+totalLandYear;
+  const costRows=revRows.filter(x=>Number(x.om_cost_year||x.land_lease_cost_year||0)!==0);
   const moneyOrNA=(v,ok)=>ok?formatMoney(v):'BELUM TERSEDIA';
   const sourceRow=(label,value,note='')=>`<div class="metric-row"><div class="fin-row-label"><span>${esc(label)}</span>${note?`<small>${esc(note)}</small>`:''}</div><b>${esc(value)}</b></div>`;
   const group=(title,body)=>`<div class="fin-group"><div class="fin-group-title">${esc(title)}</div><div class="metric-list">${body}</div></div>`;
@@ -3629,34 +3625,25 @@ function renderDashboardSource(label){
   const na='BELUM TERSEDIA';
   fin.innerHTML=`
    <div class="fin-grid">
-    ${group('REVENUE',
-      sourceRow('Revenue / Month',moneyOrNA(totalRevMonth,revAvailable),revAvailable?`${fmtInt(revSites)} site dengan Revenue`:'Source Revenue belum terhubung')+
-      sourceRow('Revenue / Year',moneyOrNA(totalRevYear,revAvailable),'Revenue / Month × 12; memakai revenue_year bila tersedia')+
-      sourceRow('Revenue per Site / Month',moneyOrNA(avgRevSite,revSites>0),revSites?`Rata-rata dari ${fmtInt(revSites)} site dengan Revenue`:'Belum ada site dengan Revenue')+
-      sourceRow('Revenue per Site / Year',moneyOrNA(avgRevSiteYear,revSites>0),'Revenue / Year ÷ site dengan Revenue'))}
-    ${group('COST',
-      sourceRow('OM Cost / Month',moneyOrNA(omCostMonth,costRows.length>0),'OM Cost tahunan ÷ 12')+
-      sourceRow('OM Cost / Year',moneyOrNA(omCostYear,costRows.length>0),'Sumber: OM Cost tahunan')+
-      sourceRow('Land Lease Cost / Month',moneyOrNA(landLeaseCostMonth,costRows.length>0),'Land Lease Cost tahunan ÷ 12')+
-      sourceRow('Land Lease Cost / Year',moneyOrNA(landLeaseCostYear,costRows.length>0),'Sumber: Land Lease Cost tahunan')+
-      sourceRow('Total Cost / Month',moneyOrNA(totalCostMonth,costRows.length>0),'OM Cost + Land Lease Cost, basis bulanan')+
-      sourceRow('Total Cost / Year',moneyOrNA(totalCostYear,costRows.length>0),'OM Cost + Land Lease Cost'))}
-    ${group('CAPEX / INVESTMENT',sourceRow('CAPEX / Site',na,'Belum ada source CAPEX portfolio site-level pada Financial Profile')+sourceRow('CAPEX B2S / Site',na,'Hasil engine B2S tersedia melalui Bulk / Single Site')+sourceRow('CAPEX Collo / Site',na,'Hasil engine COLLO tersedia melalui Bulk / Single Site')+sourceRow('CAPEX QI / Site',na,'Source QI belum terhubung'))}
-    ${group('TAX · ENGINE',sourceRow('Tax / Site / Year',na,'Tax mengikuti auto-calculation pada economic engine; tidak mengambil tax_year sebagai hasil engine')+sourceRow('Tax / Site / Month',na,'Engine tax tahunan dapat ditampilkan per bulan setelah hasil engine tersedia'))}
+    ${group('REVENUE',sourceRow('Revenue / Month',moneyOrNA(totalRevMonth,revAvailable),'Source financial profile')+sourceRow('Revenue / Year',moneyOrNA(totalRevYear,revAvailable),'Revenue / Month × 12 bila Revenue / Year tidak tersedia')+sourceRow('Revenue per Site / Month',moneyOrNA(avgRevSite,revAvailable),revAvailable?`${fmtInt(revSites)} site memiliki revenue`:'Source tenant revenue belum terhubung')+sourceRow('Revenue per Site / Year',moneyOrNA(avgRevSiteYear,revAvailable),'Total Revenue / Year ÷ site dengan Revenue'))}
+    ${group('CAPEX / INVESTMENT',sourceRow('CAPEX / Site',na,'Sumber CAPEX site-level belum terhubung di Financial Profile')+sourceRow('CAPEX B2S / Site',na,'Hasil engine B2S')+sourceRow('CAPEX Collo / Site',na,'Hasil engine COLLO')+sourceRow('CAPEX QI / Site',na,'Hasil engine QI'))}
+    ${group('OPERATING COST',sourceRow('OM Cost / Month',moneyOrNA(totalOmYear/12,costRows.length),'OM Cost / Year ÷ 12')+sourceRow('OM Cost / Year',moneyOrNA(totalOmYear,costRows.length),'Source financial profile')+sourceRow('Land Lease Cost / Month',moneyOrNA(totalLandYear/12,costRows.length),'Land Lease Cost / Year ÷ 12')+sourceRow('Land Lease Cost / Year',moneyOrNA(totalLandYear,costRows.length),'Source financial profile')+sourceRow('Total Cost / Month',moneyOrNA(totalCostYear/12,costRows.length),'OM Cost + Land Lease Cost')+sourceRow('Total Cost / Year',moneyOrNA(totalCostYear,costRows.length),'OM Cost + Land Lease Cost'))}
+    ${group('TAX',sourceRow('Tax / Year',totalTaxYear?formatMoney(totalTaxYear):na,totalTaxYear?'Nilai tersimpan pada financial profile':'Auto calculation engine · hasil belum tersedia di renderer ini')+sourceRow('Tax / Month',totalTaxYear?formatMoney(totalTaxYear/12):na,totalTaxYear?'Tax / Year ÷ 12':'Mengikuti auto calculation engine'))}
    </div>
-    ${group('PROFITABILITY & RETURN · ENGINE',
-      sourceRow('EBITDA',na,'Perlu Revenue dan Cost yang sudah terhubung pada engine')+
-      sourceRow('Cashflow / Site / Month',na,'Monthly cashflow menggunakan engine PMNO')+
-      sourceRow('IRR · Bulk / Portfolio',na,'IRR mengikuti engine PMNO; bulk engine tersedia pada menu Bulk')+
-      sourceRow('IRR · Per Site',na,'IRR mengikuti engine PMNO yang sama; tersedia per site pada Bulk / Single Site')+
-      sourceRow('NPV · Per Site',na,'Mengikuti hasil economic engine bila tersedia'))}
+    ${group('PROFITABILITY BUILD-UP',
+      sourceRow('EBITDA',na,'Mengikuti economic engine PMNO')+
+      sourceRow('EBIT',na,'Mengikuti economic engine PMNO')+
+      sourceRow('Cashflow / Site / Month',na,'Mengikuti economic engine PMNO')+
+      sourceRow('IRR · Bulk / Portfolio',na,'Mengikuti engine IRR PMNO · bulk')+
+      sourceRow('IRR · Per Site',na,'Mengikuti engine IRR PMNO · per site')+
+      sourceRow('NPV',na,'Mengikuti economic engine PMNO'))}
     ${group('ASSET VALUE',
       sourceRow('Total NBV',mappedRows.length?formatMoney(totalNbv):na,mappedRows.length?'NBV yang terpetakan ke Site ID':'Data NBV belum tersedia')+
       sourceRow('Avg NBV / Site',mappedRows.length?formatMoney(totalNbv/mappedRows.length):na,mappedRows.length?'Total NBV ÷ site dengan NBV':'Data NBV belum tersedia')+
       sourceRow('NBV pada Site NPA',npaNbv?formatMoney(npaNbv):formatMoney(0),npaNbv?'NBV pada site tanpa tenant aktif':'Tidak ada NBV terpetakan pada NPA')+
       sourceRow('Porsi NBV pada Site NPA',npaExposurePct.toFixed(1)+'%',npaNbv?'NBV NPA ÷ Total NBV':'Tidak ada NBV NPA terpetakan'))}
    </div>
-   <div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID. Revenue dan Cost ditampilkan Month/Year. Cost bulanan merupakan nilai tahunan ÷ 12. Tax dan IRR tidak direka ulang di Financial Profile: keduanya mengikuti economic engine PMNO saat hasil engine tersedia.</div>`;
+   <div class="audit-note">Kelengkapan NBV tetap dinilai di Audit Data. Angka di atas hanya memakai NBV yang terpetakan ke Site ID.</div>`;
  };
  const lc=$('dash-lifecycle');if(lc)lc.innerHTML=metricRows([['Total site / tower',fmtInt(a.total)],['NPA · 0 tenant',fmtInt(siteNpaCount(filtered)),'warn'],['Site dengan tanggal berakhir sewa',fmtInt(filtered.filter(r=>val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length)],['Lease risk < 6 bulan',fmtInt(a.leaseRisk),'warn'],['Sewa sudah berakhir',fmtInt(a.leaseExpired),'bad'],['Site tanpa tanggal berakhir sewa',fmtInt(filtered.filter(r=>!val(r,'lease_expiry_date','end_sewa','lease_end_date','contract_end_date')).length),'neutral']]);
  // Map rendering is deliberately decoupled from this source renderer.
