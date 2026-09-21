@@ -1692,6 +1692,135 @@ body.pmno-page-single .topbar .mode-menu button{
 }
 </style>
 
+
+<style id="pmno-dashboard-density-v2">
+/* V2 — reduce dead space; keep hierarchy, remove artificial stretching */
+@media (min-width:901px){
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:calc(100% - 32px)!important;
+    max-width:1840px!important;
+    padding:14px 0 28px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-head{
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-filterbar{
+    gap:7px!important;
+    margin-bottom:9px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpis{
+    gap:7px!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-height:68px!important;
+    padding:9px 10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-top{
+    grid-template-columns:minmax(0,1.68fr) minmax(300px,.82fr)!important;
+    gap:10px!important;
+    align-items:start!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{
+    height:auto!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:395px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-3{
+    gap:10px!important;
+    align-items:start!important;
+    margin-bottom:10px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card{
+    height:auto!important;
+    align-self:start!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-panel-content{
+    padding:11px!important;
+    min-height:0!important;
+  }
+}
+
+@media (orientation:landscape) and (min-width:761px) and (max-width:1100px){
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:calc(100% - 20px)!important;
+    padding:10px 0 22px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-head{
+    margin-bottom:7px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-filterbar{
+    gap:6px!important;
+    margin-bottom:7px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpis{
+    gap:6px!important;
+    margin-bottom:8px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-kpi{
+    min-height:56px!important;
+    padding:7px 8px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-top{
+    grid-template-columns:minmax(0,1.55fr) minmax(235px,.8fr)!important;
+    gap:8px!important;
+    align-items:start!important;
+    margin-bottom:8px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-top > .dash-card{
+    height:auto!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:315px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-3{
+    gap:8px!important;
+    margin-bottom:8px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-grid-3 > .dash-card{
+    height:auto!important;
+    align-self:start!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-panel-content{
+    padding:9px!important;
+    min-height:0!important;
+  }
+}
+
+@media (min-width:1500px){
+  body.pmno-page-dashboard #dashboardView .dash-shell{
+    width:calc(100% - 40px)!important;
+    max-width:1880px!important;
+  }
+
+  body.pmno-page-dashboard #dashboardView .dash-map-card #dash-map{
+    height:405px!important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div class="app">
