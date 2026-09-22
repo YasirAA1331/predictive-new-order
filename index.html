@@ -4973,9 +4973,7 @@ async function cpLoad(){
  root.innerHTML='<div class="cust-loading">Loading Customer Profile…</div>';
  try{
   const f=cpFilters();
-  const [dashRaw,bizRaw]=await Promise.all([cpRpc('pmno_customer_profile_summary',f),cpRpc('pmno_customer_business_summary',f)]);
-  const dash=cpObj(dashRaw),d=cpObj(bizRaw),s=dash.stats||{};
-  const total=cpNum(s.total_sites),tenant=cpNum(d.tenant_total||s.total_tenant),npa=cpNum(s.npa_sites),one=cpNum(s.one_tenant),two=cpNum(s.two_tenant),three=cpNum(s.three_tenant),gt3=cpNum(s.gt3_tenant),revSites=cpNum(s.revenue_sites);
+  const d=cpObj(await cpRpc('pmno_customer_business_summary',f)); const s=d.tenancy||{}; const total=cpNum(s.total_sites),tenant=cpNum(d.tenant_total),npa=cpNum(s.npa_sites),one=cpNum(s.one_tenant),two=cpNum(s.two_tenant),three=cpNum(s.three_tenant),gt3=cpNum(s.gt3_tenant),revSites=cpNum(s.revenue_sites);
   const withTenant=Math.max(0,total-npa),multi=Math.max(0,two+three+gt3),ratio=total?tenant/total:0,pct=n=>total?(n/total*100).toFixed(1):'0.0';
   const st=d.single_tenant||{},singleTotal=cpNum(st.total)||one,big3=cpNum(st.TSEL)+cpNum(st.IOH)+cpNum(st.XLSMART);
   const fixed=['TSEL','IOH','XLSMART','SURGE','MORAREPUBLIC','OTHERS'];
