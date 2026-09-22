@@ -2542,22 +2542,40 @@ async function loadLastBulkRun(){
  try{const raw=await fRpc('pmno_irr_get_last_bulk_run',{});renderBulkRun(raw)}
  catch(e){console.warn('[PMNO BULK IRR LAST RUN]',e)}
 }
+async function runBulkChunked(){
+ const bulkBtn=$f('financial-engine-bulk-run');
+ const result=$f('financial-engine-bulk-result');
+ if(!bulkBtn||!result)return;
+ bulkBtn.disabled=true;
+ const filter=bulkFilterBody();
+ try{
+   result.innerHTML=row('Status','STARTING…','Menyiapkan Bulk IRR backend','na');
+   const start=await fRpc('pmno_irr_bulk_start',filter);
+   if(!start?.ok||!start.run_id)throw new Error(start?.reason||'Gagal membuat Bulk IRR run');
+   const runId=start.run_id;
+   const chunkSize=300;
+   let offset=0,total=0,processed=0,done=false;
+   while(!done){
+     bulkBtn.textContent=total?('RUNNING '+Math.min(offset+chunkSize,total)+' / '+total):'RUNNING…';
+     const chunk=await fRpc('pmno_irr_bulk_chunk',{p_run_id:runId,p_offset:offset,p_limit:chunkSize,...filter});
+     if(!chunk?.ok)throw new Error(chunk?.reason||'Bulk IRR chunk gagal');
+     total=nF(chunk.total);processed+=nF(chunk.processed);done=!!chunk.done;
+     offset+=nF(chunk.processed);
+     result.innerHTML=row('Status',done?'FINALIZING…':'RUNNING…',iF(processed)+' / '+iF(total)+' Site diproses · IRR dihitung di backend','na');
+     if(!chunk.processed&&!done)throw new Error('Bulk engine tidak memproses Site pada chunk berikutnya');
+   }
+   const raw=await fRpc('pmno_irr_bulk_finalize',{p_run_id:runId});
+   if(!raw?.ok)throw new Error(raw?.reason||'Bulk IRR finalize gagal');
+   renderBulkRun(raw);
+ }catch(e){
+   result.innerHTML=row('Status','ENGINE ERROR',e.message,'na');
+ }finally{
+   bulkBtn.disabled=false;bulkBtn.textContent='RUN BULK IRR';
+ }
+}
 function bindEngineRunner(){
  const bulkBtn=$f('financial-engine-bulk-run');
- if(bulkBtn){
-   bulkBtn.onclick=async()=>{
-     bulkBtn.disabled=true;bulkBtn.textContent='RUNNING…';
-     const result=$f('financial-engine-bulk-result');
-     if(result)result.innerHTML=row('Status','RUNNING…','Menghitung Portfolio IRR + Avg IRR Site + NPV dari filter aktif','na');
-     try{
-       const raw=await fRpc('pmno_irr_generate_bulk_monthly',bulkFilterBody());
-       if(!raw?.ok)throw new Error(raw?.reason||'Bulk IRR gagal dijalankan');
-       renderBulkRun(raw);
-     }catch(e){
-       if(result)result.innerHTML=row('Status','ENGINE ERROR',e.message,'na');
-     }finally{bulkBtn.disabled=false;bulkBtn.textContent='RUN BULK IRR'}
-   };
- }
+ if(bulkBtn)bulkBtn.onclick=runBulkChunked;
  loadLastBulkRun();
 }
 
