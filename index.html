@@ -2468,6 +2468,11 @@ loadTenants().then(pmnoLoadRouteContext);
 const FURL='https://vzeitjesovdojfsfgyza.supabase.co';
 const FKEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
 const FH={'apikey':FKEY,'Authorization':'Bearer '+FKEY,'Content-Type':'application/json'};
+// Shared aliases for Customer Profile code running inside this Financial Profile controller.
+const URL=FURL;
+const H=FH;
+const $=id=>document.getElementById(id);
+const fmtInt=v=>nF(v).toLocaleString('id-ID');
 const $f=id=>document.getElementById(id);
 const escF=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const nF=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
