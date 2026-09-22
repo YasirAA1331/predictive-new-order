@@ -4780,18 +4780,18 @@ async function exportModule(code){
       try{const j=await r.json();msg=j?.error||j?.message||msg}catch(_){}
       throw new Error(msg);
     }
-    const blob=await r.blob();
-    if(!blob.size)throw new Error('File export kosong.');
-    const cd=r.headers.get('Content-Disposition')||'';
-    const match=cd.match(/filename="?([^";]+)"?/i);
-    const filename=match?.[1]||`PMNO_${code}_Current.xlsx`;
-    const url=window.URL.createObjectURL(blob);
+    const payload=await r.json().catch(()=>null);
+    if(!payload?.ok||!payload?.download_url)throw new Error(payload?.error||'File export tidak tersedia.');
+    const filename=payload.filename||`PMNO_${code}_Current.xlsx`;
     const a=document.createElement('a');
-    a.href=url;a.download=filename;a.style.display='none';
+    a.href=payload.download_url;
+    a.target='_blank';
+    a.rel='noopener';
+    a.style.display='none';
     document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>window.URL.revokeObjectURL(url),15000);
-    const rows=r.headers.get('X-PMNO-Rows')||'';
-    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · server-side`;
+    const rows=payload.rows||'';
+    const format=String(payload.format||'xlsx').toUpperCase();
+    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · ${format}`;
   }catch(e){
     console.error('[PMNO EXPORT]',e);
     $('masterUploadInfo').textContent=`EXPORT GAGAL · ${e.message}`;
