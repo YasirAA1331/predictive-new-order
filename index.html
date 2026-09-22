@@ -1640,6 +1640,16 @@ body.pmno-page-assetprofile .topbar{flex:none!important}
 .fp-engine-result{margin-top:10px;border-top:1px solid #1b3046;padding-top:9px}
 .fp-engine-result .fp-row{grid-template-columns:1fr auto}
 .fp-source{font-size:7px;color:#617b91;margin-top:8px;line-height:1.5}
+.fp-bulk-action{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0 12px;padding:9px 10px;border:1px solid #20364f;border-radius:8px;background:#071321}
+.fp-bulk-action button{border:1px solid #2d5b78;background:#0b2638;color:#cce9f6;border-radius:7px;padding:8px 14px;font-size:8px;font-weight:900;letter-spacing:.8px;cursor:pointer;white-space:nowrap}
+.fp-bulk-action button:disabled{opacity:.55;cursor:wait}
+.fp-bulk-meta{font-size:7px;color:#7890a5;line-height:1.5}
+.fp-bulk-last{font-size:7px;color:#617b91;margin-top:8px;line-height:1.55}
+.fp-bulk-result{margin-top:8px;border-top:1px solid #1b3046;padding-top:4px}
+.fp-bulk-result .fp-row{grid-template-columns:1fr auto}
+.fp-run-ok{color:#8fd8b3!important}
+.fp-run-na{color:#9aadc0!important}
+@media(max-width:760px){.fp-bulk-action{align-items:stretch;flex-direction:column}.fp-bulk-action button{width:100%}}
 .fp-period-table{width:100%;border-collapse:collapse}
 .fp-period-table th,.fp-period-table td{padding:8px 7px;border-bottom:1px solid #1b3046;text-align:right;font-size:8px}
 .fp-period-table th:first-child,.fp-period-table td:first-child{text-align:left}
@@ -2484,8 +2494,8 @@ function renderFinancialProfile(d){
    card('EBITDA',row('Revenue / Year',mF(revenueYear))+row('Total Cost / Year',mF(opex))+row('EBITDA',mF(ebitda),'Revenue / Year − Total Cost / Year','good'))+
    card('ECONOMIC ENGINE',row('Calculation Version','V1_MONTHLY_40Y','Backend IRR engine')+row('Period Type','MONTHLY','Cashflow per bulan')+row('Asset Life','40 Tahun','480 periode bulanan')+row('WACC','8,73%','Backend assumption'))+
  '</div><div class="fp-formula"><strong>IRR / NPV</strong><span>Backend monthly cashflow → 480 bulan → PMNO Economic Engine. FE hanya membaca hasil.</span></div></div></section>'+ 
- '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · ECONOMIC ENGINE</strong><small>Existing IRR dihitung dari cashflow bulanan Site berdasarkan Asset Register Date. Tidak ada lagi rumus IRR hardcode di FE.</small></div></div><div class="fp-section-body"><div class="fin-engine-grid">'+
-   '<div class="fp-engine-card"><div class="fp-card-title">PORTFOLIO / BULK</div>'+row('Existing IRR','BELUM DIHITUNG','Portfolio IRR harus berasal dari aggregate monthly cashflow, bukan average IRR site','na')+row('NPV','BELUM DIHITUNG','Portfolio NPV harus berasal dari aggregate monthly cashflow','na')+'<div class="fp-engine-status">Source of truth: <code>pmno_irr_cashflow_monthly</code> → aggregate per period → IRR/NPV backend. Tidak menggunakan rata-rata IRR site.</div></div>'+
+ '<section class="fp-section"><div class="fp-section-head"><div><strong>07 · ECONOMIC ENGINE</strong><small>IRR dapat dijalankan manual untuk Bulk/Portfolio maupun per Site. Hasil yang tampil otomatis menggunakan hasil running terakhir; tidak ada auto-run saat halaman dibuka.</small></div></div><div class="fp-section-body"><div class="fin-engine-grid">'+
+   '<div class="fp-engine-card"><div class="fp-card-title">PORTFOLIO / BULK</div><div class="fp-bulk-action"><div class="fp-bulk-meta"><b>MANUAL RUN</b><br>Menjalankan IRR seluruh Site sesuai filter aktif.</div><button type="button" id="financial-engine-bulk-run">RUN BULK IRR</button></div><div id="financial-engine-bulk-result" class="fp-bulk-result">'+row('Portfolio Existing IRR','—','Aggregate monthly cashflow · 480 bulan','fp-run-na')+row('Avg IRR / Site','—','Rata-rata IRR Site yang berhasil dihitung','fp-run-na')+row('Portfolio NPV','—','Aggregate monthly cashflow · WACC backend','fp-run-na')+row('Site dihitung','—','—','fp-run-na')+'</div><div id="financial-engine-bulk-last" class="fp-bulk-last">Last run: belum pernah dijalankan.</div><div class="fp-engine-status">Bulk IRR dan NPV dihitung di backend. Portfolio IRR bukan rata-rata IRR site; Avg IRR ditampilkan sebagai metrik terpisah.</div></div>'+
    '<div class="fp-engine-card"><div class="fp-card-title">PER SITE · MONTHLY ENGINE</div><div class="fp-engine-action"><input id="financial-engine-site" placeholder="Masukkan Site ID"><button type="button" id="financial-engine-run">RUN 40Y ENGINE</button></div><div id="financial-engine-result" class="fp-engine-result">'+row('Existing IRR','—','V1_MONTHLY_40Y')+row('NPV','—','Monthly cashflow · 480 bulan')+row('Cashflow / Month','—','Revenue − OM − Land Lease − Tax')+'</div><div class="fp-source">Engine source: <code>pmno_irr_generate_existing_monthly</code>. Asset Register Date menjadi titik awal 480 periode.</div></div>'+ 
  '</div></div></section>'+ 
  '<section class="fp-section"><div class="fp-section-head"><div><strong>08 · FINANCIAL DATA COVERAGE</strong><small>Coverage berdasarkan Site ID pada filter aktif.</small></div></div><div class="fp-section-body"><div class="fp-kelengkapan">'+
@@ -2496,25 +2506,79 @@ function renderFinancialProfile(d){
  '</div></div></section>';
  bindEngineRunner();
 }
+function bulkFilterBody(){
+ return {
+   p_regional:$f('financial-regional')?.value||null,
+   p_area:$f('financial-area')?.value||null,
+   p_province:$f('financial-province')?.value||null,
+   p_city:$f('financial-city')?.value||null,
+   p_search:($f('financial-search')?.value||'').trim()||null
+ };
+}
+function bulkFilterLabel(d){
+ const parts=[d?.regional,d?.area,d?.province,d?.city,d?.search].filter(v=>v);
+ return parts.length?parts.join(' · '):'ALL SITE';
+}
+function formatRunAt(v){
+ if(!v)return '—';
+ try{return new Date(v).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})}catch(_){return String(v)}
+}
+function renderBulkRun(raw){
+ const result=$f('financial-engine-bulk-result'),last=$f('financial-engine-bulk-last');
+ if(!result||!last)return;
+ if(!raw?.ok){
+   result.innerHTML=row('Status','BELUM ADA HASIL','Jalankan RUN BULK IRR untuk menghitung portfolio','fp-run-na');
+   last.textContent='Last run: belum pernah dijalankan.';
+   return;
+ }
+ result.innerHTML=row('Portfolio Existing IRR',irrF(raw.portfolio_irr),'Aggregate monthly cashflow · 480 bulan','fp-run-ok')+
+   row('Avg IRR / Site',irrF(raw.avg_site_irr),'Rata-rata IRR Site yang berhasil dihitung','fp-run-ok')+
+   row('Portfolio NPV',mF(raw.portfolio_npv),'Aggregate monthly cashflow · WACC '+irrF(raw.wacc),'fp-run-ok')+
+   row('Site dihitung',iF(raw.site_count),iF(raw.valid_irr_sites)+' site memiliki IRR valid')+
+   row('Portfolio NBV',mF(raw.portfolio_nbv),'Initial investment / opening NBV')+
+   row('Cashflow / Month',mF(raw.portfolio_monthly_cashflow),'Aggregate Revenue − OM − Land Lease − Tax');
+ last.innerHTML='Last run: <b>'+escF(formatRunAt(raw.run_at))+'</b> · '+escF(bulkFilterLabel(raw))+' · Run ID '+escF(raw.run_id||'—');
+}
+async function loadLastBulkRun(){
+ try{const raw=await fRpc('pmno_irr_get_last_bulk_run',{});renderBulkRun(raw)}
+ catch(e){console.warn('[PMNO BULK IRR LAST RUN]',e)}
+}
 function bindEngineRunner(){
  const btn=$f('financial-engine-run'),input=$f('financial-engine-site'),result=$f('financial-engine-result');
- if(!btn||!input||!result)return;
- btn.onclick=async()=>{
-   const site=String(input.value||'').trim();
-   if(!site){result.innerHTML=row('Status','Masukkan Site ID','Site ID diperlukan untuk menjalankan monthly economic engine','na');return}
-   btn.disabled=true;btn.textContent='RUNNING…';result.innerHTML=row('Status','Running…','Generate 480 monthly cashflow dari Asset Register Date');
-   try{
-     const raw=await fRpc('pmno_irr_generate_existing_monthly',{p_site_id:site});
-     if(!raw?.ok){throw new Error(raw?.reason||'Monthly engine gagal dijalankan')}
-     result.innerHTML=row('Existing IRR',irrF(raw.existing_irr),'V1_MONTHLY_40Y · annualized from monthly IRR')+
-       row('NPV',mF(raw.npv),'Monthly cashflow · 480 bulan')+
-       row('Cashflow / Month',mF(raw.monthly_cashflow),'Revenue − OM Cost − Land Lease Cost − Tax')+
-       row('Asset Register Date',raw.asset_register_date||'—','Titik awal periode 1')+
-       row('Horizon','480 bulan','40 tahun · MONTHLY');
-   }catch(e){result.innerHTML=row('Status','ENGINE ERROR',e.message,'na')}
-   finally{btn.disabled=false;btn.textContent='RUN 40Y ENGINE'}
- };
- input.onkeydown=e=>{if(e.key==='Enter')btn.click()};
+ const bulkBtn=$f('financial-engine-bulk-run');
+ if(btn&&input&&result){
+   btn.onclick=async()=>{
+     const site=String(input.value||'').trim();
+     if(!site){result.innerHTML=row('Status','Masukkan Site ID','Site ID diperlukan untuk menjalankan monthly economic engine','na');return}
+     btn.disabled=true;btn.textContent='RUNNING…';result.innerHTML=row('Status','Running…','Generate 480 monthly cashflow dari Asset Register Date');
+     try{
+       const raw=await fRpc('pmno_irr_generate_existing_monthly',{p_site_id:site});
+       if(!raw?.ok){throw new Error(raw?.reason||'Monthly engine gagal dijalankan')}
+       result.innerHTML=row('Existing IRR',irrF(raw.existing_irr),'V1_MONTHLY_40Y · annualized from monthly IRR')+
+         row('NPV',mF(raw.npv),'Monthly cashflow · 480 bulan')+
+         row('Cashflow / Month',mF(raw.monthly_cashflow),'Revenue − OM Cost − Land Lease Cost − Tax')+
+         row('Asset Register Date',raw.asset_register_date||'—','Titik awal periode 1')+
+         row('Horizon','480 bulan','40 tahun · MONTHLY');
+     }catch(e){result.innerHTML=row('Status','ENGINE ERROR',e.message,'na')}
+     finally{btn.disabled=false;btn.textContent='RUN 40Y ENGINE'}
+   };
+   input.onkeydown=e=>{if(e.key==='Enter')btn.click()};
+ }
+ if(bulkBtn){
+   bulkBtn.onclick=async()=>{
+     bulkBtn.disabled=true;bulkBtn.textContent='RUNNING…';
+     const result=$f('financial-engine-bulk-result');
+     if(result)result.innerHTML=row('Status','RUNNING…','Menghitung Portfolio IRR + Avg IRR Site + NPV dari filter aktif','na');
+     try{
+       const raw=await fRpc('pmno_irr_generate_bulk_monthly',bulkFilterBody());
+       if(!raw?.ok)throw new Error(raw?.reason||'Bulk IRR gagal dijalankan');
+       renderBulkRun(raw);
+     }catch(e){
+       if(result)result.innerHTML=row('Status','ENGINE ERROR',e.message,'na');
+     }finally{bulkBtn.disabled=false;bulkBtn.textContent='RUN BULK IRR'}
+   };
+ }
+ loadLastBulkRun();
 }
 
 async function initFinancialProfile(){
