@@ -1582,27 +1582,16 @@ body.pmno-page-assetprofile .topbar{flex:none!important}
       </div>
     </div>
     <div id="dash-audit-layer" class="dash-layer hidden">
-      <div class="audit-headline">
-        <div class="audit-kpi good"><span>COMPLETENESS</span><b id="audit-completeness">—</b><small>Data exists where required</small></div>
-        <div class="audit-kpi good"><span>VALIDITY</span><b id="audit-validity">—</b><small>Values follow format, range and business rules</small></div>
-        <div class="audit-kpi warn"><span>CONSISTENCY</span><b id="audit-consistency">—</b><small>Relationships between mapped data agree at site level</small></div>
-      </div>
-      <div class="show-section-title">AUDIT BY PROFILE</div>
+      <div class="show-section-title">AUDIT SUMMARY BY PROFILE</div>
       <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET PROFILE</strong><small>Site identity, geography and core asset attributes.</small></div></div><div id="audit-profile-asset" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditasset">OPEN AUDIT PROFILE ↗</button></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>CUSTOMER PROFILE</strong><small>Tenant mapping, active status and tenancy data.</small></div></div><div id="audit-profile-customer" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditcustomer">OPEN AUDIT PROFILE ↗</button></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>PRODUCTIVITY PROFILE</strong><small>Revenue relationship to active tenants and sites.</small></div></div><div id="audit-profile-productivity" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditproductivity">OPEN AUDIT PROFILE ↗</button></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LAND &amp; LEGAL PROFILE</strong><small>Lease information and mapped legal checklist.</small></div></div><div id="audit-profile-land" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditland">OPEN AUDIT PROFILE ↗</button></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>TECHNICAL PROFILE</strong><small>Tower, access, terrain and power information.</small></div></div><div id="audit-profile-technical" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="audittechnical">OPEN AUDIT PROFILE ↗</button></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>FINANCIAL PROFILE</strong><small>Revenue and currently mapped financial sources.</small></div></div><div id="audit-profile-financial" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditfinancial">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>01</span><strong>ASSET PROFILE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-asset" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditasset">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>02</span><strong>CUSTOMER PROFILE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-customer" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditcustomer">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>03</span><strong>PRODUCTIVITY PROFILE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-productivity" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditproductivity">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>04</span><strong>LAND &amp; LEGAL PROFILE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-land" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditland">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>05</span><strong>TECHNICAL PROFILE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-technical" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="audittechnical">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>06</span><strong>FINANCIAL PROFILE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-financial" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditfinancial">OPEN AUDIT PROFILE ↗</button></section>
+        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>ASSET LIFECYCLE</strong><small>Summary audit status.</small></div></div><div id="audit-profile-lifecycle" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditlifecycle">OPEN AUDIT PROFILE ↗</button></section>
       </div>
-      <div class="dash-grid-3">
-        <section class="dash-card"><div class="dash-card-head"><div><span>07</span><strong>ASSET LIFECYCLE</strong><small>Tenant, lease and lifecycle signal consistency.</small></div></div><div id="audit-profile-lifecycle" class="dash-panel-content"></div><button type="button" class="audit-open" data-open-audit="auditlifecycle">OPEN AUDIT PROFILE ↗</button></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>08</span><strong>SITE YANG PERLU DICEK</strong><small>Daftar site dengan ketidaksesuaian, dibatasi agar dashboard tetap ringkas.</small></div></div><div id="audit-exceptions" class="dash-panel-content"></div></section>
-        <section class="dash-card"><div class="dash-card-head"><div><span>09</span><strong>AUDIT COVERAGE</strong><small>Data yang saat ini dapat dinilai dari source yang tersedia.</small></div></div><div id="audit-coverage" class="dash-panel-content"></div></section>
-
-      </div>
-    </div>
     </div>
   </div>
 </section>
@@ -4335,15 +4324,9 @@ function renderAuditData(){
   const root=roots.length?`<div class="profile-subtitle">PENYEBAB KETIDAKSESUAIAN</div><div class="audit-rootcause-list">${roots.map(([c,n])=>`<div class="audit-rootcause"><span>${esc(causeLabels[c]||c)}</span><b>${fmtInt(n)}</b></div>`).join('')}</div>`:'';
   return `<div class="profile-audit-detail"><div class="profile-subtitle">IRISAN DATA YANG TIDAK SESUAI</div><div class="anomaly-intersection-note">Kriteria dapat saling beririsan. Satu site bisa muncul di lebih dari satu kategori.</div><div class="anomaly-intersection">${body}</div>${root}</div>`;
  };
- const setProfile=(id,profile,items,note)=>{const el=$(id);if(el)el.innerHTML=auditComplySummary(profile,list.length,auditExceptionSiteCount(profile));};
- setProfile('audit-profile-asset','Asset Profile',[], '');
- setProfile('audit-profile-customer','Customer Profile',[], '');
- setProfile('audit-profile-productivity','Productivity Profile',[], '');
- setProfile('audit-profile-land','Land & Legal Profile',[], '');
- setProfile('audit-profile-technical','Technical Profile',[], '');
- setProfile('audit-profile-financial','Financial Profile',[], '');
- renderFinancialFiveAudit();
- setProfile('audit-profile-lifecycle','Asset Lifecycle',[], '');
+ const setProfile=(id,profile)=>{const el=$(id);if(el)el.innerHTML=auditComplySummary(profile,list.length,auditExceptionSiteCount(profile));};
+ setProfile('audit-profile-asset','Asset Profile');setProfile('audit-profile-customer','Customer Profile');setProfile('audit-profile-productivity','Productivity Profile');setProfile('audit-profile-land','Land & Legal Profile');setProfile('audit-profile-technical','Technical Profile');setProfile('audit-profile-financial','Financial Profile');setProfile('audit-profile-lifecycle','Asset Lifecycle');
+ window.__pmnoAuditProfileDetails={asset:profileDetail('Asset Profile'),customer:profileDetail('Customer Profile'),productivity:profileDetail('Productivity Profile'),land:profileDetail('Land & Legal Profile'),technical:profileDetail('Technical Profile'),financial:profileDetail('Financial Profile'),lifecycle:profileDetail('Asset Lifecycle')};
  const byCode={};exceptions.forEach(e=>{byCode[e.code]=(byCode[e.code]||0)+1});
  const rootCauses=Object.entries(byCode).sort((a,b)=>b[1]-a[1]);
  // Intersection view: intentionally overlaps criteria, so totals are NOT mutually exclusive.
@@ -4390,10 +4373,14 @@ async function pmnoAuditRefreshPage(page){
  try{
    // Reuse the existing audit source-of-truth so page and dashboard never diverge.
    renderAuditData();
-   if(meta.key==='financial') await renderFinancialFiveAudit();
-   const src=document.getElementById(meta.sourceId);
-   if(!src)throw new Error('Audit source panel tidak ditemukan.');
-   content.innerHTML=src.innerHTML;
+   if(meta.key==='financial'){
+     await renderFinancialFiveAudit();
+     const src=document.getElementById(meta.sourceId);
+     if(!src)throw new Error('Audit Financial source panel tidak ditemukan.');
+     content.innerHTML=src.innerHTML;
+   }else{
+     content.innerHTML=window.__pmnoAuditProfileDetails?.[meta.key]||'<div class="audit-page-empty">Belum ada detail audit untuk profile ini.</div>';
+   }
    const run=content.querySelector('#fiveAuditRunBtn');
    if(run)run.onclick=()=>pmnoRunFinancialFiveAudit();
  }catch(e){content.innerHTML=`<div class="audit-page-error">Audit ${esc(meta.title)} gagal dimuat: ${esc(e.message)}</div>`;}
@@ -4412,7 +4399,8 @@ async function pmnoAuditProfileInit(page){
 }
 window.pmnoAuditProfileInit=pmnoAuditProfileInit;
 document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-open-audit]');if(b){e.preventDefault();e.stopPropagation();window.pmnoNavigate?.(b.dataset.openAudit);}});
-function setDashboardMode(mode){const show=mode!=='AUDIT';$('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
+const PMNO_DASH_MODE_KEY='pmnoDashboardMode';
+function setDashboardMode(mode){const show=mode!=='AUDIT';try{localStorage.setItem(PMNO_DASH_MODE_KEY,show?'SHOW':'AUDIT')}catch(_){} $('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
 let dashboardFilterTimer=null;
 async function applyFilters(){
  dashboardMapNeedsReload=true;
@@ -4618,7 +4606,7 @@ function init(){
   document.getElementById('dash-mode-show')?.addEventListener('click',()=>setDashboardMode('SHOW'));
   document.getElementById('dash-mode-audit')?.addEventListener('click',()=>setDashboardMode('AUDIT'));
  }
- load();
+ load().then(()=>{let mode='SHOW';try{mode=localStorage.getItem(PMNO_DASH_MODE_KEY)||'SHOW'}catch(_){} setDashboardMode(mode==='AUDIT'?'AUDIT':'SHOW');});
 }
 window.pmnoDashboardInit=init;
 window.pmnoDashboardRefresh=async()=>{if(!initialized)init();return await load();};
