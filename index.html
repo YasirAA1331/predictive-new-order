@@ -4953,6 +4953,74 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
 })();
 </script>
 
+<script id="pmno-customer-profile-standalone-fix">
+(function(){
+'use strict';
+const CP_URL='https://vzeitjesovdojfsfgyza.supabase.co';
+const CP_KEY='sb_publishable_AjVsTRkO0lpfA0cOyOAv8Q_rusuYxDc';
+const CP_HEADERS={'apikey':CP_KEY,'Authorization':'Bearer '+CP_KEY,'Content-Type':'application/json'};
+const cpEl=id=>document.getElementById(id);
+const cpNum=v=>{const n=Number(v);return Number.isFinite(n)?n:0};
+const cpInt=v=>cpNum(v).toLocaleString('id-ID');
+const cpMoney=v=>{const n=cpNum(v),a=Math.abs(n);if(a>=1e12)return 'Rp '+(n/1e12).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' triliun';if(a>=1e9)return 'Rp '+(n/1e9).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' miliar';if(a>=1e6)return 'Rp '+(n/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' juta';if(a>=1e3)return 'Rp '+(n/1e3).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' ribu';return 'Rp '+Math.round(n).toLocaleString('id-ID')};
+const cpEsc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+async function cpRpc(name,body){const r=await fetch(CP_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:CP_HEADERS,body:JSON.stringify(body||{})});if(!r.ok){const t=await r.text();throw new Error(name+' HTTP '+r.status+' '+t.slice(0,180));}return r.json()}
+function cpObj(v){return Array.isArray(v)?(v[0]||{}):(v||{})}
+function cpFilters(){const g=id=>String(cpEl(id)?.value||'').trim();return{p_regional:g('customer-regional')||null,p_area:g('customer-area')||null,p_province:g('customer-province')||null,p_city:g('customer-city')||null,p_search:g('customer-search')||null}}
+function cpFillOptions(fo){const set=(id,arr,label)=>{const e=cpEl(id);if(!e)return;const cur=e.value;const vals=Array.isArray(arr)?arr:[];e.innerHTML='<option value="">'+label+'</option>'+vals.map(v=>'<option value="'+cpEsc(v)+'">'+cpEsc(v)+'</option>').join('');if(vals.includes(cur))e.value=cur};set('customer-regional',fo?.regional,'ALL REGIONAL');set('customer-area',fo?.area,'ALL AREA');set('customer-province',fo?.province,'ALL PROVINCE');set('customer-city',fo?.city,'ALL KABUPATEN / KOTA')}
+async function cpLoad(){
+ const root=cpEl('customer-profile-page-content');if(!root)return;
+ root.innerHTML='<div class="cust-loading">Loading Customer Profile…</div>';
+ try{
+  const f=cpFilters();
+  const [dashRaw,bizRaw]=await Promise.all([cpRpc('pmno_dashboard_summary',f),cpRpc('pmno_customer_business_summary',f)]);
+  const dash=cpObj(dashRaw),d=cpObj(bizRaw),s=dash.stats||{};
+  const total=cpNum(s.total_sites),tenant=cpNum(d.tenant_total||s.total_tenant),npa=cpNum(s.npa_sites),one=cpNum(s.one_tenant),two=cpNum(s.two_tenant),three=cpNum(s.three_tenant),gt3=cpNum(s.gt3_tenant),revSites=cpNum(s.revenue_sites);
+  const withTenant=Math.max(0,total-npa),multi=Math.max(0,two+three+gt3),ratio=total?tenant/total:0,pct=n=>total?(n/total*100).toFixed(1):'0.0';
+  const st=d.single_tenant||{},singleTotal=cpNum(st.total)||one,big3=cpNum(st.TSEL)+cpNum(st.IOH)+cpNum(st.XLSMART);
+  const fixed=['TSEL','IOH','XLSMART','SURGE','MORAREPUBLIC','OTHERS'];
+  const label={TSEL:'TSEL',IOH:'IOH',XLSMART:'XLSMART',SURGE:'Surge',MORAREPUBLIC:'MoraRepublic',OTHERS:'Others'};
+  const cat={TSEL:'Core MNO',IOH:'Core MNO',XLSMART:'Core MNO',SURGE:'FWA',MORAREPUBLIC:'FWA',OTHERS:'Other'};
+  const cls={TSEL:'core',IOH:'core',XLSMART:'core',SURGE:'fwa',MORAREPUBLIC:'fwa',OTHERS:'other'};
+  const rows=Array.isArray(d.rows)?d.rows:[],by=new Map(rows.map(x=>[String(x.customer||'').toUpperCase(),x]));
+  const out=fixed.map(k=>by.get(k)||{customer:k,tenant_count:0,site_count:0,site_share:0,tenant_share:0,revenue_year:0,revenue_share:0,avg_revenue_site:0,avg_revenue_tenant:0});
+  const totalObj=d.total||{site_count:total,tenant_count:tenant,revenue_year:cpNum(d.revenue_year_total),avg_revenue_site:0,avg_revenue_tenant:0};
+  root.innerHTML=`
+  <section class="cust-section"><div class="cust-section-head"><strong>01 · CUSTOMER BASE</strong><small>Tenant base and site-level tenancy structure</small></div><div class="cust-section-body"><div class="cust-kpis">
+  <div class="cust-kpi primary"><span>TOTAL TENANT</span><b>${cpInt(tenant)}</b><small>Existing customer base</small></div>
+  <div class="cust-kpi"><span>TENANCY RATIO</span><b>${ratio.toFixed(2)}x</b><small>${cpInt(tenant)} tenant ÷ ${cpInt(total)} Site</small></div>
+  <div class="cust-kpi"><span>SITES WITH TENANT</span><b>${cpInt(withTenant)}</b><small>${pct(withTenant)}% of portfolio</small></div>
+  <div class="cust-kpi warn"><span>NPA · 0 TENANT</span><b>${cpInt(npa)}</b><small>${pct(npa)}% of portfolio</small></div>
+  </div></div></section>
+  <section class="cust-section"><div class="cust-section-head"><strong>02 · TENANCY DISTRIBUTION</strong><small>Site basis · distribution by number of tenant</small></div><div class="cust-section-body"><div class="cust-panel"><div class="cust-title">SITE DISTRIBUTION BY TENANT COUNT <small>Portfolio composition</small></div>
+  ${[['0 Tenant',npa,'npa'],['1 Tenant',one,''],['2 Tenant',two,''],['3 Tenant',three,''],['&gt;3 Tenant',gt3,'']].map(([l,n,c])=>`<div class="cust-row"><span>${l}</span><div class="cust-track"><i class="${c}" style="width:${total?Math.min(100,n/total*100):0}%"></i></div><b>${cpInt(n)}</b><em>${pct(n)}%</em></div>`).join('')}
+  <div class="cust-highlight"><b>${pct(multi)}%</b><span>Multi-tenant sites (≥2 tenant) · ${cpInt(multi)} Site</span></div></div></div></section>
+  <section class="cust-section"><div class="cust-section-head"><strong>03 · CUSTOMER CONCENTRATION</strong><small>Single-tenant exposure and customer concentration</small></div><div class="cust-section-body"><div class="cust-grid">
+  <div class="cust-panel"><div class="cust-title">SINGLE-TENANT EXPOSURE · BIG 3 <small>Customer composition of 1-tenant sites</small></div>
+  ${[['TSEL',st.TSEL],['IOH',st.IOH],['XLSMART',st.XLSMART]].map(([k,n])=>`<div class="cust-row"><span>${k} only</span><div class="cust-track"><i style="width:${singleTotal?Math.min(100,cpNum(n)/singleTotal*100):0}%"></i></div><b>${cpInt(n)}</b><em>${singleTotal?(cpNum(n)/singleTotal*100).toFixed(1):'0.0'}%</em></div>`).join('')}
+  <div class="cust-highlight"><b>${singleTotal?(big3/singleTotal*100).toFixed(1):'0.0'}%</b><span>Big 3 coverage of single-tenant sites</span></div></div>
+  <div class="cust-panel"><div class="cust-title">CUSTOMER BUSINESS VIEW <small>Fact-based indicators</small></div>
+  <div class="cust-signal"><span>Single-tenant concentration</span><b>${pct(one)}%</b><small>${cpInt(one)} sites currently have 1 tenant</small></div>
+  <div class="cust-signal"><span>Multi-tenant penetration</span><b>${pct(multi)}%</b><small>${cpInt(multi)} sites have ≥2 tenants</small></div>
+  <div class="cust-signal"><span>Revenue-covered sites</span><b>${cpInt(revSites)}</b><small>${pct(revSites)}% of portfolio has mapped revenue</small></div>
+  <div class="cust-signal muted"><span>Growth opportunity</span><b>CI / PREDICTIVE</b><small>Requires external network-demand evidence</small></div></div></div>
+  <div class="cust-note"><b>Business interpretation:</b> Customer share and revenue/site are descriptive commercial facts. Growth opportunity is not inferred until external CI / network-demand evidence is available.</div></div></section>
+  <section class="cust-section"><div class="cust-section-head"><strong>04 · CUSTOMER SHARE &amp; ECONOMICS</strong><small>Existing portfolio footprint and annualized revenue contribution</small></div><div class="cust-section-body"><div class="cust-table-wrap"><table class="cust-table"><thead><tr><th>CUSTOMER</th><th>CATEGORY</th><th>SITES</th><th>SITE SHARE</th><th>TENANT</th><th>TENANT SHARE</th><th>ANNUAL REVENUE</th><th>REVENUE SHARE</th><th>AVG REV / SITE</th><th>AVG REV / TENANT</th></tr></thead><tbody>
+  ${out.map(x=>{const k=String(x.customer||'').toUpperCase();return `<tr><td class="${cls[k]||'other'}">${label[k]||cpEsc(x.customer)}</td><td>${cat[k]||'Other'}</td><td>${cpInt(x.site_count)}</td><td>${cpNum(x.site_share).toFixed(1)}%</td><td>${cpInt(x.tenant_count)}</td><td>${cpNum(x.tenant_share).toFixed(1)}%</td><td class="money">${cpMoney(x.revenue_year)}</td><td>${cpNum(x.revenue_share).toFixed(1)}%</td><td class="money">${cpMoney(x.avg_revenue_site)}</td><td class="money">${cpMoney(x.avg_revenue_tenant)}</td></tr>`}).join('')}
+  <tr class="total"><td>TOTAL</td><td>Portfolio</td><td>${cpInt(totalObj.site_count)}</td><td>100.0%</td><td>${cpInt(totalObj.tenant_count)}</td><td>100.0%</td><td class="money">${cpMoney(totalObj.revenue_year)}</td><td>100.0%</td><td class="money">${cpMoney(totalObj.avg_revenue_site)}</td><td class="money">${cpMoney(totalObj.avg_revenue_tenant)}</td></tr>
+  </tbody></table></div></div></section>`;
+ }catch(e){console.error('[PMNO CUSTOMER STANDALONE]',e);root.innerHTML='<div class="cust-empty">Customer Profile gagal dimuat: '+cpEsc(e.message)+'</div>'}
+}
+window.pmnoCustomerProfileInit=async function(){
+ try{const s=await cpRpc('pmno_dashboard_summary',{});const d=cpObj(s);cpFillOptions(d.filter_options||{});if(!window.__pmnoPortfolioSummary)window.__pmnoPortfolioSummary=d;}catch(e){console.warn('[PMNO CUSTOMER FILTER OPTIONS]',e);cpFillOptions({})}
+ await cpLoad();
+};
+['customer-refresh'].forEach(id=>cpEl(id)?.addEventListener('click',()=>window.pmnoCustomerProfileInit()));
+['customer-regional','customer-area','customer-province','customer-city'].forEach(id=>cpEl(id)?.addEventListener('change',()=>cpLoad()));
+cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpSearchTimer);window.__cpSearchTimer=setTimeout(cpLoad,320)});
+})();
+</script>
+
 </body>
 </html>
 
