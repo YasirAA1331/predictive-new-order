@@ -4023,30 +4023,47 @@ async function renderFinancialFiveAudit(){
  const token=(window.__pmnoFiveAuditToken||0)+1;window.__pmnoFiveAuditToken=token;
  el.innerHTML='<div class="five-audit-loading">MEMUAT AUDIT 5 DIMENSI…</div>';
  try{
-  const r=await fetch(URL+'/rest/v1/rpc/pmno_financial_audit_five_dimension',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
-  if(!r.ok)throw new Error('pmno_financial_audit_five_dimension HTTP '+r.status+' '+(await r.text()).slice(0,180));
-  const d=normalizeRpcObject(await r.json());if(token!==window.__pmnoFiveAuditToken)return;
-  const total=Number(d.total_sites)||0, allFive=Number(d.all_five_yes)||0;
-  const dims=Array.isArray(d.dimensions)?d.dimensions:[];
+  const filter={p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null};
+  const chunkSize=5000;let offset=0,total=0;const rows=[];
+  do{
+   const r=await fetch(URL+'/rest/v1/rpc/pmno_financial_audit_five_dimension_chunk',{method:'POST',headers:H,body:JSON.stringify({p_offset:offset,p_limit:chunkSize,...filter})});
+   if(!r.ok)throw new Error('pmno_financial_audit_five_dimension_chunk HTTP '+r.status+' '+(await r.text()).slice(0,180));
+   const d=normalizeRpcObject(await r.json());
+   if(d.ok===false)throw new Error(d.reason||'Audit 5 dimensi chunk gagal');
+   total=Number(d.total)||0;const batch=Array.isArray(d.rows)?d.rows:[];rows.push(...batch);offset+=batch.length;
+   if(!batch.length&&offset<total)throw new Error('Audit 5 dimensi tidak memproses Site pada chunk berikutnya');
+   if(token!==window.__pmnoFiveAuditToken)return;
+   el.innerHTML='<div class="five-audit-loading">MEMUAT AUDIT 5 DIMENSI… '+fmtInt(Math.min(offset,total))+' / '+fmtInt(total)+' SITE</div>';
+  }while(offset<total);
+  const dims=[
+   {key:'tower',label:'Tower'},
+   {key:'active_tenant',label:'Status Tenant Active'},
+   {key:'revenue',label:'Revenue'},
+   {key:'nbv',label:'NBV'},
+   {key:'device',label:'Device Installed'}
+  ].map(x=>{const yes=x.key==='tower'?rows.length:rows.filter(r=>!!r[x.key]).length;return {...x,yes,no:Math.max(0,total-yes)}});
+  const comboMap=new Map();
+  for(const r of rows){
+   const k=[true,!!r.active_tenant,!!r.revenue,!!r.nbv,!!r.device].map(v=>v?'1':'0').join('');
+   comboMap.set(k,(comboMap.get(k)||0)+1);
+  }
+  const combos=[];
+  for(const t of [true,false])for(const ta of [true,false])for(const rev of [true,false])for(const nbv of [true,false])for(const dev of [true,false]){
+   const k=[t,ta,rev,nbv,dev].map(v=>v?'1':'0').join('');
+   combos.push({tower:t,active_tenant:ta,revenue:rev,nbv:nbv,device:dev,site_count:comboMap.get(k)||0});
+  }
+  // Keep real site-bearing combinations first, while preserving all 32 combinations.
+  combos.sort((a,b)=>(b.site_count-a.site_count)||Number(b.tower)-Number(a.tower)||Number(b.active_tenant)-Number(a.active_tenant)||Number(b.revenue)-Number(a.revenue)||Number(b.nbv)-Number(a.nbv)||Number(b.device)-Number(a.device));
+  const allFive=rows.filter(r=>r.active_tenant&&r.revenue&&r.nbv&&r.device).length;
+  window.__pmnoFiveAuditCombos=combos;
   const cls=n=>n===total?'good':n===0?'bad':'warn';
   const row=x=>{const yes=Number(x.yes)||0,no=Number(x.no)||0,coverage=total?yes/total*100:0;return `<div class="five-audit-row"><div class="five-audit-main"><div><strong>${esc(x.label)}</strong><small>${fmtInt(yes)} site ADA · ${fmtInt(no)} site TIDAK ADA</small></div><b class="${cls(yes)}">${coverage.toFixed(1)}%</b></div><div class="five-audit-track"><i style="width:${Math.max(0,Math.min(100,coverage))}%"></i></div></div>`};
-  const combos=Array.isArray(d.combination_rows)?d.combination_rows:[];
-  window.__pmnoFiveAuditCombos=combos;
   const comboRows=combos.map((x,i)=>{const bits=[x.tower,x.active_tenant,x.revenue,x.nbv,x.device];const n=Number(x.site_count)||0;return `<tr><td class="combo-no">${String(i+1).padStart(2,'0')}</td>${bits.map(v=>`<td><span class="combo-status ${v?'yes':'no'}">${v?'ADA':'TIDAK'}</span></td>`).join('')}<td class="combo-count">${n?`<button type="button" class="five-audit-site-btn" data-five-combo-index="${i}">${fmtInt(n)} site</button>`:'<span style="color:#61778d">0 site</span>'}</td></tr>`}).join('');
   const activeDim=dims.find(x=>x.key==='active_tenant');
-  const statusNote=activeDim&&Number(activeDim.yes)>0?'Status Tenant Active menggunakan mapping tenant_status = ACTIVE atau INOP; pada source saat ini INOP diperlakukan sebagai tenant aktif.':'Tidak ada record tenant dengan status ACTIVE/INOP pada filter yang dipilih.';
-  el.innerHTML=`<div class="five-audit-wrap"><div class="five-audit-head"><div><div class="profile-subtitle">AUDIT 5 DIMENSI · SITE BASIS</div><div class="anomaly-intersection-note">Setiap Site diuji terhadap lima indikator yang sama. Denominator mengikuti Site Master.</div></div><div class="five-audit-total"><span>5 / 5 ADA</span><b>${fmtInt(allFive)}</b><small>${total?((allFive/total)*100).toFixed(1):'0.0'}% dari ${fmtInt(total)} site</small></div></div><div class="five-audit-list">${dims.map(row).join('')}</div><div class="five-audit-note"><b>Status Tenant Active:</b> ${esc(statusNote)}</div><div class="five-combo-head"><span>KOMBINASI SITE · 32 KOMBINASI</span><small>Seluruh kombinasi 2⁵ ditampilkan · site count = 0 tetap ditampilkan</small></div><div class="five-combo-table-wrap"><table class="five-combo-table"><thead><tr><th>#</th><th>TOWER</th><th>TENANT ACTIVE</th><th>REVENUE</th><th>NBV</th><th>DEVICE</th><th>SITE · CLICK TO DETAIL</th></tr></thead><tbody>${comboRows}</tbody></table></div></div>`;
-  // Bind directly after each render. This avoids relying on a global delegated click
-  // handler when the audit block is replaced by innerHTML and guarantees touch/click
-  // works on mobile as well.
-  el.querySelectorAll('.five-audit-site-btn').forEach(btn=>{
-    btn.addEventListener('click',ev=>{
-      ev.preventDefault();
-      ev.stopPropagation();
-      pmnoOpenFiveAuditCombo(btn.dataset.fiveComboIndex);
-    });
-  });
- }catch(e){if(token!==window.__pmnoFiveAuditToken)return;el.innerHTML=`<div class="audit-note bad">Audit 5 dimensi gagal dimuat: ${esc(e.message)}</div>`}
+  const statusNote='Status Tenant Active menggunakan mapping tenant_status = ACTIVE atau INOP; pada source saat ini INOP diperlakukan sebagai tenant aktif.';
+  el.innerHTML=`<div class="five-audit-wrap"><div class="five-audit-head"><div><div class="profile-subtitle">AUDIT 5 DIMENSI · SITE BASIS</div><div class="anomaly-intersection-note">Setiap Site diuji terhadap lima indikator yang sama. Denominator mengikuti Site Master · NBV dari site_financial_profile per Site ID · INOP = Active.</div></div><div class="five-audit-total"><span>5 / 5 ADA</span><b>${fmtInt(allFive)}</b><small>${total?((allFive/total)*100).toFixed(1):'0.0'}% dari ${fmtInt(total)} site</small></div></div><div class="five-audit-list">${dims.map(row).join('')}</div><div class="five-audit-note"><b>Status Tenant Active:</b> ${esc(statusNote)}</div><div class="five-combo-head"><span>KOMBINASI SITE · 32 KOMBINASI</span><small>Seluruh kombinasi 2⁵ ditampilkan · site count = 0 tetap ditampilkan</small></div><div class="five-combo-table-wrap"><table class="five-combo-table"><thead><tr><th>#</th><th>TOWER</th><th>TENANT ACTIVE</th><th>REVENUE</th><th>NBV</th><th>DEVICE</th><th>SITE · CLICK TO DETAIL</th></tr></thead><tbody>${comboRows}</tbody></table></div></div>`;
+  el.querySelectorAll('.five-audit-site-btn').forEach(btn=>{btn.addEventListener('click',ev=>{ev.preventDefault();ev.stopPropagation();pmnoOpenFiveAuditCombo(btn.dataset.fiveComboIndex);});});
+ }catch(e){if(token!==window.__pmnoFiveAuditToken)return;el.innerHTML=`<div class="audit-note bad">Audit 5 dimensi gagal dimuat: ${esc(e.message)}</div>`;}
 }
 function pmnoEnsureFiveAuditModal(){
  const old=document.getElementById('pmnoFiveAuditModal');if(old)return old;
@@ -4269,7 +4286,7 @@ function renderAuditData(){
   ['Tower','Baseline dari Site Master','good'],
   ['Status Tenant Active','Status tenant dari tenant_contract','neutral'],
   ['Revenue','Revenue pada tenant_contract','neutral'],
-  ['NBV','NBV pada site_master','neutral'],
+  ['NBV','NBV dari site_financial_profile','neutral'],
   ['Device Installed','Record pada antenna_installed','neutral']
  ],'Audit Financial Profile difokuskan dulu pada 5 dimensi: Tower, Status Tenant Active, Revenue, NBV, dan Device Installed.');
  renderFinancialFiveAudit();
@@ -4299,7 +4316,7 @@ function renderAuditData(){
  $('audit-exceptions').innerHTML=siteHtml;
  $('audit-exceptions').querySelectorAll('[data-audit-site]').forEach(b=>b.onclick=()=>{const r=list.find(x=>sid(x)===b.dataset.auditSite);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
  $('audit-coverage').innerHTML=metricRows([
-  ['Asset Profile','ASSESSED','good'],['Customer Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Productivity Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST SOURCE NOT MAPPED','warn'],['Asset Lifecycle',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['NBV source','Mapped where available','neutral']
+  ['Asset Profile','ASSESSED','good'],['Customer Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Productivity Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST SOURCE NOT MAPPED','warn'],['Asset Lifecycle',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['NBV source','site_financial_profile · Site ID basis','neutral']
  ])+'<div class="audit-note">Completeness = availability of required data. Validity = format/range/business-rule validity. Consistency = whether mapped fields/sources agree at site level. Source yang belum tersedia tidak dipaksa menjadi PASS/FAIL.</div>';
 }
 function setDashboardMode(mode){const show=mode!=='AUDIT';$('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
