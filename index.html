@@ -4546,7 +4546,23 @@ async function getModules(){
  const fallback=Object.entries(codeByName).map(([module_name,module_code])=>({module_code,module_name,data_category:modules.find(x=>x[2].includes(module_name))?.[0]||'STATIC_MASTER',upload_mode:module_code==='LEASE_HISTORY'||module_code.endsWith('_HISTORY')?'APPEND':'REPLACE',target_table:targetTableByCode[module_code]||({'TENANT_CONTRACT':'tenant_contract','TENANT_POWER':'tenant_power','MAINTENANCE':'maintenance'})[module_code]||module_code.toLowerCase()}));
  try{const r=await fetch(URL+'/rest/v1/pmno_master_module?select=module_code,module_name,data_category,upload_mode,target_table&active=eq.true&order=module_code',{headers:apiHeaders()});if(!r.ok)throw Error();const db=await r.json();const byCode=Object.fromEntries(db.map(x=>[x.module_code,x]));return fallback.map(x=>({...(byCode[x.module_code]||{}),...x,target_table:targetTableByCode[x.module_code]||byCode[x.module_code]?.target_table||x.target_table}))}catch(e){return fallback}
 }
-async function rowCount(table){try{const select=table==='pmno_site_master'?'site_id':'*';const r=await fetch(URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&limit=1',{headers:{...apiHeaders(),'Prefer':'count=exact'}});const cr=r.headers.get('content-range');if(cr&&cr.includes('/'))return Number(cr.split('/')[1]);return '—'}catch(e){return '—'}}
+async function rowCount(table){
+  try{
+    const select=table==='pmno_site_master'?'site_id':'*';
+    const url=URL+'/rest/v1/'+table+'?select='+encodeURIComponent(select)+'&limit=1';
+    const r=await fetch(url,{headers:{...apiHeaders(),'Prefer':'count=exact'}});
+    const cr=r.headers.get('content-range');
+    if(cr&&cr.includes('/')){
+      const total=Number(cr.split('/')[1]);
+      if(Number.isFinite(total))return total;
+    }
+    if(r.ok){
+      const data=await r.json().catch(()=>null);
+      if(Array.isArray(data))return data.length;
+    }
+    return '—';
+  }catch(e){return '—'}
+}
 async function render(){
   const box=$('masterSections');
   if(!box)return;
