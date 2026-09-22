@@ -4973,7 +4973,7 @@ async function cpLoad(){
  root.innerHTML='<div class="cust-loading">Loading Customer Profile…</div>';
  try{
   const f=cpFilters();
-  const [dashRaw,bizRaw]=await Promise.all([cpRpc('pmno_dashboard_summary',f),cpRpc('pmno_customer_business_summary',f)]);
+  const [dashRaw,bizRaw]=await Promise.all([cpRpc('pmno_customer_profile_summary',f),cpRpc('pmno_customer_business_summary',f)]);
   const dash=cpObj(dashRaw),d=cpObj(bizRaw),s=dash.stats||{};
   const total=cpNum(s.total_sites),tenant=cpNum(d.tenant_total||s.total_tenant),npa=cpNum(s.npa_sites),one=cpNum(s.one_tenant),two=cpNum(s.two_tenant),three=cpNum(s.three_tenant),gt3=cpNum(s.gt3_tenant),revSites=cpNum(s.revenue_sites);
   const withTenant=Math.max(0,total-npa),multi=Math.max(0,two+three+gt3),ratio=total?tenant/total:0,pct=n=>total?(n/total*100).toFixed(1):'0.0';
