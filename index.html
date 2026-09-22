@@ -3145,6 +3145,13 @@ async function saveRun(){if(!state.project||!state.results.length)return;const a
  loadProjects();
 })();
 </script>
+<style id="pmno-financial-five-audit-css">
+.five-audit-wrap{border:1px solid rgba(93,144,191,.18);border-radius:14px;padding:14px;background:rgba(8,22,39,.34)}
+.five-audit-head{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}.five-audit-total{min-width:145px;text-align:right}.five-audit-total span{display:block;font-size:9px;font-weight:900;letter-spacing:.14em;color:#91a8bd}.five-audit-total b{display:block;font-size:24px;line-height:1.1;margin:4px 0;color:#eef5ff}.five-audit-total small{font-size:10px;color:#71869a}
+.five-audit-row{padding:11px 0;border-top:1px solid rgba(148,163,184,.10)}.five-audit-main{display:flex;justify-content:space-between;gap:12px;align-items:center}.five-audit-main strong{display:block;font-size:12px;color:#e8f0f7}.five-audit-main small{display:block;font-size:10px;color:#71869a;margin-top:3px}.five-audit-main b{font-size:14px}.five-audit-main b.good{color:#45dfad}.five-audit-main b.warn{color:#f2bf5c}.five-audit-main b.bad{color:#ff647f}.five-audit-track{height:7px;margin-top:8px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}.five-audit-track i{display:block;height:100%;background:#35c8ff;border-radius:99px}
+.five-audit-note{margin-top:11px;padding:10px 11px;border-radius:10px;background:rgba(255,191,92,.06);border:1px solid rgba(255,191,92,.16);font-size:10px;line-height:1.5;color:#8fa3b7}.five-audit-note b{color:#dce7f0}.five-combo-head{display:flex;justify-content:space-between;gap:10px;align-items:baseline;margin-top:15px;padding-top:13px;border-top:1px solid rgba(148,163,184,.10)}.five-combo-head span{font-size:10px;font-weight:900;letter-spacing:.13em;color:#dbe7f2}.five-combo-head small{font-size:9px;color:#71869a;text-align:right}.five-combo-row{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:8px 0;border-top:1px solid rgba(148,163,184,.07)}.five-combo-bits{display:flex;gap:5px;flex-wrap:wrap}.five-combo-bits span{font-size:8px;font-weight:900;letter-spacing:.05em;padding:4px 6px;border-radius:6px;border:1px solid rgba(148,163,184,.15)}.five-combo-bits .yes{color:#63e3b4;background:rgba(69,223,173,.06);border-color:rgba(69,223,173,.18)}.five-combo-bits .no{color:#ff8799;background:rgba(255,100,127,.05);border-color:rgba(255,100,127,.16)}.five-combo-row>b{font-size:11px;color:#eef5ff;white-space:nowrap}.five-audit-loading{padding:18px;border:1px dashed rgba(93,144,191,.25);border-radius:12px;color:#71869a;font-size:10px;letter-spacing:.12em;text-align:center}
+@media(max-width:620px){.five-audit-head{flex-direction:column}.five-audit-total{text-align:left}.five-combo-head{flex-direction:column}.five-combo-head small{text-align:left}}
+</style>
 <style id="pmno-financial-profile-css">
 .fin-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:4px}.fin-group{border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px;background:rgba(255,255,255,.02)}.fin-group-title,.fin-profit-title{font-size:11px;font-weight:900;letter-spacing:.12em;color:#9fb0c3;margin-bottom:8px}.fin-source-row{display:flex;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid rgba(148,163,184,.10);align-items:center}.fin-source-row:last-child{border-bottom:0}.fin-source-row span{font-size:12px;font-weight:700;color:#d7e0ea}.fin-source-row small{display:block;font-size:10px;color:#718096;margin-top:2px}.fin-source-row b{font-size:13px;text-align:right}.fin-profitability{margin-top:12px;border:1px solid rgba(148,163,184,.16);border-radius:14px;padding:12px}.fin-profit-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px}.fin-profit-card{border:1px solid rgba(148,163,184,.12);border-radius:12px;padding:11px}.fin-profit-card span{display:block;font-size:10px;font-weight:900;letter-spacing:.1em;color:#9fb0c3}.fin-profit-card b{display:block;font-size:17px;margin:5px 0}.fin-profit-card small{font-size:10px;color:#718096}.fin-formula{margin-top:10px;padding:10px;border-radius:10px;background:rgba(212,175,55,.07);display:flex;gap:10px;align-items:center;flex-wrap:wrap;font-size:10px}.fin-formula strong{color:#d4af37;letter-spacing:.08em}.fin-formula span{color:#b8c5d3}.fin-asset-value{margin-top:12px}.fin-asset-value .metric-list{margin-top:0}@media(max-width:900px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr 1fr}}@media(max-width:620px){.fin-grid,.fin-profit-grid{grid-template-columns:1fr}}
 </style>
@@ -4010,6 +4017,26 @@ function auditStatus(p){return p>=98?'good':p>=90?'warn':'bad'}
 function auditProfileCard(items,note=''){
  return metricRows(items.map(x=>[x[0],x[1],x[2]||'']))+(note?`<div class="audit-note">${esc(note)}</div>`:'');
 }
+async function renderFinancialFiveAudit(){
+ const el=$('audit-profile-financial');if(!el)return;
+ const rg=String($('dash-regional')?.value||'').trim(),ar=String($('dash-area')?.value||'').trim(),pv=String($('dash-province')?.value||'').trim(),ct=String($('dash-city')?.value||'').trim(),q=String($('dash-search')?.value||'').trim();
+ const token=(window.__pmnoFiveAuditToken||0)+1;window.__pmnoFiveAuditToken=token;
+ el.innerHTML='<div class="five-audit-loading">MEMUAT AUDIT 5 DIMENSI…</div>';
+ try{
+  const r=await fetch(URL+'/rest/v1/rpc/pmno_financial_audit_five_dimension',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
+  if(!r.ok)throw new Error('pmno_financial_audit_five_dimension HTTP '+r.status+' '+(await r.text()).slice(0,180));
+  const d=normalizeRpcObject(await r.json());if(token!==window.__pmnoFiveAuditToken)return;
+  const total=Number(d.total_sites)||0, allFive=Number(d.all_five_yes)||0;
+  const dims=Array.isArray(d.dimensions)?d.dimensions:[];
+  const cls=n=>n===total?'good':n===0?'bad':'warn';
+  const row=x=>{const yes=Number(x.yes)||0,no=Number(x.no)||0,coverage=total?yes/total*100:0;return `<div class="five-audit-row"><div class="five-audit-main"><div><strong>${esc(x.label)}</strong><small>${fmtInt(yes)} site ADA · ${fmtInt(no)} site TIDAK ADA</small></div><b class="${cls(yes)}">${coverage.toFixed(1)}%</b></div><div class="five-audit-track"><i style="width:${Math.max(0,Math.min(100,coverage))}%"></i></div></div>`};
+  const combos=Array.isArray(d.combination_rows)?d.combination_rows:[];
+  const comboRows=combos.slice(0,8).map(x=>{const bits=[x.tower,x.active_tenant,x.revenue,x.nbv,x.device];return `<div class="five-combo-row"><div class="five-combo-bits">${bits.map((v,i)=>`<span class="${v?'yes':'no'}">${['T','TA','R','N','D'][i]} ${v?'ADA':'TIDAK'}</span>`).join('')}</div><b>${fmtInt(x.site_count)} site</b></div>`}).join('');
+  const activeDim=dims.find(x=>x.key==='active_tenant');
+  const statusNote=activeDim&&Number(activeDim.yes)===0?'Source tenant_contract saat ini berstatus INOP pada seluruh record; tidak ada record dengan tenant_status = ACTIVE.':'Status ACTIVE dibaca langsung dari tenant_contract.';
+  el.innerHTML=`<div class="five-audit-wrap"><div class="five-audit-head"><div><div class="profile-subtitle">AUDIT 5 DIMENSI · SITE BASIS</div><div class="anomaly-intersection-note">Setiap Site diuji terhadap lima indikator yang sama. Denominator mengikuti Site Master.</div></div><div class="five-audit-total"><span>5 / 5 ADA</span><b>${fmtInt(allFive)}</b><small>${total?((allFive/total)*100).toFixed(1):'0.0'}% dari ${fmtInt(total)} site</small></div></div><div class="five-audit-list">${dims.map(row).join('')}</div><div class="five-audit-note"><b>Status Tenant Active:</b> ${esc(statusNote)}</div><div class="five-combo-head"><span>KOMBINASI SITE</span><small>5 flag · T=Tower · TA=Tenant Active · R=Revenue · N=NBV · D=Device</small></div><div class="five-combo-list">${comboRows||'<div class="five-audit-note">Belum ada kombinasi yang terbentuk.</div>'}</div></div>`;
+ }catch(e){if(token!==window.__pmnoFiveAuditToken)return;el.innerHTML=`<div class="audit-note bad">Audit 5 dimensi gagal dimuat: ${esc(e.message)}</div>`}
+}
 function renderAuditData(){
  const list=filtered,total=list.length;
  if(!total)return;
@@ -4187,8 +4214,14 @@ function renderAuditData(){
   ['Completeness',technicalComp.toFixed(1)+'%',auditStatus(technicalComp)],['Validity',technicalValid.toFixed(1)+'%',auditStatus(technicalValid)],['Consistency',scoreLabel(consistencyByProfile.technical),scoreCls(consistencyByProfile.technical)],['Consistency exceptions',fmtInt(exceptionCount('Technical Profile')),exceptionCount('Technical Profile')?'warn':'good']
  ],'Device is NOT ASSESSABLE until a transactional device source is mapped.');
  setProfile('audit-profile-financial','Financial Profile',[
-  ['Completeness',financialComp.toFixed(1)+'%',auditStatus(financialComp)],['Validity',financialValid.toFixed(1)+'%',auditStatus(financialValid)],['Consistency',scoreLabel(consistencyByProfile.financial),scoreCls(consistencyByProfile.financial)],['Consistency exceptions',fmtInt(exceptionCount('Financial Profile')),exceptionCount('Financial Profile')?'bad':'good']
- ],'Cost is NOT ASSESSABLE until a site-level cost source is mapped. Revenue ↔ tenant remains assessable where tenant data is mapped.');
+  ['Audit basis','5 DIMENSI · SITE BASIS','neutral'],
+  ['Tower','Baseline dari Site Master','good'],
+  ['Status Tenant Active','Status tenant dari tenant_contract','neutral'],
+  ['Revenue','Revenue pada tenant_contract','neutral'],
+  ['NBV','NBV pada site_master','neutral'],
+  ['Device Installed','Record pada antenna_installed','neutral']
+ ],'Audit Financial Profile difokuskan dulu pada 5 dimensi: Tower, Status Tenant Active, Revenue, NBV, dan Device Installed.');
+ renderFinancialFiveAudit();
  setProfile('audit-profile-lifecycle','Asset Lifecycle',[
   ['Completeness',lifecycleComp.toFixed(1)+'%',auditStatus(lifecycleComp)],['Validity',lifecycleValid.toFixed(1)+'%',auditStatus(lifecycleValid)],['Consistency',scoreLabel(consistencyByProfile.lifecycle),scoreCls(consistencyByProfile.lifecycle)],['Consistency exceptions',fmtInt(exceptionCount('Asset Lifecycle')),exceptionCount('Asset Lifecycle')?'bad':'good']
  ],'Checks tenant/lease lifecycle relationships. NPA itself is not an audit failure.');
