@@ -3962,8 +3962,9 @@ function renderDashboardHub(){
  set('dash-lease',mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':'')+mini('EXPIRED',fmtInt(expired),'lease expired',expired?'bad':''));
  set('dash-power',mini('POWER',fmtInt(power),total?fmtPct(power/total*100)+'% coverage':'—')+mini('TOWER HEIGHT',fmtInt(Number(sm.tower_height_sites)||0),'site with height'));
  set('dash-productivity',mini('REVENUE SITE',fmtInt(revenue),total?fmtPct(revenue/total*100)+'% coverage':'—')+mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':''));
- const nbv=typeof liveNbv!=='undefined'?Object.values(liveNbv||{}).reduce((n,v)=>n+Number(v||0),0):0;
- set('dash-financial',mini('NBV MAPPED',nbv?formatMoney(nbv):'BELUM TERSEDIA',nbv?'mapped Site ID':'source belum lengkap'));
+ const fs=window.__pmnoFinancialSummary||{};
+ const nbv=Number(fs.nbv_total)||0, nbvSites=Number(fs.nbv_sites)||0;
+ set('dash-financial',mini('NBV MAPPED',nbv?formatMoney(nbv):'BELUM TERSEDIA',nbv?fmtInt(nbvSites)+' site dengan NBV':'source NBV belum tersedia'));
  set('dash-lifecycle',mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':'')+mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':''));
  document.querySelectorAll('[data-open-profile]').forEach(btn=>{if(btn.dataset.bound)return;btn.dataset.bound='1';btn.addEventListener('click',()=>{const p=btn.dataset.openProfile;if(p==='asset')window.pmnoNavigate?.('assetprofile');else if(p==='financial')window.pmnoNavigate?.('financialprofile');else if(p==='assetprofile')window.pmnoNavigate?.('assetprofile');else btn.classList.add('pending');});});
 }
@@ -4194,9 +4195,14 @@ async function applyFilters(){
   const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
   try{
    const source=$('dash-source');if(source)source.textContent='FILTERING · SERVER-SIDE…';
-   const r=await fetch(URL+'/rest/v1/rpc/pmno_dashboard_query',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null,p_offset:0,p_limit:1000})});
+   const filterBody={p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null};
+   const [r,fr]=await Promise.all([
+     fetch(URL+'/rest/v1/rpc/pmno_dashboard_query',{method:'POST',headers:H,body:JSON.stringify({...filterBody,p_offset:0,p_limit:1000})}),
+     fetch(URL+'/rest/v1/rpc/pmno_financial_profile_summary',{method:'POST',headers:H,body:JSON.stringify(filterBody)})
+   ]);
    if(!r.ok)throw new Error('pmno_dashboard_query HTTP '+r.status);
    const snap=await r.json();
+   if(fr.ok){try{window.__pmnoFinancialSummary=normalizeRpcObject(await fr.json())||null}catch(e){console.warn('[PMNO FILTER FINANCIAL SUMMARY]',e)}}
    if(!snap?.stats?.total_sites && !snap?.stats?.totalSites)throw new Error('Filtered summary missing stats.total_sites');
    window.__pmnoDashboardSummary=snap||null;
    window.__pmnoPortfolioSummary=snap||null;
@@ -4237,13 +4243,14 @@ async function load(){
  const refreshBtn=$('dash-refresh');
  if(refreshBtn){refreshBtn.disabled=true;refreshBtn.classList.add('refreshing');refreshBtn.dataset.originalText=refreshBtn.textContent;refreshBtn.textContent='↻ LOADING';}
  try{
-  rows=[]; filtered=[]; window.__pmnoPortfolioSummary=null; window.__pmnoDashboardSummary=null; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
+  rows=[]; filtered=[]; window.__pmnoPortfolioSummary=null; window.__pmnoDashboardSummary=null; window.__pmnoFinancialSummary=null; liveTenants={}; liveTenantStats={}; livePower={}; livePowerCount={}; liveMaintenance={}; liveLegalStats={}; liveNbv={}; liveFinancial={};
   window.__pmnoDashboardPartial=true;
   const pageSize=1000;
   const fetchJson=(url,body)=>fetch(url,{method:'POST',headers:H,body:JSON.stringify(body)}).then(async r=>{if(!r.ok)throw new Error(url+' HTTP '+r.status);return normalizeRpcObject(await r.json())});
 
   // Progressive load: render the server-side summary immediately. Do NOT wait for the 1,000-row detail page.
   const summaryPromise=fetchJson(URL+'/rest/v1/rpc/pmno_dashboard_summary',{});
+  const financialSummaryPromise=fetchJson(URL+'/rest/v1/rpc/pmno_financial_profile_summary',{p_regional:null,p_area:null,p_province:null,p_city:null,p_search:null});
   const pagePromise=fetchJson(URL+'/rest/v1/rpc/pmno_dashboard_site_page',{p_offset:0,p_limit:pageSize});
 
   let summary={};
@@ -4257,6 +4264,12 @@ async function load(){
     renderDashboardSource('MASTER DATA · PMNO · summary server-side');
   }catch(e){
     console.warn('[PMNO SUMMARY]',e);
+  }
+  try{
+    window.__pmnoFinancialSummary=normalizeRpcObject(await financialSummaryPromise)||null;
+  }catch(e){
+    console.warn('[PMNO FINANCIAL SUMMARY]',e);
+    window.__pmnoFinancialSummary=null;
   }
 
   try{
