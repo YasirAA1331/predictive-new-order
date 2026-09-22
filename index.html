@@ -4565,7 +4565,7 @@ const schemas={
 'COMMUNITY_HISTORY':['site_id','source_unit','case_type','severity','status','case_date','resolution_date','radius_m','resolution_cost','notes'],
 'MAINTENANCE':['site_id','maintenance_id','maintenance_status','last_maintenance_date','next_maintenance_date','maintenance_type','maintenance_vendor','maintenance_document_link','maintenance_ticket_link','maintenance_note','last_update']};
 const targetTableByCode={ASSET_PROFILE:'pmno_site_master',CUSTOMER_PROFILE:'tenant_contract',LAND_LEGAL_PROFILE:'pmno_site_master',POWER_PROFILE:'tenant_power',ANTENNA_INSTALLED:'antenna_installed',DOCUMENT_PROFILE:'site_document_profile',FINANCIAL_PROFILE:'site_financial_profile'};
-const requiredHeaders={ASSET_PROFILE:['site_id'],CUSTOMER_PROFILE:['site_id','site_name','tenant_name'],LAND_LEGAL_PROFILE:['site_id','site_name'],POWER_PROFILE:['site_id','site_name','tenant_name'],ANTENNA_INSTALLED:['site_id','site_name'],DOCUMENT_PROFILE:['site_id','site_name'],FINANCIAL_PROFILE:['site_id','site_name']};
+const requiredHeaders={ASSET_PROFILE:['site_id'],CUSTOMER_PROFILE:['site_id','site_name','tenant_name','tenant_status'],LAND_LEGAL_PROFILE:['site_id','site_name'],POWER_PROFILE:['site_id','site_name','tenant_name'],ANTENNA_INSTALLED:['site_id','site_name'],DOCUMENT_PROFILE:['site_id','site_name'],FINANCIAL_PROFILE:['site_id','site_name']};
 let selected=null,parsed=null;
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function headersFor(code){return schemas[code]||null}
