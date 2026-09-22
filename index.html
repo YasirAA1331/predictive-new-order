@@ -4701,11 +4701,11 @@ async function exportModule(code){
     const cd=r.headers.get('Content-Disposition')||'';
     const match=cd.match(/filename="?([^";]+)"?/i);
     const filename=match?.[1]||`PMNO_${code}_Current.xlsx`;
-    const url=URL.createObjectURL(blob);
+    const url=window.URL.createObjectURL(blob);
     const a=document.createElement('a');
     a.href=url;a.download=filename;a.style.display='none';
     document.body.appendChild(a);a.click();a.remove();
-    setTimeout(()=>URL.revokeObjectURL(url),15000);
+    setTimeout(()=>window.URL.revokeObjectURL(url),15000);
     const rows=r.headers.get('X-PMNO-Rows')||'';
     $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · server-side`;
   }catch(e){
