@@ -4034,7 +4034,7 @@ async function renderFinancialFiveAudit(){
   window.__pmnoFiveAuditCombos=combos;
   const comboRows=combos.map((x,i)=>{const bits=[x.tower,x.active_tenant,x.revenue,x.nbv,x.device];const n=Number(x.site_count)||0;return `<tr><td class="combo-no">${String(i+1).padStart(2,'0')}</td>${bits.map(v=>`<td><span class="combo-status ${v?'yes':'no'}">${v?'ADA':'TIDAK'}</span></td>`).join('')}<td class="combo-count">${n?`<button type="button" class="five-audit-site-btn" data-five-combo-index="${i}">${fmtInt(n)} site</button>`:'<span style="color:#61778d">0 site</span>'}</td></tr>`}).join('');
   const activeDim=dims.find(x=>x.key==='active_tenant');
-  const statusNote=activeDim&&Number(activeDim.yes)===0?'Source tenant_contract saat ini berstatus INOP pada seluruh record; tidak ada record dengan tenant_status = ACTIVE.':'Status ACTIVE dibaca langsung dari tenant_contract.';
+  const statusNote=activeDim&&Number(activeDim.yes)>0?'Status Tenant Active menggunakan mapping tenant_status = ACTIVE atau INOP; pada source saat ini INOP diperlakukan sebagai tenant aktif.':'Tidak ada record tenant dengan status ACTIVE/INOP pada filter yang dipilih.';
   el.innerHTML=`<div class="five-audit-wrap"><div class="five-audit-head"><div><div class="profile-subtitle">AUDIT 5 DIMENSI · SITE BASIS</div><div class="anomaly-intersection-note">Setiap Site diuji terhadap lima indikator yang sama. Denominator mengikuti Site Master.</div></div><div class="five-audit-total"><span>5 / 5 ADA</span><b>${fmtInt(allFive)}</b><small>${total?((allFive/total)*100).toFixed(1):'0.0'}% dari ${fmtInt(total)} site</small></div></div><div class="five-audit-list">${dims.map(row).join('')}</div><div class="five-audit-note"><b>Status Tenant Active:</b> ${esc(statusNote)}</div><div class="five-combo-head"><span>KOMBINASI SITE · 32 KOMBINASI</span><small>Seluruh kombinasi 2⁵ ditampilkan · site count = 0 tetap ditampilkan</small></div><div class="five-combo-table-wrap"><table class="five-combo-table"><thead><tr><th>#</th><th>TOWER</th><th>TENANT ACTIVE</th><th>REVENUE</th><th>NBV</th><th>DEVICE</th><th>SITE · CLICK TO DETAIL</th></tr></thead><tbody>${comboRows}</tbody></table></div></div>`;
   // Bind directly after each render. This avoids relying on a global delegated click
   // handler when the audit block is replaced by innerHTML and guarantees touch/click
@@ -4565,7 +4565,7 @@ const schemas={
 'COMMUNITY_HISTORY':['site_id','source_unit','case_type','severity','status','case_date','resolution_date','radius_m','resolution_cost','notes'],
 'MAINTENANCE':['site_id','maintenance_id','maintenance_status','last_maintenance_date','next_maintenance_date','maintenance_type','maintenance_vendor','maintenance_document_link','maintenance_ticket_link','maintenance_note','last_update']};
 const targetTableByCode={ASSET_PROFILE:'pmno_site_master',CUSTOMER_PROFILE:'tenant_contract',LAND_LEGAL_PROFILE:'pmno_site_master',POWER_PROFILE:'tenant_power',ANTENNA_INSTALLED:'antenna_installed',DOCUMENT_PROFILE:'site_document_profile',FINANCIAL_PROFILE:'site_financial_profile'};
-const requiredHeaders={ASSET_PROFILE:['site_id'],CUSTOMER_PROFILE:['site_id','site_name','tenant_name'],LAND_LEGAL_PROFILE:['site_id','site_name'],POWER_PROFILE:['site_id','site_name','tenant_name'],ANTENNA_INSTALLED:['site_id','site_name'],DOCUMENT_PROFILE:['site_id','site_name'],FINANCIAL_PROFILE:['site_id','site_name']};
+const requiredHeaders={ASSET_PROFILE:['site_id'],CUSTOMER_PROFILE:['site_id','site_name','tenant_name','tenant_status'],LAND_LEGAL_PROFILE:['site_id','site_name'],POWER_PROFILE:['site_id','site_name','tenant_name'],ANTENNA_INSTALLED:['site_id','site_name'],DOCUMENT_PROFILE:['site_id','site_name'],FINANCIAL_PROFILE:['site_id','site_name']};
 let selected=null,parsed=null;
 const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function headersFor(code){return schemas[code]||null}
@@ -4780,37 +4780,18 @@ async function exportModule(code){
       try{const j=await r.json();msg=j?.error||j?.message||msg}catch(_){}
       throw new Error(msg);
     }
-    const contentType=(r.headers.get('content-type')||'').toLowerCase();
-    let blob=null, filename='';
-    if(contentType.includes('application/json')){
-      const payload=await r.json();
-      if(!payload?.download_url)throw new Error(payload?.error||'Download URL export tidak tersedia.');
-      filename=payload.filename||`PMNO_${code}_Current.${payload.format||'xlsx'}`;
-      const dr=await fetch(payload.download_url);
-      if(!dr.ok)throw new Error('Download hasil export HTTP '+dr.status);
-      blob=await dr.blob();
-    }else{
-      blob=await r.blob();
-      const cd=r.headers.get('Content-Disposition')||'';
-      const match=cd.match(/filename="?([^";]+)"?/i);
-      filename=match?.[1]||`PMNO_${code}_Current.xlsx`;
-    }
-    if(!blob?.size)throw new Error('File export kosong.');
-    // Dataset besar di-stream sebagai CSV oleh backend agar Edge Function tidak kehabisan compute.
-    // Di browser CSV dikonversi menjadi XLSX, sehingga user tetap menerima file Excel.
-    if(/\.csv$/i.test(filename)){
-      const csv=await blob.text();
-      if(!csv.trim())throw new Error('CSV export kosong.');
-      const wb=XLSX.read(csv,{type:'string',raw:true});
-      const xlsxName=filename.replace(/\.csv$/i,'.xlsx');
-      XLSX.writeFile(wb,xlsxName,{bookType:'xlsx',compression:true});
-      filename=xlsxName;
-    }else{
-      const wb=XLSX.read(await blob.arrayBuffer(),{type:'array'});
-      XLSX.writeFile(wb,filename,{bookType:'xlsx',compression:true});
-    }
-    const rows=contentType.includes('application/json') ? '' : (r.headers.get('X-PMNO-Rows')||'');
-    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · server-side`;
+    const payload=await r.json().catch(()=>null);
+    if(!payload?.ok||!payload?.download_url)throw new Error(payload?.error||'File export tidak tersedia.');
+    const filename=payload.filename||`PMNO_${code}_Current.xlsx`;
+    const a=document.createElement('a');
+    a.href=payload.download_url;
+    a.target='_blank';
+    a.rel='noopener';
+    a.style.display='none';
+    document.body.appendChild(a);a.click();a.remove();
+    const rows=payload.rows||'';
+    const format=String(payload.format||'xlsx').toUpperCase();
+    $('masterUploadInfo').textContent=`Exported · ${rows?Number(rows).toLocaleString('id-ID')+' rows · ':''}${schema.length} columns · ${moduleName(code)} · ${format}`;
   }catch(e){
     console.error('[PMNO EXPORT]',e);
     $('masterUploadInfo').textContent=`EXPORT GAGAL · ${e.message}`;
