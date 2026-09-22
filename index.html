@@ -3988,7 +3988,7 @@ function renderDashboardSource(label){
  // triggering a map reload here would race/clear the visible layer.
  const src=$('dash-source');if(src){const shownTotal=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||rows.length;src.textContent=label+' · '+fmtInt(shownTotal)+' SITE';}
  renderDashboardHub();
- renderAuditData();
+ try{ renderAuditData(); }catch(e){ console.error('[PMNO AUDIT SUMMARY]',e); renderAuditSummaryFallback(e); }
 }
 function renderDashboardHub(){
  const sm=pmnoGetAggregateSummary()?.stats||{};
@@ -4164,6 +4164,13 @@ function pmnoExportFiveAuditSites(){
  XLSX.writeFile(wb,`PMNO_Audit_5D_${bits.join('_')}_${new Date().toISOString().slice(0,10)}.xlsx`,{bookType:'xlsx',compression:true});
 }
 
+function renderAuditSummaryFallback(err){
+ const total=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||Number(filtered?.length)||0;
+ const msg='Audit detail belum dapat dihitung pada snapshot saat ini';
+ const ids=['audit-profile-asset','audit-profile-customer','audit-profile-productivity','audit-profile-land','audit-profile-technical','audit-profile-financial','audit-profile-lifecycle'];
+ ids.forEach(id=>{const el=$(id);if(el)el.innerHTML=`<div class="audit-summary-2"><div class="audit-summary-line good"><span>Comply</span><b>— site</b><em>(—%)</em></div><div class="audit-summary-line bad"><span>Not Comply</span><b>— site</b><em>(—%)</em></div></div><div class="audit-note">${esc(msg)}. Detail audit tetap tersedia di halaman profile.</div>`;});
+ console.warn('[PMNO AUDIT SUMMARY FALLBACK]',err?.message||err);
+}
 function renderAuditData(){
  const list=filtered,total=list.length;
  if(!total)return;
@@ -4400,7 +4407,7 @@ async function pmnoAuditProfileInit(page){
 window.pmnoAuditProfileInit=pmnoAuditProfileInit;
 document.addEventListener('click',e=>{const b=e.target?.closest?.('[data-open-audit]');if(b){e.preventDefault();e.stopPropagation();window.pmnoNavigate?.(b.dataset.openAudit);}});
 const PMNO_DASH_MODE_KEY='pmnoDashboardMode';
-function setDashboardMode(mode){const show=mode!=='AUDIT';try{localStorage.setItem(PMNO_DASH_MODE_KEY,show?'SHOW':'AUDIT')}catch(_){} $('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show)renderAuditData();if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
+function setDashboardMode(mode){const show=mode!=='AUDIT';try{localStorage.setItem(PMNO_DASH_MODE_KEY,show?'SHOW':'AUDIT')}catch(_){} $('dash-show-layer')?.classList.toggle('hidden',!show);$('dash-audit-layer')?.classList.toggle('hidden',show);$('dash-mode-show')?.classList.toggle('active',show);$('dash-mode-audit')?.classList.toggle('active',!show);if(!show){try{renderAuditData()}catch(e){console.error('[PMNO AUDIT MODE]',e);renderAuditSummaryFallback(e)}}if(show&&window.__pmnoDashMap){setTimeout(()=>window.__pmnoDashMap.invalidateSize({animate:false}),40)}}
 let dashboardFilterTimer=null;
 async function applyFilters(){
  dashboardMapNeedsReload=true;
@@ -4475,7 +4482,7 @@ async function load(){
     window.__pmnoPortfolioSummary=summary;
     window.__pmnoDashboardFilterOptions=summary?.filter_options||null;
     // Render KPI/profile from the full server-side aggregate immediately.
-    renderDashboardSource('MASTER DATA · PMNO · summary server-side');
+    try{ renderDashboardSource('MASTER DATA · PMNO · summary server-side'); }catch(e){ console.error('[PMNO SUMMARY RENDER]',e); renderKpis(); renderDashboardHub(); renderAuditSummaryFallback(e); }
   }catch(e){
     console.warn('[PMNO SUMMARY]',e);
   }
@@ -4496,7 +4503,7 @@ async function load(){
     // Keep the already-loaded full summary; only enrich it with page/filter metadata where present.
     if(!window.__pmnoDashboardSummary){window.__pmnoDashboardSummary={...snap,stats:snap?.stats||{total_sites:Number(snap?.total_sites)||0}};window.__pmnoPortfolioSummary=window.__pmnoDashboardSummary;}
     if(snap?.filter_options) window.__pmnoDashboardFilterOptions=snap.filter_options;
-    renderDashboardSource('MASTER DATA · PMNO · summary + detail page');
+    try{ renderDashboardSource('MASTER DATA · PMNO · summary + detail page'); }catch(e){ console.error('[PMNO DETAIL RENDER]',e); renderKpis(); renderDashboardHub(); renderAuditSummaryFallback(e); }
   }catch(e){
     console.warn('[PMNO DETAIL PAGE]',e);
     // Summary is sufficient for KPI/profile; detail page failure must not blank the dashboard.
@@ -4513,7 +4520,7 @@ async function load(){
   // Do not hydrate all 40,350 rows. Search/detail remains server-side/on-demand.
  }catch(e){
   console.error('[PMNO DASHBOARD LOAD]',e);
-  const el=$('dash-kpis'); if(el) el.innerHTML='<div class="dash-error">Dashboard gagal memuat data. Coba Refresh.</div>';
+  const el=$('dash-kpis'); if(el) el.innerHTML='<div class="dash-error">Dashboard gagal memuat data. Coba Refresh.<br><small>'+esc(e?.message||'Unknown error')+'</small></div>';
  }finally{
   loading=false; window.__pmnoDashboardLoadingPages=false;
   if(refreshBtn){refreshBtn.disabled=false;refreshBtn.classList.remove('refreshing');refreshBtn.textContent=refreshBtn.dataset.originalText||'↻ REFRESH';}
