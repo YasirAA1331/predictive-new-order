@@ -4273,9 +4273,12 @@ function renderAuditData(){
  const consistency=auditPct(assessableScores);
  const completeness=auditPct([assetComp,customerComp,productivityComp,landComp,technicalComp,financialComp,lifecycleComp]);
  const validity=auditPct([assetValid,customerValid,productivityValid,landValid,technicalValid,financialValid,lifecycleValid]);
- $('audit-completeness').textContent=completeness.toFixed(1)+'%';
- $('audit-validity').textContent=validity.toFixed(1)+'%';
- $('audit-consistency').textContent=consistency.toFixed(1)+'%';
+ const auditCompletenessEl=$('audit-completeness');
+ const auditValidityEl=$('audit-validity');
+ const auditConsistencyEl=$('audit-consistency');
+ if(auditCompletenessEl)auditCompletenessEl.textContent=completeness.toFixed(1)+'%';
+ if(auditValidityEl)auditValidityEl.textContent=validity.toFixed(1)+'%';
+ if(auditConsistencyEl)auditConsistencyEl.textContent=consistency.toFixed(1)+'%';
  const scoreLabel=v=>v===null?'NOT ASSESSABLE':v.toFixed(1)+'%';
  const scoreCls=v=>v===null?'neutral':auditStatus(v);
  const exceptionCount=profile=>exceptions.filter(e=>e.profile===profile).length;
@@ -4354,12 +4357,17 @@ function renderAuditData(){
  function rootsHtml(exs,labels){const codes={};exs.forEach(e=>codes[e.code]=(codes[e.code]||0)+1);const roots=Object.entries(codes).sort((a,b)=>b[1]-a[1]).slice(0,5);return roots.length?`<div class="profile-subtitle">PENYEBAB KETIDAKSESUAIAN</div><div class="audit-rootcause-list">${roots.map(([c,n])=>`<div class="audit-rootcause"><span>${esc(labels[c]||c)}</span><b>${fmtInt(n)}</b></div>`).join('')}</div>`:'';}
  const globalAnomalyBody=anomalyRows.map(x=>`<div class="anomaly-row"><div><div class="anomaly-label">${esc(x.label)}</div>${x.source?`<div class="anomaly-source">${esc(x.source)}</div>`:''}</div><div class="anomaly-bar"><i style="width:${x.count===null?0:Math.max(2,(x.count/maxAnomaly)*100)}%"></i></div><div class="anomaly-count ${x.count===null?'na':''}">${x.count===null?'BELUM DINILAI':fmtInt(x.count)}</div></div>`).join('');
  const globalRoot=rootsHtml(exceptions,causeLabels);
- $('audit-exceptions').innerHTML=siteHtml;
- $('audit-exceptions').querySelectorAll('[data-audit-site]').forEach(b=>b.onclick=()=>{const r=list.find(x=>sid(x)===b.dataset.auditSite);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
- $('audit-coverage').innerHTML=metricRows([
+ const auditExceptionsEl=$('audit-exceptions');
+ if(auditExceptionsEl){
+   auditExceptionsEl.innerHTML=siteHtml;
+   auditExceptionsEl.querySelectorAll('[data-audit-site]').forEach(b=>b.onclick=()=>{const r=list.find(x=>sid(x)===b.dataset.auditSite);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
+ }
+ const auditCoverageEl=$('audit-coverage');
+ if(auditCoverageEl)auditCoverageEl.innerHTML=metricRows([
   ['Asset Profile','ASSESSED','good'],['Customer Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Productivity Profile',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['Land & Legal Profile','ASSESSED','good'],['Technical Profile','PARTIAL · DEVICE SOURCE NOT MAPPED','warn'],['Financial Profile','PARTIAL · COST SOURCE NOT MAPPED','warn'],['Asset Lifecycle',customerMapped?'ASSESSED':'NOT ASSESSABLE','neutral'],['NBV source','site_financial_profile · Site ID basis','neutral']
  ])+'<div class="audit-note">Completeness = availability of required data. Validity = format/range/business-rule validity. Consistency = whether mapped fields/sources agree at site level. Source yang belum tersedia tidak dipaksa menjadi PASS/FAIL.</div>';
 }
+
 const PMNO_AUDIT_PAGE_META={
  auditasset:{key:'asset',title:'Asset Profile',sourceId:'audit-profile-asset'},
  auditcustomer:{key:'customer',title:'Customer Profile',sourceId:'audit-profile-customer'},
@@ -4378,8 +4386,10 @@ async function pmnoAuditRefreshPage(page){
  const meta=PMNO_AUDIT_PAGE_META[page];if(!meta)return;const view=document.getElementById('audit'+meta.key.charAt(0).toUpperCase()+meta.key.slice(1)+'ProfileView');const content=document.getElementById('audit-page-content-'+meta.key);if(!view||!content)return;
  content.innerHTML=`<div class="audit-page-loading">RUNNING AUDIT DATA…</div>`;
  try{
-   // Reuse the existing audit source-of-truth so page and dashboard never diverge.
-   renderAuditData();
+   // Profile pages are separate from the dashboard DOM.
+   // Do NOT call renderAuditData() here: that renderer expects dashboard-only
+   // nodes such as #audit-completeness / #audit-validity / #audit-consistency.
+   // Calling it on a standalone audit page caused the null.textContent error.
    if(meta.key==='financial'){
      await renderFinancialFiveAudit();
      const src=document.getElementById(meta.sourceId);
