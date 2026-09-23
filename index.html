@@ -4036,9 +4036,9 @@ function auditComplySummary(profile,total,notComply){
  const pct=x=>t?(x/t*100).toFixed(1):'0.0';
  return `<div class="audit-summary-2"><div class="audit-summary-line good"><span>Comply</span><b>${fmtInt(c)} site</b><em>(${pct(c)}%)</em></div><div class="audit-summary-line bad"><span>Not Comply</span><b>${fmtInt(n)} site</b><em>(${pct(n)}%)</em></div></div>`;
 }
-function auditExceptionSiteCount(profile){
+function auditExceptionSiteCount(profile, sourceExceptions=window.__pmnoAuditExceptions){
  const ids=new Set();
- (exceptions||[]).forEach(e=>{
+ (sourceExceptions||[]).forEach(e=>{
   if(e.profile!==profile)return;
   const site=String(e.site_id||'').trim();
   if(site)ids.add(site);
@@ -4340,7 +4340,7 @@ function renderAuditData(){
   const root=roots.length?`<div class="profile-subtitle">PENYEBAB KETIDAKSESUAIAN</div><div class="audit-rootcause-list">${roots.map(([c,n])=>`<div class="audit-rootcause"><span>${esc(causeLabels[c]||c)}</span><b>${fmtInt(n)}</b></div>`).join('')}</div>`:'';
   return `<div class="profile-audit-detail"><div class="profile-subtitle">IRISAN DATA YANG TIDAK SESUAI</div><div class="anomaly-intersection-note">Kriteria dapat saling beririsan. Satu site bisa muncul di lebih dari satu kategori.</div><div class="anomaly-intersection">${body}</div>${root}</div>`;
  };
- const setProfile=(id,profile)=>{const el=$(id);if(el)el.innerHTML=auditComplySummary(profile,list.length,auditExceptionSiteCount(profile));};
+ const setProfile=(id,profile)=>{const el=$(id);if(el)el.innerHTML=auditComplySummary(profile,list.length,auditExceptionSiteCount(profile,exceptions));};
  setProfile('audit-profile-asset','Asset Profile');setProfile('audit-profile-customer','Customer Profile');setProfile('audit-profile-productivity','Productivity Profile');setProfile('audit-profile-land','Land & Legal Profile');setProfile('audit-profile-technical','Technical Profile');setProfile('audit-profile-financial','Financial Profile');setProfile('audit-profile-lifecycle','Asset Lifecycle');
  window.__pmnoAuditProfileDetails={asset:profileDetail('Asset Profile'),customer:profileDetail('Customer Profile'),productivity:profileDetail('Productivity Profile'),land:profileDetail('Land & Legal Profile'),technical:profileDetail('Technical Profile'),financial:profileDetail('Financial Profile'),lifecycle:profileDetail('Asset Lifecycle')};
  const byCode={};exceptions.forEach(e=>{byCode[e.code]=(byCode[e.code]||0)+1});
