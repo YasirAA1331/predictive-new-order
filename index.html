@@ -3481,7 +3481,7 @@ async function pmnoLoadGeoPortfolio(){
  if(g.status==='loading')return g.loading||g;
  g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;g.details=[];g.validSiteIds=[];
  g.loading=(async()=>{
-  const PAGE=1000;
+  const PAGE=250;
   try{
    const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
    g.lastContext={regional:rg,area:ar,province:pv,city:ct,search:q};
@@ -3501,7 +3501,7 @@ async function pmnoLoadGeoPortfolio(){
     if(total===null)total=Number(page.total)||0;
     g.total=total;
     if(!page.rows.length)break;
-    g.phase='Validating sites '+fmtInt(offset+1)+'–'+fmtInt(Math.min(offset+page.rows.length,total))+' / '+fmtInt(total)+'…';
+    g.phase='Validating sites '+fmtInt(offset+1)+'–'+fmtInt(Math.min(offset+page.rows.length,total))+' / '+fmtInt(total)+' · batch '+fmtInt(Math.floor(offset/PAGE)+1)+'…';
     pmnoGeoUpdateProgressUI?.();
     const vr=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{
       method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},
@@ -3519,7 +3519,7 @@ async function pmnoLoadGeoPortfolio(){
     offset+=page.rows.length;
     g.processed=offset;
     g.progress=total?Math.min(100,offset/total*100):100;
-    g.phase=offset<total?'Validating sites '+fmtInt(offset)+' / '+fmtInt(total)+'…':'Finalizing validation…';
+    g.phase=offset<total?'Validated '+fmtInt(offset)+' / '+fmtInt(total)+' · next batch '+fmtInt(offset+1)+'–'+fmtInt(Math.min(offset+PAGE,total))+'…':'Finalizing validation…';
     g.elapsedMs=performance.now()-(g.startedAt||performance.now());
     pmnoGeoUpdateProgressUI?.();
     if(offset>=total)break;
