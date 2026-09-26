@@ -3498,7 +3498,7 @@ async function pmnoLoadGeoPortfolio(){
    const ctl=new AbortController();const timeout=setTimeout(()=>ctl.abort(),120000);
    let r;
    try{
-    r=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({regional:rg||null,area:ar||null,province:pv||null,city:ct||null,search:q||null}),signal:ctl.signal});
+    r=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({regional:rg||null,area:ar||null,province:pv||null,city:ct||null,search:q||null}),signal:ctl.signal});
    }finally{clearTimeout(timeout)}
    if(!r.ok){let msg='Coordinate validation HTTP '+r.status;try{const x=await r.json();if(x?.message)msg=x.message}catch(_e){}throw new Error(msg)}
    const payload=await r.json();
@@ -3676,7 +3676,7 @@ async function pmnoRebuildGeoIssueDetails(){
  const g=window.__pmnoGeoPortfolio||{};const c=g.lastContext||{};
  try{
   const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),120000);
-  let r;try{r=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{method:'POST',headers:{...H,'Content-Type':'application/json'},body:JSON.stringify({regional:c.regional||null,area:c.area||null,province:c.province||null,city:c.city||null,search:c.search||null}),signal:ctl.signal});}finally{clearTimeout(timer)}
+  let r;try{r=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({regional:c.regional||null,area:c.area||null,province:c.province||null,city:c.city||null,search:c.search||null}),signal:ctl.signal});}finally{clearTimeout(timer)}
   if(!r.ok)throw new Error('Coordinate validation HTTP '+r.status);const payload=await r.json();if(!payload||!Array.isArray(payload.details))throw new Error('Coordinate validation payload invalid');
   g.details=payload.details;g.valid=Number(payload.valid)||0;g.mismatch=Number(payload.mismatch)||0;g.invalid=Number(payload.invalid)||0;g.missing=Number(payload.missing)||0;g.total=Number(payload.total)||0;g.processed=Number(payload.processed)||g.total;g.progress=100;g.validSiteIds=Array.isArray(payload.valid_site_ids)?payload.valid_site_ids.map(String):g.validSiteIds;g.status='ready';
   try{localStorage.setItem('pmnoGeoLastResult',JSON.stringify({status:'ready',valid:g.valid,mismatch:g.mismatch,invalid:g.invalid,missing:g.missing,total:g.total,processed:g.processed,progress:100,elapsedMs:Number(g.elapsedMs)||0,lastRunAt:g.lastRunAt||null,lastContext:c,details:g.details,validSiteIds:g.validSiteIds}));}catch(_e){}
