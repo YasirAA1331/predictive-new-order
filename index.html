@@ -3448,8 +3448,14 @@ function pmnoMasterCompatibilityProvince(s){
  return a[n]||n;
 }
 function pmnoMasterProvince(r){return pmnoMasterCompatibilityProvince(val(r,'province','provinsi','propinsi','regional_province'))}
-function pmnoMappedProvince(f){const p=f?.properties||{};return p.NAME_1||p.name_1||p.NAME_1_EN||p.PROVINSI||p.provinsi||p.province||p.PROVINCE||p.Propinsi||p.prov||''}
-function pmnoMappedMasterProvince(f){return pmnoMasterCompatibilityProvince(pmnoMappedProvince(f))}
+function pmnoMappedProvinceRaw(f){const p=f?.properties||{};return p.NAME_1||p.name_1||p.NAME_1_EN||p.PROVINSI||p.provinsi||p.province||p.PROVINCE||p.Propinsi||p.prov||''}
+function pmnoMappedProvince(f){const raw=pmnoMappedProvinceRaw(f);const canon=pmnoMasterCompatibilityProvince(raw);const display={
+  'ACEH':'Aceh','DKIJAKARTA':'DKI Jakarta','DIYOGYAKARTA':'DI Yogyakarta','KEPULAUANBANGKABELITUNG':'Kepulauan Bangka Belitung',
+  'PAPUA':'Papua','PAPUABARAT':'Papua Barat','PAPUATENGAH':'Papua','PAPUASELATAN':'Papua','PAPUAPEGUNUNGAN':'Papua','PAPUABARATDAYA':'Papua Barat'
+};
+  return display[canon]||raw;
+}
+function pmnoMappedMasterProvince(f){return pmnoMasterCompatibilityProvince(pmnoMappedProvinceRaw(f))}
 function pmnoGeoProvinceIndex(){
  const fs=window.__pmnoGeoReference?.province?.features||[];
  return fs.map(f=>({f,name:pmnoMappedProvince(f),canon:pmnoMappedMasterProvince(f),bbox:pmnoFeatureBBox(f)}));
