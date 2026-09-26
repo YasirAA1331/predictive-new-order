@@ -3414,7 +3414,7 @@ function fitDashboardMap(){
 }
 if(typeof document!=='undefined')document.addEventListener('click',e=>{const b=e.target.closest?.('.dash-site-open');if(!b)return;const r=rows.find(x=>sid(x)===b.dataset.site);if(r&&window.pmnoOpenSiteProfile)window.pmnoOpenSiteProfile(r)});
 const PMNO_GEO_REF_URLS={
-  both:URL+'/functions/v1/pmno-geo-reference?layer=both&v=gadm41'
+  province:URL+'/functions/v1/pmno-geo-reference?layer=province&v=gadm41-r6'
 };
 window.__pmnoGeoReference=window.__pmnoGeoReference||{status:'idle',land:null,province:null,error:null,loading:null};
 function pmnoPointInRing(pt,ring){let x=pt[0],y=pt[1],inside=false;for(let i=0,j=ring.length-1;i<ring.length;j=i++){const xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];const hit=((yi>y)!==(yj>y))&&(x<((xj-xi)*(y-yi)/(yj-yi)+xi));if(hit)inside=!inside;}return inside}
@@ -3476,7 +3476,7 @@ function pmnoGeoClassify(rows){
  });
  return {valid,mismatch,invalid,missing,total:(rows||[]).length,details};
 }
-window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||(()=>{try{const x=JSON.parse(localStorage.getItem('pmnoGeoLastResultGADM41')||'null');return x&&x.status==='ready'?{status:'ready',valid:Number(x.valid)||0,mismatch:Number(x.mismatch)||0,invalid:Number(x.invalid)||0,missing:Number(x.missing)||0,total:Number(x.total)||0,processed:Number(x.processed)||Number(x.total)||0,progress:100,startedAt:null,elapsedMs:Number(x.elapsedMs)||0,lastRunAt:x.lastRunAt||null,lastContext:x.lastContext||{},details:Array.isArray(x.details)?x.details:[],validSiteIds:Array.isArray(x.validSiteIds)?x.validSiteIds:[],error:null,loading:null}:null}catch(_e){return null}})()||{status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,lastRunAt:null,lastContext:{},details:[],validSiteIds:[],error:null,loading:null};
+window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||(()=>{try{const x=JSON.parse(localStorage.getItem('pmnoGeoLastResultGADM41v2')||'null');return x&&x.status==='ready'?{status:'ready',valid:Number(x.valid)||0,mismatch:Number(x.mismatch)||0,invalid:Number(x.invalid)||0,missing:Number(x.missing)||0,total:Number(x.total)||0,processed:Number(x.processed)||Number(x.total)||0,progress:100,startedAt:null,elapsedMs:Number(x.elapsedMs)||0,lastRunAt:x.lastRunAt||null,lastContext:x.lastContext||{},details:Array.isArray(x.details)?x.details:[],validSiteIds:Array.isArray(x.validSiteIds)?x.validSiteIds:[],error:null,loading:null}:null}catch(_e){return null}})()||{status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,lastRunAt:null,lastContext:{},details:[],validSiteIds:[],error:null,loading:null};
 async function pmnoLoadGeoPortfolio(){
  const g=window.__pmnoGeoPortfolio;
  if(g.status==='loading'&&g.loading)return g.loading;
@@ -3508,7 +3508,7 @@ async function pmnoLoadGeoPortfolio(){
     if(end<pts.length)await new Promise(requestAnimationFrame);
    }
    g.valid=valid;g.mismatch=mismatch;g.invalid=invalid;g.missing=missing;g.total=pts.length;g.processed=pts.length;g.progress=100;g.elapsedMs=performance.now()-(g.startedAt||performance.now());g.status='ready';g.lastRunAt=new Date().toISOString();g.lastContext={regional:rg,area:ar,province:pv,city:ct,search:q};g.details=details;g.validSiteIds=validSiteIds;
-   try{localStorage.setItem('pmnoGeoLastResultGADM41',JSON.stringify({reference:'GADM 4.1',status:'ready',valid,mismatch,invalid,missing,total:pts.length,processed:pts.length,progress:100,elapsedMs:g.elapsedMs,lastRunAt:g.lastRunAt,lastContext:g.lastContext,details,validSiteIds}));}catch(_e){}
+   try{localStorage.setItem('pmnoGeoLastResultGADM41v2',JSON.stringify({reference:'GADM 4.1',status:'ready',valid,mismatch,invalid,missing,total:pts.length,processed:pts.length,progress:100,elapsedMs:g.elapsedMs,lastRunAt:g.lastRunAt,lastContext:g.lastContext,details,validSiteIds}));}catch(_e){}
    return g;
   }catch(e){g.status='error';g.error=e;g.elapsedMs=performance.now()-(g.startedAt||performance.now());return g;}
   finally{g.loading=null;renderDashboardSource('MASTER DATA · PMNO');}
@@ -3521,14 +3521,12 @@ async function pmnoLoadGeoReference(){
  ref.loading=(async()=>{
    const ctl=new AbortController();const timer=setTimeout(()=>ctl.abort(),35000);
    try{
-     const r=await fetch(PMNO_GEO_REF_URLS.both,{method:'GET',headers:H,cache:'force-cache',signal:ctl.signal});
+     const r=await fetch(PMNO_GEO_REF_URLS.province,{method:'GET',headers:H,cache:'no-store',credentials:'omit',signal:ctl.signal});
      if(!r.ok)throw new Error('Geospatial reference unavailable ('+r.status+')');
      const payload=await r.json();
-     const lf=(payload.land?.features||[])[0];
      const province=payload.province;
-     if(!lf)throw new Error('GADM 4.1 land polygon unavailable');
      if(!province?.features?.length)throw new Error('GADM 4.1 province polygon unavailable');
-     ref.land=lf;ref.province=province;ref.status='ready';
+     ref.land=null;ref.province=province;ref.status='ready';
      if(typeof renderDashboardSource==='function' && window.__pmnoDashboardSummary?.stats?.total_sites)renderDashboardSource('MASTER DATA · PMNO');
      return ref;
    }catch(e){
@@ -3725,7 +3723,7 @@ async function pmnoRebuildGeoIssueDetails(){
    // Preserve the original validation totals/context, but replace the incomplete detail cache with the full issue worklist.
    g.details=details;
    g.valid=valid;g.mismatch=mismatch;g.invalid=invalid;g.missing=missing;g.total=pts.length;g.processed=pts.length;g.progress=100;
-   try{localStorage.setItem('pmnoGeoLastResultGADM41',JSON.stringify({
+   try{localStorage.setItem('pmnoGeoLastResultGADM41v2',JSON.stringify({
      status:'ready',valid,mismatch,invalid,missing,total:pts.length,processed:pts.length,progress:100,
      elapsedMs:Number(g.elapsedMs)||0,lastRunAt:g.lastRunAt||null,lastContext:c,details
    }));}catch(_e){}
