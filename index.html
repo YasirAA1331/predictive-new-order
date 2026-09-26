@@ -3604,25 +3604,20 @@ async function pmnoCalculateTowerAdjacency(){
 
 /* MANUAL ONLY: dashboard render must not start adjacency calculation. */
 window.__pmnoRunTowerAdjacency=()=>pmnoCalculateTowerAdjacency();
-// One-time migration: if the latest saved result has UNIQUE PAIRS but no matching
-// pair-distance distribution, calculate it once and persist it. Never rerun on refresh.
-window.__pmnoPairDistMigration=window.__pmnoPairDistMigration||(()=>{try{return JSON.parse(localStorage.getItem('pmnoTowerAdjacencyPairDistMigration')||'null')}catch(_e){return null}})();
-function pmnoMaybeMigratePairDistribution(){
-  try{
-    const a=window.__pmnoTowerAdjacency||{};
-    const pd=a.pairDistanceDistribution||{};
-    const total=(Number(pd.lt30)||0)+(Number(pd['30_50'])||0)+(Number(pd['50_70'])||0)+(Number(pd['70_100'])||0);
-    const pairs=Number(a.adjacentPairs)||0;
-    const run=a.lastRunAt||'';
-    const mig=window.__pmnoPairDistMigration;
-    if(a.status==='ready' && pairs>0 && total!==pairs && (!mig || mig.runAt!==run)){
-      window.__pmnoPairDistMigration={runAt:run,started:true};
-      localStorage.setItem('pmnoTowerAdjacencyPairDistMigration',JSON.stringify(window.__pmnoPairDistMigration));
-      setTimeout(()=>{ if(!window.__pmnoTowerAdjacency?.loading) window.__pmnoRunTowerAdjacency?.(); },250);
-    }
-  }catch(_e){}
-}
-document.addEventListener('click',e=>{if(e.target?.closest?.('#pmnoAdjCalcBtn,#asset-page-adj'))window.__pmnoRunTowerAdjacency()});
+// IMPORTANT: Tower adjacency calculation is MANUAL ONLY.
+// Do not auto-run or migrate on page load/refresh. Existing completed KPI results
+// remain visible; pair-distance distribution is populated only by clicking
+// HITUNG <100 M, which computes and persists the distribution together with
+// the same unique-pair result.
+window.__pmnoPairDistMigration=null;
+
+// Single manual click handler. No automatic calculation is attached to render/load.
+document.addEventListener('click',e=>{
+  if(e.target?.closest?.('#pmnoAdjCalcBtn,#asset-page-adj')){
+    e.preventDefault();
+    window.__pmnoRunTowerAdjacency?.();
+  }
+});
 
 // Geospatial validation is MANUAL. The reference layer is loaded only when the user presses VALIDATE COORDINATE.
 function pmnoStartGeoWhenVisible(){}
@@ -3923,7 +3918,7 @@ function renderAssetProfilePage(){
  <section class="ap-section"><div class="ap-section-head"><div><strong>04 · TOWER SPATIAL INTELLIGENCE</strong><small>Tower bersebelahan dalam jarak &lt;100 m</small></div><button type="button" class="ap-btn" id="asset-page-adj">${adLoading?'⟳ MENGHITUNG…':'↻ HITUNG &lt;100 M'}</button></div><div class="ap-section-body"><div class="ap-spatial-top"><div class="ap-spatial-kpi hero"><span>TOWER BERSEBELAHAN</span><b>${adReady?fmtInt(adj):'—'}</b><small>${adReady?share.toFixed(1)+'% of portfolio':'Result not available'}</small></div><div class="ap-spatial-kpi"><span>KOORDINAT VALID</span><b>${adReady?fmtInt(adTotal):'—'}</b></div><div class="ap-spatial-kpi"><span>TOWER BERPASANGAN</span><b>${adReady?fmtInt(pairs):'—'}</b></div><div class="ap-spatial-kpi"><span>TIDAK BERSEBELAHAN</span><b>${adReady?fmtInt(non):'—'}</b></div><div class="ap-spatial-kpi"><span>TIDAK TERHITUNG</span><b>${adReady?fmtInt(Math.max(0,total-adTotal)):'—'}</b></div></div>${adjacencyDistributionHtml}${matrix||'<div class="ap-empty" style="margin-top:12px">Height matrix will appear after the &lt;100 m calculation is completed.</div>'}<div class="ap-note">Perhitungan jarak hanya menggunakan tower dengan koordinat valid. Tower teridentifikasi bersebelahan berarti memiliki minimal 1 tower lain dalam jarak <b>&lt;100 m</b>. Tower berpasangan dihitung unik satu kali; jarak tepat 100,0 m tidak termasuk. Hasil terakhir dipertahankan sampai perhitungan berikutnya selesai.</div></div></section>`;
  $('asset-page-geo')?.addEventListener('click',()=>document.getElementById('pmnoGeoValidateBtn')?.click());
  const adjBtn=document.getElementById('asset-page-adj');
- if(adjBtn) adjBtn.onclick=()=>window.__pmnoRunTowerAdjacency?.();
+ if(adjBtn) adjBtn.onclick=null;
 }
 window.pmnoAssetProfileRender=renderAssetProfilePage;
 setTimeout(pmnoMaybeMigratePairDistribution,800);
