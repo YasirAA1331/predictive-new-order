@@ -3906,6 +3906,23 @@ function renderAssetProfilePage(){
 }
 window.pmnoAssetProfileRender=renderAssetProfilePage;
 
+// One-time repair for legacy cached adjacency results: if UNIQUE PAIRS exists but
+// its distance distribution is stale/missing, calculate once in this browser session.
+// After a successful run the result is persisted and normal dashboard opens reuse it.
+function pmnoEnsurePairDistribution(){
+ try{
+  const ad=window.__pmnoTowerAdjacency||{};
+  const pd=ad.pairDistanceDistribution||{};
+  const total=(Number(pd.lt30)||0)+(Number(pd['30_50'])||0)+(Number(pd['50_70'])||0)+(Number(pd['70_100'])||0);
+  const pairs=Number(ad.adjacentPairs)||0;
+  if(ad.status==='ready' && pairs>0 && total!==pairs && !sessionStorage.getItem('pmnoPairDistRepairAttempted')){
+   sessionStorage.setItem('pmnoPairDistRepairAttempted','1');
+   setTimeout(()=>{ try{ pmnoCalculateTowerAdjacency(); }catch(_e){} },250);
+  }
+ }catch(_e){}
+}
+
+
 function renderDashboardSource(label){
  const aggregate=pmnoGetAggregateSummary();
  const sm=aggregate?.stats||null;
@@ -5414,3 +5431,5 @@ body.pmno-page-single .detail-panel{
 })();
 </script>
 <script>window.__PMNO_BUILD__="V83-ADJACENCY-PERSIST-LAST-RESULT";</script>
+
+<script>window.addEventListener('load',()=>setTimeout(()=>{try{pmnoEnsurePairDistribution()}catch(e){}},500));</script>
