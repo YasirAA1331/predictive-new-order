@@ -3479,37 +3479,63 @@ window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||(()=>{try{const x=JSON.pars
 async function pmnoLoadGeoPortfolio(){
  const g=window.__pmnoGeoPortfolio;
  if(g.status==='loading')return g.loading||g;
- g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=2;g.startedAt=performance.now();g.elapsedMs=0;g.details=[];g.validSiteIds=[];
+ g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;g.details=[];g.validSiteIds=[];
  g.loading=(async()=>{
-  let ticker=null;
+  const PAGE=1000;
   try{
    const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
    g.lastContext={regional:rg,area:ar,province:pv,city:ct,search:q};
-   g.total=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||0;
-   g.phase='Connecting to validation engine…';g.progress=5;pmnoGeoUpdateProgressUI?.();
-   // Validation is executed server-side so the browser does not have to download/parse the GADM polygon dataset.
-   // The moving progress is stage-based only; the final 100% is set from the actual server response.
-   const started=performance.now();
-   ticker=setInterval(()=>{
-    const elapsed=(performance.now()-started)/1000;
-    const stage=Math.min(92,Math.max(8,8+Math.log1p(elapsed)*18));
-    g.progress=stage;g.phase=elapsed<2?'Loading coordinate scope…':elapsed<8?'Checking GADM 4.1 province polygons…':'Validating coordinate records…';g.elapsedMs=performance.now()-(g.startedAt||performance.now());pmnoGeoUpdateProgressUI?.();
-   },350);
-   const ctl=new AbortController();const timeout=setTimeout(()=>ctl.abort(),120000);
-   let r;
-   try{
-    r=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},body:JSON.stringify({regional:rg||null,area:ar||null,province:pv||null,city:ct||null,search:q||null}),signal:ctl.signal});
-   }finally{clearTimeout(timeout)}
-   if(!r.ok){let msg='Coordinate validation HTTP '+r.status;try{const x=await r.json();if(x?.message)msg=x.message}catch(_e){}throw new Error(msg)}
-   const payload=await r.json();
-   if(!payload||!Number.isFinite(Number(payload.total)))throw new Error('Coordinate validation payload invalid');
-   g.valid=Number(payload.valid)||0;g.mismatch=Number(payload.mismatch)||0;g.invalid=Number(payload.invalid)||0;g.missing=Number(payload.missing)||0;g.total=Number(payload.total)||0;g.processed=Number(payload.processed)||g.total;g.progress=100;g.elapsedMs=Number(payload.elapsed_ms)|| (performance.now()-(g.startedAt||performance.now()));g.status='ready';g.phase='Validation complete';g.lastRunAt=new Date().toISOString();g.details=Array.isArray(payload.details)?payload.details:[];g.validSiteIds=Array.isArray(payload.valid_site_ids)?payload.valid_site_ids.map(String):[];
+   g.phase='Loading coordinate scope…';g.progress=0;pmnoGeoUpdateProgressUI?.();
+   let offset=0;
+   let total=null;
+   const allDetails=[];
+   const allValidIds=[];
+   while(true){
+    const rr=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points_page',{
+      method:'POST',headers:H,
+      body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null,p_limit:PAGE,p_offset:offset})
+    });
+    if(!rr.ok)throw new Error('pmno_coordinate_points_page HTTP '+rr.status);
+    const page=await rr.json();
+    if(!page||!Array.isArray(page.rows))throw new Error('Coordinate page payload invalid');
+    if(total===null)total=Number(page.total)||0;
+    g.total=total;
+    if(!page.rows.length)break;
+    g.phase='Validating sites '+fmtInt(offset+1)+'–'+fmtInt(Math.min(offset+page.rows.length,total))+' / '+fmtInt(total)+'…';
+    pmnoGeoUpdateProgressUI?.();
+    const vr=await fetch(URL+'/functions/v1/pmno-coordinate-validation',{
+      method:'POST',headers:{'Content-Type':'text/plain;charset=UTF-8'},
+      body:JSON.stringify({rows:page.rows})
+    });
+    if(!vr.ok){let msg='Coordinate validation HTTP '+vr.status;try{const x=await vr.json();if(x?.message)msg=x.message}catch(_e){}throw new Error(msg)}
+    const result=await vr.json();
+    if(!result||Number(result.total)!==page.rows.length)throw new Error('Validation batch size mismatch');
+    g.valid+=Number(result.valid)||0;
+    g.mismatch+=Number(result.mismatch)||0;
+    g.invalid+=Number(result.invalid)||0;
+    g.missing+=Number(result.missing)||0;
+    if(Array.isArray(result.details))allDetails.push(...result.details);
+    if(Array.isArray(result.valid_site_ids))allValidIds.push(...result.valid_site_ids.map(String));
+    offset+=page.rows.length;
+    g.processed=offset;
+    g.progress=total?Math.min(100,offset/total*100):100;
+    g.phase=offset<total?'Validating sites '+fmtInt(offset)+' / '+fmtInt(total)+'…':'Finalizing validation…';
+    g.elapsedMs=performance.now()-(g.startedAt||performance.now());
+    pmnoGeoUpdateProgressUI?.();
+    if(offset>=total)break;
+    await new Promise(requestAnimationFrame);
+   }
+   g.total=Number(total)||0;g.processed=offset;g.progress=100;
+   g.phase='Validation complete';g.elapsedMs=performance.now()-(g.startedAt||performance.now());
+   g.details=allDetails;g.validSiteIds=allValidIds;g.status='ready';g.lastRunAt=new Date().toISOString();
    if(g.validSiteIds.length!==g.valid)throw new Error('Validation engine returned inconsistent valid site scope');
    try{localStorage.setItem('pmnoGeoLastResult',JSON.stringify({status:'ready',valid:g.valid,mismatch:g.mismatch,invalid:g.invalid,missing:g.missing,total:g.total,processed:g.processed,progress:100,elapsedMs:g.elapsedMs,lastRunAt:g.lastRunAt,lastContext:g.lastContext,details:g.details,validSiteIds:g.validSiteIds}));}catch(_e){}
    pmnoGeoUpdateProgressUI?.();return g;
-  }catch(e){g.status='error';g.error=e;g.phase=e?.name==='AbortError'?'Validation timeout':'Validation unavailable';g.elapsedMs=performance.now()-(g.startedAt||performance.now());g.progress=0;pmnoGeoUpdateProgressUI?.();return g;
-  }finally{if(ticker)clearInterval(ticker);g.loading=null;renderDashboardSource('MASTER DATA · PMNO');}
- })();return g.loading;
+  }catch(e){
+   g.status='error';g.error=e;g.phase=e?.name==='AbortError'?'Validation timeout':'Validation unavailable';g.elapsedMs=performance.now()-(g.startedAt||performance.now());pmnoGeoUpdateProgressUI?.();return g;
+  }finally{g.loading=null;renderDashboardSource('MASTER DATA · PMNO');}
+ })();
+ return g.loading;
 }
 async function pmnoLoadGeoReference(){
  const ref=window.__pmnoGeoReference;if(ref.status==='ready'&&ref.province?.features?.length)return ref;if(ref.loading)return ref.loading;
@@ -3894,7 +3920,7 @@ function renderAssetProfilePage(){
    <div class="ap-kpi"><span>ACQUISITION</span><b>${fmtInt(origin[1]?.[1]||0)}</b><small>${pctOf(origin[1]?.[1]||0)} of portfolio</small></div>
  </div></div></section>
  <section class="ap-section"><div class="ap-section-head"><div><strong>02 · ASSET STRUCTURE</strong><small> Composition, origin, maturity and physical profile</small></div></div><div class="ap-section-body"><div class="ap-structure"><div class="ap-module"><div class="ap-module-title">ASSET COMPOSITION · TOWER TYPE</div><div class="ap-bar">${barRows(towerTypeRows)||'<div class="ap-empty">No tower type data in current filter.</div>'}</div></div><div class="ap-module"><div class="ap-module-title">ASSET ORIGIN</div>${originRows||'<div class="ap-empty">Origin summary unavailable.</div>'}</div><div class="ap-module"><div class="ap-module-title">ASSET MATURITY</div><div class="ap-bar">${barRows(ageBuckets)||'<div class="ap-empty">No maturity data in current filter.</div>'}</div></div><div class="ap-module"><div class="ap-module-title">PHYSICAL PROFILE · TOWER HEIGHT</div><div class="ap-bar">${barRows(heightBuckets)||'<div class="ap-empty">No tower height data in current filter.</div>'}</div></div></div></div></section>
- <section class="ap-section"><div class="ap-section-head"><div><strong>03 · LOCATION INTELLIGENCE</strong><small>Tower coordinate validity and geospatial readiness</small></div><button type="button" class="ap-btn" id="asset-page-geo">${geoLoading?'VALIDATING…':'↻ VALIDATE COORDINATE'}</button></div><div class="ap-section-body"><div class="ap-geo-grid"><div class="ap-geo-main"><div class="ap-geo-score"><strong>${geoReady?fmtInt(gv):'—'}</strong><b>${geoReady?(total?((gv/total)*100).toFixed(1):'0.0')+'%':geoError?'Unavailable':geoLoading?gp.toFixed(0)+'%':'—'}</b><span>valid coordinates</span></div><div class="ap-progress"><div class="ap-progress-head"><span>${geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?'Validation running':'Not validated yet'}</span><b>${fmtInt(Math.min(Number(geo.processed)||0,total))} / ${fmtInt(Number(geo.total)||total)}</b></div><div class="ap-progress-track"><i style="width:${Math.min(100,gp)}%"></i></div></div><div class="ap-breakdown"><div class="ap-break geo-clickable" data-geo-status="VALID_COORDINATE" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('VALID_COORDINATE')" title="View valid coordinate sites"><span>VALID</span><b>${geoReady?fmtInt(gv):'—'}</b><em>${geoReady?pctOf(gv):'—'}</em></div><div class="ap-break mismatch geo-clickable" data-geo-status="LOCATION_MISMATCH" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('LOCATION_MISMATCH')" title="View location mismatch sites"><span>LOCATION MISMATCH</span><b>${geoReady?fmtInt(gm):'—'}</b><em>${geoReady?pctOf(gm):'—'}</em></div><div class="ap-break invalid geo-clickable" data-geo-status="INVALID_COORDINATE" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('INVALID_COORDINATE')" title="View invalid coordinate sites"><span>INVALID COORDINATE</span><b>${geoReady?fmtInt(gi):'—'}</b><em>${geoReady?pctOf(gi):'—'}</em></div><div class="ap-break missing geo-clickable" data-geo-status="MISSING_COORDINATE" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('MISSING_COORDINATE')" title="View missing coordinate sites"><span>MISSING COORDINATE</span><b>${geoReady?fmtInt(gn):'—'}</b><em>${geoReady?pctOf(gn):'—'}</em></div></div></div><div class="ap-side"><div class="ap-side-card"><span>LAST VALIDATION</span><b>${geo.lastRunAt?esc(new Date(geo.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})):'Not validated yet'}</b><small>Filter changes do not automatically rerun validation.</small></div><div class="ap-side-card"><span>REFERENCE</span><b>GADM 4.1</b><small>Province polygons with normalized province aliases.</small></div></div></div></div></section>
+ <section class="ap-section"><div class="ap-section-head"><div><strong>03 · LOCATION INTELLIGENCE</strong><small>Tower coordinate validity and geospatial readiness</small></div><button type="button" class="ap-btn" id="asset-page-geo">${geoLoading?'VALIDATING…':'↻ VALIDATE COORDINATE'}</button></div><div class="ap-section-body"><div class="ap-geo-grid"><div class="ap-geo-main"><div class="ap-geo-score"><strong>${geoReady?fmtInt(gv):'—'}</strong><b>${geoReady?(total?((gv/total)*100).toFixed(1):'0.0')+'%':geoError?'Unavailable':geoLoading?gp.toFixed(0)+'%':'—'}</b><span>${geoLoading?'validation progress':'valid coordinates'}</span></div><div class="ap-progress"><div class="ap-progress-head"><span>${geoReady?'Validation complete':geoError?'Validation unavailable':geoLoading?(geo.phase||'Validation running'):'Not validated yet'}</span><b>${fmtInt(Math.min(Number(geo.processed)||0,total))} / ${fmtInt(Number(geo.total)||total)}</b></div><div class="ap-progress-track"><i style="width:${Math.min(100,gp)}%"></i></div></div><div class="ap-breakdown"><div class="ap-break geo-clickable" data-geo-status="VALID_COORDINATE" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('VALID_COORDINATE')" title="View valid coordinate sites"><span>VALID</span><b>${geoReady?fmtInt(gv):'—'}</b><em>${geoReady?pctOf(gv):'—'}</em></div><div class="ap-break mismatch geo-clickable" data-geo-status="LOCATION_MISMATCH" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('LOCATION_MISMATCH')" title="View location mismatch sites"><span>LOCATION MISMATCH</span><b>${geoReady?fmtInt(gm):'—'}</b><em>${geoReady?pctOf(gm):'—'}</em></div><div class="ap-break invalid geo-clickable" data-geo-status="INVALID_COORDINATE" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('INVALID_COORDINATE')" title="View invalid coordinate sites"><span>INVALID COORDINATE</span><b>${geoReady?fmtInt(gi):'—'}</b><em>${geoReady?pctOf(gi):'—'}</em></div><div class="ap-break missing geo-clickable" data-geo-status="MISSING_COORDINATE" role="button" tabindex="0" onclick="pmnoOpenGeoIssues('MISSING_COORDINATE')" title="View missing coordinate sites"><span>MISSING COORDINATE</span><b>${geoReady?fmtInt(gn):'—'}</b><em>${geoReady?pctOf(gn):'—'}</em></div></div></div><div class="ap-side"><div class="ap-side-card"><span>LAST VALIDATION</span><b>${geo.lastRunAt?esc(new Date(geo.lastRunAt).toLocaleString('id-ID',{dateStyle:'medium',timeStyle:'short'})):'Not validated yet'}</b><small>Filter changes do not automatically rerun validation.</small></div><div class="ap-side-card"><span>REFERENCE</span><b>GADM 4.1</b><small>Province polygons with normalized province aliases.</small></div></div></div></div></section>
  <section class="ap-section"><div class="ap-section-head"><div><strong>04 · TOWER SPATIAL INTELLIGENCE</strong><small>Tower adjacency within &lt;100 m</small></div><button type="button" class="ap-btn" id="asset-page-adj">${adLoading?'⟳ MENGHITUNG…':'↻ HITUNG &lt;100 M'}</button></div><div class="ap-section-body"><div class="ap-spatial-top"><div class="ap-spatial-kpi hero"><span>ADJACENT TOWERS</span><b>${adReady?fmtInt(adj):'—'}</b><small>${adReady?share.toFixed(1)+'% of portfolio':'Result not available'}</small></div><div class="ap-spatial-kpi"><span>VALID COORDINATES</span><b>${adReady?fmtInt(adTotal):'—'}</b></div><div class="ap-spatial-kpi"><span>UNIQUE PAIRS</span><b>${adReady?fmtInt(pairs):'—'}</b></div><div class="ap-spatial-kpi"><span>NOT ADJACENT</span><b>${adReady?fmtInt(non):'—'}</b></div><div class="ap-spatial-kpi"><span>NOT COUNTED</span><b>${adReady?fmtInt(Math.max(0,total-adTotal)):'—'}</b></div></div>${adjacencyDistributionHtml}${pairDistributionHtml}${matrix||'<div class="ap-empty" style="margin-top:12px">Height matrix will appear after the &lt;100 m calculation is completed.</div>'}<div class="ap-note">Perhitungan jarak hanya menggunakan tower dengan koordinat valid. Tower teridentifikasi bersebelahan berarti memiliki minimal 1 tower lain dalam jarak <b>&lt;100 m</b>. Pasangan tower dihitung unik satu kali; jarak tepat 100,0 m tidak termasuk. Hasil terakhir dipertahankan sampai perhitungan berikutnya selesai.</div></div></section>`;
 
  $('asset-page-adj')?.addEventListener('click',()=>window.__pmnoRunTowerAdjacency?.());
