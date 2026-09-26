@@ -3441,8 +3441,7 @@ function pmnoGeoProvinceIndex(){
  return fs.map(f=>({f,name:f?.properties?.NAME_1||f?.properties?.name_1||f?.properties?.NAME_1_EN||'',canon:pmnoMappedProvince(f),bbox:pmnoFeatureBBox(f)}));
 }
 async function pmnoGeoClassify(rows,onProgress){
- const ref=window.__pmnoGeoReference;
- if(ref.status!=='ready'||!ref.province)return null;
+ const ref=window.__pmnoGeoReference;if(ref.status!=='ready'||!ref.province)return null;
  const provinces=pmnoGeoProvinceIndex();
  let valid=0,mismatch=0,invalid=0,missing=0;
  const details=[],validSiteIds=[];
@@ -3464,17 +3463,15 @@ async function pmnoGeoClassify(rows,onProgress){
     invalid++;issueRow(r,'INVALID_COORDINATE',{reason:'OUT_OF_INDONESIA_BOUNDS'});continue;
    }
    const pt=[lo,la];
-   const masterRaw=String(r.province||'').trim();
-   const masterCanon=pmnoCanonicalProvince(masterRaw);
    let mapped=null;
-   // Always classify the coordinate first. Do not require the master province name
-   // to match a reference feature before looking for the actual polygon containing the point.
-   for(const p of provinces){
-    if(pmnoFeatureContains(p.f,pt)){mapped=p;break;}
-   }
+   // Determine the actual province from the coordinate first. This prevents a
+   // naming difference such as DKI Jakarta vs Jakarta Raya from becoming a mismatch.
+   for(const p of provinces){if(pmnoFeatureContains(p.f,pt)){mapped=p;break}}
    if(!mapped){
     invalid++;issueRow(r,'INVALID_COORDINATE',{reason:'NO_PROVINCE_POLYGON'});continue;
    }
+   const masterRaw=String(r.province||'').trim();
+   const masterCanon=pmnoCanonicalProvince(masterRaw);
    const mappedCanon=mapped.canon;
    if(masterCanon&&mappedCanon===masterCanon){
     valid++;validSiteIds.push(String(r.site_id||''));
@@ -3484,12 +3481,28 @@ async function pmnoGeoClassify(rows,onProgress){
     issueRow(r,'LOCATION_MISMATCH',{mapped_province:mapped.name,reason:`MASTER PROVINCE ${masterRaw||'—'} ≠ COORDINATE PROVINCE ${mapped.name}`,master_canonical:masterCanon,mapped_canonical:mappedCanon});
    }
   }
-  if(typeof onProgress==='function')onProgress(end,(rows||[]).length);
+  if(typeof onProgress==='function')onProgress(end,(rows||[]).length,{valid,mismatch,invalid,missing});
   if(end<(rows||[]).length)await new Promise(requestAnimationFrame);
  }
  return {valid,mismatch,invalid,missing,total:(rows||[]).length,details,validSiteIds};
 }
 window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||(()=>{try{const x=JSON.parse(localStorage.getItem('pmnoGeoLastResult')||'null');return x&&x.status==='ready'?{status:'ready',valid:Number(x.valid)||0,mismatch:Number(x.mismatch)||0,invalid:Number(x.invalid)||0,missing:Number(x.missing)||0,total:Number(x.total)||0,processed:Number(x.processed)||Number(x.total)||0,progress:100,startedAt:null,elapsedMs:Number(x.elapsedMs)||0,lastRunAt:x.lastRunAt||null,lastContext:x.lastContext||{},details:Array.isArray(x.details)?x.details:[],validSiteIds:Array.isArray(x.validSiteIds)?x.validSiteIds:[],error:null,loading:null}:null}catch(_e){return null}})()||{status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,lastRunAt:null,lastContext:{},details:[],validSiteIds:[],error:null,loading:null};
+function pmnoGeoUpdateProgressUI(){
+ const btn=document.getElementById('asset-page-geo');
+ const sec=btn?.closest('.ap-section');
+ const g=window.__pmnoGeoPortfolio||{};
+ if(!sec)return;
+ const total=Number(g.total)||0,processed=Number(g.processed)||0,p=Number(g.progress)||0;
+ const head=sec.querySelector('.ap-progress-head');
+ if(head){
+  const label=head.querySelector('span'),count=head.querySelector('b');
+  if(label)label.textContent=g.status==='loading'?'Validation running':g.status==='error'?'Validation unavailable':g.status==='ready'?'Validation complete':'Not validated yet';
+  if(count)count.textContent=fmtInt(Math.min(processed,total))+' / '+fmtInt(total);
+ }
+ const track=sec.querySelector('.ap-progress-track i');if(track)track.style.width=Math.min(100,p)+'%';
+ const score=sec.querySelector('.ap-geo-score b');if(score)score.textContent=g.status==='loading'?p.toFixed(0)+'%':g.status==='ready'?(total?(Number(g.valid||0)/total*100).toFixed(1):'0.0')+'%':g.status==='error'?'Unavailable':'—';
+ if(btn){btn.disabled=g.status==='loading';btn.textContent=g.status==='loading'?`⟳ VALIDATING ${Math.round(p)}%`:'↻ VALIDATE COORDINATE';}
+}
 async function pmnoLoadGeoPortfolio(){
  const g=window.__pmnoGeoPortfolio;
  if(g.status==='loading')return g.loading||g;
@@ -3501,11 +3514,12 @@ async function pmnoLoadGeoPortfolio(){
    const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
    if(!r.ok)throw new Error('pmno_coordinate_points HTTP '+r.status);
    const pts=await r.json();if(!Array.isArray(pts))throw new Error('Coordinate payload invalid');
-   g.total=pts.length;
-   const result=await pmnoGeoClassify(pts,(processed,total)=>{
-    g.processed=processed;g.progress=total?processed/total*100:100;g.elapsedMs=performance.now()-(g.startedAt||performance.now());
+   g.total=pts.length;g.processed=0;g.progress=0;pmnoGeoUpdateProgressUI();
+   const result=await pmnoGeoClassify(pts,(processed,total,counts)=>{
+    g.valid=counts.valid;g.mismatch=counts.mismatch;g.invalid=counts.invalid;g.missing=counts.missing;g.processed=processed;g.progress=total?processed/total*100:100;g.elapsedMs=performance.now()-(g.startedAt||performance.now());
+    pmnoGeoUpdateProgressUI();
    });
-   if(!result)throw new Error('Geospatial classifier unavailable');
+   if(!result)throw new Error('Geospatial reference unavailable');
    g.valid=result.valid;g.mismatch=result.mismatch;g.invalid=result.invalid;g.missing=result.missing;g.total=result.total;g.processed=result.total;g.progress=100;g.elapsedMs=performance.now()-(g.startedAt||performance.now());g.status='ready';g.lastRunAt=new Date().toISOString();g.lastContext={regional:rg,area:ar,province:pv,city:ct,search:q};g.details=result.details;g.validSiteIds=result.validSiteIds;
    try{localStorage.setItem('pmnoGeoLastResult',JSON.stringify({status:'ready',valid:g.valid,mismatch:g.mismatch,invalid:g.invalid,missing:g.missing,total:g.total,processed:g.processed,progress:100,elapsedMs:g.elapsedMs,lastRunAt:g.lastRunAt,lastContext:g.lastContext,details:g.details,validSiteIds:g.validSiteIds}));}catch(_e){}
    return g;
@@ -3513,6 +3527,7 @@ async function pmnoLoadGeoPortfolio(){
   finally{g.loading=null;renderDashboardSource('MASTER DATA · PMNO');}
  })();return g.loading;
 }
+
 async function pmnoLoadGeoReference(){
  const ref=window.__pmnoGeoReference;if(ref.status==='ready')return ref;if(ref.loading)return ref.loading;
  ref.status='loading';ref.error=null;
@@ -3638,15 +3653,26 @@ window.__pmnoRunTowerAdjacency=()=>pmnoCalculateTowerAdjacency();document.addEve
 function pmnoStartGeoWhenVisible(){}
 
 window.__pmnoRunGeoValidation=async function(){
- const getButtons=()=>[document.getElementById('asset-page-geo'),document.getElementById('pmnoGeoValidateBtn')].filter(Boolean);
- const setBusy=(busy)=>getButtons().forEach(b=>{b.disabled=busy;b.textContent=busy?'VALIDATING…':'↻ VALIDATE COORDINATE'});
- if(window.__pmnoGeoPortfolio?.status==='loading')return window.__pmnoGeoPortfolio.loading||window.__pmnoGeoPortfolio;
- setBusy(true);
- try{await pmnoLoadGeoReference();if(window.__pmnoGeoReference?.status!=='ready')throw new Error(window.__pmnoGeoReference?.error?.message||'GADM reference unavailable');return await pmnoLoadGeoPortfolio();}
- catch(e){window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||{};window.__pmnoGeoPortfolio.status='error';window.__pmnoGeoPortfolio.error=e;renderDashboardSource('MASTER DATA · PMNO');return window.__pmnoGeoPortfolio;}
- finally{setBusy(false);}
+ const g=window.__pmnoGeoPortfolio||{};
+ if(g.status==='loading')return g.loading||g;
+ g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;
+ g.total=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||Number(g.total)||0;
+ try{renderDashboardSource('MASTER DATA · PMNO');}catch(_e){}
+ pmnoGeoUpdateProgressUI();
+ try{
+  await pmnoLoadGeoReference();
+  if(window.__pmnoGeoReference?.status!=='ready')throw new Error(window.__pmnoGeoReference?.error?.message||'GADM reference unavailable');
+  return await pmnoLoadGeoPortfolio();
+ }catch(e){
+  g.status='error';g.error=e;g.loading=null;
+  try{renderDashboardSource('MASTER DATA · PMNO');}catch(_e){}
+  return g;
+ }finally{
+  const b=document.getElementById('asset-page-geo');if(b){b.disabled=false;b.textContent='↻ VALIDATE COORDINATE';}
+ }
 };
-document.addEventListener('click',e=>{if(e.target?.closest?.('#pmnoGeoValidateBtn')||e.target?.closest?.('#asset-page-geo'))window.__pmnoRunGeoValidation()});
+document.addEventListener('click',e=>{if(e.target?.closest?.('#asset-page-geo')||e.target?.closest?.('#pmnoGeoValidateBtn'))window.__pmnoRunGeoValidation()});
+
 
 function pmnoGeoFilterLabel(ctx){
  const c=ctx||{}; const parts=[];
@@ -3669,19 +3695,52 @@ function pmnoGeoStatusLabel(s){return s==='VALID_COORDINATE'?'VALID COORDINATE':
 async function pmnoRebuildGeoIssueDetails(){
  const g=window.__pmnoGeoPortfolio||{};
  if(window.__pmnoGeoReference?.status!=='ready'){
-  try{await pmnoLoadGeoReference();}catch(_e){}
+   try{await pmnoLoadGeoReference();}catch(_e){}
  }
  if(window.__pmnoGeoReference?.status!=='ready')return false;
  try{
-  const c=g.lastContext||{};
-  const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:c.regional||null,p_area:c.area||null,p_province:c.province||null,p_city:c.city||null,p_search:c.search||null})});
-  if(!r.ok)throw new Error('pmno_coordinate_points HTTP '+r.status);
-  const pts=await r.json();if(!Array.isArray(pts))throw new Error('Coordinate payload invalid');
-  const result=await pmnoGeoClassify(pts);
-  if(!result)return false;
-  g.details=result.details;g.valid=result.valid;g.mismatch=result.mismatch;g.invalid=result.invalid;g.missing=result.missing;g.total=result.total;g.processed=result.total;g.progress=100;g.validSiteIds=result.validSiteIds;
-  try{localStorage.setItem('pmnoGeoLastResult',JSON.stringify({status:'ready',valid:g.valid,mismatch:g.mismatch,invalid:g.invalid,missing:g.missing,total:g.total,processed:g.processed,progress:100,elapsedMs:Number(g.elapsedMs)||0,lastRunAt:g.lastRunAt||null,lastContext:c,details:g.details,validSiteIds:g.validSiteIds}));}catch(_e){}
-  return true;
+   const c=g.lastContext||{};
+   const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{
+     method:'POST',headers:H,
+     body:JSON.stringify({
+       p_regional:c.regional||null,p_area:c.area||null,p_province:c.province||null,
+       p_city:c.city||null,p_search:c.search||null
+     })
+   });
+   if(!r.ok)throw new Error('pmno_coordinate_points HTTP '+r.status);
+   const pts=await r.json();
+   if(!Array.isArray(pts))throw new Error('Coordinate payload invalid');
+   const provinces=pmnoGeoProvinceIndex(), byCanon=new Map(provinces.map(x=>[x.canon,x]));
+   const details=[];
+   const issueRow=(x,status,extra={})=>details.push({
+     site_id:x.site_id,site_name:x.site_name||'',regional:x.regional||'',area:x.area||'',
+     master_province:x.province||'',city:x.city||'',district:x.district||'',village:x.village||'',
+     latitude:x.latitude??'',longitude:x.longitude??'',status,...extra
+   });
+   let valid=0,mismatch=0,invalid=0,missing=0;
+   for(const x of pts){
+     const laRaw=x.latitude,loRaw=x.longitude;
+     if(String(laRaw??'').trim()===''||String(loRaw??'').trim()===''){missing++;issueRow(x,'MISSING_COORDINATE');continue;}
+     const la=Number(laRaw),lo=Number(loRaw);
+     if(!Number.isFinite(la)||!Number.isFinite(lo)||la<-11.5||la>6.5||lo<94.5||lo>141.5){invalid++;issueRow(x,'INVALID_COORDINATE',{reason:'OUT_OF_INDONESIA_BOUNDS'});continue;}
+     const pt=[lo,la],master=pmnoCanonicalProvince(x.province),masterFeature=byCanon.get(master);
+     if(masterFeature&&pmnoFeatureContains(masterFeature.f,pt)){valid++;issueRow(x,'VALID_COORDINATE',{reason:'COORDINATE_MATCHES_MASTER_PROVINCE'});continue;}
+     let mapped=null;
+     for(const f of provinces){
+       if(masterFeature&&f.canon===masterFeature.canon)continue;
+       if(pmnoFeatureContains(f.f,pt)){mapped=f;break;}
+     }
+     if(mapped){mismatch++;issueRow(x,'LOCATION_MISMATCH',{mapped_province:mapped.name,reason:`MASTER PROVINCE ${x.province||'—'} ≠ COORDINATE PROVINCE ${mapped.name}`});}
+     else{invalid++;issueRow(x,'INVALID_COORDINATE',{reason:'NO_PROVINCE_POLYGON'});}
+   }
+   // Preserve the original validation totals/context, but replace the incomplete detail cache with the full issue worklist.
+   g.details=details;
+   g.valid=valid;g.mismatch=mismatch;g.invalid=invalid;g.missing=missing;g.total=pts.length;g.processed=pts.length;g.progress=100;
+   try{localStorage.setItem('pmnoGeoLastResult',JSON.stringify({
+     status:'ready',valid,mismatch,invalid,missing,total:pts.length,processed:pts.length,progress:100,
+     elapsedMs:Number(g.elapsedMs)||0,lastRunAt:g.lastRunAt||null,lastContext:c,details
+   }));}catch(_e){}
+   return true;
  }catch(_e){return false;}
 }
 async function pmnoOpenGeoIssues(status){
