@@ -3603,7 +3603,26 @@ async function pmnoCalculateTowerAdjacency(){
 }
 
 /* MANUAL ONLY: dashboard render must not start adjacency calculation. */
-window.__pmnoRunTowerAdjacency=()=>pmnoCalculateTowerAdjacency();document.addEventListener('click',e=>{if(e.target?.closest?.('#pmnoAdjCalcBtn'))window.__pmnoRunTowerAdjacency()});
+window.__pmnoRunTowerAdjacency=()=>pmnoCalculateTowerAdjacency();
+// One-time migration: if the latest saved result has UNIQUE PAIRS but no matching
+// pair-distance distribution, calculate it once and persist it. Never rerun on refresh.
+window.__pmnoPairDistMigration=window.__pmnoPairDistMigration||(()=>{try{return JSON.parse(localStorage.getItem('pmnoTowerAdjacencyPairDistMigration')||'null')}catch(_e){return null}})();
+function pmnoMaybeMigratePairDistribution(){
+  try{
+    const a=window.__pmnoTowerAdjacency||{};
+    const pd=a.pairDistanceDistribution||{};
+    const total=(Number(pd.lt30)||0)+(Number(pd['30_50'])||0)+(Number(pd['50_70'])||0)+(Number(pd['70_100'])||0);
+    const pairs=Number(a.adjacentPairs)||0;
+    const run=a.lastRunAt||'';
+    const mig=window.__pmnoPairDistMigration;
+    if(a.status==='ready' && pairs>0 && total!==pairs && (!mig || mig.runAt!==run)){
+      window.__pmnoPairDistMigration={runAt:run,started:true};
+      localStorage.setItem('pmnoTowerAdjacencyPairDistMigration',JSON.stringify(window.__pmnoPairDistMigration));
+      setTimeout(()=>{ if(!window.__pmnoTowerAdjacency?.loading) window.__pmnoRunTowerAdjacency?.(); },250);
+    }
+  }catch(_e){}
+}
+document.addEventListener('click',e=>{if(e.target?.closest?.('#pmnoAdjCalcBtn,#asset-page-adj'))window.__pmnoRunTowerAdjacency()});
 
 // Geospatial validation is MANUAL. The reference layer is loaded only when the user presses VALIDATE COORDINATE.
 function pmnoStartGeoWhenVisible(){}
@@ -3907,6 +3926,7 @@ function renderAssetProfilePage(){
  if(adjBtn) adjBtn.onclick=()=>window.__pmnoRunTowerAdjacency?.();
 }
 window.pmnoAssetProfileRender=renderAssetProfilePage;
+setTimeout(pmnoMaybeMigratePairDistribution,800);
 
 function renderDashboardSource(label){
  const aggregate=pmnoGetAggregateSummary();
