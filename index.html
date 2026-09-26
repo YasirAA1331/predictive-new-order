@@ -3643,11 +3643,14 @@ function pmnoGeoUpdateProgressUI(){
  if(btn){btn.disabled=g.status==='loading';btn.textContent=g.status==='loading'?`⟳ VALIDATING ${Math.round(p)}%`:'↻ VALIDATE COORDINATE';}
 }
 window.__pmnoRunGeoValidation=async function(){
- const g=window.__pmnoGeoPortfolio||{};if(g.status==='loading')return g.loading||g;
- g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=2;g.total=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||0;g.startedAt=performance.now();g.elapsedMs=0;g.phase='Preparing server validation…';g.details=[];g.validSiteIds=[];
+ const g=window.__pmnoGeoPortfolio||{};
+ if(g.status==='loading')return g.loading||g;
+ // IMPORTANT: do not wrap pmnoLoadGeoPortfolio() inside another promise here.
+ // pmnoLoadGeoPortfolio() owns g.loading; setting status='loading' before calling it
+ // makes its guard return immediately if we create the promise from inside this wrapper.
+ g.status='idle';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=2;g.total=Number(pmnoGetAggregateSummary()?.stats?.total_sites)||0;g.startedAt=performance.now();g.elapsedMs=0;g.phase='Preparing server validation…';g.details=[];g.validSiteIds=[];
  pmnoGeoUpdateProgressUI();
- g.loading=(async()=>{try{return await pmnoLoadGeoPortfolio()}catch(e){g.status='error';g.error=e;g.phase='Validation unavailable';pmnoGeoUpdateProgressUI();renderDashboardSource('MASTER DATA · PMNO');return g;}finally{g.loading=null;}})();
- return g.loading;
+ return pmnoLoadGeoPortfolio();
 };
 document.addEventListener('click',e=>{if(e.target?.closest?.('#asset-page-geo'))window.__pmnoRunGeoValidation()});
 
