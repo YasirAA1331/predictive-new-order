@@ -3459,9 +3459,43 @@ function pmnoGeoClassify(rows){
  return {valid,mismatch,invalid,missing,total:(rows||[]).length,details};
 }
 window.__pmnoGeoPortfolio=window.__pmnoGeoPortfolio||(()=>{try{const x=JSON.parse(localStorage.getItem('pmnoGeoLastResult')||'null');return x&&x.status==='ready'?{status:'ready',valid:Number(x.valid)||0,mismatch:Number(x.mismatch)||0,invalid:Number(x.invalid)||0,missing:Number(x.missing)||0,total:Number(x.total)||0,processed:Number(x.processed)||Number(x.total)||0,progress:100,startedAt:null,elapsedMs:Number(x.elapsedMs)||0,lastRunAt:x.lastRunAt||null,lastContext:x.lastContext||{},details:Array.isArray(x.details)?x.details:[],validSiteIds:Array.isArray(x.validSiteIds)?x.validSiteIds:[],error:null,loading:null}:null}catch(_e){return null}})()||{status:'idle',valid:0,mismatch:0,invalid:0,missing:0,total:0,processed:0,progress:0,startedAt:null,elapsedMs:0,lastRunAt:null,lastContext:{},details:[],validSiteIds:[],error:null,loading:null};
+function pmnoGeoUpdateProgressUI(){
+ const g=window.__pmnoGeoPortfolio||{};
+ const section=document.querySelector('#asset-page-geo')?.closest('.ap-section');
+ if(!section)return;
+ const btn=section.querySelector('#asset-page-geo');
+ const score=section.querySelector('.ap-geo-score');
+ const progressHead=section.querySelector('.ap-progress-head');
+ const track=section.querySelector('.ap-progress-track i');
+ const breaks=section.querySelectorAll('.ap-breakdown .ap-break');
+ const total=Number(g.total)||Number(pmnoGetAggregateSummary()?.stats?.total_sites)||0;
+ const processed=Math.min(Number(g.processed)||0,total);
+ const progress=Math.max(0,Math.min(100,Number(g.progress)||0));
+ const ready=g.status==='ready' && total>0 && Number(g.total)===total;
+ const loading=g.status==='loading';
+ const error=g.status==='error';
+ if(btn){
+   btn.disabled=loading;
+   btn.textContent=loading?'VALIDATING…':(error?'↻ RETRY VALIDATE':'↻ VALIDATE COORDINATE');
+ }
+ if(score){
+   const strong=score.querySelector('strong'), b=score.querySelector('b');
+   if(strong)strong.textContent=ready?fmtInt(g.valid):error?'—':fmtInt(Number(g.valid)||0);
+   if(b)b.textContent=ready?(total?((Number(g.valid)||0)/total*100).toFixed(1):'0.0')+'%':progress.toFixed(0)+'%';
+ }
+ if(progressHead){
+   const spans=progressHead.querySelectorAll('span,b');
+   if(spans[0])spans[0].textContent=ready?'Validation complete':error?'Validation unavailable':loading?(g.phase||'Validation running'):'Not validated yet';
+   if(spans[1])spans[1].textContent=fmtInt(processed)+' / '+fmtInt(total);
+ }
+ if(track)track.style.width=(ready?100:progress)+'%';
+ const vals=[['valid',Number(g.valid)||0],['mismatch',Number(g.mismatch)||0],['invalid',Number(g.invalid)||0],['missing',Number(g.missing)||0]];
+ breaks.forEach((el,i)=>{const b=el.querySelector('b'),em=el.querySelector('em'),n=vals[i]?.[1]||0;if(b)b.textContent=(ready||loading)?fmtInt(n):'—';if(em)em.textContent=(ready&&total)?(n/total*100).toFixed(1)+'%':'—';});
+}
+
 async function pmnoLoadGeoPortfolio(){
  const g=window.__pmnoGeoPortfolio;
- if(g.status==='loading')return g.loading||g;
+ if(g.status==='loading'&&g.loading)return g.loading;
  if(window.__pmnoGeoReference?.status!=='ready')return null;
  g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=0;g.startedAt=performance.now();g.elapsedMs=0;g.details=[];
  g.loading=(async()=>{
@@ -3523,7 +3557,7 @@ async function pmnoLoadGeoReference(){
 // Geospatial validation is MANUAL: only the visible VALIDATE COORDINATE button starts it.
 window.__pmnoRunGeoValidation=async function(){
  const g=window.__pmnoGeoPortfolio||{};
- if(g.status==='loading')return g.loading||g;
+ if(g.status==='loading'&&g.loading)return g.loading;
  g.status='loading';g.error=null;g.valid=0;g.mismatch=0;g.invalid=0;g.missing=0;g.processed=0;g.progress=0;g.total=0;g.details=[];g.validSiteIds=[];g.phase='Loading province reference…';
  pmnoGeoUpdateProgressUI();
  try{
