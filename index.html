@@ -5335,6 +5335,132 @@ cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpS
 })();
 </script>
 
+
+<!-- PMNO MOBILE POPUP CLOSE FIX v1 -->
+<style id="pmno-mobile-popup-close-fix">
+/* Keep the visual X small, but give it a reliable 44x44px mobile hit area. */
+.candidate-popup .close{
+  position:absolute!important;
+  top:2px!important;
+  right:2px!important;
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  min-height:44px!important;
+  margin:0!important;
+  padding:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  border:0!important;
+  border-radius:10px!important;
+  background:rgba(7,19,33,.28)!important;
+  color:#b7c8d5!important;
+  font-size:20px!important;
+  line-height:1!important;
+  font-weight:500!important;
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+  -webkit-touch-callout:none!important;
+  z-index:100!important;
+}
+.candidate-popup .close:hover,
+.candidate-popup .close:active{
+  background:rgba(53,200,255,.12)!important;
+  color:#fff!important;
+}
+.leaflet-marker-icon:has(.candidate-popup){
+  pointer-events:auto!important;
+}
+.candidate-popup{
+  position:relative;
+  pointer-events:auto!important;
+  touch-action:manipulation;
+}
+.candidate-popup .popup-foot button{
+  min-height:34px;
+  touch-action:manipulation;
+  pointer-events:auto!important;
+}
+@media(max-width:760px){
+  .candidate-popup .close{
+    width:48px!important;
+    height:48px!important;
+    min-width:48px!important;
+    min-height:48px!important;
+    top:0!important;
+    right:0!important;
+    font-size:21px!important;
+  }
+}
+</style>
+
+<script id="pmno-mobile-popup-close-hardening">
+(function(){
+  'use strict';
+
+  function bindPopupCloseHardening(){
+    if(typeof L==='undefined' || !window.map || window.__pmnoPopupCloseHardening) return;
+    window.__pmnoPopupCloseHardening=true;
+
+    const container=window.map.getContainer();
+    if(!container) return;
+
+    // Event delegation makes the close action work even when Leaflet recreates
+    // the marker DOM after a selection/detail refresh.
+    const closePopup=(e)=>{
+      const target=e.target;
+      const btn=target?.closest?.('.candidate-popup .close');
+      if(!btn) return;
+
+      e.preventDefault();
+      e.stopPropagation();
+      if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+
+      const popup=btn.closest('.candidate-popup');
+      const siteId=popup?.dataset?.siteId;
+
+      // Use the app's existing canonical cleanup function so this works
+      // with the script-scoped popup variables as well as the B2S popup.
+      if(typeof window.closeMapSelection==='function'){
+        window.closeMapSelection();
+      }
+    };
+
+    // click is the canonical activation event; pointer/touch handlers are
+    // intentionally not used to avoid double-firing on iOS Safari.
+    container.addEventListener('click',closePopup,true);
+
+    // Defensive CSS/DOM hardening whenever a popup is created.
+    const harden=()=>{
+      container.querySelectorAll('.candidate-popup .close').forEach(btn=>{
+        btn.setAttribute('type','button');
+        btn.setAttribute('aria-label','Close popup');
+        btn.style.pointerEvents='auto';
+        btn.style.touchAction='manipulation';
+      });
+    };
+
+    harden();
+    if(window.MutationObserver){
+      const observer=new MutationObserver(harden);
+      observer.observe(container,{childList:true,subtree:true});
+    }
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(bindPopupCloseHardening,0),{once:true});
+  }else{
+    setTimeout(bindPopupCloseHardening,0);
+  }
+
+  window.addEventListener('pageshow',()=>setTimeout(bindPopupCloseHardening,0));
+})();
+</script>
+<!-- END PMNO MOBILE POPUP CLOSE FIX v1 -->
+
 </body>
 </html>
 
