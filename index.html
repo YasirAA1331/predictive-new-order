@@ -4202,8 +4202,11 @@ function renderDashboardHub(){
  const mini=(label,value,sub,cls='')=>`<div class="hub-mini ${cls}"><span>${esc(label)}</span><b>${esc(value)}</b><small>${esc(sub)}</small></div>`;
  set('dash-health',`<div class="hub-health-kpis">${mini('ACTIVE / PRODUCTIVE',fmtInt(Math.max(0,total-npa)),'site setelah NPA')} ${mini('REVENUE COVERAGE',fmtPct(total?revenue/total*100:0)+'%',fmtInt(revenue)+' site')} ${mini('POWER COVERAGE',fmtPct(total?power/total*100:0)+'%',fmtInt(power)+' site')} ${mini('LEASE RISK',fmtInt(leaseRisk),leaseRisk+' site < 6 bulan',leaseRisk?'warn':'')}</div><div class="hub-health-list"><div><span>Tenancy Ratio</span><b>${ratio.toFixed(2)}</b></div><div><span>Site NPA / 0 Tenant</span><b class="${npa?'warn':''}">${fmtInt(npa)}</b></div><div><span>Lease Expired</span><b class="${expired?'bad':''}">${fmtInt(expired)}</b></div></div>`);
  set('dash-asset',mini('PORTFOLIO',''+fmtInt(total),'sites / towers'));
- set('dash-tenant',mini('TENANTS',fmtInt(tenants),'total tenant')+mini('TENANCY',ratio.toFixed(2),'tenant / site'));
- set('dash-lease',mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':'')+mini('EXPIRED',fmtInt(expired),'lease expired',expired?'bad':''));
+ const hubExp=window.__pmnoHubExpiry||{};
+ const tenant2026=Number(hubExp.tenant?.expiry_2026)||0, tenantExpired2026=Number(hubExp.tenant?.expired_2026)||0, tenantRemaining2026=Number(hubExp.tenant?.remaining_2026)||0;
+ const land2026=Number(hubExp.land?.expiry_2026)||0, landExpired2026=Number(hubExp.land?.expired_2026)||0, landRemaining2026=Number(hubExp.land?.remaining_2026)||0;
+ set('dash-tenant',mini('TENANTS',fmtInt(tenants),'total tenant')+mini('2026 LEASE EXPIRY',tenant2026?fmtInt(tenant2026):'—',tenant2026?`${fmtInt(tenantExpired2026)} expired · ${fmtInt(tenantRemaining2026)} remaining`:'loading…'));
+ set('dash-lease',mini('LAND PORTFOLIO',fmtInt(total),'sites / towers')+mini('2026 LEASE EXPIRY',land2026?fmtInt(land2026):'—',land2026?`${fmtInt(landExpired2026)} expired · ${fmtInt(landRemaining2026)} remaining`:'loading…'));
  set('dash-power',mini('POWER',fmtInt(power),total?fmtPct(power/total*100)+'% coverage':'—')+mini('TOWER HEIGHT',fmtInt(Number(sm.tower_height_sites)||0),'site with height'));
  set('dash-productivity',mini('REVENUE SITE',fmtInt(revenue),total?fmtPct(revenue/total*100)+'% coverage':'—')+mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':''));
  const fs=window.__pmnoFinancialSummary||{};
@@ -4219,6 +4222,17 @@ function renderDashboardHub(){
  );
  set('dash-lifecycle',mini('NPA',fmtInt(npa),'0 tenant',npa?'warn':'')+mini('LEASE RISK',fmtInt(leaseRisk),'< 6 months',leaseRisk?'warn':''));
  document.querySelectorAll('[data-open-profile]').forEach(btn=>{if(btn.dataset.bound)return;btn.dataset.bound='1';btn.addEventListener('click',()=>{const p=btn.dataset.openProfile;if(p==='asset')window.pmnoNavigate?.('assetprofile');else if(p==='financial')window.pmnoNavigate?.('financialprofile');else if(p==='assetprofile')window.pmnoNavigate?.('assetprofile');else if(p==='customer')window.pmnoNavigate?.('customer');else if(p==='landlegal')window.pmnoNavigate?.('landlegal');else btn.classList.add('pending');});});
+ if(!window.__pmnoHubExpiryLoading && !window.__pmnoHubExpiry){
+   window.__pmnoHubExpiryLoading=true;
+   Promise.all([
+     fetch(URL+'/rest/v1/rpc/pmno_customer_lease_expiry_summary',{method:'POST',headers:H,body:JSON.stringify({p_regional:null,p_area:null,p_province:null,p_city:null,p_search:null})}).then(r=>r.ok?r.json():null).catch(()=>null),
+     fetch(URL+'/rest/v1/rpc/pmno_land_lease_expiry_summary',{method:'POST',headers:H,body:JSON.stringify({p_regional:null,p_area:null,p_province:null,p_city:null,p_search:null})}).then(r=>r.ok?r.json():null).catch(()=>null)
+   ]).then(([tenantLease,landLease])=>{
+     const obj=v=>Array.isArray(v)?(v[0]||{}):(v||{});
+     window.__pmnoHubExpiry={tenant:obj(tenantLease),land:obj(landLease)};
+     renderDashboardHub();
+   }).finally(()=>{window.__pmnoHubExpiryLoading=false});
+ }
 }
 
 function auditFieldStats(list,fieldKeys){const total=list.length;let filled=0;for(const r of list){if(fieldKeys.some(k=>String(val(r,k)).trim()!==''))filled++}return {filled,missing:Math.max(0,total-filled),pct:total?filled/total*100:0}}
