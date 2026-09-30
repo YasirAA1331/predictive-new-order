@@ -5445,20 +5445,21 @@ async function cpLoad(){
   <div class="cust-signal"><span>Revenue-covered sites</span><b>${cpInt(revSites)}</b><small>${pct(revSites)}% of portfolio has mapped revenue</small></div>
   <div class="cust-signal muted"><span>Growth opportunity</span><b>CI / PREDICTIVE</b><small>Requires external network-demand evidence</small></div></div></div>
   <div class="cust-expiry"><div class="cust-expiry-head"><div class="cust-expiry-title">TENANT LEASE EXPIRY · OUTLOOK</div><small>Tenant composition + monthly contract end distribution</small></div>
-    <div class="cust-expiry-summary">
-      <div class="cust-expiry-summary-main"><span>2026 LEASE EXPIRY</span><b>${cpInt(lease.expiry_2026)}</b><small>annual revenue associated · ${cpMoney(lease.annual_revenue_2026)}</small></div>
-      <div class="cust-expiry-summary-pills"><span class="cust-tenant-pill"><strong>EXPIRED 2026</strong><em>${cpInt(lease.expired_2026||0)}</em></span><span class="cust-tenant-pill"><strong>REMAINING 2026</strong><em>${cpInt(lease.remaining_2026||0)}</em></span></div>
+    <div class="cust-expiry-kpis">
+      <div class="cust-expiry-kpi"><span>EXPIRED &lt; 2026</span><b>${cpInt(lease.expired_before_2026||0)}</b><small>contract expiry before 2026</small></div>
+      <div class="cust-expiry-kpi"><span>EXPIRED TOTAL</span><b>${cpInt(lease.expired||0)}</b><small>${cpInt(lease.no_expiry||0)} no expiry date</small></div>
     </div>
     <div class="cust-expiry-years">${(Array.isArray(lease.year_breakdown)?lease.year_breakdown:[]).map((y,yi)=>{
       const months=Array.isArray(y.months)?y.months:[]; const maxM=Math.max(1,...months.map(m=>cpNum(m.count)));
       const tenants=Array.isArray(y.tenants)?y.tenants:[];
       return `<div class="cust-expiry-year ${y.year===2026?'current':''}">
-        <div class="cust-expiry-year-head"><div><span class="year">${y.year===2026?'2026 BREAKDOWN':y.year}</span>${y.year===2026?'':'<b>'+cpInt(y.count)+'</b>'}<small>${y.year===2026?'Tenant composition + monthly expiry distribution':('tenancy · '+cpMoney(y.revenue)+' annual revenue associated')}</small></div><div class="cust-expiry-year-meta">${tenants.length} tenant groups</div></div>
+        <div class="cust-expiry-year-head"><div><span class="year">${y.year===2026?'2026 LEASE EXPIRY':y.year}</span><small>annual revenue associated · ${cpMoney(y.revenue)}</small></div><div class="cust-expiry-year-total">${cpInt(y.count)}</div></div>
+        ${y.year===2026?`<div class="cust-expiry-status"><div class="cust-expiry-status-pill expired"><span>EXPIRED 2026</span><b>${cpInt(y.expired_count||lease.expired_2026||0)}</b></div><div class="cust-expiry-status-pill remaining"><span>REMAINING 2026</span><b>${cpInt(y.remaining_count||lease.remaining_2026||0)}</b></div></div>`:''}
         <div class="cust-expiry-tenants"><span class="cust-expiry-label">TENANT</span><div class="cust-tenant-pills">${tenants.map(t=>`<span class="cust-tenant-pill"><strong>${cpEsc(t.tenant)}</strong><em>${cpInt(t.count)}</em></span>`).join('')}</div></div>
         <div class="cust-expiry-months"><span class="cust-expiry-label">MONTHLY DISTRIBUTION</span><div class="cust-month-grid">${months.map(m=>`<div class="cust-month"><div class="cust-month-top"><span>${cpEsc(m.label)}</span><b>${cpInt(m.count)}</b></div><div class="cust-month-track"><i style="width:${Math.min(100,cpNum(m.count)/maxM*100)}%"></i></div></div>`).join('')}</div></div>
       </div>`;
     }).join('')}</div>
-    <div class="cust-expiry-total"><b>${cpInt(lease.expiry_through_2028)} tenancy</b><span>Jatuh tempo sampai 2028 · annual revenue associated ${cpMoney(lease.annual_revenue_through_2028)}</span></div><div class="cust-expiry-foot">Expired total: ${cpInt(lease.expired)} tenancy · Expired &lt; 2026: ${cpInt(lease.expired_before_2026||0)} · No expiry date: ${cpInt(lease.no_expiry)} tenancy</div>
+    <div class="cust-expiry-total"><b>${cpInt(lease.expiry_through_2028)} tenancy</b><span>Jatuh tempo sampai 2028 · annual revenue associated ${cpMoney(lease.annual_revenue_through_2028)}</span></div><div class="cust-expiry-foot">As of ${cpEsc(lease.as_of||'—')}. 2026 shows the full calendar-year lease expiry cohort, split into expired and remaining; 2027–2028 show the full calendar-year expiry distribution.</div>
   </div>
   <div class="cust-note"><b>Business interpretation:</b> Customer share and revenue/site are descriptive commercial facts. Growth opportunity is not inferred until external CI / network-demand evidence is available.</div></div></section>
   <section class="cust-section"><div class="cust-section-head"><strong>04 · CUSTOMER SHARE &amp; ECONOMICS</strong><small>Existing portfolio footprint and annualized revenue contribution</small></div><div class="cust-section-body"><div class="cust-table-wrap"><table class="cust-table"><thead><tr><th>CUSTOMER</th><th>CATEGORY</th><th>SITES</th><th>SITE SHARE</th><th>TENANT</th><th>TENANT SHARE</th><th>ANNUAL REVENUE</th><th>REVENUE SHARE</th><th>AVG REV / SITE</th><th>AVG REV / TENANT</th></tr></thead><tbody>
@@ -5479,6 +5480,11 @@ cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpS
 
 </body>
 </html>
+
+
+<style id="pmno-customer-lease-expiry-land-style">
+.cust-expiry-kpis{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}.cust-expiry-kpi{border:1px solid #24445d;border-radius:12px;background:#071827;padding:14px}.cust-expiry-kpi span{display:block;color:#9db0bf;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-kpi b{display:block;color:#dce8f2;font-size:26px;margin-top:5px}.cust-expiry-kpi small{display:block;color:#71899c;font-size:8px;margin-top:4px}.cust-expiry-year-total{font-size:30px;color:#dce8f2;font-weight:900}.cust-expiry-year.current .cust-expiry-year-total{color:#d4af37}.cust-expiry-status{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 14px}.cust-expiry-status-pill{min-width:150px;padding:9px 12px;border:1px solid #31577b;border-radius:12px;background:#071b2a;display:flex;align-items:center;justify-content:space-between;gap:14px}.cust-expiry-status-pill span{font-size:8px;letter-spacing:.12em;color:#9eb2c8}.cust-expiry-status-pill b{font-size:17px;color:#e7eef5}.cust-expiry-status-pill.expired b{color:#f59e6b}.cust-expiry-status-pill.remaining b{color:#f7c33b}@media(max-width:600px){.cust-expiry-kpis{grid-template-columns:1fr}.cust-expiry-status-pill{min-width:145px}}
+</style>
 
 <style id="pmno-single-site-master-input-v74">
 .single-input-mode{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:10px 0 12px;padding:4px;border:1px solid var(--line);border-radius:10px;background:#081522}
