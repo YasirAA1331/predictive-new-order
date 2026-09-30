@@ -2450,7 +2450,25 @@ async function pmnoLoadRouteContext(){
   },true);
 })();
 
-loadTenants().then(pmnoLoadRouteContext);
+function ensurePmnoTenantOptions(){
+  const required=[
+    {code:'IOH',name:'IOH'},
+    {code:'TSEL',name:'TSEL'},
+    {code:'XLS',name:'XLS'},
+    {code:'SFN',name:'SFN'},
+    {code:'SURGE',name:'Surge'},
+    {code:'MORAREPUBLIC',name:'MoraRepublic'}
+  ];
+  ['tenant','tenantMaster'].forEach(id=>{
+    const sel=$(id); if(!sel)return;
+    const current=sel.value;
+    const existing=new Map([...sel.options].map(o=>[String(o.value||'').trim().toUpperCase(),o.textContent||o.value]));
+    required.forEach(t=>{if(!existing.has(t.code))existing.set(t.code,t.name)});
+    sel.innerHTML=[...existing.entries()].map(([code,name])=>`<option value="${esc(code)}">${esc(name)}</option>`).join('');
+    if([...sel.options].some(o=>o.value===current))sel.value=current;
+  });
+}
+loadTenants().finally(()=>{ensurePmnoTenantOptions();pmnoLoadRouteContext();});
 /* PMNO SINGLE SITE SOURCE OF TRUTH BRIDGE
    DRM/Bulk consumers use this bridge so analysis semantics remain anchored to
    the exact Single Site RPC + normalization flow. The existing Single Site UI
