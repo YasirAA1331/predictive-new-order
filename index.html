@@ -1856,7 +1856,7 @@ function esc(v){return String(v??'').replace(/[&<>"']/g,s=>({'&':'&amp;','<':'&l
 function towerSvg(stroke='#35c8ff',size=30){return `<svg width="${size}" height="${size}" viewBox="0 0 40 40" aria-hidden="true"><path d="M11 32h18M14 29l6-21 6 21M16 21h8M15 25h10M20 8V5M17 10l-4-3M23 10l4-3" fill="none" stroke="${stroke}" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
 function targetIcon(){return L.divIcon({className:'pmno-target-icon',html:`<div class="target-marker target-red"><div class="target-ring">${towerSvg('#ffffff',34)}</div></div>`,iconSize:[58,58],iconAnchor:[29,29]})}
 function b2sIcon(){return L.divIcon({className:'',html:`<div class="b2s-marker"><div class="b2s-pin">${towerSvg('#f5bf5c',30)}</div></div>`,iconSize:[54,54],iconAnchor:[27,27]})}
-function b2sInfoIcon(){const d=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};return L.divIcon({className:'',html:`<div class="candidate-popup b2s-popup" data-site-id="__B2S__"><button class="close" aria-label="Close">×</button><div class="kicker">PREDICTIVE NEW SITE / B2S</div><h3>${esc(state.tenant)} NEW BUILD</h3><div class="sub">Predicted at New Order location</div><div class="popup-grid"><div><span>TOWER</span><b>${esc(d.tower_type||'SST')} · ${d.recommended_height_m!=null?num(d.recommended_height_m).toFixed(0)+' m':'—'}</b></div><div><span>LAND</span><b>${d.recommended_land_area_m2!=null?num(d.recommended_land_area_m2).toFixed(0)+' m²':'—'}</b></div><div><span>DENSITY</span><b>${esc(d.density_class||'—')}</b></div><div><span>NETWORK GAP</span><b>${d.network_gap_score!=null?num(d.network_gap_score).toFixed(1):'—'}</b></div></div><div class="popup-foot"><small>Candidate #6 · Fallback</small><button>VIEW INTELLIGENCE</button></div></div>`,iconSize:[270,205],iconAnchor:[135,205]})}
+function b2sInfoIcon(){const d=state.decision?.raw?.predictive_design||state.decision?.raw?.new_site?.design||{};return L.divIcon({className:'',html:`<div class="candidate-popup b2s-popup" data-site-id="__B2S__"><button type="button" class="close" aria-label="Close" onclick="return window.__pmnoClosePopup(this);">×</button><div class="kicker">PREDICTIVE NEW SITE / B2S</div><h3>${esc(state.tenant)} NEW BUILD</h3><div class="sub">Predicted at New Order location</div><div class="popup-grid"><div><span>TOWER</span><b>${esc(d.tower_type||'SST')} · ${d.recommended_height_m!=null?num(d.recommended_height_m).toFixed(0)+' m':'—'}</b></div><div><span>LAND</span><b>${d.recommended_land_area_m2!=null?num(d.recommended_land_area_m2).toFixed(0)+' m²':'—'}</b></div><div><span>DENSITY</span><b>${esc(d.density_class||'—')}</b></div><div><span>NETWORK GAP</span><b>${d.network_gap_score!=null?num(d.network_gap_score).toFixed(1):'—'}</b></div></div><div class="popup-foot"><small>Candidate #6 · Fallback</small><button>VIEW INTELLIGENCE</button></div></div>`,iconSize:[270,205],iconAnchor:[135,205]})}
 function targetLabel(){return L.divIcon({className:'',html:`<div class="target-label"><strong>NEW ORDER</strong><span>${esc(state.tenant)} TARGET</span></div>`,iconSize:[104,42],iconAnchor:[52,43]})}
 function candidateIcon(c,isRec,rank,selected=false){const stroke=isRec?'#43e0a0':'#35c8ff';const cls=isRec?'tower-rec':'tower-collo';return L.divIcon({className:'',html:`<div class="marker ${selected?'candidate-marker-selected':''}"><div class="tower ${cls}">${towerSvg(stroke,isRec?40:31)}${!isRec&&rank?`<span class="rank">${rank}</span>`:''}</div></div>`,iconSize:[isRec?56:46,isRec?56:46],iconAnchor:[isRec?28:28,isRec?28:28]})}
 function existingIcon(){return L.divIcon({className:'',html:`<div class="marker"><div class="tower tower-existing"></div></div>`,iconSize:[18,18],iconAnchor:[9,9]})}
@@ -2150,8 +2150,8 @@ async function selectCandidate(c){
 }
 function signalSummary(){const techs=state.decision?.raw?.rf?.technologies||[];const best={};techs.forEach(t=>{const k=t.technology;if(!k)return;const r=num(t.estimated_rsrp_dbm,null);if(r===null)return;if(!best[k]||num(t.confidence,0)>num(best[k].confidence,0))best[k]=t});const order=['4G','5G','3G','2G'];return order.filter(k=>best[k]).slice(0,2).map(k=>`${k} · ${num(best[k].estimated_rsrp_dbm).toFixed(1)} dBm`).join('\n')||'—'}
 function strStatus(c){const e=c?.detail?.engineering;if(e?.need_str)return e.need_str;const challenges=Array.isArray(c?.challenges)?c.challenges:[];return challenges.includes('ENGINEERING / STRUCTURAL')?'YES':'NO'}
-function popupIcon(c){const rec=state.recommendedId===c.site_id;const tenants=Array.isArray(c.tenants)&&c.tenants.length?c.tenants.join(' · '):`${num(c.tenant_count)} tenant`;const signal=c?.signal_rsrp_avg_dbm!=null?`${num(c.signal_rsrp_avg_dbm).toFixed(1)} dBm`:'—';const needStr=strStatus(c);const html=`<div class="candidate-popup" data-site-id="${esc(c.site_id||'')}"><button class="close" aria-label="Close">×</button><div class="kicker">${rec?'RECOMMENDED COLLO':'COLLO OPPORTUNITY'}</div><h3>${esc(c.site_name||c.site_id)}</h3><div class="sub">${esc(c.site_id)} · ${(num(c.distance_m)/1000).toFixed(2)} km</div><div class="tenant-line"><b>EXISTING TENANTS:</b> ${esc(tenants)}</div><div class="popup-grid"><div><span>NEED STR</span><b class="${needStr==='YES'?'str-yes':'str-no'}">${needStr}</b></div><div><span>SIGNAL</span><b class="signal-line">${esc(signal)}</b></div><div><span>TECHNOLOGY</span><b>${esc(c.tower_type||'EXISTING SITE')} · ${num(c.tower_height_m).toFixed(0)} m</b></div><div><span>STATUS</span><b>${rec?'RECOMMENDED':'TOP COLLO'}</b></div></div><div class="popup-foot"><small>${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}</small><button>VIEW INTELLIGENCE</button></div></div>`;return L.divIcon({className:'',html,iconSize:[270,225],iconAnchor:[135,225]})}
-function existingPopupIcon(c){const tenants=Array.isArray(c.tenants)&&c.tenants.length?c.tenants.join(' · '):`${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}`;const signal=c?.signal_rsrp_avg_dbm!=null?`${num(c.signal_rsrp_avg_dbm).toFixed(1)} dBm`:'—';const risk=isRiskSite(c)?'RISK / REDZONE':'NORMAL';const html=`<div class="candidate-popup existing-popup" data-site-id="${esc(c.site_id||'')}"><button class="close" aria-label="Close">×</button><div class="kicker" style="color:#a7b5c0">EXISTING SITE</div><h3>${esc(c.site_name||c.site_id||'Existing Site')}</h3><div class="sub">${esc(c.site_id||'—')} · ${(num(c.distance_m)/1000).toFixed(2)} km from New Order</div><div class="popup-grid"><div><span>TENANTS</span><b>${esc(tenants)}</b></div><div><span>TOWER TYPE</span><b>${esc(c.tower_type||'—')}</b></div><div><span>TOWER HEIGHT</span><b>${c.tower_height_m!=null?num(c.tower_height_m).toFixed(0)+' m':'—'}</b></div><div><span>SIGNAL</span><b class="signal-line">${esc(signal)}</b></div><div><span>STATUS</span><b>${risk}</b></div></div><div class="popup-foot"><small>Existing site · basic information</small></div></div>`;return L.divIcon({className:'',html,iconSize:[270,205],iconAnchor:[135,205]})}
+function popupIcon(c){const rec=state.recommendedId===c.site_id;const tenants=Array.isArray(c.tenants)&&c.tenants.length?c.tenants.join(' · '):`${num(c.tenant_count)} tenant`;const signal=c?.signal_rsrp_avg_dbm!=null?`${num(c.signal_rsrp_avg_dbm).toFixed(1)} dBm`:'—';const needStr=strStatus(c);const html=`<div class="candidate-popup" data-site-id="${esc(c.site_id||'')}"><button type="button" class="close" aria-label="Close" onclick="return window.__pmnoClosePopup(this);">×</button><div class="kicker">${rec?'RECOMMENDED COLLO':'COLLO OPPORTUNITY'}</div><h3>${esc(c.site_name||c.site_id)}</h3><div class="sub">${esc(c.site_id)} · ${(num(c.distance_m)/1000).toFixed(2)} km</div><div class="tenant-line"><b>EXISTING TENANTS:</b> ${esc(tenants)}</div><div class="popup-grid"><div><span>NEED STR</span><b class="${needStr==='YES'?'str-yes':'str-no'}">${needStr}</b></div><div><span>SIGNAL</span><b class="signal-line">${esc(signal)}</b></div><div><span>TECHNOLOGY</span><b>${esc(c.tower_type||'EXISTING SITE')} · ${num(c.tower_height_m).toFixed(0)} m</b></div><div><span>STATUS</span><b>${rec?'RECOMMENDED':'TOP COLLO'}</b></div></div><div class="popup-foot"><small>${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}</small><button>VIEW INTELLIGENCE</button></div></div>`;return L.divIcon({className:'',html,iconSize:[270,225],iconAnchor:[135,225]})}
+function existingPopupIcon(c){const tenants=Array.isArray(c.tenants)&&c.tenants.length?c.tenants.join(' · '):`${num(c.tenant_count)} tenant${num(c.tenant_count)===1?'':'s'}`;const signal=c?.signal_rsrp_avg_dbm!=null?`${num(c.signal_rsrp_avg_dbm).toFixed(1)} dBm`:'—';const risk=isRiskSite(c)?'RISK / REDZONE':'NORMAL';const html=`<div class="candidate-popup existing-popup" data-site-id="${esc(c.site_id||'')}"><button type="button" class="close" aria-label="Close" onclick="return window.__pmnoClosePopup(this);">×</button><div class="kicker" style="color:#a7b5c0">EXISTING SITE</div><h3>${esc(c.site_name||c.site_id||'Existing Site')}</h3><div class="sub">${esc(c.site_id||'—')} · ${(num(c.distance_m)/1000).toFixed(2)} km from New Order</div><div class="popup-grid"><div><span>TENANTS</span><b>${esc(tenants)}</b></div><div><span>TOWER TYPE</span><b>${esc(c.tower_type||'—')}</b></div><div><span>TOWER HEIGHT</span><b>${c.tower_height_m!=null?num(c.tower_height_m).toFixed(0)+' m':'—'}</b></div><div><span>SIGNAL</span><b class="signal-line">${esc(signal)}</b></div><div><span>STATUS</span><b>${risk}</b></div></div><div class="popup-foot"><small>Existing site · basic information</small></div></div>`;return L.divIcon({className:'',html,iconSize:[270,205],iconAnchor:[135,205]})}
 function showExistingPopup(c){closeMapSelection(false);selectedExistingPopup=L.marker([num(c.latitude),num(c.longitude)],{icon:existingPopupIcon(c),interactive:true,zIndexOffset:3600,autoPan:false}).addTo(map);const el=selectedExistingPopup.getElement();el?.querySelector('.close')?.addEventListener('click',e=>{e.preventDefault();e.stopPropagation();selectedExistingPopup?.remove();selectedExistingPopup=null});selectedExistingPopup.on('click',e=>e.originalEvent?.stopPropagation())}
 function updateSummary(data,rows){$('summaryRadius').textContent=(state.radius/1000).toFixed(0)+' KM';$('summarySites').textContent=data.length;$('summaryCollo').textContent=rows.length;$('radiusText').textContent=(state.radius/1000).toFixed(0)+' km'}
 function signalRows(rec){
@@ -5336,6 +5336,28 @@ cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpS
 </script>
 
 
+<script id="pmno-popup-close-direct-handler">
+(function(){
+  window.__pmnoClosePopup=function(btn){
+    try{
+      if(window.L && window.L.DomEvent){
+        try{ window.L.DomEvent.stop(window.event || {}); }catch(_){}
+      }
+      if(typeof window.closeMapSelection==='function'){
+        window.closeMapSelection();
+      }else{
+        const el=btn?.closest?.('.leaflet-marker-icon');
+        if(el) el.remove();
+      }
+    }catch(err){
+      const el=btn?.closest?.('.leaflet-marker-icon');
+      if(el) el.remove();
+    }
+    return false;
+  };
+})();
+</script>
+
 <!-- PMNO MOBILE POPUP CLOSE FIX v1 -->
 <style id="pmno-mobile-popup-close-fix">
 /* Keep the visual X small, but give it a reliable 44x44px mobile hit area. */
@@ -5371,9 +5393,8 @@ cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpS
   background:rgba(53,200,255,.12)!important;
   color:#fff!important;
 }
-.leaflet-marker-icon:has(.candidate-popup){
-  pointer-events:auto!important;
-}
+.leaflet-marker-icon{pointer-events:auto!important;}
+.leaflet-marker-pane .leaflet-marker-icon{pointer-events:auto!important;}
 .candidate-popup{
   position:relative;
   pointer-events:auto!important;
