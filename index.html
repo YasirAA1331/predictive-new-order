@@ -2454,18 +2454,51 @@ function ensurePmnoTenantOptions(){
   const required=[
     {code:'IOH',name:'IOH'},
     {code:'TSEL',name:'TSEL'},
-    {code:'XLS',name:'XLS'},
-    {code:'SFN',name:'SFN'},
+    {code:'XLSMART',name:'XLSMART'},
     {code:'SURGE',name:'Surge'},
-    {code:'MORAREPUBLIC',name:'MoraRepublic'}
+    {code:'MORAREPUBLIC',name:'MoraRepublic'},
+    {code:'SFN',name:'SFN'}
   ];
+  const cleanKey=v=>String(v||'').trim().toUpperCase().replace(/[^A-Z0-9]/g,'');
   ['tenant','tenantMaster'].forEach(id=>{
     const sel=$(id); if(!sel)return;
-    const current=sel.value;
-    const existing=new Map([...sel.options].map(o=>[String(o.value||'').trim().toUpperCase(),o.textContent||o.value]));
-    required.forEach(t=>{if(!existing.has(t.code))existing.set(t.code,t.name)});
-    sel.innerHTML=[...existing.entries()].map(([code,name])=>`<option value="${esc(code)}">${esc(name)}</option>`).join('');
-    if([...sel.options].some(o=>o.value===current))sel.value=current;
+    const currentKey=cleanKey(sel.value);
+    const items=[];
+    const seen=new Set();
+    // Keep API-provided ordering/labels, but remove duplicate tenant codes or labels.
+    [...sel.options].forEach(o=>{
+      const code=String(o.value||'').trim();
+      const name=String(o.textContent||o.value||'').trim();
+      const key=cleanKey(code)||cleanKey(name);
+      const labelKey=cleanKey(name);
+      if(!key||seen.has(key)||seen.has('LABEL:'+labelKey))return;
+      seen.add(key); seen.add('LABEL:'+labelKey);
+      items.push({code,name});
+    });
+    // Guarantee the canonical PMNO tenant choices and prevent duplicate labels.
+    required.forEach(t=>{
+      const key=cleanKey(t.code), labelKey=cleanKey(t.name);
+      if(!seen.has(key)&&!seen.has('LABEL:'+labelKey)){
+        seen.add(key); seen.add('LABEL:'+labelKey); items.push(t);
+      }
+    });
+    // Canonicalize known aliases so XLSMART / MoraRepublic never appear twice.
+    const canonical={
+      XLS:'XLSMART', XLSMART:'XLSMART',
+      MORAREPUBLIC:'MORAREPUBLIC', MORAREPUBLIK:'MORAREPUBLIC'
+    };
+    const final=[]; const finalKeys=new Set(); const finalLabels=new Set();
+    items.forEach(t=>{
+      const raw=cleanKey(t.code);
+      const code=canonical[raw]||t.code;
+      const label=code==='XLSMART'?'XLSMART':code==='MORAREPUBLIC'?'MoraRepublic':t.name;
+      const ck=cleanKey(code), lk=cleanKey(label);
+      if(finalKeys.has(ck)||finalLabels.has(lk))return;
+      finalKeys.add(ck); finalLabels.add(lk); final.push({code,name:label});
+    });
+    sel.innerHTML=final.map(t=>`<option value="${esc(t.code)}">${esc(t.name)}</option>`).join('');
+    const match=[...sel.options].find(o=>cleanKey(o.value)===currentKey);
+    if(match)sel.value=match.value;
   });
 }
 loadTenants().finally(()=>{ensurePmnoTenantOptions();pmnoLoadRouteContext();});
