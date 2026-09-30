@@ -5453,7 +5453,7 @@ async function cpLoad(){
       const months=Array.isArray(y.months)?y.months:[]; const maxM=Math.max(1,...months.map(m=>cpNum(m.count)));
       const tenants=Array.isArray(y.tenants)?y.tenants:[];
       return `<div class="cust-expiry-year ${y.year===2026?'current':''}">
-        <div class="cust-expiry-year-head"><div><span class="year">${y.year===2026?'2026 LEASE EXPIRY':y.year}</span><b>${cpInt(y.count)}</b><small>tenancy · ${cpMoney(y.revenue)} annual revenue associated${y.year===2026?' · '+cpInt(y.expired_count||0)+' expired · '+cpInt(y.remaining_count||0)+' remaining':''}</small></div><div class="cust-expiry-year-meta">${tenants.length} tenant groups</div></div>
+        <div class="cust-expiry-year-head"><div><span class="year">${y.year===2026?'2026 BREAKDOWN':y.year}</span>${y.year===2026?'':'<b>'+cpInt(y.count)+'</b>'}<small>${y.year===2026?'Tenant composition + monthly expiry distribution':('tenancy · '+cpMoney(y.revenue)+' annual revenue associated')}</small></div><div class="cust-expiry-year-meta">${tenants.length} tenant groups</div></div>
         <div class="cust-expiry-tenants"><span class="cust-expiry-label">TENANT</span><div class="cust-tenant-pills">${tenants.map(t=>`<span class="cust-tenant-pill"><strong>${cpEsc(t.tenant)}</strong><em>${cpInt(t.count)}</em></span>`).join('')}</div></div>
         <div class="cust-expiry-months"><span class="cust-expiry-label">MONTHLY DISTRIBUTION</span><div class="cust-month-grid">${months.map(m=>`<div class="cust-month"><div class="cust-month-top"><span>${cpEsc(m.label)}</span><b>${cpInt(m.count)}</b></div><div class="cust-month-track"><i style="width:${Math.min(100,cpNum(m.count)/maxM*100)}%"></i></div></div>`).join('')}</div></div>
       </div>`;
