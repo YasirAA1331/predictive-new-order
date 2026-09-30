@@ -5375,6 +5375,7 @@ async function cpLoad(){
   const f=cpFilters();
   const d=cpObj(await cpRpc('pmno_customer_business_summary',f));
   const lease=cpObj(await cpRpc('pmno_customer_lease_expiry_summary',f));
+  const landLease=cpObj(await cpRpc('pmno_land_lease_expiry_summary',f));
   const s=d.tenancy||{}; const total=cpNum(s.total_sites),tenant=cpNum(d.tenant_total),npa=cpNum(s.npa_sites),one=cpNum(s.one_tenant),two=cpNum(s.two_tenant),three=cpNum(s.three_tenant),gt3=cpNum(s.gt3_tenant),revSites=cpNum(s.revenue_sites);
   const withTenant=Math.max(0,total-npa),multi=Math.max(0,two+three+gt3),ratio=total?tenant/total:0,pct=n=>total?(n/total*100).toFixed(1):'0.0';
   const st=d.single_tenant||{},singleTotal=cpNum(st.total)||one,big3=cpNum(st.TSEL)+cpNum(st.IOH)+cpNum(st.XLSMART);
@@ -5415,6 +5416,19 @@ async function cpLoad(){
       </div>`;
     }).join('')}</div>
     <div class="cust-expiry-total"><b>${cpInt(lease.expiry_through_2028)} tenancy</b><span>Jatuh tempo sampai 2028 · annual revenue associated ${cpMoney(lease.annual_revenue_through_2028)}</span></div><div class="cust-expiry-foot">Expired: ${cpInt(lease.expired)} tenancy · No expiry date: ${cpInt(lease.no_expiry)} tenancy</div>
+  </div>
+  <div class="cust-expiry">
+    <div class="cust-expiry-head"><div class="cust-expiry-title">LAND LEASE EXPIRY · OUTLOOK</div><small>Land status + monthly lease expiry distribution</small></div>
+    <div class="cust-expiry-years">${(Array.isArray(landLease.year_breakdown)?landLease.year_breakdown:[]).map((y,yi)=>{
+      const months=Array.isArray(y.months)?y.months:[]; const maxM=Math.max(1,...months.map(m=>cpNum(m.count)));
+      const profiles=Array.isArray(y.profiles)?y.profiles:[];
+      return `<div class="cust-expiry-year ${yi===0?'current':''}">
+        <div class="cust-expiry-year-head"><div><span class="year">${y.year===2026?'REMAINING 2026':y.year}</span><b>${cpInt(y.count)}</b><small>site · ${cpMoney(y.cost)} annual lease cost associated</small></div><div class="cust-expiry-year-meta">${profiles.length} land status groups</div></div>
+        <div class="cust-expiry-tenants"><span class="cust-expiry-label">LAND STATUS</span><div class="cust-tenant-pills">${profiles.map(t=>`<span class="cust-tenant-pill"><strong>${cpEsc(t.profile)}</strong><em>${cpInt(t.count)}</em></span>`).join('')}</div></div>
+        <div class="cust-expiry-months"><span class="cust-expiry-label">MONTHLY DISTRIBUTION</span><div class="cust-month-grid">${months.map(m=>`<div class="cust-month"><div class="cust-month-top"><span>${cpEsc(m.label)}</span><b>${cpInt(m.count)}</b></div><div class="cust-month-track"><i style="width:${Math.min(100,cpNum(m.count)/maxM*100)}%"></i></div></div>`).join('')}</div></div>
+      </div>`;
+    }).join('')}</div>
+    <div class="cust-expiry-total"><b>${cpInt(landLease.expiry_through_2028)} site</b><span>Jatuh tempo sampai 2028 · annual lease cost ${cpMoney(landLease.annual_cost_through_2028)}</span></div><div class="cust-expiry-foot">Expired: ${cpInt(landLease.expired)} site · No expiry date: ${cpInt(landLease.no_expiry)} site</div>
   </div>
   <div class="cust-note"><b>Business interpretation:</b> Customer share and revenue/site are descriptive commercial facts. Growth opportunity is not inferred until external CI / network-demand evidence is available.</div></div></section>
   <section class="cust-section"><div class="cust-section-head"><strong>04 · CUSTOMER SHARE &amp; ECONOMICS</strong><small>Existing portfolio footprint and annualized revenue contribution</small></div><div class="cust-section-body"><div class="cust-table-wrap"><table class="cust-table"><thead><tr><th>CUSTOMER</th><th>CATEGORY</th><th>SITES</th><th>SITE SHARE</th><th>TENANT</th><th>TENANT SHARE</th><th>ANNUAL REVENUE</th><th>REVENUE SHARE</th><th>AVG REV / SITE</th><th>AVG REV / TENANT</th></tr></thead><tbody>
