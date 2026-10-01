@@ -2761,7 +2761,7 @@ const URL=window.SUPABASE_URL||'https://vzeitjesovdojfsfgyza.supabase.co';
 const H={apikey:SUPABASE_KEY,Authorization:'Bearer '+SUPABASE_KEY,'Content-Type':'application/json'};
 const esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
 const fmtInt=n=>new Intl.NumberFormat('id-ID').format(Number(n)||0);
-const fmtRp=n=>{n=Number(n)||0;if(Math.abs(n)>=1e9)return 'Rp '+(n/1e9).toFixed(2).replace('.',',')+' miliar';if(Math.abs(n)>=1e6)return 'Rp '+(n/1e6).toFixed(1).replace('.',',')+' juta';return 'Rp '+fmtInt(Math.round(n));};
+const fmtRp=n=>{n=Number(n)||0;const a=Math.abs(n);if(a>=1e12)return 'Rp '+(n/1e12).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' triliun';if(a>=1e9)return 'Rp '+(n/1e9).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' miliar';if(a>=1e6)return 'Rp '+(n/1e6).toLocaleString('id-ID',{minimumFractionDigits:2,maximumFractionDigits:2})+' juta';if(a>=1e3)return 'Rp '+Math.round(n).toLocaleString('id-ID')+' ribu';return 'Rp '+Math.round(n).toLocaleString('id-ID');};
 let timer=null,busy=false;
 async function rpc(name,body){const r=await fetch(URL+'/rest/v1/rpc/'+name,{method:'POST',headers:H,body:JSON.stringify(body||{})});const txt=await r.text();if(!r.ok)throw new Error(txt||('HTTP '+r.status));try{return JSON.parse(txt)}catch(_){return txt}}
 function fill(id,vals,all){const el=$(id);if(!el)return;const keep=el.value;el.innerHTML='<option value="">'+all+'</option>'+Array.from(new Set((vals||[]).filter(Boolean).map(String))).sort().map(v=>'<option value="'+esc(v)+'">'+esc(v)+'</option>').join('');if(Array.from(el.options).some(o=>o.value===keep))el.value=keep}
