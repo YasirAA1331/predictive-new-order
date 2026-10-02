@@ -4051,7 +4051,10 @@ function pmnoRenderCustomerBusinessTable(data){
   </div>`;
 }
 
-function pmnoEnsureAdjacencyModal(){if(document.getElementById('pmnoAdjacencyModal'))return;const el=document.createElement('div');el.id='pmnoAdjacencyModal';el.className='ap-adj-modal';el.innerHTML=`<div class="ap-adj-panel"><div class="ap-adj-head"><div><h3 id="pmnoAdjTitle">TOWER DETAIL</h3><small id="pmnoAdjSub">—</small></div><div class="ap-adj-actions"><button type="button" id="pmnoAdjExport" class="ap-adj-btn">EXPORT EXCEL</button><button type="button" id="pmnoAdjClose" class="ap-adj-btn secondary">CLOSE</button></div></div><div id="pmnoAdjTableWrap" class="ap-adj-table-wrap"></div><div class="ap-adj-note">Detail mengikuti hasil perhitungan terakhir pada filter/scope yang aktif saat calculation dijalankan.</div></div>`;document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('#pmnoAdjClose'))el.classList.remove('open')});document.getElementById('pmnoAdjExport')?.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();pmnoExportAdjacencyDetail()})}
+function pmnoEnsureAdjacencyModal(){if(document.getElementById('pmnoAdjacencyModal'))return;const el=document.createElement('div');el.id='pmnoAdjacencyModal';el.className='ap-adj-modal';el.innerHTML=`<div class="ap-adj-panel"><div class="ap-adj-head"><div><h3 id="pmnoAdjTitle">TOWER DETAIL</h3><small id="pmnoAdjSub">—</small></div><div class="ap-adj-actions"><button type="button" id="pmnoAdjExport" class="ap-adj-btn">EXPORT EXCEL</button><button type="button" id="pmnoAdjClose" class="ap-adj-btn secondary">CLOSE</button></div></div><div id="pmnoAdjTableWrap" class="ap-adj-table-wrap"></div><div class="ap-adj-note">Detail mengikuti hasil perhitungan terakhir pada filter/scope yang aktif saat calculation dijalankan.</div></div>`;document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('#pmnoAdjClose')){el.classList.remove('open');}});document.getElementById('pmnoAdjExport')?.addEventListener('click',function(e){
+ e.preventDefault();e.stopPropagation();
+ try{pmnoExportAdjacencyDetail()}catch(err){console.error('[PMNO EXPORT]',err);alert('Export Excel gagal: '+(err?.message||err))}
+})}
 let __pmnoAdjModalRows=[],__pmnoAdjModalType='sites',__pmnoAdjPairMap=new Map();
 function pmnoAdjEsc(v){return esc(v==null?'':v)}
 function pmnoAdjNum(v){return Number.isFinite(Number(v))?Number(v).toLocaleString('id-ID',{maximumFractionDigits:2}):'—'}
@@ -4085,7 +4088,7 @@ async function pmnoAdjOpen(type){
  else if(type.startsWith('degree')){const k=type==='degreeMore'?'>5':type.replace('degree','');rows=(g.siteRows||[]).filter(r=>r.adjacency_bucket===k)}
  else if(['lt30','m30_50','m50_70','m70_100'].includes(type))isPairs=true,rows=(g.pairRows||[]).filter(r=>r.distance_bucket===type);
  else if(type.startsWith('matrix_')){isPairs=true;if(type.startsWith('matrix_row_')){const i=Number(type.split('_')[2]);rows=(g.pairRows||[]).filter(r=>{const c=String(r.height_matrix_cell||'').split('|').map(Number);return c[0]===i||c[1]===i})}else if(type.startsWith('matrix_col_')){const j=Number(type.split('_')[2]);rows=(g.pairRows||[]).filter(r=>{const c=String(r.height_matrix_cell||'').split('|').map(Number);return c[0]===j||c[1]===j})}else{const cell=type.replace('matrix_','').replace('_','|');rows=(g.pairRows||[]).filter(r=>r.height_matrix_cell===cell)}}
- __pmnoAdjModalRows=rows;__pmnoAdjModalType=isPairs?'pairs':'sites';
+ __pmnoAdjModalRows=rows;__pmnoAdjModalType=isPairs?'pairs':'sites';window.__pmnoAdjExportRows=rows.slice();window.__pmnoAdjExportType=__pmnoAdjModalType;
  if(subEl)subEl.textContent=isPairs?`${fmtInt(rows.length)} pasangan tower`:`${fmtInt(rows.length)} site`;
  if(!rows.length)wrap.innerHTML='<div class="ap-adj-empty">Tidak ada data detail untuk angka ini.</div>';
  else if(isPairs)wrap.innerHTML='<table class="ap-adj-table"><thead><tr><th>SITE A</th><th>NAME A</th><th>SITE B</th><th>NAME B</th><th>DISTANCE</th><th>HEIGHT A</th><th>HEIGHT B</th></tr></thead><tbody>'+rows.map(r=>`<tr><td>${pmnoAdjEsc(r.site_a)}</td><td>${pmnoAdjEsc(r.site_a_name)}</td><td>${pmnoAdjEsc(r.site_b)}</td><td>${pmnoAdjEsc(r.site_b_name)}</td><td class="ap-adj-distance">${pmnoAdjNum(r.distance_m)} m</td><td>${pmnoAdjNum(r.site_a_height)} m</td><td>${pmnoAdjNum(r.site_b_height)} m</td></tr>`).join('')+'</tbody></table>';
@@ -4113,12 +4116,16 @@ async function pmnoAdjOpen(type){
  document.getElementById('pmnoAdjacencyModal').classList.add('open');
 }
 function pmnoExportAdjacencyDetail(){
- const rows=Array.isArray(window.__pmnoAdjModalRows)?window.__pmnoAdjModalRows:[];
+ const rows=Array.isArray(window.__pmnoAdjExportRows)
+   ? window.__pmnoAdjExportRows
+   : (Array.isArray(window.__pmnoAdjModalRows)?window.__pmnoAdjModalRows:[]);
  if(!rows.length){
    alert('Tidak ada data untuk diexport.');
    return;
  }
- const isPairs=window.__pmnoAdjModalType==='pairs';
+ const isPairs=window.__pmnoAdjExportType==='pairs'
+   ? true
+   : window.__pmnoAdjModalType==='pairs';
  const headers=isPairs
    ?['SITE A','NAME A','REGIONAL A','AREA A','HEIGHT A','SITE B','NAME B','REGIONAL B','AREA B','HEIGHT B','DISTANCE M','DISTANCE BUCKET']
    :['SITE ID','SITE NAME','REGIONAL','AREA','PROVINCE','CITY','TOWER PASANGAN','LATITUDE','LONGITUDE','TOWER HEIGHT M','ADJACENT COUNT','ADJACENCY BUCKET'];
