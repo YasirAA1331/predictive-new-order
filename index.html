@@ -4051,7 +4051,7 @@ function pmnoRenderCustomerBusinessTable(data){
   </div>`;
 }
 
-function pmnoEnsureAdjacencyModal(){if(document.getElementById('pmnoAdjacencyModal'))return;const el=document.createElement('div');el.id='pmnoAdjacencyModal';el.className='ap-adj-modal';el.innerHTML=`<div class="ap-adj-panel"><div class="ap-adj-head"><div><h3 id="pmnoAdjTitle">TOWER DETAIL</h3><small id="pmnoAdjSub">—</small></div><div class="ap-adj-actions"><button type="button" id="pmnoAdjExport" class="ap-adj-btn">EXPORT EXCEL</button><button type="button" id="pmnoAdjClose" class="ap-adj-btn secondary">CLOSE</button></div></div><div id="pmnoAdjTableWrap" class="ap-adj-table-wrap"></div><div class="ap-adj-note">Detail mengikuti hasil perhitungan terakhir pada filter/scope yang aktif saat calculation dijalankan.</div></div>`;document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('#pmnoAdjClose'))el.classList.remove('open')});document.getElementById('pmnoAdjExport')?.addEventListener('click',()=>pmnoExportAdjacencyDetail())}
+function pmnoEnsureAdjacencyModal(){if(document.getElementById('pmnoAdjacencyModal'))return;const el=document.createElement('div');el.id='pmnoAdjacencyModal';el.className='ap-adj-modal';el.innerHTML=`<div class="ap-adj-panel"><div class="ap-adj-head"><div><h3 id="pmnoAdjTitle">TOWER DETAIL</h3><small id="pmnoAdjSub">—</small></div><div class="ap-adj-actions"><button type="button" id="pmnoAdjExport" class="ap-adj-btn">EXPORT EXCEL</button><button type="button" id="pmnoAdjClose" class="ap-adj-btn secondary">CLOSE</button></div></div><div id="pmnoAdjTableWrap" class="ap-adj-table-wrap"></div><div class="ap-adj-note">Detail mengikuti hasil perhitungan terakhir pada filter/scope yang aktif saat calculation dijalankan.</div></div>`;document.body.appendChild(el);el.addEventListener('click',e=>{if(e.target===el||e.target.closest('#pmnoAdjClose'))el.classList.remove('open')});document.getElementById('pmnoAdjExport')?.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();pmnoExportAdjacencyDetail()})}
 let __pmnoAdjModalRows=[],__pmnoAdjModalType='sites',__pmnoAdjPairMap=new Map();
 function pmnoAdjEsc(v){return esc(v==null?'':v)}
 function pmnoAdjNum(v){return Number.isFinite(Number(v))?Number(v).toLocaleString('id-ID',{maximumFractionDigits:2}):'—'}
@@ -4113,19 +4113,70 @@ async function pmnoAdjOpen(type){
  document.getElementById('pmnoAdjacencyModal').classList.add('open');
 }
 function pmnoExportAdjacencyDetail(){
- const rows=__pmnoAdjModalRows||[]; if(!rows.length)return;
- const isPairs=__pmnoAdjModalType==='pairs';
- const headers=isPairs?['SITE A','NAME A','REGIONAL A','AREA A','HEIGHT A','SITE B','NAME B','REGIONAL B','AREA B','HEIGHT B','DISTANCE M','DISTANCE BUCKET']:['SITE ID','SITE NAME','REGIONAL','AREA','PROVINCE','CITY','TOWER PASANGAN','LATITUDE','LONGITUDE','TOWER HEIGHT M','ADJACENT COUNT','ADJACENCY BUCKET'];
+ const rows=Array.isArray(window.__pmnoAdjModalRows)?window.__pmnoAdjModalRows:[];
+ if(!rows.length){
+   alert('Tidak ada data untuk diexport.');
+   return;
+ }
+ const isPairs=window.__pmnoAdjModalType==='pairs';
+ const headers=isPairs
+   ?['SITE A','NAME A','REGIONAL A','AREA A','HEIGHT A','SITE B','NAME B','REGIONAL B','AREA B','HEIGHT B','DISTANCE M','DISTANCE BUCKET']
+   :['SITE ID','SITE NAME','REGIONAL','AREA','PROVINCE','CITY','TOWER PASANGAN','LATITUDE','LONGITUDE','TOWER HEIGHT M','ADJACENT COUNT','ADJACENCY BUCKET'];
+
  const body=rows.map(r=>{
-   if(isPairs)return [r.site_a,r.site_a_name,r.site_a_regional,r.site_a_area,r.site_a_height,r.site_b,r.site_b_name,r.site_b_regional,r.site_b_area,r.site_b_height,r.distance_m,r.distance_bucket];
-   const pairs=__pmnoAdjPairMap.get(String(r.site_id))||[];
+   if(isPairs){
+     return [r.site_a,r.site_a_name,r.site_a_regional,r.site_a_area,r.site_a_height,
+             r.site_b,r.site_b_name,r.site_b_regional,r.site_b_area,r.site_b_height,
+             r.distance_m,r.distance_bucket];
+   }
+   const pairs=window.__pmnoAdjPairMap instanceof Map
+     ? (window.__pmnoAdjPairMap.get(String(r.site_id))||[])
+     : [];
    const towerPairs=pairs.map(p=>String(p.site||'')+' · '+String(p.name||'')+' ('+String(p.distance??'')+' m)').join(' | ');
-   return [r.site_id,r.site_name,r.regional,r.area,r.province,r.city,towerPairs,r.latitude,r.longitude,r.tower_height_m,r.adjacent_count,r.adjacency_bucket];
+   return [r.site_id,r.site_name,r.regional,r.area,r.province,r.city,towerPairs,
+           r.latitude,r.longitude,r.tower_height_m,r.adjacent_count,r.adjacency_bucket];
  });
+
  const escX=v=>String(v??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
- const html=`<html><head><meta charset="UTF-8"><style>td,th{border:1px solid #ddd;padding:4px;white-space:nowrap}th{font-weight:700}</style></head><body><table><thead><tr>${headers.map(h=>`<th>${escX(h)}</th>`).join('')}</tr></thead><tbody>${body.map(row=>`<tr>${row.map(v=>`<td>${escX(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;
- const blob=new Blob([html],{type:'application/vnd.ms-excel;charset=utf-8'}),url=URL.createObjectURL(blob),a=document.createElement('a');
- a.href=url;a.download=`tower_spatial_${isPairs?'pairs':'sites'}_${new Date().toISOString().slice(0,10)}.xls`;document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);
+ const xls=`<html xmlns:x="urn:schemas-microsoft-com:office:excel"><head><meta charset="UTF-8"><style>table{border-collapse:collapse}td,th{border:1px solid #ddd;padding:6px;white-space:nowrap}th{font-weight:700;background:#eaf2f8}</style></head><body><table><thead><tr>${headers.map(h=>`<th>${escX(h)}</th>`).join('')}</tr></thead><tbody>${body.map(row=>`<tr>${row.map(v=>`<td>${escX(v)}</td>`).join('')}</tr>`).join('')}</tbody></table></body></html>`;
+
+ const filename=`tower_spatial_${isPairs?'pairs':'sites'}_${new Date().toISOString().slice(0,10)}.xls`;
+ const blob=new Blob(['\ufeff',xls],{type:'application/vnd.ms-excel'});
+ const nav=window.navigator;
+
+ // iPhone/iPad Safari: navigator.share with a File is more reliable than
+ // programmatic <a download> for locally generated files.
+ try{
+   if(nav.share && typeof File==='function' && nav.canShare){
+     const file=new File([blob],filename,{type:'application/vnd.ms-excel'});
+     if(nav.canShare({files:[file]})){
+       nav.share({files:[file],title:'Tower Spatial Export',text:'Tower Spatial detail'}).catch(()=>{});
+       return;
+     }
+   }
+ }catch(_e){}
+
+ // Desktop / browsers supporting download attribute.
+ try{
+   const url=URL.createObjectURL(blob);
+   const a=document.createElement('a');
+   a.href=url;
+   a.download=filename;
+   a.style.display='none';
+   document.body.appendChild(a);
+   a.click();
+   setTimeout(()=>{a.remove();URL.revokeObjectURL(url)},1500);
+   return;
+ }catch(_e){}
+
+ // Last fallback: open the Excel-compatible HTML in a new tab.
+ try{
+   const url=URL.createObjectURL(blob);
+   window.open(url,'_blank','noopener');
+   setTimeout(()=>URL.revokeObjectURL(url),10000);
+ }catch(_e){
+   alert('Export Excel gagal dibuka di browser ini.');
+ }
 }
 function pmnoAdjBindClicks(){if(window.__pmnoAdjClickBound)return;window.__pmnoAdjClickBound=true;document.addEventListener('click',e=>{const el=e.target?.closest?.('[data-adj-detail]');if(el)pmnoAdjOpen(el.getAttribute('data-adj-detail'))});document.addEventListener('keydown',e=>{if((e.key==='Enter'||e.key===' ')&&e.target?.closest?.('[data-adj-detail]')){e.preventDefault();pmnoAdjOpen(e.target.closest('[data-adj-detail]').getAttribute('data-adj-detail'))}})}pmnoAdjBindClicks();
 
