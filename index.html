@@ -4892,7 +4892,52 @@ async function renderSiteProfile(r){
  }
 }
 window.pmnoAssetProfileInit=async function(){
-  if(typeof window.pmnoDashboardInit==='function') await window.pmnoDashboardInit();
+  if(typeof window.pmnoDashboardInit==='function'){
+    try{ await window.pmnoDashboardInit(); }catch(e){ console.warn('[PMNO ASSET PROFILE] dashboard init',e); }
+  }
+
+  // Asset Profile must always have the authoritative aggregate payload.
+  // Dashboard detail is intentionally paged (1,000 rows), so never derive
+  // Asset Structure from `rows`. If navigation happens while the dashboard
+  // is still loading, fetch the aggregate directly before rendering.
+  const current=pmnoGetAggregateSummary();
+  const currentStats=current?.stats||{};
+  const hasStructure=Array.isArray(current?.tower_type)
+    && Array.isArray(current?.maturity)
+    && Array.isArray(current?.height)
+    && (Number(currentStats.total_sites)||0)>0;
+
+  if(!hasStructure){
+    try{
+      const rg=String($('dash-regional')?.value||'').trim();
+      const ar=String($('dash-area')?.value||'').trim();
+      const pv=String($('dash-province')?.value||'').trim();
+      const ct=String($('dash-city')?.value||'').trim();
+      const q=String($('dash-search')?.value||'').trim();
+      const filterBody={p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null};
+
+      const url=(rg||ar||pv||ct||q)
+        ? URL+'/rest/v1/rpc/pmno_dashboard_query'
+        : URL+'/rest/v1/rpc/pmno_dashboard_summary';
+
+      const body=(rg||ar||pv||ct||q)
+        ? {...filterBody,p_offset:0,p_limit:1}
+        : {};
+
+      const r=await fetch(url,{method:'POST',headers:H,body:JSON.stringify(body)});
+      if(!r.ok) throw new Error(url+' HTTP '+r.status);
+      const snap=normalizeRpcObject(await r.json());
+
+      if(snap?.stats?.total_sites){
+        window.__pmnoDashboardSummary=snap;
+        window.__pmnoPortfolioSummary=snap;
+        if(snap?.filter_options) window.__pmnoDashboardFilterOptions=snap.filter_options;
+      }
+    }catch(e){
+      console.warn('[PMNO ASSET PROFILE] aggregate reload failed',e);
+    }
+  }
+
   renderAssetProfilePage();
   setupAssetProfileFilters();
 };
