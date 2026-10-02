@@ -4222,19 +4222,24 @@ async function pmnoExportAdjacencyDetail(){
      console.warn('[PMNO XLSX SHARE FALLBACK]',shareErr);
    }
 
-   const url=URL.createObjectURL(blob);
-   const a=document.createElement('a');
-   a.href=url;
-   a.download=filename;
-   a.rel='noopener';
-   a.style.position='fixed';
-   a.style.left='-9999px';
-   document.body.appendChild(a);
-   a.click();
-
-   setTimeout(()=>{
-     try{a.remove();URL.revokeObjectURL(url);}catch(_e){}
-   },3000);
+   // iOS WebViews may not expose the Blob URL API.
+   // Convert the real XLSX blob to a data URL as the final fallback.
+   const reader=new FileReader();
+   reader.onload=()=>{
+     const a=document.createElement('a');
+     a.href=String(reader.result||'');
+     a.download=filename;
+     a.rel='noopener';
+     a.style.position='fixed';
+     a.style.left='-9999px';
+     document.body.appendChild(a);
+     a.click();
+     setTimeout(()=>{try{a.remove();}catch(_e){}},3000);
+   };
+   reader.onerror=()=>{
+     alert('Export Excel gagal: browser tidak mendukung metode download file ini.');
+   };
+   reader.readAsDataURL(blob);
 
  }catch(err){
    console.error('[PMNO EXPORT XLSX]',err);
