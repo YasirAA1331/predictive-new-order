@@ -3612,10 +3612,55 @@ async function pmnoLoadGeoPortfolio(){
  g.loading=(async()=>{
   try{
    const rg=String($('dash-regional')?.value||''),ar=String($('dash-area')?.value||''),pv=String($('dash-province')?.value||''),ct=String($('dash-city')?.value||''),q=String($('dash-search')?.value||'').trim();
-   const r=await fetch(URL+'/rest/v1/rpc/pmno_coordinate_points',{method:'POST',headers:H,body:JSON.stringify({p_regional:rg||null,p_area:ar||null,p_province:pv||null,p_city:ct||null,p_search:q||null})});
-   if(!r.ok)throw new Error('pmno_coordinate_points HTTP '+r.status);
-   const pts=await r.json();if(!Array.isArray(pts))throw new Error('Coordinate payload invalid');
-   g.total=pts.length;const ref=window.__pmnoGeoReference, provinces=pmnoGeoProvinceIndex(), byCanon=new Map(provinces.map(x=>[x.canon,x]));
+
+   // Read the coordinate source directly in pages.
+   // The previous pmno_coordinate_points RPC was capped at 1,000 rows,
+   // which caused the UI to show 1,000 / 40,350 after validation.
+   const pageSize=1000;
+   const makeParams=()=>{
+     const p=new URLSearchParams();
+     p.set('select','site_id,site_name,regional,area,province,city,district,village,latitude,longitude');
+     p.set('order','site_id.asc');
+     p.set('limit',String(pageSize));
+     if(rg)p.set('regional','eq.'+rg);
+     if(ar)p.set('area','eq.'+ar);
+     if(pv)p.set('province','eq.'+pv);
+     if(ct)p.set('city','eq.'+ct);
+     if(q){
+       const safe=q.replace(/[%,()]/g,' ');
+       p.set('or','site_id.ilike.*'+safe+'*,site_name.ilike.*'+safe+'*');
+     }
+     return p;
+   };
+   const fetchCoordinatePage=async(offset)=>{
+     const p=makeParams();
+     p.set('offset',String(offset));
+     const r=await fetch(URL+'/rest/v1/pmno_site_master?'+p.toString(),{method:'GET',headers:{...H,Prefer:'count=exact'}});
+     if(!r.ok)throw new Error('pmno_site_master coordinate page HTTP '+r.status);
+     const rows=await r.json();
+     return Array.isArray(rows)?rows:[];
+   };
+
+   const firstPage=await fetchCoordinatePage(0);
+   let pts=firstPage.slice();
+
+   // Fetch the remaining pages in small batches.
+   for(let offset=pageSize;offset<400000;offset+=pageSize*6){
+     const jobs=[];
+     for(let j=0;j<6;j++)jobs.push(fetchCoordinatePage(offset+j*pageSize));
+     const chunks=await Promise.all(jobs);
+     let stop=false;
+     for(const rows of chunks){
+       pts.push(...rows);
+       if(rows.length<pageSize)stop=true;
+     }
+     g.total=pts.length;
+     g.phase='Loading coordinate data… '+pts.length.toLocaleString('id-ID')+' sites';
+     if(stop)break;
+   }
+
+   const ref=window.__pmnoGeoReference, provinces=pmnoGeoProvinceIndex(), byCanon=new Map(provinces.map(x=>[x.canon,x]));
+   if(!pts.length)throw new Error('No coordinate records found for the current filter.');
    const chunkSize=250;let valid=0,mismatch=0,invalid=0,missing=0;const details=[],validSiteIds=[];
    const issueRow=(r,status,extra={})=>details.push({site_id:r.site_id,site_name:r.site_name||'',regional:r.regional||'',area:r.area||'',master_province:r.province||'',city:r.city||'',district:r.district||'',village:r.village||'',latitude:r.latitude??'',longitude:r.longitude??'',status,...extra});
    for(let start=0;start<pts.length;start+=chunkSize){
