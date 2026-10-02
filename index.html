@@ -4088,7 +4088,7 @@ async function pmnoAdjOpen(type){
  else if(type.startsWith('degree')){const k=type==='degreeMore'?'>5':type.replace('degree','');rows=(g.siteRows||[]).filter(r=>r.adjacency_bucket===k)}
  else if(['lt30','m30_50','m50_70','m70_100'].includes(type))isPairs=true,rows=(g.pairRows||[]).filter(r=>r.distance_bucket===type);
  else if(type.startsWith('matrix_')){isPairs=true;if(type.startsWith('matrix_row_')){const i=Number(type.split('_')[2]);rows=(g.pairRows||[]).filter(r=>{const c=String(r.height_matrix_cell||'').split('|').map(Number);return c[0]===i||c[1]===i})}else if(type.startsWith('matrix_col_')){const j=Number(type.split('_')[2]);rows=(g.pairRows||[]).filter(r=>{const c=String(r.height_matrix_cell||'').split('|').map(Number);return c[0]===j||c[1]===j})}else{const cell=type.replace('matrix_','').replace('_','|');rows=(g.pairRows||[]).filter(r=>r.height_matrix_cell===cell)}}
- __pmnoAdjModalRows=rows;__pmnoAdjModalType=isPairs?'pairs':'sites';window.__pmnoAdjExportRows=rows.slice();window.__pmnoAdjExportType=__pmnoAdjModalType;
+ __pmnoAdjModalRows=rows;__pmnoAdjModalType=isPairs?'pairs':'sites';window.__pmnoAdjExportRows=rows.slice();window.__pmnoAdjExportType=__pmnoAdjModalType;window.__pmnoAdjExportPairMap=__pmnoAdjPairMap;
  if(subEl)subEl.textContent=isPairs?`${fmtInt(rows.length)} pasangan tower`:`${fmtInt(rows.length)} site`;
  if(!rows.length)wrap.innerHTML='<div class="ap-adj-empty">Tidak ada data detail untuk angka ini.</div>';
  else if(isPairs)wrap.innerHTML='<table class="ap-adj-table"><thead><tr><th>SITE A</th><th>NAME A</th><th>SITE B</th><th>NAME B</th><th>DISTANCE</th><th>HEIGHT A</th><th>HEIGHT B</th></tr></thead><tbody>'+rows.map(r=>`<tr><td>${pmnoAdjEsc(r.site_a)}</td><td>${pmnoAdjEsc(r.site_a_name)}</td><td>${pmnoAdjEsc(r.site_b)}</td><td>${pmnoAdjEsc(r.site_b_name)}</td><td class="ap-adj-distance">${pmnoAdjNum(r.distance_m)} m</td><td>${pmnoAdjNum(r.site_a_height)} m</td><td>${pmnoAdjNum(r.site_b_height)} m</td></tr>`).join('')+'</tbody></table>';
@@ -4141,9 +4141,12 @@ async function pmnoExportAdjacencyDetail(){
      ];
    }
 
-   const pairs=window.__pmnoAdjPairMap instanceof Map
-     ? (window.__pmnoAdjPairMap.get(String(r.site_id))||[])
-     : [];
+   const exportPairMap=window.__pmnoAdjExportPairMap;
+   const pairs=exportPairMap instanceof Map
+     ? (exportPairMap.get(String(r.site_id))||[])
+     : (typeof __pmnoAdjPairMap!=='undefined' && __pmnoAdjPairMap instanceof Map
+       ? (__pmnoAdjPairMap.get(String(r.site_id))||[])
+       : []);
    const towerPairs=pairs
      .map(p=>String(p.site||'')+' · '+String(p.name||'')+' ('+String(p.distance??'')+' m)')
      .join(' | ');
