@@ -5079,10 +5079,15 @@ window.pmnoAssetProfileInit=async function(){
       p_city:$('asset-city')?.value||$('dash-city')?.value||null,
       p_search:$('asset-search')?.value?.trim()||$('dash-search')?.value?.trim()||null
     };
-    window.__pmnoAssetStructureAggregate=await rpc('pmno_asset_structure_summary',args);
+    // rpc() returns the REST payload as-is. This function returns a
+    // single-row JSON aggregate, so normalize it before the renderer reads
+    // .tower_type / .origin / .maturity / .height.
+    window.__pmnoAssetStructureAggregate=normalizeRpcObject(
+      await rpc('pmno_asset_structure_summary',args)
+    );
   }catch(e){
     console.warn('[PMNO ASSET PROFILE] structure aggregate failed',e);
-    window.__pmnoAssetStructureAggregate=null;
+    if(!window.__pmnoAssetStructureAggregate) window.__pmnoAssetStructureAggregate=null;
   }
   renderAssetProfilePage();
   setupAssetProfileFilters();
