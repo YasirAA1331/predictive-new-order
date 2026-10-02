@@ -4141,12 +4141,22 @@ async function pmnoExportAdjacencyDetail(){
      ];
    }
 
-   const exportPairMap=window.__pmnoAdjExportPairMap;
-   const pairs=exportPairMap instanceof Map
-     ? (exportPairMap.get(String(r.site_id))||[])
-     : (typeof __pmnoAdjPairMap!=='undefined' && __pmnoAdjPairMap instanceof Map
-       ? (__pmnoAdjPairMap.get(String(r.site_id))||[])
-       : []);
+   // For SITE export, always rebuild the display map from the SAME last-run
+   // pairRows used by the calculation. Do not depend on the modal's local
+   // pairMap, which is created after the export snapshot is captured.
+   const pairSource=Array.isArray(window.__pmnoTowerAdjacency?.pairRows)
+     ? window.__pmnoTowerAdjacency.pairRows
+     : [];
+   const exportPairMap=new Map();
+   pairSource.forEach(p=>{
+     const a=String(p.site_a||''), b=String(p.site_b||'');
+     if(!a||!b)return;
+     if(!exportPairMap.has(a))exportPairMap.set(a,[]);
+     if(!exportPairMap.has(b))exportPairMap.set(b,[]);
+     exportPairMap.get(a).push({site:b,name:p.site_b_name,distance:p.distance_m});
+     exportPairMap.get(b).push({site:a,name:p.site_a_name,distance:p.distance_m});
+   });
+   const pairs=exportPairMap.get(String(r.site_id))||[];
    const towerPairs=pairs
      .map(p=>String(p.site||'')+' · '+String(p.name||'')+' ('+String(p.distance??'')+' m)')
      .join(' | ');
