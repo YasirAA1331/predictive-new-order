@@ -6404,3 +6404,106 @@ body.pmno-page-single .pmno-home-top{display:inline-flex!important}
   document.addEventListener('DOMContentLoaded',inject);window.addEventListener('hashchange',()=>setTimeout(inject,0));setTimeout(inject,0);
 })();
 </script>
+
+<style id="pmno-product-design-v13">
+/* PMNO PRODUCT DESIGN SYSTEM v13 — full application shell redesign */
+:root{
+  --pm-bg:#f7f8fa; --pm-surface:#fff; --pm-ink:#172033; --pm-muted:#7d899b;
+  --pm-primary:#08a9e6; --pm-primary-soft:#e9f8fd; --pm-line:#e6ebf0;
+  --pm-success:#18a66a; --pm-warning:#f2a51a; --pm-danger:#e84d68;
+  --pm-radius-sm:12px; --pm-radius:18px; --pm-radius-lg:26px;
+  --pm-shadow:0 10px 32px rgba(21,35,54,.07);
+  --pm-shadow-lg:0 18px 55px rgba(21,35,54,.10);
+}
+html,body{background:var(--pm-bg)!important;color:var(--pm-ink)!important}
+body{font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+/* Kill legacy enterprise navigation everywhere. */
+body .topbar{display:none!important}
+body .mode-menu{display:none!important}
+/* New shell */
+.pm13-sidebar{position:fixed;z-index:7000;left:0;top:0;bottom:0;width:236px;background:#fff;border-right:1px solid var(--pm-line);padding:24px 14px;display:flex;flex-direction:column}
+.pm13-brand{display:flex;align-items:center;gap:11px;padding:0 12px 28px}
+.pm13-mark{width:38px;height:38px;border-radius:12px;background:var(--pm-ink);color:#fff;display:grid;place-items:center;font-weight:900;font-size:12px;letter-spacing:.08em}
+.pm13-brand strong{font-size:15px;letter-spacing:-.3px}.pm13-brand small{display:block;color:#9aa5b4;font-size:9px;letter-spacing:.13em;font-weight:800;margin-top:2px}
+.pm13-nav-label{font-size:9px;font-weight:900;letter-spacing:.16em;color:#a3adba;padding:0 12px;margin:10px 0 7px}
+.pm13-nav{display:grid;gap:4px}.pm13-nav button{height:46px;border:0;background:transparent;border-radius:13px;padding:0 12px;display:flex;align-items:center;gap:11px;color:#738095;font-size:12px;font-weight:750;text-align:left;cursor:pointer}
+.pm13-nav button svg{width:20px;height:20px;flex:none}.pm13-nav button:hover{background:#f5f7f9;color:var(--pm-ink)}.pm13-nav button.active{background:var(--pm-primary-soft);color:#079bd2}
+.pm13-sidebar-footer{margin-top:auto;padding:12px}.pm13-status{padding:12px;border:1px solid #e8f1ed;background:#f4fbf7;border-radius:14px;color:#16875a;font-size:10px;font-weight:800}.pm13-status i{display:inline-block;width:7px;height:7px;border-radius:50%;background:#1ab675;margin-right:7px}
+.pm13-content{margin-left:236px;min-height:100dvh;padding:0 34px 50px}
+.pm13-mobile-head{display:none}
+.pm13-page-head{max-width:1280px;margin:0 auto;padding:34px 0 22px;display:flex;align-items:flex-end;justify-content:space-between;gap:20px}
+.pm13-page-head .eyebrow{font-size:10px;font-weight:900;letter-spacing:.18em;color:#9aa5b4;margin-bottom:8px}.pm13-page-head h1{font-size:34px;line-height:1.05;letter-spacing:-1.2px;margin:0;font-weight:850}.pm13-page-head h1 b{color:var(--pm-primary)}.pm13-page-head p{font-size:14px;color:var(--pm-muted);margin:9px 0 0}.pm13-head-actions{display:flex;gap:9px}.pm13-head-actions button{height:42px;padding:0 17px;border-radius:12px;border:1px solid var(--pm-line);background:#fff;color:#465267;font-weight:800;font-size:11px}.pm13-head-actions .primary{background:var(--pm-primary);border-color:var(--pm-primary);color:#fff}
+/* Content surfaces: neutralize dark legacy page shells without touching data logic */
+body.pmno-page-dashboard #dashboardView,body.pmno-page-assetprofile #assetProfileView,body.pmno-page-siteprofile #siteProfileView,body.pmno-page-bulk #bulkView,body.pmno-page-drm #drmView,body.pmno-page-master #masterDataView{background:var(--pm-bg)!important;color:var(--pm-ink)!important}
+body.pmno-page-dashboard #dashboardView,body.pmno-page-assetprofile #assetProfileView,body.pmno-page-siteprofile #siteProfileView,body.pmno-page-bulk #bulkView,body.pmno-page-drm #drmView,body.pmno-page-master #masterDataView{margin-left:236px!important;padding-left:34px!important;padding-right:34px!important}
+/* legacy title/header blocks */
+body.pmno-page-dashboard .dash-head,body.pmno-page-assetprofile .asset-page-head,body.pmno-page-master .master-head,body.pmno-page-bulk .bulk-view>header.top{background:transparent!important;border:0!important;box-shadow:none!important;color:var(--pm-ink)!important}
+body.pmno-page-dashboard .dash-title,body.pmno-page-assetprofile .asset-page-title,body.pmno-page-master .master-title,body.pmno-page-bulk .bulk-view>header.top .title{color:var(--pm-ink)!important;font-size:34px!important;letter-spacing:-1.2px!important}
+body.pmno-page-dashboard .dash-sub,body.pmno-page-assetprofile .asset-page-sub,body.pmno-page-master .master-sub{color:var(--pm-muted)!important}
+/* global surface treatment */
+body.pmno-page-dashboard .dash-shell,body.pmno-page-assetprofile .asset-page-shell,body.pmno-page-siteprofile .site-profile-shell,body.pmno-page-bulk .bulk-view .wrap,body.pmno-page-drm .drm-view,body.pmno-page-master .master-shell{max-width:1280px!important;margin:0 auto!important}
+body.pmno-page-dashboard .dash-card,body.pmno-page-dashboard .kpi-card,body.pmno-page-assetprofile .asset-card,body.pmno-page-siteprofile .sp-card,body.pmno-page-drm .drm-card,body.pmno-page-master .master-card{background:#fff!important;border:1px solid var(--pm-line)!important;border-radius:18px!important;box-shadow:var(--pm-shadow)!important;color:var(--pm-ink)!important}
+/* filters */
+body.pmno-page-dashboard .dash-filterbar,body.pmno-page-assetprofile .asset-page-filterbar{background:#fff!important;border:1px solid var(--pm-line)!important;border-radius:18px!important;box-shadow:var(--pm-shadow)!important}
+/* buttons */
+body.pmno-page-dashboard button,body.pmno-page-assetprofile button,body.pmno-page-siteprofile button,body.pmno-page-bulk button,body.pmno-page-drm button,body.pmno-page-master button{font-family:inherit}
+/* Mobile app shell */
+.pm13-bottom{display:none}
+@media(max-width:760px){
+  .pm13-sidebar{display:none}
+  .pm13-content{margin-left:0;padding:0 16px 100px}
+  .pm13-mobile-head{display:flex;height:62px;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:6500;background:rgba(247,248,250,.92);backdrop-filter:blur(18px);margin:0 -16px;padding:0 18px;border-bottom:1px solid rgba(230,235,240,.75)}
+  .pm13-mobile-brand{display:flex;align-items:center;gap:9px;font-size:14px;font-weight:850}.pm13-mobile-brand .mark{width:31px;height:31px;border-radius:10px;background:var(--pm-ink);color:#fff;display:grid;place-items:center;font-size:9px;letter-spacing:.08em}
+  .pm13-mobile-head button{width:34px;height:34px;border:0;border-radius:50%;background:#fff;color:#5d697b;box-shadow:0 4px 14px rgba(20,30,45,.08)}
+  .pm13-page-head{padding:25px 0 18px;display:block}.pm13-page-head h1{font-size:28px}.pm13-page-head p{font-size:13px}.pm13-head-actions{margin-top:16px}
+  body.pmno-page-dashboard #dashboardView,body.pmno-page-assetprofile #assetProfileView,body.pmno-page-siteprofile #siteProfileView,body.pmno-page-bulk #bulkView,body.pmno-page-drm #drmView,body.pmno-page-master #masterDataView{margin-left:0!important;padding-left:16px!important;padding-right:16px!important}
+  body.pmno-page-dashboard .dash-title,body.pmno-page-assetprofile .asset-page-title,body.pmno-page-master .master-title,body.pmno-page-bulk .bulk-view>header.top .title{font-size:28px!important}
+  .pm13-bottom{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));height:68px;padding:5px;z-index:8000;background:rgba(255,255,255,.95);backdrop-filter:blur(20px);border:1px solid rgba(225,231,237,.95);border-radius:22px;box-shadow:0 16px 45px rgba(18,31,47,.16)}
+  .pm13-bottom button{border:0;background:transparent;border-radius:17px;color:#99a4b4;font:800 9px/1 inherit;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px}.pm13-bottom button svg{width:22px;height:22px}.pm13-bottom button.active{background:var(--pm-primary-soft);color:#079fd4}.pm13-bottom button:active{transform:scale(.97)}
+}
+</style>
+<script id="pmno-product-design-v13-js">
+(function(){
+  const routes={home:'Home',single:'Analyze',dashboard:'Insights',assetprofile:'Asset Profile',siteprofile:'Site Profile',bulk:'Bulk Analyzer',drm:'DRM',master:'Master Data'};
+  const icons={
+    home:'<path d="m4 10 8-6 8 6v10H4V10Z"/><path d="M9 20v-6h6v6"/>',
+    analyze:'<circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',
+    insights:'<path d="M5 19V10M12 19V5M19 19v-7"/><path d="M3 19h18"/>',
+    more:'<path d="M4 7h16M4 12h16M4 17h16"/>',
+    asset:'<path d="m12 3 7 4v10l-7 4-7-4V7l7-4Z"/><path d="m5 7 7 4 7-4M12 11v10"/>',
+    site:'<path d="M5 21V5h10v16M15 10h4v11"/><path d="M8 9h4M8 13h4M8 17h4"/>',
+    bulk:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/>',
+    drm:'<path d="m12 3 8 9-8 9-8-9 8-9Z"/><path d="M8 12h8"/>',
+    master:'<path d="M5 5h14v14H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>'
+  };
+  function svg(name){return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+(icons[name]||icons.more)+'</svg>'}
+  function current(){return String(location.hash||'#single').replace(/^#/,'').split(/[?&/]/)[0].toLowerCase()||'single'}
+  function go(r){if(window.pmnoNavigate)window.pmnoNavigate(r);else location.hash='#'+r}
+  function navItems(){return [['home','Home','home'],['single','Analyze','analyze'],['dashboard','Insights','insights'],['more','More','more']]}
+  function removeOld(){document.querySelectorAll('.pmno-global-nav,.pmno-more-sheet').forEach(x=>x.remove())}
+  function shell(){
+    if(document.querySelector('.pm13-sidebar'))return;
+    const side=document.createElement('aside');side.className='pm13-sidebar';side.innerHTML=`<div class="pm13-brand"><div class="pm13-mark">PM</div><div><strong>PMNO</strong><small>ASSET INTELLIGENCE</small></div></div><div class="pm13-nav-label">WORKSPACE</div><div class="pm13-nav" data-main-nav></div><div class="pm13-nav-label">DATA</div><div class="pm13-nav" data-data-nav></div><div class="pm13-sidebar-footer"><div class="pm13-status"><i></i>PMNO ENGINE ONLINE</div></div>`;
+    const main=side.querySelector('[data-main-nav]');[['home','Home','home'],['single','Analyze','analyze'],['dashboard','Insights','insights']].forEach(([r,l,i])=>{const b=document.createElement('button');b.dataset.route=r;b.innerHTML=svg(i)+'<span>'+l+'</span>';main.appendChild(b)});
+    const data=side.querySelector('[data-data-nav]');[['assetprofile','Asset Profile','asset'],['siteprofile','Site Profile','site'],['bulk','Bulk Analyzer','bulk'],['drm','DRM','drm'],['master','Master Data','master']].forEach(([r,l,i])=>{const b=document.createElement('button');b.dataset.route=r;b.innerHTML=svg(i)+'<span>'+l+'</span>';data.appendChild(b)});
+    side.addEventListener('click',e=>{const b=e.target.closest('[data-route]');if(b)go(b.dataset.route)});document.body.appendChild(side);
+    const mobile=document.createElement('div');mobile.className='pm13-mobile-head';mobile.innerHTML='<div class="pm13-mobile-brand"><span class="mark">PM</span><span>PMNO</span></div><button aria-label="Profile">Y</button>';document.body.appendChild(mobile);
+    const bottom=document.createElement('nav');bottom.className='pm13-bottom';navItems().forEach(([r,l,i])=>{const b=document.createElement('button');b.dataset.route=r;b.innerHTML=svg(i)+'<span>'+l+'</span>';bottom.appendChild(b)});bottom.addEventListener('click',e=>{const b=e.target.closest('[data-route]');if(!b)return; if(b.dataset.route==='more'){more();return}go(b.dataset.route)});document.body.appendChild(bottom);
+  }
+  function more(){let s=document.querySelector('.pm13-more');if(!s){s=document.createElement('div');s.className='pm13-more';s.innerHTML=`<div class="pm13-more-card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px"><strong style="font-size:18px">Explore PMNO</strong><button data-close style="width:34px;height:34px;border:0;border-radius:50%;background:#f2f4f7;font-size:20px">×</button></div><div class="pm13-more-grid">${[['assetprofile','Asset Profile','asset'],['siteprofile','Site Profile','site'],['bulk','Bulk Analyzer','bulk'],['drm','DRM','drm'],['master','Master Data','master']].map(([r,l,i])=>`<button data-route="${r}">${svg(i)}<span>${l}</span></button>`).join('')}</div></div>`;document.body.appendChild(s);s.style.cssText='position:fixed;inset:0;z-index:9000;background:rgba(15,25,38,.28);backdrop-filter:blur(7px);display:flex;align-items:flex-end;justify-content:center;padding:12px';s.querySelector('.pm13-more-card').style.cssText='width:min(560px,100%);background:#fff;border-radius:26px;padding:20px;box-shadow:0 25px 70px rgba(0,0,0,.22)';s.querySelector('.pm13-more-grid').style.cssText='display:grid;grid-template-columns:repeat(3,1fr);gap:10px';s.querySelectorAll('.pm13-more-grid button').forEach(b=>{b.style.cssText='border:1px solid #e6ebf0;background:#fff;border-radius:16px;padding:15px 8px;color:#344154;display:flex;flex-direction:column;align-items:center;gap:8px;font:800 10px inherit';b.querySelector('svg').style.cssText='width:25px;height:25px;color:#079fd4'});s.addEventListener('click',e=>{if(e.target===s||e.target.closest('[data-close]'))s.remove();const b=e.target.closest('[data-route]');if(b){s.remove();go(b.dataset.route)}})}else s.remove()}
+  function update(){const r=current();document.querySelectorAll('.pm13-nav button,.pm13-bottom button').forEach(b=>b.classList.toggle('active',b.dataset.route===r||(r==='assetprofile'&&b.dataset.route==='dashboard')||(r==='siteprofile'&&b.dataset.route==='dashboard')||(r==='bulk'&&b.dataset.route==='single')||(r==='drm'&&b.dataset.route==='single')||(r==='master'&&b.dataset.route==='home')))}
+  function init(){removeOld();shell();update()}
+  document.addEventListener('DOMContentLoaded',init);window.addEventListener('hashchange',update);setTimeout(init,0);
+})();
+</script>
+<style id="pmno-product-design-v13-more-css">
+@media(min-width:761px){.pm13-bottom{display:none!important}.pm13-mobile-head{display:none!important}.pm13-more{display:none!important}}
+@media(max-width:760px){.pm13-more{display:flex!important}.pm13-more-grid button svg{width:25px!important;height:25px!important;color:#079fd4!important}.pm13-more-grid button span{font-size:10px!important}.pm13-more-card{margin-bottom:2px!important}}
+</style>
+<style id="pmno-product-design-v13-layout-fix">
+@media(min-width:761px){
+ body.pmno-page-home #pmnoHomeView{margin-left:236px!important;padding-left:34px!important;padding-right:34px!important;max-width:none!important}
+ body.pmno-page-single .workspace{margin-left:236px!important;width:calc(100% - 236px)!important}
+}
+@media(max-width:760px){body.pmno-page-single .workspace{margin-left:0!important;width:100%!important}.pmno-home{margin-left:0!important}}
+</style>
