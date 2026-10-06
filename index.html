@@ -6133,3 +6133,135 @@ body.pmno-page-single .detail-panel{
 <style id="pmno-customer-lease-expiry-detail-v2">
 .cust-expiry-summary{margin-top:12px;padding:13px;border:1px solid #24445d;border-radius:10px;background:#071827}.cust-expiry-summary-main span{display:block;color:#9db0bf;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-summary-main b{display:block;color:#d4af37;font-size:28px;margin-top:4px}.cust-expiry-summary-main small{display:block;color:#71899c;font-size:8px;margin-top:3px}.cust-expiry-summary-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cust-expiry-summary-pills .cust-tenant-pill.muted{border-color:#34495b}.cust-expiry-summary-pills .cust-tenant-pill.muted em{color:#9db0bf}.cust-expiry-year.current{border-color:#5b4a25}.cust-expiry-years{display:grid;gap:10px;margin-top:12px}.cust-expiry-year{border:1px solid #203b55;border-radius:10px;background:#071321;padding:13px}.cust-expiry-year.current{border-color:#5b4a25}.cust-expiry-year-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cust-expiry-year-head .year{display:block;color:#71899c;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-year-head b{display:block;font-size:25px;margin-top:4px;color:#dce8f2}.cust-expiry-year.current .cust-expiry-year-head b{color:#d4af37}.cust-expiry-year-head small{display:block;color:#71899c;font-size:8px;margin-top:3px}.cust-expiry-year-meta{font-size:8px;color:#71899c;padding-top:2px;white-space:nowrap}.cust-expiry-tenants{margin-top:12px;padding-top:10px;border-top:1px solid #193148}.cust-expiry-label{display:block;color:#71899c;font-size:7px;font-weight:900;letter-spacing:.14em;margin-bottom:7px}.cust-tenant-pills{display:flex;flex-wrap:wrap;gap:5px}.cust-tenant-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid #24445d;border-radius:999px;background:#091a29;color:#9db0bf;font-size:8px}.cust-tenant-pill strong{color:#dce8f2;font-size:8px}.cust-tenant-pill em{font-style:normal;color:#42b9f4;font-weight:900}.cust-expiry-months{margin-top:12px}.cust-month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.cust-month{padding:7px;border:1px solid #173249;border-radius:7px;background:#081827}.cust-month-top{display:flex;justify-content:space-between;gap:5px;align-items:center;color:#71899c;font-size:7px}.cust-month-top b{color:#dce8f2;font-size:9px}.cust-month-track{height:4px;margin-top:6px;border-radius:99px;background:#10283c;overflow:hidden}.cust-month-track i{display:block;height:100%;border-radius:99px;background:#42b9f4}.cust-expiry-year.current .cust-month-track i{background:#d4af37}@media(max-width:600px){.cust-expiry-year-head{display:block}.cust-expiry-year-meta{margin-top:7px}.cust-month-grid{grid-template-columns:repeat(3,1fr)}.cust-tenant-pills{max-height:112px;overflow:auto;padding-right:2px}.cust-tenant-pill{font-size:7px}.cust-tenant-pill strong{font-size:7px}}
 </style>
+<style id="pmno-icon-system-v10">
+/* V10 — replace placeholder glyphs with a consistent modern app icon system */
+.gh-icon,.gh-tool-row i,.gh-recent-icon,.gh-bottom-nav i,.gh-promo-art>span{font-size:0!important;font-family:inherit!important;display:grid!important;place-items:center!important;position:relative!important}
+.gh-icon::before,.gh-tool-row i::before,.gh-recent-icon::before,.gh-bottom-nav i::before,.gh-promo-art>span::before{content:"";display:block;width:30px;height:30px;background:currentColor;-webkit-mask:var(--pmno-icon) center/contain no-repeat;mask:var(--pmno-icon) center/contain no-repeat}
+.gh-icon{color:#159ed1!important}
+/* target / single site */
+.gh-primary-grid button:nth-child(1) .gh-icon,.gh-recent-icon.cyan{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round'%3E%3Ccircle cx='24' cy='24' r='9'/%3E%3Cpath d='M24 4v11M24 33v11M4 24h11M33 24h11'/%3E%3C/svg%3E")}
+/* grid / bulk */
+.gh-primary-grid button:nth-child(2) .gh-icon,.gh-recent-icon.orange{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.6' stroke-linejoin='round'%3E%3Crect x='6' y='6' width='36' height='36' rx='4'/%3E%3Cpath d='M18 6v36M30 6v36M6 18h36M6 30h36'/%3E%3C/svg%3E")}
+/* analytics */
+.gh-primary-grid button:nth-child(3) .gh-icon{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 39V26M20 39V18M32 39V9M44 39H5'/%3E%3C/svg%3E")}
+/* decision / DRM */
+.gh-primary-grid button:nth-child(4) .gh-icon{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linejoin='round'%3E%3Cpath d='M24 5 41 24 24 43 7 24 24 5Z'/%3E%3Cpath d='M24 14v20M14 24h20'/%3E%3C/svg%3E")}
+/* secondary tools */
+.gh-tool-row button:nth-child(1) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linejoin='round'%3E%3Cpath d='M10 15 24 7l14 8v18L24 41 10 33V15Z'/%3E%3Cpath d='m10 15 14 8 14-8M24 23v18'/%3E%3C/svg%3E")}
+.gh-tool-row button:nth-child(2) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 41V20l14-12 14 12v21'/%3E%3Cpath d='M18 41V29h12v12M6 41h36'/%3E%3C/svg%3E")}
+.gh-tool-row button:nth-child(3) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linecap='round'%3E%3Cpath d='M8 12h32M8 24h32M8 36h32'/%3E%3Ccircle cx='14' cy='12' r='1.5' fill='black'/%3E%3Ccircle cx='14' cy='24' r='1.5' fill='black'/%3E%3Ccircle cx='14' cy='36' r='1.5' fill='black'/%3E%3C/svg%3E")}
+.gh-tool-row button:nth-child(4) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='2.8' stroke-linejoin='round'%3E%3Cpath d='M7 34 17 24l7 6 10-14 7 7'/%3E%3Cpath d='M7 40h34'/%3E%3C/svg%3E")}
+/* bottom navigation */
+.gh-bottom-nav button:nth-child(1) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='3' stroke-linejoin='round'%3E%3Cpath d='m8 22 16-14 16 14v19H29V29h-10v12H8V22Z'/%3E%3C/svg%3E")}
+.gh-bottom-nav button:nth-child(2) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Ccircle cx='24' cy='24' r='8'/%3E%3Cpath d='M24 5v11M24 32v11M5 24h11M32 24h11'/%3E%3C/svg%3E")}
+.gh-bottom-nav button:nth-child(3) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='3' stroke-linejoin='round'%3E%3Cpath d='M24 5 41 24 24 43 7 24 24 5Z'/%3E%3Cpath d='M15 24h18'/%3E%3C/svg%3E")}
+.gh-bottom-nav button:nth-child(4) i{--pmno-icon:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='black' stroke-width='3' stroke-linecap='round'%3E%3Cpath d='M8 12h32M8 24h32M8 36h32'/%3E%3C/svg%3E")}
+.gh-icon::before{width:29px;height:29px}
+.gh-tool-row i::before{width:27px;height:27px}
+.gh-recent-icon::before{width:22px;height:22px}
+.gh-bottom-nav i::before{width:24px;height:24px}
+.gh-promo-art>span::before{width:38px;height:38px}
+/* cleaner, more premium icon containers */
+.gh-primary-grid .gh-icon{box-shadow:inset 0 0 0 1px rgba(255,255,255,.35)}
+.gh-primary-grid button:hover .gh-icon{transform:scale(1.06);transition:transform .18s ease}
+</style>
+<style id="pmno-premium-shell-v11">
+/* PMNO PREMIUM APP SHELL — visual layer only; existing routes/content remain intact */
+:root{--p-bg:#f6f8fb;--p-surface:#fff;--p-ink:#172033;--p-muted:#78859a;--p-blue:#08a8e6;--p-blue2:#0a8fd0;--p-line:#e7edf3;--p-shadow:0 16px 45px rgba(23,32,51,.08);--p-radius:24px}
+body.pmno-page-home{background:var(--p-bg)!important;color:var(--p-ink)!important}
+body.pmno-page-home .app{display:block!important;min-height:100dvh!important;background:var(--p-bg)!important}
+body.pmno-page-home #pmnoTopbar{display:none!important}
+body.pmno-page-home .pmno-home{display:block!important;max-width:1180px!important;margin:0 auto!important;padding:28px 32px 110px!important;min-height:100dvh!important;background:var(--p-bg)!important}
+/* premium app header */
+body.pmno-page-home .pmno-home:before{content:"PMNO";display:flex;align-items:center;justify-content:center;width:42px;height:42px;margin:0 0 34px;border-radius:13px;background:#172033;color:#fff;font-size:13px;font-weight:900;letter-spacing:.08em;box-shadow:0 8px 18px rgba(23,32,51,.15)}
+body.pmno-page-home .gh-head{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important;margin:0 0 22px!important}
+body.pmno-page-home .gh-eyebrow{font-size:10px!important;letter-spacing:.18em!important;color:#98a4b5!important;font-weight:900!important;margin-bottom:8px!important}
+body.pmno-page-home .gh-head h1{font-size:34px!important;line-height:1.05!important;letter-spacing:-1.4px!important;margin:0!important;color:var(--p-ink)!important;font-weight:800!important}
+body.pmno-page-home .gh-head h1 span{font-size:.72em!important;filter:saturate(.8)!important}
+body.pmno-page-home .gh-head p{font-size:15px!important;color:var(--p-muted)!important;margin:9px 0 0!important}
+body.pmno-page-home .gh-avatar{width:48px!important;height:48px!important;border:0!important;border-radius:50%!important;background:#172033!important;color:#fff!important;font-size:15px!important;font-weight:800!important;box-shadow:0 8px 20px rgba(23,32,51,.12)!important}
+/* search */
+body.pmno-page-home .gh-search{height:58px!important;border:1px solid var(--p-line)!important;background:#fff!important;border-radius:18px!important;box-shadow:0 8px 28px rgba(23,32,51,.045)!important;display:flex!important;align-items:center!important;padding:0 18px!important;margin:0 0 34px!important}
+body.pmno-page-home .gh-search span{font-size:0!important;width:20px!important;height:20px!important;margin-right:11px!important;position:relative!important}
+body.pmno-page-home .gh-search span:before{content:"";position:absolute;inset:2px;border:2px solid #91a0b2;border-radius:50%}
+body.pmno-page-home .gh-search span:after{content:"";position:absolute;width:7px;height:2px;background:#91a0b2;right:0;bottom:2px;transform:rotate(45deg);border-radius:2px}
+body.pmno-page-home .gh-search input{font-size:14px!important;color:var(--p-ink)!important}
+body.pmno-page-home .gh-search input::placeholder{color:#a6afbb!important}
+/* sections */
+body.pmno-page-home .gh-section{margin:0 0 34px!important}
+body.pmno-page-home .gh-section-head{display:flex!important;align-items:baseline!important;justify-content:space-between!important;margin:0 0 18px!important}
+body.pmno-page-home .gh-section-head h2{font-size:21px!important;letter-spacing:-.55px!important;color:var(--p-ink)!important;margin:0!important;font-weight:800!important}
+body.pmno-page-home .gh-section-head button{border:0!important;background:none!important;color:var(--p-blue2)!important;font-size:12px!important;font-weight:800!important;padding:0!important}
+/* service icons: no card tiles */
+body.pmno-page-home .gh-primary-grid{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+body.pmno-page-home .gh-primary-grid button{border:0!important;background:transparent!important;padding:0!important;min-width:0!important}
+body.pmno-page-home .gh-primary-grid .gh-icon{width:64px!important;height:64px!important;border-radius:20px!important;margin:0 auto 11px!important;box-shadow:none!important;transition:transform .18s ease!important}
+body.pmno-page-home .gh-primary-grid button:nth-child(1) .gh-icon{background:#e5f7fc!important;color:#079fda!important}
+body.pmno-page-home .gh-primary-grid button:nth-child(2) .gh-icon{background:#fff0df!important;color:#ed9418!important}
+body.pmno-page-home .gh-primary-grid button:nth-child(3) .gh-icon{background:#e7f8ef!important;color:#16a968!important}
+body.pmno-page-home .gh-primary-grid button:nth-child(4) .gh-icon{background:#eeeaff!important;color:#7458e9!important}
+body.pmno-page-home .gh-primary-grid button:hover .gh-icon{transform:translateY(-3px)!important}
+body.pmno-page-home .gh-primary-grid .gh-icon:before{width:31px!important;height:31px!important}
+body.pmno-page-home .gh-primary-grid strong{font-size:12px!important;line-height:1.2!important;color:#243044!important;font-weight:800!important}
+body.pmno-page-home .gh-primary-grid small{font-size:10px!important;color:#8c98aa!important;margin-top:4px!important}
+/* hero — premium, less dashboard */
+body.pmno-page-home .gh-promo{min-height:205px!important;border:0!important;border-radius:28px!important;margin:0 0 36px!important;padding:30px 32px!important;background:linear-gradient(120deg,#132238 0%,#12364b 48%,#0d86a8 100%)!important;box-shadow:0 20px 45px rgba(16,48,70,.15)!important}
+body.pmno-page-home .gh-promo span{font-size:9px!important;letter-spacing:.18em!important;color:#62d5f7!important}
+body.pmno-page-home .gh-promo h3{font-size:28px!important;line-height:1.08!important;letter-spacing:-1px!important;margin:10px 0 9px!important}
+body.pmno-page-home .gh-promo p{font-size:12px!important;line-height:1.55!important;max-width:390px!important;color:#c4d5df!important;margin-bottom:20px!important}
+body.pmno-page-home .gh-promo b{font-size:12px!important}
+body.pmno-page-home .gh-promo-art{width:260px!important}
+body.pmno-page-home .gh-promo-art span{width:72px!important;height:72px!important;border-radius:24px!important;right:70px!important;top:53px!important;background:#28b9ed!important}
+body.pmno-page-home .gh-promo-art span:before{width:42px!important;height:42px!important}
+/* explore: icon-only row */
+body.pmno-page-home .gh-tool-row{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+body.pmno-page-home .gh-tool-row button{border:0!important;background:transparent!important;box-shadow:none!important;padding:0!important;display:flex!important;flex-direction:column!important;align-items:center!important;gap:8px!important;text-align:center!important}
+body.pmno-page-home .gh-tool-row i{width:52px!important;height:52px!important;border-radius:17px!important}
+body.pmno-page-home .gh-tool-row i:before{width:25px!important;height:25px!important}
+body.pmno-page-home .gh-tool-row span{font-size:10px!important;color:#59667a!important;font-weight:800!important;line-height:1.2!important}
+/* recent */
+body.pmno-page-home .gh-recent{background:#fff!important;border:1px solid var(--p-line)!important;border-radius:22px!important;padding:20px!important;box-shadow:var(--p-shadow)!important;margin-top:0!important}
+body.pmno-page-home .gh-recent>button{min-height:58px!important;border:0!important;border-top:1px solid #edf1f5!important;background:transparent!important;padding:12px 0!important;display:flex!important;align-items:center!important;gap:12px!important;width:100%!important;text-align:left!important}
+body.pmno-page-home .gh-recent>button:first-of-type{border-top:0!important}
+body.pmno-page-home .gh-recent-icon{width:40px!important;height:40px!important;border-radius:13px!important;flex:none!important}
+body.pmno-page-home .gh-recent button div{min-width:0!important;flex:1!important}
+body.pmno-page-home .gh-recent button strong{display:block!important;font-size:12px!important;color:#263247!important}
+body.pmno-page-home .gh-recent button small{display:block!important;font-size:10px!important;color:#8c98aa!important;margin-top:3px!important}
+body.pmno-page-home .gh-recent button>b{color:#a1acba!important;font-size:20px!important}
+/* desktop composition */
+@media(min-width:900px){
+ body.pmno-page-home .pmno-home{display:grid!important;grid-template-columns:minmax(0,1fr) 390px!important;column-gap:46px!important;align-content:start!important}
+ body.pmno-page-home .pmno-home:before{grid-column:1/-1!important}
+ body.pmno-page-home .gh-head,body.pmno-page-home .gh-search,body.pmno-page-home .gh-section:first-of-type{grid-column:1/-1!important}
+ body.pmno-page-home .gh-promo{grid-column:1!important;grid-row:5 / span 2!important;margin:0!important;height:100%!important}
+ body.pmno-page-home .gh-tools{grid-column:2!important;grid-row:5!important;margin:0!important}
+ body.pmno-page-home .gh-recent{grid-column:2!important;grid-row:6!important;margin-top:10px!important}
+ body.pmno-page-home .gh-bottom-nav{display:none!important}
+}
+/* mobile app polish */
+@media(max-width:760px){
+ body.pmno-page-home .pmno-home{padding:22px 18px 104px!important}
+ body.pmno-page-home .pmno-home:before{margin-bottom:28px!important;width:40px!important;height:40px!important}
+ body.pmno-page-home .gh-head h1{font-size:29px!important}
+ body.pmno-page-home .gh-head p{font-size:14px!important}
+ body.pmno-page-home .gh-search{height:54px!important;margin-bottom:30px!important}
+ body.pmno-page-home .gh-section{margin-bottom:30px!important}
+ body.pmno-page-home .gh-section-head h2{font-size:20px!important}
+ body.pmno-page-home .gh-primary-grid{gap:5px!important}
+ body.pmno-page-home .gh-primary-grid .gh-icon{width:58px!important;height:58px!important;border-radius:19px!important}
+ body.pmno-page-home .gh-primary-grid .gh-icon:before{width:28px!important;height:28px!important}
+ body.pmno-page-home .gh-primary-grid strong{font-size:11px!important}
+ body.pmno-page-home .gh-primary-grid small{display:none!important}
+ body.pmno-page-home .gh-promo{min-height:190px!important;padding:25px 22px!important;border-radius:25px!important}
+ body.pmno-page-home .gh-promo h3{font-size:24px!important}
+ body.pmno-page-home .gh-promo p{font-size:10.5px!important;max-width:215px!important}
+ body.pmno-page-home .gh-promo-art{width:115px!important}
+ body.pmno-page-home .gh-promo-art span{right:8px!important;top:54px!important;width:58px!important;height:58px!important;border-radius:19px!important}
+ body.pmno-page-home .gh-tool-row{gap:3px!important}
+ body.pmno-page-home .gh-tool-row i{width:48px!important;height:48px!important;border-radius:16px!important}
+ body.pmno-page-home .gh-tool-row span{font-size:9px!important}
+ body.pmno-page-home .gh-bottom-nav{left:14px!important;right:14px!important;bottom:14px!important;height:68px!important;border-radius:23px!important;background:rgba(255,255,255,.94)!important;box-shadow:0 15px 40px rgba(23,32,51,.14)!important}
+ body.pmno-page-home .gh-bottom-nav button{font-size:9px!important}
+}
+</style>
+<script>window.__PMNO_BUILD__="PREMIUM-APP-SHELL-V11";</script>
