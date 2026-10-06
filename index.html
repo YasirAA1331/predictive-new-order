@@ -6265,3 +6265,142 @@ body.pmno-page-home .gh-recent button>b{color:#a1acba!important;font-size:20px!i
 }
 </style>
 <script>window.__PMNO_BUILD__="PREMIUM-APP-SHELL-V11";</script>
+<style id="pmno-premium-shell-v12">
+/* PMNO V12 — premium application shell. Visual layer only; existing routes/data untouched. */
+:root{--ui-bg:#f5f7fa;--ui-surface:#fff;--ui-ink:#172033;--ui-muted:#7b8799;--ui-line:#e7ecf1;--ui-cyan:#08a9df;--ui-cyan-soft:#e7f7fc;--ui-shadow:0 12px 34px rgba(18,31,48,.07)}
+html,body{background:var(--ui-bg)!important;color:var(--ui-ink)!important}
+body{font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+/* Kill the old enterprise navigation everywhere. */
+.mode-menu,.pmno-legacy-nav{display:none!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .topbar{position:sticky!important;top:0!important;z-index:1000!important;height:72px!important;min-height:72px!important;padding:0 30px!important;background:rgba(255,255,255,.94)!important;border-bottom:1px solid var(--ui-line)!important;box-shadow:0 4px 18px rgba(20,30,45,.035)!important;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:20px!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .pmno-app-brand{min-width:0}
+body:not(.pmno-page-single):not(.pmno-page-home) .pmno-brand-mark{width:38px;height:38px;border-radius:12px;background:var(--ui-ink);font-size:15px;box-shadow:0 7px 18px rgba(23,32,51,.13)}
+body:not(.pmno-page-single):not(.pmno-page-home) .brand-kicker{display:block!important;font-size:8px!important;letter-spacing:.16em!important;color:#99a4b3!important;font-weight:800!important;margin-bottom:3px!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .brand-title{font-size:18px!important;line-height:1!important;color:var(--ui-ink)!important;font-weight:650!important;white-space:nowrap!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .brand-title b{color:var(--ui-cyan)!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .pmno-top-actions{margin-left:auto!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .pmno-home-top{height:38px!important;padding:0 15px!important;background:#f0f9fc!important;color:#079fd4!important;border:1px solid #d9f0f7!important;font-size:12px!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .pmno-bell{width:38px!important;height:38px!important;background:#f5f7f9!important;border:1px solid var(--ui-line)!important;font-size:17px!important}
+body:not(.pmno-page-single):not(.pmno-page-home) .pmno-avatar{width:38px!important;height:38px!important;background:var(--ui-ink)!important}
+/* Universal content canvas */
+body:not(.pmno-page-home) .dashboard-view,body:not(.pmno-page-home) .asset-profile-page,body:not(.pmno-page-home) .bulk-view,body:not(.pmno-page-home) .drm-view,body:not(.pmno-page-home) .master-view{background:var(--ui-bg)!important;color:var(--ui-ink)!important}
+/* Dashboard / profile headers */
+.dash-shell,.asset-page-shell,.bulk-view .wrap,.master-shell{max-width:1440px!important;margin:0 auto!important}
+.dash-head,.asset-page-head,.master-head{background:transparent!important;border:0!important;padding:32px 32px 22px!important}
+.dash-kicker,.asset-page-kicker,.master-kicker{font-size:10px!important;letter-spacing:.17em!important;color:#97a3b3!important;font-weight:850!important}
+.dash-title,.asset-page-title,.master-title{font-size:34px!important;line-height:1.08!important;letter-spacing:-1.4px!important;color:var(--ui-ink)!important;font-weight:850!important}
+.dash-title b,.asset-page-title b{color:var(--ui-cyan)!important}
+.dash-sub,.asset-page-sub,.master-sub{font-size:14px!important;color:var(--ui-muted)!important;margin-top:9px!important;line-height:1.5!important}
+.dash-actions,.asset-page-actions{gap:9px!important}
+.dash-btn{min-height:44px!important;border-radius:13px!important;border:1px solid #dce4eb!important;background:#fff!important;color:#3c4a5d!important;font-size:11px!important;font-weight:800!important;box-shadow:0 4px 12px rgba(20,30,45,.04)!important}
+.dash-btn.primary{background:var(--ui-cyan)!important;border-color:var(--ui-cyan)!important;color:#fff!important}
+.dash-filterbar,.asset-page-filterbar{margin:0 32px 22px!important;padding:18px!important;background:#fff!important;border:1px solid var(--ui-line)!important;border-radius:18px!important;box-shadow:var(--ui-shadow)!important}
+.dash-filterbar label,.asset-page-filterbar label{font-size:10px!important;color:#7c8797!important;font-weight:800!important;letter-spacing:.08em!important}
+.dash-filterbar select,.dash-filterbar input,.asset-page-filterbar select,.asset-page-filterbar input{height:46px!important;border:1px solid #dfe5eb!important;border-radius:12px!important;background:#fff!important;color:var(--ui-ink)!important;font-size:13px!important;padding:0 13px!important}
+.dash-card{background:#fff!important;border:1px solid var(--ui-line)!important;border-radius:20px!important;box-shadow:var(--ui-shadow)!important;color:var(--ui-ink)!important}
+.dash-card-head{border-bottom:1px solid #edf1f4!important;background:transparent!important;padding:18px 20px!important}
+.dash-card-head strong,.hub-section-head strong{color:var(--ui-ink)!important}
+.dash-card-head small,.hub-section-head small{color:#8a95a5!important}
+/* Asset profile: remove the old navy slab. */
+.asset-profile-page{min-height:calc(100dvh - 72px)!important;padding-bottom:90px!important}
+.asset-page-shell{padding-bottom:60px!important}
+#asset-profile-page-content{padding:0 32px!important}
+.asset-page-shell .asset-page-filterbar{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr)) minmax(220px,1.4fr)!important;gap:12px!important}
+/* Bulk */
+.bulk-view{padding-bottom:90px!important}
+.bulk-view>header.top{max-width:1440px!important;margin:0 auto!important;padding:34px 32px 20px!important;background:transparent!important;border:0!important}
+.bulk-view>header.top .kicker{font-size:10px!important;letter-spacing:.17em!important;color:#97a3b3!important;font-weight:850!important}
+.bulk-view>header.top .title{font-size:34px!important;color:var(--ui-ink)!important;font-weight:850!important;letter-spacing:-1.4px!important}
+.bulk-view>header.top .title b{color:var(--ui-cyan)!important}
+.bulk-view .wrap{padding:0 32px 50px!important}
+.bulk-view .toolbar{display:flex!important;flex-wrap:wrap!important;gap:10px!important;margin-bottom:14px!important}
+.bulk-view .btn{min-height:44px!important;border-radius:13px!important;border:1px solid #dce4eb!important;background:#fff!important;color:#3e4b5c!important;font-size:11px!important;font-weight:800!important;box-shadow:0 4px 12px rgba(20,30,45,.035)!important}
+.bulk-view .btn.primary{background:var(--ui-cyan)!important;border-color:var(--ui-cyan)!important;color:#fff!important}
+.bulk-view .summary{gap:12px!important}
+.bulk-view .kpi{background:#fff!important;border:1px solid var(--ui-line)!important;border-radius:18px!important;box-shadow:var(--ui-shadow)!important;padding:18px!important}
+.bulk-view .kpi span{font-size:9px!important;color:#8995a5!important;letter-spacing:.12em!important}
+.bulk-view .kpi b{font-size:28px!important;color:var(--ui-ink)!important;margin-top:8px!important}
+.bulk-view .bulk-table-wrap{background:#fff!important;border:1px solid var(--ui-line)!important;border-radius:20px!important;box-shadow:var(--ui-shadow)!important;overflow:hidden!important}
+/* DRM / Master light canvas without touching functional tables. */
+.drm-view{padding-bottom:90px!important}
+.drm-view .drm-head,.drm-view .drm-hero{background:transparent!important;border:0!important}
+.drm-view .drm-card{background:#fff!important;border:1px solid var(--ui-line)!important;border-radius:20px!important;box-shadow:var(--ui-shadow)!important}
+.master-view{padding-bottom:90px!important}
+.master-shell{padding:0 32px 60px!important}
+.master-head{padding-left:0!important;padding-right:0!important}
+.master-engine{background:#eaf8f1!important;border:1px solid #d5efe1!important;color:#138a5b!important;border-radius:999px!important}
+/* Existing Single Site stays functional, but adopts the same app surface. */
+body.pmno-page-single .topbar{height:64px!important;min-height:64px!important;background:#fff!important;color:var(--ui-ink)!important;border-bottom:1px solid var(--ui-line)!important}
+body.pmno-page-single .pmno-home-top{display:inline-flex!important}
+/* Global mobile navigation */
+.pmno-global-nav{display:none}
+.pmno-more-sheet{display:none}
+@media(max-width:760px){
+  body:not(.pmno-page-home) .topbar{height:64px!important;min-height:64px!important;padding:0 16px!important}
+  body:not(.pmno-page-home) .brand-kicker{display:none!important}
+  body:not(.pmno-page-home) .brand-title{font-size:16px!important}
+  body:not(.pmno-page-home) .pmno-brand-mark{width:34px!important;height:34px!important}
+  body:not(.pmno-page-home) .pmno-home-top{font-size:0!important;width:36px!important;padding:0!important;border-radius:12px!important;position:relative!important}
+  body:not(.pmno-page-home) .pmno-home-top:before{content:"";position:absolute;width:15px;height:15px;left:10px;top:10px;border-left:2px solid #079fd4;border-bottom:2px solid #079fd4;transform:rotate(45deg)}
+  .dash-head,.asset-page-head,.master-head{padding:24px 18px 18px!important}
+  .dash-title,.asset-page-title,.master-title,.bulk-view>header.top .title{font-size:28px!important}
+  .dash-sub,.asset-page-sub,.master-sub{font-size:13px!important}
+  .dash-actions,.asset-page-actions{display:grid!important;grid-template-columns:1fr 1fr!important;margin-top:16px!important}
+  .dash-filterbar,.asset-page-filterbar{margin:0 16px 16px!important;padding:14px!important;border-radius:16px!important;grid-template-columns:1fr 1fr!important}
+  .asset-page-shell .asset-page-filterbar{grid-template-columns:1fr 1fr!important}
+  #asset-profile-page-content{padding:0 16px!important}
+  .dash-shell{padding-bottom:85px!important}
+  .bulk-view>header.top{padding:24px 18px 18px!important}
+  .bulk-view .wrap{padding:0 16px 80px!important}
+  .bulk-view .toolbar{display:grid!important;grid-template-columns:1fr 1fr!important}
+  .bulk-view .btn{width:100%!important}
+  .bulk-view .summary{grid-template-columns:1fr 1fr!important}
+  .bulk-view .kpi{padding:15px!important}
+  .bulk-view .kpi b{font-size:24px!important}
+  .master-shell{padding:0 16px 80px!important}
+  .pmno-global-nav{position:fixed;display:grid;grid-template-columns:repeat(4,1fr);left:12px;right:12px;bottom:calc(10px + env(safe-area-inset-bottom));height:68px;padding:5px;z-index:5000;background:rgba(255,255,255,.96);border:1px solid rgba(220,228,236,.95);border-radius:22px;box-shadow:0 16px 42px rgba(20,32,48,.16);backdrop-filter:blur(18px)}
+  .pmno-global-nav button{border:0;background:transparent;border-radius:17px;color:#929dac;font-size:9px;font-weight:800;letter-spacing:.01em}
+  .pmno-global-nav button i{display:grid;place-items:center;width:25px;height:25px;margin:0 auto 2px;font-style:normal;font-size:0;position:relative}
+  .pmno-global-nav button i:before{content:"";width:21px;height:21px;background:currentColor;-webkit-mask:var(--nav-icon) center/contain no-repeat;mask:var(--nav-icon) center/contain no-repeat}
+  .pmno-global-nav button.active{background:#edf9fd;color:#069fd5}
+  .pmno-global-nav button.active i{color:#069fd5}
+  body:not(.pmno-page-home) .pmno-global-nav{display:grid!important}
+  body.pmno-page-single .mobile-nav{display:none!important}
+  body.pmno-page-home .gh-bottom-nav{display:none!important}
+  body.pmno-page-home .pmno-home{padding-bottom:105px!important}
+  body:not(.pmno-page-home) .dashboard-view,body:not(.pmno-page-home) .asset-profile-page,body:not(.pmno-page-home) .bulk-view,body:not(.pmno-page-home) .drm-view,body:not(.pmno-page-home) .master-view{padding-bottom:105px!important}
+  /* page content never hides underneath the floating nav */
+  body:not(.pmno-page-home) .asset-profile-page,body:not(.pmno-page-home) .bulk-view,body:not(.pmno-page-home) .drm-view,body:not(.pmno-page-home) .master-view,body:not(.pmno-page-home) .dashboard-view{min-height:calc(100dvh - 64px)!important}
+}
+@media(min-width:761px){
+  .pmno-global-nav{position:fixed;right:28px;top:17px;display:flex;gap:4px;z-index:1100;padding:4px;background:#f5f7f9;border:1px solid #e6ebf0;border-radius:14px}
+  .pmno-global-nav button{border:0;background:transparent;border-radius:10px;padding:8px 12px;color:#718095;font-size:10px;font-weight:800;cursor:pointer}
+  .pmno-global-nav button.active{background:#fff;color:#079fd4;box-shadow:0 3px 10px rgba(20,30,45,.07)}
+  .pmno-global-nav i{display:none}
+}
+/* More sheet */
+.pmno-more-sheet{position:fixed;inset:0;z-index:6000;background:rgba(12,22,35,.28);backdrop-filter:blur(5px);align-items:flex-end;justify-content:center}
+.pmno-more-sheet.open{display:flex}
+.pmno-more-card{width:min(560px,calc(100% - 24px));margin-bottom:12px;background:#fff;border-radius:26px;padding:20px;box-shadow:0 24px 70px rgba(10,20,30,.25)}
+.pmno-more-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}.pmno-more-head strong{font-size:18px}.pmno-more-close{border:0;background:#f1f4f7;width:34px;height:34px;border-radius:50%;font-size:20px;color:#647184}
+.pmno-more-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}.pmno-more-grid button{border:1px solid #e8edf2;background:#fff;border-radius:16px;padding:14px 8px;color:#344154;font-size:10px;font-weight:800}.pmno-more-grid button:hover{border-color:#bfe8f4;color:#079fd4}
+</style>
+<script id="pmno-premium-shell-v12-js">
+(function(){
+  const routeMap={home:'Home',single:'Analyze',dashboard:'Insights',assetprofile:'Asset Profile',siteprofile:'Site Profile',bulk:'Bulk Analyzer',drm:'DRM',master:'Master Data'};
+  function activeRoute(){return String(location.hash||'#single').replace('#','').split(/[?&/]/)[0].toLowerCase()||'single'}
+  function go(r){if(window.pmnoNavigate) window.pmnoNavigate(r); else location.hash='#'+r}
+  function iconSvg(name){const s={home:'<path d="M5 21h14V9L12 4 5 9v12Z"/><path d="M9 21v-6h6v6"/>',analyze:'<circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4"/>',insights:'<path d="M5 19V9M12 19V5M19 19v-7"/>',more:'<path d="M5 7h14M5 12h14M5 17h14"/>',asset:'<path d="m12 3 7 4v10l-7 4-7-4V7l7-4Z"/><path d="m5 7 7 4 7-4M12 11v10"/>',site:'<path d="M5 21V5h10v16M15 9h4v12M8 9h4M8 13h4M8 17h4"/>',bulk:'<rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 10h16M4 15h16M10 4v16M15 4v16"/>',drm:'<path d="m12 3 8 9-8 9-8-9 8-9Z"/><path d="M8 12h8"/>'};return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">${s[name]||s.more}</svg>`}
+  function inject(){
+    if(!document.querySelector('.pmno-global-nav')){
+      const nav=document.createElement('nav');nav.className='pmno-global-nav';nav.innerHTML=`<button data-nav="home"><i style="--nav-icon:url('data:image/svg+xml,${encodeURIComponent(iconSvg('home'))}')"></i><span>Home</span></button><button data-nav="single"><i style="--nav-icon:url('data:image/svg+xml,${encodeURIComponent(iconSvg('analyze'))}')"></i><span>Analyze</span></button><button data-nav="dashboard"><i style="--nav-icon:url('data:image/svg+xml,${encodeURIComponent(iconSvg('insights'))}')"></i><span>Insights</span></button><button data-nav="more"><i style="--nav-icon:url('data:image/svg+xml,${encodeURIComponent(iconSvg('more'))}')"></i><span>More</span></button>`;document.body.appendChild(nav);
+      nav.addEventListener('click',e=>{const b=e.target.closest('[data-nav]');if(!b)return;const r=b.dataset.nav;if(r==='more'){document.querySelector('.pmno-more-sheet')?.classList.add('open');return}go(r)});
+    }
+    if(!document.querySelector('.pmno-more-sheet')){
+      const sheet=document.createElement('div');sheet.className='pmno-more-sheet';sheet.innerHTML=`<div class="pmno-more-card"><div class="pmno-more-head"><strong>Explore PMNO</strong><button class="pmno-more-close">×</button></div><div class="pmno-more-grid"><button data-more-route="assetprofile">${iconSvg('asset')}<br>Asset Profile</button><button data-more-route="siteprofile">${iconSvg('site')}<br>Site Profile</button><button data-more-route="bulk">${iconSvg('bulk')}<br>Bulk Analyzer</button><button data-more-route="drm">${iconSvg('drm')}<br>DRM</button><button data-more-route="master">${iconSvg('more')}<br>Master Data</button></div></div>`;document.body.appendChild(sheet);sheet.addEventListener('click',e=>{if(e.target===sheet||e.target.closest('.pmno-more-close'))sheet.classList.remove('open');const b=e.target.closest('[data-more-route]');if(b){sheet.classList.remove('open');go(b.dataset.moreRoute)}});
+    }
+    const r=activeRoute();document.querySelectorAll('.pmno-global-nav [data-nav]').forEach(b=>b.classList.toggle('active',(r==='home'&&b.dataset.nav==='home')||(r==='single'&&b.dataset.nav==='single')||(r==='dashboard'&&b.dataset.nav==='dashboard')));
+  }
+  document.addEventListener('DOMContentLoaded',inject);window.addEventListener('hashchange',()=>setTimeout(inject,0));setTimeout(inject,0);
+})();
+</script>
