@@ -5901,6 +5901,149 @@ cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpS
 })();
 </script>
 
+
+<style id="pmno-home-v10-card-reference">
+/* V10 — KPI/card language based directly on the supplied reference:
+   solid status colors, compact horizontal cards, large type, restrained watermark. */
+
+body.pmno-page-home{background:#eef3f6!important}
+.pmno-home-v6{padding:18px 22px 26px!important;background:#eef3f6!important}
+.v6-shell{max-width:1240px!important;margin:0 auto!important;border-radius:18px!important;overflow:hidden!important;background:#fff!important;border:1px solid #dce6ec!important;box-shadow:0 8px 24px rgba(20,52,78,.08)!important}
+
+/* HERO */
+.v6-hero{height:220px!important;border-radius:0!important}
+.v6-hero-image{width:56%!important;opacity:.9!important;background-position:center 38%!important}
+.v6-hero-overlay{background:linear-gradient(90deg,#eef8fc 0%,#eef8fc 31%,rgba(238,248,252,.86) 48%,rgba(238,248,252,.18) 72%,rgba(238,248,252,0) 100%)!important}
+.v6-hero-content{padding:27px 46px!important}
+.v6-kicker{font-size:10px!important;letter-spacing:.30em!important;color:#244b70!important}
+.v6-hero h1{font-size:46px!important;line-height:.98!important;margin:6px 0 7px!important}
+.v6-hero p{font-size:14px!important;line-height:1.25!important;margin-bottom:14px!important;color:#617d96!important}
+.v6-search{height:56px!important;max-width:650px!important;border:1px solid #d6e1e8!important}
+
+/* PRIMARY — reference card language */
+.v6-primary{
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  padding:12px 28px 10px!important;
+  background:#fff!important;
+}
+.v6-service{
+  height:108px!important;
+  min-width:0!important;
+  border-radius:12px!important;
+  padding:15px 18px!important;
+  gap:12px!important;
+  border:1px solid rgba(0,0,0,.10)!important;
+  box-shadow:none!important;
+  align-items:center!important;
+}
+.v6-service::after{display:none!important}
+.v6-service.v6-blue{background:#07578f!important}
+.v6-service.v6-green{background:#0a9a83!important}
+.v6-service.v6-gold{background:#f0a500!important}
+.v6-service .v6-icon{
+  width:48px!important;height:48px!important;flex-basis:48px!important;
+  border-radius:10px!important;
+  background:rgba(255,255,255,.13)!important;
+  border:1px solid rgba(255,255,255,.25)!important;
+}
+.v6-service .v6-icon svg{width:31px!important;height:31px!important;stroke-width:2!important}
+.v6-service b{font-size:16px!important;line-height:1!important;letter-spacing:.01em!important}
+.v6-service small{font-size:9px!important;line-height:1.28!important;margin-top:6px!important;max-width:205px!important}
+.v6-service .v8-card-art{
+  width:135px!important;height:135px!important;
+  right:-4px!important;bottom:-35px!important;
+  opacity:.11!important;
+}
+
+/* SECONDARY — compact 4-up */
+.v6-secondary{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:9px!important;
+  padding:0 28px 12px!important;
+  background:#fff!important;
+}
+.v6-secondary button{
+  height:76px!important;
+  min-width:0!important;
+  border-radius:11px!important;
+  padding:10px 12px!important;
+  gap:8px!important;
+  box-shadow:none!important;
+}
+.v6-secondary .v6-mini{
+  width:42px!important;height:42px!important;flex-basis:42px!important;
+  border-radius:10px!important;
+}
+.v6-secondary .v6-mini svg{width:24px!important;height:24px!important}
+.v6-secondary b{font-size:10.5px!important;line-height:1.05!important;letter-spacing:.02em!important}
+.v6-secondary small{font-size:8px!important;line-height:1.2!important;margin-top:3px!important}
+.v6-secondary i{font-size:17px!important;margin-left:auto!important}
+.v6-secondary .v8-mini-art{opacity:.055!important}
+
+/* BOTTOM */
+.v6-bottom{
+  display:grid!important;
+  grid-template-columns:1.6fr 1.15fr .72fr!important;
+  gap:9px!important;
+  padding:12px 28px 18px!important;
+  background:#f7fafc!important;
+  border-top:1px solid #e3ebf0!important;
+}
+.v6-panel{border-radius:12px!important;box-shadow:none!important}
+
+/* Keep the visual density compact on phones: cards stay horizontal/short,
+   instead of becoming giant landing-page tiles. */
+@media(max-width:700px){
+  .pmno-home-v6{padding:0 0 14px!important}
+  .v6-shell{border-radius:0!important;border:0!important;box-shadow:none!important}
+  .v6-hero{height:250px!important}
+  .v6-hero-content{padding:25px 20px!important}
+  .v6-hero-image{width:62%!important}
+  .v6-hero h1{font-size:39px!important}
+  .v6-hero p{font-size:12.5px!important;max-width:310px!important}
+  .v6-search{height:55px!important;max-width:none!important}
+
+  .v6-primary{
+    grid-template-columns:1fr!important;
+    gap:9px!important;
+    padding:12px 26px 9px!important;
+  }
+  .v6-service{
+    height:98px!important;
+    border-radius:12px!important;
+    padding:12px 16px!important;
+  }
+  .v6-service .v6-icon{width:46px!important;height:46px!important;flex-basis:46px!important}
+  .v6-service b{font-size:16px!important}
+  .v6-service small{font-size:8.8px!important;max-width:250px!important}
+
+  .v6-secondary{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    gap:8px!important;
+    padding:0 26px 12px!important;
+  }
+  .v6-secondary button{height:74px!important;padding:9px 10px!important}
+  .v6-secondary .v6-mini{width:40px!important;height:40px!important;flex-basis:40px!important}
+  .v6-secondary b{font-size:10px!important}
+  .v6-secondary small{font-size:7.8px!important}
+
+  .v6-bottom{
+    grid-template-columns:1fr!important;
+    padding:10px 26px 16px!important;
+  }
+}
+
+/* Slightly wider compact desktop */
+@media(min-width:701px) and (max-width:1050px){
+  .v6-primary{padding-left:18px!important;padding-right:18px!important}
+  .v6-secondary{padding-left:18px!important;padding-right:18px!important}
+  .v6-bottom{padding-left:18px!important;padding-right:18px!important}
+}
+</style>
+
 </body>
 </html>
 
