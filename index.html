@@ -1628,6 +1628,139 @@ body.pmno-page-home .status-dot{background:#16b978!important;box-shadow:0 0 10px
 }
 </style>
 
+
+<style id="pmno-light-theme-v1">
+/* PMNO LIGHT APP THEME — home + all internal pages */
+body:not(.pmno-page-home){
+  --bg:#f5f7fa!important;--panel:#ffffff!important;--panel2:#ffffff!important;--line:#e5e9ef!important;
+  --text:#172033!important;--muted:#718096!important;--cyan:#12aee8!important;--green:#16a66b!important;
+  --red:#e24d61!important;--amber:#d89b20!important;--shadow:0 8px 28px rgba(20,35,55,.08)!important;
+  background:#f5f7fa!important;color:#172033!important;
+}
+body:not(.pmno-page-home) .app{background:#f5f7fa!important;color:#172033!important}
+body:not(.pmno-page-home) .topbar{background:#fff!important;border-bottom:1px solid #e7ebf0!important;color:#172033!important;box-shadow:0 2px 12px rgba(20,35,55,.05)}
+body:not(.pmno-page-home) .brand-kicker{color:#718096!important}
+body:not(.pmno-page-home) .brand-title{color:#172033!important}
+body:not(.pmno-page-home) .brand-title b{color:#12aee8!important}
+body:not(.pmno-page-home) .status{color:#718096!important}
+body:not(.pmno-page-home) .mode-menu button{color:#596579!important;background:transparent!important;border-color:transparent!important}
+body:not(.pmno-page-home) .mode-menu button:hover{background:#f1f7fa!important;color:#079dd5!important}
+body:not(.pmno-page-home) .mode-menu button.active{background:#e9f8fe!important;color:#079dd5!important;border-color:#bceafa!important}
+body:not(.pmno-page-home) .nav-group-label{color:#9aa7b7!important}
+
+/* Single Site shell: white panels, dark map preserved */
+body:not(.pmno-page-home) .panel{background:#fff!important;color:#172033!important;border-color:#e5e9ef!important}
+body:not(.pmno-page-home) .input-panel{border-right-color:#e5e9ef!important}
+body:not(.pmno-page-home) .detail-panel{border-left-color:#e5e9ef!important}
+body:not(.pmno-page-home) .section-kicker,.pmno-page-single .section-kicker{color:#7a8798!important}
+body:not(.pmno-page-home) .field label{color:#7a8798!important}
+body:not(.pmno-page-home) .field input,
+body:not(.pmno-page-home) .field select{background:#f8fafc!important;color:#172033!important;border-color:#dfe5ec!important}
+body:not(.pmno-page-home) .field input:focus,.body:not(.pmno-page-home) .field select:focus{border-color:#12aee8!important}
+body:not(.pmno-page-home) .rule{background:#f7fbfd!important;border-color:#d9edf5!important}
+body:not(.pmno-page-home) .rule strong{color:#079dd5!important}
+body:not(.pmno-page-home) .rule p,.body:not(.pmno-page-home) .source{color:#718096!important}
+body:not(.pmno-page-home) .source{background:#fafbfc!important;border-color:#e4e9ef!important;color:#718096!important}
+body:not(.pmno-page-home) .detail-head .decision-label{color:#7a8798!important}
+body:not(.pmno-page-home) .site-name{color:#718096!important}
+body:not(.pmno-page-home) .score-copy p,.body:not(.pmno-page-home) .metric small,.body:not(.pmno-page-home) .bar-head{color:#718096!important}
+body:not(.pmno-page-home) .metrics,.body:not(.pmno-page-home) .score-line{border-color:#e5e9ef!important}
+body:not(.pmno-page-home) .metric span{color:#7a8798!important}
+body:not(.pmno-page-home) .bar{background:#e9eef3!important}
+body:not(.pmno-page-home) .candidate-row{background:#fff!important;border-color:#e1e7ed!important}
+body:not(.pmno-page-home) .candidate-row.active{background:#eef9fd!important;border-color:#12aee8!important;color:#172033!important}
+body:not(.pmno-page-home) .candidate-row small,.body:not(.pmno-page-home) .candidate-rank{color:#718096!important}
+body:not(.pmno-page-home) .challenge{background:#fffaf1!important;border-color:#f0dfba!important}
+
+/* Bulk / dashboard / profile pages */
+body:not(.pmno-page-home) .wrap,
+body:not(.pmno-page-home) .dashboard-shell,
+body:not(.pmno-page-home) .profile-shell,
+body:not(.pmno-page-home) .site-profile-shell{color:#172033!important}
+body:not(.pmno-page-home) .kpi,
+body:not(.pmno-page-home) .summary .kpi,
+body:not(.pmno-page-home) .card,
+body:not(.pmno-page-home) .dashboard-card,
+body:not(.pmno-page-home) .profile-card,
+body:not(.pmno-page-home) .panel-card{background:#fff!important;color:#172033!important;border-color:#e1e7ed!important;box-shadow:0 6px 20px rgba(20,35,55,.055)!important}
+body:not(.pmno-page-home) .kpi span,.body:not(.pmno-page-home) .hint{color:#7a8798!important}
+body:not(.pmno-page-home) .table-wrap{background:#fff!important;border-color:#e1e7ed!important}
+body:not(.pmno-page-home) .table th{background:#f7f9fb!important;color:#6f7d90!important;border-color:#e5e9ef!important}
+body:not(.pmno-page-home) .table td{color:#263247!important;border-color:#edf0f4!important}
+body:not(.pmno-page-home) .table tr:hover td{background:#f8fbfd!important}
+body:not(.pmno-page-home) .btn{background:#fff!important;color:#079dd5!important;border-color:#b9dce9!important}
+body:not(.pmno-page-home) .btn.primary{background:#12aee8!important;color:#fff!important;border-color:#12aee8!important}
+
+/* DRM — explicitly override its deep navy surfaces */
+body:not(.pmno-page-home) .drm-view{background:#f5f7fa!important;color:#172033!important}
+body:not(.pmno-page-home) .drm-card,
+body:not(.pmno-page-home) .drm-section,
+body:not(.pmno-page-home) .drm-welcome,
+body:not(.pmno-page-home) .drm-kpi,
+body:not(.pmno-page-home) .drm-run-progress,
+body:not(.pmno-page-home) .drm-project-header-card,
+body:not(.pmno-page-home) .drm-project-list,
+body:not(.pmno-page-home) .drm-project-card,
+body:not(.pmno-page-home) .drm-wizard{background:#fff!important;border-color:#e1e7ed!important;color:#172033!important;box-shadow:0 6px 22px rgba(20,35,55,.055)!important}
+body:not(.pmno-page-home) .drm-title,
+body:not(.pmno-page-home) .drm-project-title,
+body:not(.pmno-page-home) .drm-wizard-title,
+body:not(.pmno-page-home) .drm-section-title{color:#172033!important}
+body:not(.pmno-page-home) .drm-sub,.body:not(.pmno-page-home) .drm-section-help,.body:not(.pmno-page-home) .drm-project-meta,.body:not(.pmno-page-home) .drm-result-state{color:#718096!important}
+body:not(.pmno-page-home) .drm-input,
+body:not(.pmno-page-home) .drm-note,
+body:not(.pmno-page-home) .drm-decision,
+body:not(.pmno-page-home) .drm-btn,
+body:not(.pmno-page-home) .drm-mini-btn,
+body:not(.pmno-page-home) .drm-file-label{background:#f8fafc!important;color:#263247!important;border-color:#dfe5ec!important}
+body:not(.pmno-page-home) .drm-btn.primary{background:#12aee8!important;color:#fff!important;border-color:#12aee8!important}
+body:not(.pmno-page-home) .drm-table-wrap{background:#fff!important;border-color:#e1e7ed!important}
+body:not(.pmno-page-home) .drm-table th{background:#f5f8fa!important;color:#718096!important;border-color:#e5e9ef!important}
+body:not(.pmno-page-home) .drm-table td{color:#263247!important;border-color:#edf0f4!important}
+body:not(.pmno-page-home) .drm-table tbody tr:hover{background:#f8fbfd!important}
+body:not(.pmno-page-home) .drm-table th:first-child,
+body:not(.pmno-page-home) .drm-table td:first-child,
+body:not(.pmno-page-home) .drm-table th:nth-child(2),
+body:not(.pmno-page-home) .drm-table td:nth-child(2){background:#fff!important}
+body:not(.pmno-page-home) .drm-table thead th:first-child,
+body:not(.pmno-page-home) .drm-table thead th:nth-child(2){background:#f0f5f8!important}
+body:not(.pmno-page-home) .drm-site-card{background:#fff!important;border-color:#e1e7ed!important;color:#172033!important}
+body:not(.pmno-page-home) .drm-site-card-name,.body:not(.pmno-page-home) .drm-site-card-meta{color:#718096!important}
+body:not(.pmno-page-home) .drm-empty-project{background:#fafbfc!important;border-color:#dfe5ec!important}
+
+/* Master Data */
+body:not(.pmno-page-home) .master-view{background:#f5f7fa!important;color:#172033!important}
+body:not(.pmno-page-home) .master-card,
+body:not(.pmno-page-home) .master-section,
+body:not(.pmno-page-home) .master-panel{background:#fff!important;color:#172033!important;border-color:#e1e7ed!important;box-shadow:0 6px 20px rgba(20,35,55,.05)!important}
+body:not(.pmno-page-home) .master-title{color:#172033!important}
+body:not(.pmno-page-home) .master-kicker{color:#079dd5!important}
+
+/* Profile / audit surfaces: turn common dark blocks into white cards */
+body:not(.pmno-page-home) .profile-view,
+body:not(.pmno-page-home) .asset-profile-view,
+body:not(.pmno-page-home) .site-profile-view,
+body:not(.pmno-page-home) .audit-view{background:#f5f7fa!important;color:#172033!important}
+body:not(.pmno-page-home) [class*="profile-card"],
+body:not(.pmno-page-home) [class*="profile-panel"],
+body:not(.pmno-page-home) [class*="audit-card"],
+body:not(.pmno-page-home) [class*="audit-panel"]{background:#fff!important;color:#172033!important;border-color:#e1e7ed!important}
+
+/* Common light typography */
+body:not(.pmno-page-home) h1,body:not(.pmno-page-home) h2,body:not(.pmno-page-home) h3,
+body:not(.pmno-page-home) h4,body:not(.pmno-page-home) strong{color:inherit}
+body:not(.pmno-page-home) .section-title strong{color:#172033!important}
+body:not(.pmno-page-home) .section-title>span{color:#079dd5!important}
+
+/* Keep map itself dark and readable */
+body:not(.pmno-page-home) .map-stage{background:#0a1827!important}
+
+@media(max-width:760px){
+  body:not(.pmno-page-home) .topbar{background:#fff!important}
+  body:not(.pmno-page-home) .input-panel{border-bottom-color:#e5e9ef!important}
+  body:not(.pmno-page-home) .detail-panel{border-top-color:#e5e9ef!important}
+}
+</style>
 </head>
 <body>
 <div class="app">
