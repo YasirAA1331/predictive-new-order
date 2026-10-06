@@ -6195,6 +6195,13 @@ body:not(.pmno-page-single) .hub-open{height:38px!important;font-size:9px!import
 }
 </style>
 
+
+<nav id="pmno-mobile-home-nav" class="pmno-mobile-home-nav"><button class="active" onclick="window.pmnoNavigate&&window.pmnoNavigate('home')"><span>⌂</span><small>Home</small></button><button onclick="window.pmnoNavigate&&window.pmnoNavigate('single')"><span>⌖</span><small>Analyze</small></button><button onclick="window.pmnoNavigate&&window.pmnoNavigate('dashboard')"><span>▥</span><small>Insights</small></button><button onclick="window.pmnoNavigate&&window.pmnoNavigate('assetprofile')"><span>◫</span><small>Profile</small></button></nav>
+
+<style id="pmno-mobile-home-nav-v5">
+.pmno-mobile-home-nav{display:none}
+@media(max-width:760px){.pmno-mobile-home-nav{position:fixed;z-index:4000;left:14px;right:14px;bottom:max(10px,env(safe-area-inset-bottom));display:grid;grid-template-columns:repeat(4,1fr);gap:3px;padding:5px;background:rgba(255,255,255,.97);border:1px solid #e2e9ed;border-radius:21px;box-shadow:0 10px 30px rgba(21,48,65,.15);backdrop-filter:blur(16px)}.pmno-mobile-home-nav button{height:54px;border:0;background:transparent;border-radius:15px;color:#7a8993;font-family:inherit;display:grid;place-items:center;align-content:center;gap:2px}.pmno-mobile-home-nav button span{font-size:20px;line-height:20px}.pmno-mobile-home-nav button small{font-size:9px;font-weight:800}.pmno-mobile-home-nav button.active{background:#e8f7fd;color:#078ac4}}
+</style>
 </body>
 </html>
 
@@ -6323,4 +6330,196 @@ body.pmno-page-single .detail-panel{
 
 <style id="pmno-customer-lease-expiry-detail-v2">
 .cust-expiry-summary{margin-top:12px;padding:13px;border:1px solid #24445d;border-radius:10px;background:#071827}.cust-expiry-summary-main span{display:block;color:#9db0bf;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-summary-main b{display:block;color:#d4af37;font-size:28px;margin-top:4px}.cust-expiry-summary-main small{display:block;color:#71899c;font-size:8px;margin-top:3px}.cust-expiry-summary-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cust-expiry-summary-pills .cust-tenant-pill.muted{border-color:#34495b}.cust-expiry-summary-pills .cust-tenant-pill.muted em{color:#9db0bf}.cust-expiry-year.current{border-color:#5b4a25}.cust-expiry-years{display:grid;gap:10px;margin-top:12px}.cust-expiry-year{border:1px solid #203b55;border-radius:10px;background:#071321;padding:13px}.cust-expiry-year.current{border-color:#5b4a25}.cust-expiry-year-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cust-expiry-year-head .year{display:block;color:#71899c;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-year-head b{display:block;font-size:25px;margin-top:4px;color:#dce8f2}.cust-expiry-year.current .cust-expiry-year-head b{color:#d4af37}.cust-expiry-year-head small{display:block;color:#71899c;font-size:8px;margin-top:3px}.cust-expiry-year-meta{font-size:8px;color:#71899c;padding-top:2px;white-space:nowrap}.cust-expiry-tenants{margin-top:12px;padding-top:10px;border-top:1px solid #193148}.cust-expiry-label{display:block;color:#71899c;font-size:7px;font-weight:900;letter-spacing:.14em;margin-bottom:7px}.cust-tenant-pills{display:flex;flex-wrap:wrap;gap:5px}.cust-tenant-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid #24445d;border-radius:999px;background:#091a29;color:#9db0bf;font-size:8px}.cust-tenant-pill strong{color:#dce8f2;font-size:8px}.cust-tenant-pill em{font-style:normal;color:#42b9f4;font-weight:900}.cust-expiry-months{margin-top:12px}.cust-month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.cust-month{padding:7px;border:1px solid #173249;border-radius:7px;background:#081827}.cust-month-top{display:flex;justify-content:space-between;gap:5px;align-items:center;color:#71899c;font-size:7px}.cust-month-top b{color:#dce8f2;font-size:9px}.cust-month-track{height:4px;margin-top:6px;border-radius:99px;background:#10283c;overflow:hidden}.cust-month-track i{display:block;height:100%;border-radius:99px;background:#42b9f4}.cust-expiry-year.current .cust-month-track i{background:#d4af37}@media(max-width:600px){.cust-expiry-year-head{display:block}.cust-expiry-year-meta{margin-top:7px}.cust-month-grid{grid-template-columns:repeat(3,1fr)}.cust-tenant-pills{max-height:112px;overflow:auto;padding-right:2px}.cust-tenant-pill{font-size:7px}.cust-tenant-pill strong{font-size:7px}}
+</style>
+
+<style id="pmno-gojek-design-system-v5">
+/* V5 — PMNO unified app design system: Gojek-inspired, not dashboard-inspired. */
+:root{
+  --app-bg:#f6f8fa;--app-card:#fff;--app-text:#172433;--app-muted:#71818d;--app-line:#e5ebef;
+  --pmno-blue:#159bd7;--pmno-teal:#10ad8a;--pmno-yellow:#e4a918;--pmno-green:#19b778;--pmno-red:#e45767;
+  --app-shadow:0 6px 20px rgba(24,55,73,.07);--app-shadow-hover:0 12px 28px rgba(24,55,73,.11);
+}
+html,body{background:var(--app-bg)!important;color:var(--app-text)!important}
+body{font-family:Poppins,Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif!important}
+/* Global app shell */
+body:not(.pmno-page-home) .topbar{background:#fff!important;color:var(--app-text)!important;border-bottom:1px solid var(--app-line)!important;box-shadow:0 2px 12px rgba(24,55,73,.045)!important;padding:14px 24px!important;min-height:70px!important;height:auto!important}
+body:not(.pmno-page-home) .brand-kicker{color:#7a8a95!important;font-size:9px!important;letter-spacing:2px!important}
+body:not(.pmno-page-home) .brand-title{color:var(--app-text)!important;font-size:22px!important;letter-spacing:-.5px!important}
+body:not(.pmno-page-home) .brand-title b{color:var(--pmno-blue)!important}
+body:not(.pmno-page-home) .status{color:#647581!important;font-size:9px!important}
+body:not(.pmno-page-home) .status-dot{background:var(--pmno-green)!important;box-shadow:0 0 8px rgba(25,183,120,.3)!important}
+/* Navigation becomes an app switcher, not a dashboard toolbar. */
+body:not(.pmno-page-home) .mode-menu{gap:7px!important;align-items:center!important}
+body:not(.pmno-page-home) .nav-group{background:#f5f7f8!important;border:1px solid #e4eaee!important;border-radius:14px!important;padding:3px!important;gap:2px!important}
+body:not(.pmno-page-home) .nav-group-label{display:none!important}
+body:not(.pmno-page-home) .mode-menu button{height:34px!important;min-height:34px!important;padding:0 11px!important;border:0!important;border-radius:10px!important;background:transparent!important;color:#71818d!important;font-size:9px!important;letter-spacing:.35px!important;font-weight:800!important}
+body:not(.pmno-page-home) .mode-menu button:hover{background:#fff!important;color:var(--app-text)!important}
+body:not(.pmno-page-home) .mode-menu button.active{background:#e8f7fd!important;color:#078ac4!important;box-shadow:0 2px 6px rgba(21,155,215,.10)!important}
+/* Every non-map page gets the same airy canvas. */
+body:not(.pmno-page-home) #dashboardView,
+body:not(.pmno-page-home) #assetProfileView,
+body:not(.pmno-page-home) #customerProfileView,
+body:not(.pmno-page-home) #landLegalProfileView,
+body:not(.pmno-page-home) #financialProfileView,
+body:not(.pmno-page-home) #auditAssetProfileView,
+body:not(.pmno-page-home) #auditCustomerProfileView,
+body:not(.pmno-page-home) #auditProductivityProfileView,
+body:not(.pmno-page-home) #auditLandProfileView,
+body:not(.pmno-page-home) #auditTechnicalProfileView,
+body:not(.pmno-page-home) #auditFinancialProfileView,
+body:not(.pmno-page-home) #auditLifecycleProfileView,
+body:not(.pmno-page-home) #siteProfileView,
+body:not(.pmno-page-home) #bulkView,
+body:not(.pmno-page-home) #drmView,
+body:not(.pmno-page-home) #masterDataView{background:var(--app-bg)!important;color:var(--app-text)!important}
+/* Generic cards, panels and wrappers */
+body:not(.pmno-page-home) .panel,
+body:not(.pmno-page-home) .card,
+body:not(.pmno-page-home) .section-card,
+body:not(.pmno-page-home) .profile-card,
+body:not(.pmno-page-home) .hub-card,
+body:not(.pmno-page-home) .drm-project-header-card,
+body:not(.pmno-page-home) .drm-project-list,
+body:not(.pmno-page-home) .drm-hero,
+body:not(.pmno-page-home) .drm-project-card,
+body:not(.pmno-page-home) .drm-wizard,
+body:not(.pmno-page-home) .drm-confirm,
+body:not(.pmno-page-home) .master-card,
+body:not(.pmno-page-home) .master-panel{background:#fff!important;color:var(--app-text)!important;border-color:var(--app-line)!important;box-shadow:var(--app-shadow)!important;border-radius:16px!important}
+/* Make section headings feel like app pages. */
+body:not(.pmno-page-home) .section-kicker,
+body:not(.pmno-page-home) .section-label,
+body:not(.pmno-page-home) .hub-section-head>span,
+body:not(.pmno-page-home) .master-kicker{color:#7a8a95!important;font-size:10px!important;letter-spacing:1.5px!important;font-weight:900!important}
+body:not(.pmno-page-home) h1{font-size:clamp(28px,3vw,38px)!important;letter-spacing:-1px!important}
+body:not(.pmno-page-home) h2{font-size:24px!important;letter-spacing:-.5px!important}
+body:not(.pmno-page-home) h3{font-size:18px!important;letter-spacing:-.2px!important}
+body:not(.pmno-page-home) p{font-size:13px!important;line-height:1.55!important}
+body:not(.pmno-page-home) label{font-size:10px!important;letter-spacing:.7px!important;color:#72828e!important;font-weight:800!important}
+body:not(.pmno-page-home) input,
+body:not(.pmno-page-home) select,
+body:not(.pmno-page-home) textarea{background:#f8fafb!important;color:var(--app-text)!important;border:1px solid #dfe7eb!important;border-radius:12px!important;min-height:44px!important;font-size:13px!important}
+body:not(.pmno-page-home) input:focus,
+body:not(.pmno-page-home) select:focus,
+body:not(.pmno-page-home) textarea:focus{border-color:#78cbe8!important;box-shadow:0 0 0 3px rgba(21,155,215,.10)!important;outline:none!important}
+/* Tables become readable, airy app tables. */
+body:not(.pmno-page-home) table{color:var(--app-text)!important;font-size:12px!important}
+body:not(.pmno-page-home) th{background:#f5f7f8!important;color:#647581!important;border-color:#e7edf0!important;font-size:10px!important;letter-spacing:.5px!important}
+body:not(.pmno-page-home) td{background:#fff!important;color:#344653!important;border-color:#edf1f3!important;font-size:12px!important}
+body:not(.pmno-page-home) tr:hover td{background:#f8fbfc!important}
+/* Buttons */
+body:not(.pmno-page-home) .primary,
+body:not(.pmno-page-home) .analyze,
+body:not(.pmno-page-home) .drm-btn.primary{background:var(--pmno-blue)!important;color:#fff!important;border-color:var(--pmno-blue)!important;border-radius:12px!important;box-shadow:0 5px 12px rgba(21,155,215,.18)!important;font-weight:800!important}
+body:not(.pmno-page-home) button{font-family:inherit!important}
+/* DRM light language */
+body:not(.pmno-page-home) .drm-v4-home,
+body:not(.pmno-page-home) .drm-workspace-home{background:transparent!important}
+body:not(.pmno-page-home) .drm-big-btn{background:#fff!important;color:var(--app-text)!important;border-color:var(--app-line)!important;border-radius:16px!important;box-shadow:var(--app-shadow)!important}
+body:not(.pmno-page-home) .drm-big-btn.primary{background:#e9f7fd!important;color:#078ac4!important;border-color:#b9e5f4!important}
+body:not(.pmno-page-home) .drm-project-card{background:#fff!important}
+body:not(.pmno-page-home) .drm-step{background:#f5f7f8!important;color:#72828e!important;border-color:#e2e8ec!important}
+body:not(.pmno-page-home) .drm-step.active{background:#e8f7fd!important;color:#078ac4!important;border-color:#b9e5f4!important}
+body:not(.pmno-page-home) .drm-step.done{background:#e8f8f2!important;color:#16885f!important;border-color:#bde9d7!important}
+body:not(.pmno-page-home) .drm-modal{background:rgba(18,36,51,.35)!important;backdrop-filter:blur(5px)!important}
+body:not(.pmno-page-home) .drm-modal-card{background:#fff!important;color:var(--app-text)!important;border-color:var(--app-line)!important}
+/* Master Data light */
+body:not(.pmno-page-home) .master-view{background:var(--app-bg)!important;color:var(--app-text)!important}
+/* Single Site: controls light; map intentionally remains dark for geographic contrast. */
+body.pmno-page-single .input-panel,
+body.pmno-page-single .detail-panel{background:#fff!important;color:var(--app-text)!important;border-color:var(--app-line)!important}
+body.pmno-page-single .input-panel{box-shadow:var(--app-shadow)!important}
+body.pmno-page-single .detail-panel{box-shadow:var(--app-shadow)!important}
+body.pmno-page-single .panel .section-title,
+body.pmno-page-single .panel .section-kicker{color:var(--app-text)!important}
+body.pmno-page-single .decision{color:var(--app-text)!important}
+/* Home: convert to actual app launcher language. */
+body.pmno-page-home .topbar{padding:12px 24px!important;min-height:64px!important;background:#fff!important}
+body.pmno-page-home .brand-kicker{font-size:9px!important;color:#7a8a95!important}
+body.pmno-page-home .brand-title{font-size:21px!important;color:var(--app-text)!important}
+body.pmno-page-home .brand-title b{color:var(--pmno-blue)!important}
+body.pmno-page-home .pmno-home-hero{min-height:285px!important;background:linear-gradient(120deg,#fff 0%,#fbfdfe 58%,#edf9fd 100%)!important}
+body.pmno-page-home .pmno-home-hero-content{padding:38px 5vw 34px!important}
+body.pmno-page-home .pmno-home-eyebrow{font-size:11px!important;color:#6d7f8b!important}
+body.pmno-page-home .pmno-home-hero h1{font-size:clamp(36px,4.7vw,60px)!important;color:var(--app-text)!important}
+body.pmno-page-home .pmno-home-hero p{font-size:15px!important;color:#6e7f8a!important}
+body.pmno-page-home .pmno-home-search{height:62px!important;border-radius:18px!important;width:min(680px,74vw)!important}
+body.pmno-page-home .pmno-search-copy strong{font-size:15px!important}
+body.pmno-page-home .pmno-search-copy span{font-size:12px!important}
+body.pmno-page-home .pmno-search-arrow{width:46px!important;height:46px!important}
+body.pmno-page-home .pmno-home-shell{margin:-4px auto 0!important}
+body.pmno-page-home .pmno-home-section-head{margin-bottom:15px!important}
+body.pmno-page-home .pmno-home-section-head span{font-size:10px!important;color:#82919b!important}
+body.pmno-page-home .pmno-home-section-head h2{font-size:25px!important}
+body.pmno-page-home .pmno-home-section-head small{font-size:11px!important}
+body.pmno-page-home .pmno-home-main-actions{gap:14px!important}
+body.pmno-page-home .pmno-home-action{min-height:170px!important;border-radius:20px!important;padding:21px!important;box-shadow:var(--app-shadow)!important;grid-template-columns:64px minmax(0,1fr) 32px!important}
+body.pmno-page-home .pmno-home-action:hover{box-shadow:var(--app-shadow-hover)!important}
+body.pmno-page-home .pmno-action-icon{width:64px!important;height:64px!important;border-radius:19px!important;font-size:0!important;position:relative!important}
+/* Inline SVG icon tiles */
+body.pmno-page-home .pmno-action-icon:before,
+body.pmno-page-home .pmno-secondary-icon:before{content:"";display:block;width:31px;height:31px;background-repeat:no-repeat;background-position:center;background-size:contain}
+body.pmno-page-home .action-single .pmno-action-icon:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23159bd7' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 43s14-13.1 14-24A14 14 0 1 0 10 19c0 10.9 14 24 14 24Z'/%3E%3Ccircle cx='24' cy='19' r='4.5'/%3E%3Cpath d='M24 6V2M8 12 4 10M40 12l4-2'/%3E%3C/svg%3E")}
+body.pmno-page-home .action-bulk .pmno-action-icon:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%2310ad8a' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='9' y='7' width='30' height='34' rx='4'/%3E%3Cpath d='M15 15h18M15 22h18M15 29h11M15 35h7'/%3E%3C/svg%3E")}
+body.pmno-page-home .action-dashboard .pmno-action-icon:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='%23d79a08' stroke-width='2.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M8 40V8M8 40h34'/%3E%3Crect x='14' y='24' width='6' height='11' rx='1'/%3E%3Crect x='24' y='17' width='6' height='18' rx='1'/%3E%3Crect x='34' y='10' width='6' height='25' rx='1'/%3E%3C/svg%3E")}
+body.pmno-page-home .pmno-action-copy strong{font-size:19px!important}
+body.pmno-page-home .pmno-action-copy p{font-size:12px!important;line-height:1.55!important;margin-top:9px!important}
+body.pmno-page-home .pmno-home-action i{font-size:29px!important}
+body.pmno-page-home .pmno-badge{font-size:9px!important;padding:5px 8px!important}
+body.pmno-page-home .pmno-home-secondary{gap:12px!important;margin-top:12px!important}
+body.pmno-page-home .pmno-home-secondary button{min-height:105px!important;border-radius:17px!important;padding:15px!important;grid-template-columns:50px minmax(0,1fr) 20px!important;box-shadow:var(--app-shadow)!important}
+body.pmno-page-home .pmno-secondary-icon{width:50px!important;height:50px!important;border-radius:15px!important;font-size:0!important}
+body.pmno-page-home .pmno-secondary-icon:before{width:26px;height:26px}
+body.pmno-page-home .pmno-secondary-icon.purple:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='white' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M10 40V13l14-6 14 6v27'/%3E%3Cpath d='M17 40V24h14v16M20 16h8'/%3E%3C/svg%3E")}
+body.pmno-page-home .pmno-secondary-icon.red:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='white' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M24 42s13-12.4 13-23A13 13 0 1 0 11 19c0 10.6 13 23 13 23Z'/%3E%3Ccircle cx='24' cy='19' r='4'/%3E%3C/svg%3E")}
+body.pmno-page-home .pmno-secondary-icon.green:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='white' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m10 25 8 8 20-20'/%3E%3Crect x='6' y='6' width='36' height='36' rx='8'/%3E%3C/svg%3E")}
+body.pmno-page-home .pmno-secondary-icon.blue:before{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 48 48' fill='none' stroke='white' stroke-width='2.7' stroke-linecap='round' stroke-linejoin='round'%3E%3Cellipse cx='24' cy='10' rx='14' ry='5'/%3E%3Cpath d='M10 10v12c0 2.8 6.3 5 14 5s14-2.2 14-5V10M10 22v12c0 2.8 6.3 5 14 5s14-2.2 14-5V22'/%3E%3C/svg%3E")}
+body.pmno-page-home .pmno-home-secondary strong{font-size:13px!important}
+body.pmno-page-home .pmno-home-secondary small{font-size:10px!important;line-height:1.3!important}
+body.pmno-page-home .pmno-home-bottom-grid{gap:12px!important;margin-top:12px!important}
+body.pmno-page-home .pmno-home-card{border-radius:17px!important;padding:17px!important;box-shadow:var(--app-shadow)!important}
+body.pmno-page-home .pmno-card-head h3{font-size:17px!important}
+body.pmno-page-home .pmno-card-head span{font-size:10px!important}
+body.pmno-page-home .pmno-recent-row{font-size:10px!important;padding:11px 0!important}
+body.pmno-page-home .pmno-recent-row b{font-size:11px!important}
+body.pmno-page-home .pmno-source-row{font-size:10px!important;padding:11px 0!important}
+body.pmno-page-home .pmno-source-row b{font-size:10px!important}
+body.pmno-page-home .pmno-quick-grid b{font-size:22px!important}
+body.pmno-page-home .pmno-quick-grid small{font-size:9px!important}
+/* Mobile becomes a genuine app layout. */
+@media(max-width:760px){
+  body:not(.pmno-page-home) .topbar{padding:11px 14px!important;min-height:62px!important}
+  body:not(.pmno-page-home) .brand-title{font-size:18px!important}
+  body:not(.pmno-page-home) .brand-kicker{font-size:7px!important}
+  body:not(.pmno-page-home) .mode-menu{display:none!important}
+  body:not(.pmno-page-home) .status{font-size:7px!important}
+  body.pmno-page-home .topbar{padding:10px 14px!important;min-height:60px!important}
+  body.pmno-page-home .brand-title{font-size:19px!important}
+  body.pmno-page-home .pmno-home-hero{min-height:340px!important}
+  body.pmno-page-home .pmno-home-hero-content{padding:32px 18px 30px!important}
+  body.pmno-page-home .pmno-home-hero h1{font-size:38px!important}
+  body.pmno-page-home .pmno-home-hero p{font-size:13px!important}
+  body.pmno-page-home .pmno-home-search{width:100%!important;height:58px!important;border-radius:18px!important}
+  body.pmno-page-home .pmno-search-copy strong{font-size:14px!important}
+  body.pmno-page-home .pmno-search-copy span{font-size:10px!important}
+  body.pmno-page-home .pmno-home-shell{padding:0 14px 92px!important;margin:0!important}
+  body.pmno-page-home .pmno-home-section-head{margin-top:22px!important}
+  body.pmno-page-home .pmno-home-section-head h2{font-size:22px!important}
+  body.pmno-page-home .pmno-home-action{min-height:130px!important;padding:17px!important;border-radius:18px!important;grid-template-columns:54px minmax(0,1fr) 26px!important}
+  body.pmno-page-home .pmno-action-icon{width:54px!important;height:54px!important;border-radius:16px!important}
+  body.pmno-page-home .pmno-action-icon:before{width:27px;height:27px}
+  body.pmno-page-home .pmno-action-copy strong{font-size:17px!important}
+  body.pmno-page-home .pmno-action-copy p{font-size:11px!important}
+  body.pmno-page-home .pmno-home-secondary button{min-height:88px!important;padding:11px!important;grid-template-columns:42px minmax(0,1fr) 14px!important}
+  body.pmno-page-home .pmno-secondary-icon{width:42px!important;height:42px!important;border-radius:13px!important}
+  body.pmno-page-home .pmno-home-secondary strong{font-size:11px!important}
+  body.pmno-page-home .pmno-home-secondary small{font-size:8px!important}
+  body.pmno-page-home .pmno-home-bottom-grid{grid-template-columns:1fr!important}
+  body.pmno-page-home .pmno-home-card{padding:14px!important}
+  body.pmno-page-home .pmno-card-head h3{font-size:16px!important}
+  /* App bottom nav: white, floating, rounded like a consumer app. */
+  body.pmno-page-home .mobile-nav,body.pmno-page-single .mobile-nav{background:rgba(255,255,255,.96)!important;border:1px solid #e1e8ec!important;box-shadow:0 8px 30px rgba(21,48,65,.14)!important;border-radius:20px!important;backdrop-filter:blur(16px)!important}
+  body.pmno-page-home .mobile-nav button,body.pmno-page-single .mobile-nav button{color:#7b8992!important;font-size:9px!important;letter-spacing:.2px!important}
+  body.pmno-page-home .mobile-nav button.active,body.pmno-page-single .mobile-nav button.active{background:#e8f7fd!important;color:#078ac4!important}
+}
 </style>
