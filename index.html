@@ -1514,7 +1514,7 @@ body.pmno-page-assetprofile .topbar{flex:none!important}
 </head>
 <body>
 <div class="app">
-<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="assetProfileMenu">ASSET PROFILE</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
+<header class="topbar"><div><div class="brand-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="brand-title">Predictive Mapping <b>New Order</b></div></div><div class="mode-menu"><div class="nav-group"><span class="nav-group-label">ASSET</span><button id="dashboardMenu">DASHBOARD</button><button id="assetProfileMenu">ASSET PROFILE</button><button id="siteProfileMenu">SITE PROFILE</button></div><div class="nav-group"><span class="nav-group-label">ANALYSIS</span><button id="singleMenu" class="active">SINGLE SITE</button><button id="bulkMenu">BULK ANALYZER</button><button id="drmMenu">DRM</button></div><div class="nav-group"><span class="nav-group-label">DATA</span><button id="masterDataMenu">MASTER DATA</button><button id="acquisitionMenu">ACQUISITION ASSESSMENT</button></div></div><div class="status"><i class="status-dot"></i><span>PMNO ENGINE ONLINE</span></div></header>
 <main class="workspace">
 <aside class="panel input-panel">
 <div class="section-kicker">NEW ORDER INPUT</div>
@@ -1870,12 +1870,7 @@ body.pmno-page-financialprofile #financialProfileView{display:block!important}bo
 </section>
 <div id="masterModal" class="master-modal"><div class="master-dialog"><div class="master-dialog-head"><div><h2 id="masterModalTitle">Master Module</h2><p id="masterModalSub">Export → Edit → Upload → Validate → Impact → Publish</p></div><button class="master-close" id="masterClose">×</button></div><div class="master-toolbar"><button id="masterExport">EXPORT CURRENT</button><label class="master-upload-btn">UPLOAD NEW VERSION<input id="masterFile" type="file" accept=".xlsx,.xls,.csv" style="display:none"></label><select id="masterOperation" aria-hidden="true" tabindex="-1" style="display:none"><option value="REPLACE">REPLACE</option><option value="APPEND">APPEND</option><option value="PATCH">PATCH</option></select><div id="masterModeChooser" class="master-mode-chooser" style="display:inline-flex"><button type="button" class="master-mode-btn" data-master-op="PATCH">PATCH · PARTIAL UPDATE</button><button type="button" class="master-mode-btn" data-master-op="REPLACE">REPLACE · FULL DATASET</button></div><span id="masterOperationMode" class="master-mode-pill" style="display:none">MODE · REPLACE</span><button id="masterValidate">VALIDATE</button><button id="masterPublish" class="primary" disabled>PUBLISH</button></div><div class="master-upload-info" id="masterUploadInfo">No file uploaded. Export the official template or upload an edited workbook.</div><div id="masterModeWarning" class="master-mode-warning"></div><div id="masterPublishProgress" class="master-publish-progress" style="display:none"><div class="master-progress-head"><strong id="masterPublishProgressLabel">PUBLISHING 0 / 0</strong><span id="masterPublishProgressPct">0%</span></div><div class="master-progress-track"><div id="masterPublishProgressBar" class="master-progress-bar"></div></div><div class="master-progress-meta"><span id="masterPublishProgressChunk">Preparing…</span><span id="masterPublishProgressRate">0 / 0 chunks</span></div></div><div class="master-validation"><div><strong>STRUCTURE VALIDATION</strong><span id="masterStructure">PENDING</span></div><div><strong>BUSINESS VALIDATION</strong><span id="masterBusiness">PENDING</span></div></div><div class="master-impact"><strong>IMPACT PREVIEW</strong><p id="masterImpact">Open a module, export its template, upload a workbook, then validate.</p></div><div class="master-fix" id="masterFix" style="display:none"><div class="master-fix-head"><strong>DATA YANG PERLU DIPERBAIKI</strong><button id="masterFixExport" type="button">EXPORT ERROR ROWS</button></div><div id="masterFixBody"></div></div><div class="master-history"><table><thead><tr><th>VERSION</th><th>STATUS</th><th>ROWS</th><th>CREATED</th></tr></thead><tbody id="masterHistoryBody"><tr><td colspan="4">No version history.</td></tr></tbody></table></div></div>
 <!-- PMNO MASTER DATA ADDITION: END HTML -->
-<nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button>
-<!-- PMNO_ACQUISITION_MENU -->
-<button type="button" class="dash-nav-item" data-pmno-view="acquisitionAssessment">
-  <span class="dash-nav-icon">⌖</span><span>ASSESS POTENSI AKUISISI</span>
-</button>
-</nav>
+<nav class="mobile-nav"><button data-target="input">⌂<br>INPUT</button><button data-target="map" class="active">◎<br>MAP</button><button data-target="decision">◈<br>DECISION</button></nav>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 <script>
@@ -2788,14 +2783,62 @@ function bind(){ $('landlegal-back-dashboard')?.addEventListener('click',()=>win
 window.pmnoLandLegalProfileInit=init;bind();
 })();
 </script>
+
+<style id="pmno-acquisition-assessment-v1">
+.acq-page{padding:28px 32px 44px;background:#f5f7fa;min-height:calc(100vh - 92px);color:#142033}
+.acq-shell{max-width:1500px;margin:0 auto}.acq-head{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:22px}.acq-kicker{font-size:11px;letter-spacing:.18em;font-weight:800;color:#8a6a20}.acq-title{font-size:30px;font-weight:700;letter-spacing:-.03em}.acq-title b{font-weight:800}.acq-sub{margin-top:6px;color:#687386;font-size:13px}.acq-actions{display:flex;gap:8px;flex-wrap:wrap}.acq-btn{border:1px solid #d7dce4;background:#fff;border-radius:9px;padding:10px 14px;font-weight:700;cursor:pointer}.acq-btn.primary{background:#142033;color:#fff;border-color:#142033}.acq-upload{display:flex;align-items:center;justify-content:space-between;gap:16px;background:#fff;border:1px solid #e0e5eb;border-radius:14px;padding:16px 18px;margin-bottom:16px}.acq-upload small{color:#7a8494}.acq-file{display:none}.acq-filters{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;background:#fff;border:1px solid #e0e5eb;border-radius:14px;padding:14px;margin-bottom:16px}.acq-field label{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;color:#788294;margin-bottom:5px}.acq-field select,.acq-field input{width:100%;box-sizing:border-box;border:1px solid #d8dee7;border-radius:8px;padding:9px 10px;background:#fff;font-size:12px}.acq-kpis{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:10px;margin-bottom:16px}.acq-kpi{background:#fff;border:1px solid #e0e5eb;border-radius:13px;padding:13px 12px}.acq-kpi span{display:block;font-size:9px;font-weight:800;letter-spacing:.08em;color:#7a8494}.acq-kpi b{display:block;font-size:23px;margin-top:5px}.acq-kpi small{display:block;color:#8a94a4;margin-top:2px;font-size:10px}.acq-panel{background:#fff;border:1px solid #e0e5eb;border-radius:14px;margin-bottom:16px;overflow:hidden}.acq-panel-head{display:flex;justify-content:space-between;align-items:center;padding:15px 17px;border-bottom:1px solid #edf0f4}.acq-panel-head strong{font-size:13px}.acq-panel-head small{color:#8993a2;font-size:11px}.acq-distance-grid{display:grid;grid-template-columns:repeat(8,minmax(0,1fr));gap:1px;background:#edf0f4}.acq-distance{background:#fff;padding:14px 12px}.acq-distance span{display:block;color:#7a8494;font-size:10px;font-weight:800}.acq-distance b{font-size:22px;display:block;margin-top:6px}.acq-table-wrap{overflow:auto}.acq-table{width:100%;border-collapse:collapse;font-size:11px}.acq-table th{background:#f8f9fb;color:#7b8595;text-align:left;font-size:9px;letter-spacing:.06em;padding:10px 12px;white-space:nowrap}.acq-table td{padding:11px 12px;border-top:1px solid #edf0f4;white-space:nowrap}.acq-empty{padding:38px;text-align:center;color:#8993a2}.acq-status{display:inline-flex;align-items:center;gap:6px;font-size:10px;font-weight:800}.acq-status i{width:7px;height:7px;border-radius:50%;background:#8c96a5}.acq-note{padding:12px 16px;color:#7d8797;font-size:11px;background:#fafbfc;border-top:1px solid #edf0f4}
+@media(max-width:1100px){.acq-kpis,.acq-distance-grid{grid-template-columns:repeat(4,minmax(0,1fr))}.acq-filters{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:700px){.acq-page{padding:18px 14px}.acq-head{display:block}.acq-actions{margin-top:14px}.acq-filters{grid-template-columns:1fr 1fr}.acq-kpis,.acq-distance-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.acq-upload{display:block}.acq-upload .acq-btn{margin-top:10px}}
+</style>
+<section id="acquisitionAssessmentView" class="acq-page" style="display:none">
+  <div class="acq-shell">
+    <div class="acq-head">
+      <div><div class="acq-kicker">MITRATEL · ASSET INTELLIGENCE</div><div class="acq-title">ACQUISITION <b>ASSESSMENT</b></div><div class="acq-sub">Assess target towers against the nearest existing Mitratel tower using actual geographic distance.</div></div>
+      <div class="acq-actions"><button class="acq-btn" id="acq-back-dashboard">← DASHBOARD</button><button class="acq-btn primary" id="acq-export">EXPORT RESULT</button></div>
+    </div>
+    <div class="acq-upload"><div><b>UPLOAD TARGET ACQUISITION</b><br><small>Excel / CSV. Target master mengikuti field acquisition yang sudah disepakati.</small></div><div><input id="acq-file" class="acq-file" type="file" accept=".xlsx,.xls,.csv"><button class="acq-btn primary" id="acq-upload-btn">UPLOAD DATA</button></div></div>
+    <div class="acq-filters">
+      <div class="acq-field"><label>TOWER OWNER</label><select id="acq-owner"><option value="">ALL</option></select></div>
+      <div class="acq-field"><label>TP GROUP</label><select id="acq-group"><option value="">ALL</option></select></div>
+      <div class="acq-field"><label>REGIONAL</label><select id="acq-regional"><option value="">ALL</option></select></div>
+      <div class="acq-field"><label>PROVINSI</label><select id="acq-province"><option value="">ALL</option></select></div>
+      <div class="acq-field"><label>TOWER TYPE</label><select id="acq-tower-type"><option value="">ALL</option></select></div>
+      <div class="acq-field"><label>SEARCH SITE</label><input id="acq-search" placeholder="Site ID / Site Name"></div>
+    </div>
+    <div class="acq-kpis" id="acq-kpis"></div>
+    <section class="acq-panel"><div class="acq-panel-head"><strong>DISTANCE TO NEAREST MITRATEL TOWER</strong><small>Cumulative distance bands</small></div><div class="acq-distance-grid" id="acq-distance-grid"></div><div class="acq-note">A target yang berjarak 80 m akan masuk ke &lt;100 m, &lt;500 m, &lt;1 km, dan seterusnya. Angka berasal dari nearest-tower calculation, bukan risk label.</div></section>
+    <section class="acq-panel"><div class="acq-panel-head"><strong>TARGET ACQUISITION · NEAREST MITRATEL</strong><small id="acq-count">0 SITE</small></div><div class="acq-table-wrap"><div id="acq-table" class="acq-empty">Belum ada data target. Upload file untuk memulai assessment.</div></div></section>
+  </div>
+</section>
+<script id="pmno-acquisition-assessment-v1">
+(function(){
+'use strict';
+const $=id=>document.getElementById(id), esc=v=>String(v??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+let rows=[]; let filtered=[];
+const bands=[['< 100 m',0.1],['< 500 m',0.5],['< 1 km',1],['< 2 km',2],['< 3 km',3],['< 5 km',5],['< 10 km',10],['≥ 10 km',Infinity]];
+function pick(r,names){for(const n of names){if(r[n]!==undefined&&r[n]!==null&&String(r[n]).trim()!=='')return r[n]}return ''}
+function norm(r){return {tower_owner:pick(r,['Tower Owner','Nama Lengkap TP','TowerOwner']),tp_group:pick(r,['TP Group','TPGroup']),regional:pick(r,['Regional']),site_id:pick(r,['Site ID','Site ID TP','Site_ID']),site_name:pick(r,['Site Name','SiteName']),longitude:Number(pick(r,['Longitude','Long','LONG'])),latitude:Number(pick(r,['Latitude','Lat','LAT'])),alamat:pick(r,['Alamat Lengkap','Alamat']),province:pick(r,['Provinsi','Province']),kabupaten:pick(r,['Kabupaten','Kabupaten/Kota','City']),kecamatan:pick(r,['Kecamatan','District']),desa:pick(r,['Desa','Village']),jumlah_tenant:Number(pick(r,['Jumlah Tenant','Jumlah Tenant Existing']))||0,tenant:pick(r,['Tenant','Colo Telkomsel']),tower_type:pick(r,['Tower Type']),land_type:pick(r,['Land Type','Field Type'])}}
+function hav(a,b){const R=6371;const p=Math.PI/180;const dLat=(b.latitude-a.latitude)*p,dLon=(b.longitude-a.longitude)*p;const x=Math.sin(dLat/2)**2+Math.cos(a.latitude*p)*Math.cos(b.latitude*p)*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(x))}
+function setOptions(id,vals){const el=$(id),cur=el.value;el.innerHTML='<option value="">ALL</option>'+[...new Set(vals.map(v=>String(v??'').trim()).filter(Boolean))].sort().map(v=>`<option value="${esc(v)}">${esc(v)}</option>`).join('');if([...el.options].some(o=>o.value===cur))el.value=cur}
+function apply(){const q=String($('acq-search')?.value||'').toLowerCase().trim();filtered=rows.filter(r=>(!$('acq-owner').value||r.tower_owner===$('acq-owner').value)&&(!$('acq-group').value||r.tp_group===$('acq-group').value)&&(!$('acq-regional').value||r.regional===$('acq-regional').value)&&(!$('acq-province').value||r.province===$('acq-province').value)&&(!$('acq-tower-type').value||r.tower_type===$('acq-tower-type').value)&&(!q||String(r.site_id).toLowerCase().includes(q)||String(r.site_name).toLowerCase().includes(q)));render()}
+function render(){const n=filtered.length;const nearest=filtered.filter(r=>Number.isFinite(r.distance_km));$('acq-count').textContent=n.toLocaleString('id-ID')+' SITE';$('acq-kpis').innerHTML=`<div class="acq-kpi"><span>TARGET SITE</span><b>${n.toLocaleString('id-ID')}</b><small>filtered acquisition target</small></div><div class="acq-kpi"><span>WITH NEAREST MTEL</span><b>${nearest.length.toLocaleString('id-ID')}</b><small>coordinate match</small></div><div class="acq-kpi"><span>AVG NEAREST</span><b>${nearest.length?(nearest.reduce((a,r)=>a+r.distance_km,0)/nearest.length).toFixed(2):'—'}</b><small>km</small></div><div class="acq-kpi"><span>CLOSEST</span><b>${nearest.length?Math.min(...nearest.map(r=>r.distance_km)).toFixed(2):'—'}</b><small>km</small></div>`+bands.slice(0,4).map(()=> '').join('');$('acq-distance-grid').innerHTML=bands.map(([label,max],i)=>{let c;if(i===0)c=nearest.filter(r=>r.distance_km<0.1).length;else if(i<7)c=nearest.filter(r=>r.distance_km<max).length;else c=nearest.filter(r=>r.distance_km>=10).length;return `<div class="acq-distance"><span>${label}</span><b>${c.toLocaleString('id-ID')}</b></div>`}).join('');if(!n){$('acq-table').innerHTML='<div class="acq-empty">Tidak ada site sesuai filter.</div>';return}const cols=['SITE ID','SITE NAME','TOWER OWNER','TP GROUP','REGIONAL','NEAREST MITRATEL','DISTANCE','TENANT','TOWER TYPE','LAND TYPE'];$('acq-table').innerHTML=`<table class="acq-table"><thead><tr>${cols.map(c=>`<th>${c}</th>`).join('')}</tr></thead><tbody>${filtered.slice(0,500).map(r=>`<tr><td><b>${esc(r.site_id)}</b></td><td>${esc(r.site_name)}</td><td>${esc(r.tower_owner)}</td><td>${esc(r.tp_group)}</td><td>${esc(r.regional)}</td><td>${esc(r.nearest_site_id||'—')}</td><td>${r.distance_km==null?'—':r.distance_km.toFixed(3)+' km'}</td><td>${esc(r.tenant||'—')}</td><td>${esc(r.tower_type||'—')}</td><td>${esc(r.land_type||'—')}</td></tr>`).join('')}</tbody></table><div class="acq-note">Menampilkan maksimal 500 baris di layar. Export menggunakan seluruh hasil terfilter.</div>`}
+function init(){apply()}
+$('acq-back-dashboard')?.addEventListener('click',()=>window.pmnoNavigate?.('dashboard'));
+['acq-owner','acq-group','acq-regional','acq-province','acq-tower-type'].forEach(id=>$(id)?.addEventListener('change',apply));$('acq-search')?.addEventListener('input',()=>{clearTimeout(window.__acqT);window.__acqT=setTimeout(apply,200)});
+$('acq-upload-btn')?.addEventListener('click',()=>$('acq-file')?.click());
+$('acq-file')?.addEventListener('change',async e=>{const f=e.target.files?.[0];if(!f)return;if(!window.XLSX){alert('Library Excel belum siap.');return}try{const data=await f.arrayBuffer(),wb=XLSX.read(data,{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]],raw=XLSX.utils.sheet_to_json(ws,{defval:''});rows=raw.map(norm).filter(r=>Number.isFinite(r.latitude)&&Number.isFinite(r.longitude));setOptions('acq-owner',rows.map(r=>r.tower_owner));setOptions('acq-group',rows.map(r=>r.tp_group));setOptions('acq-regional',rows.map(r=>r.regional));setOptions('acq-province',rows.map(r=>r.province));setOptions('acq-tower-type',rows.map(r=>r.tower_type));apply();}catch(err){console.error(err);alert('Upload gagal: '+err.message)}});
+$('acq-export')?.addEventListener('click',()=>{if(!window.XLSX||!filtered.length)return;const out=filtered.map(r=>({'Tower Owner':r.tower_owner,'TP Group':r.tp_group,'Regional':r.regional,'Site ID':r.site_id,'Site Name':r.site_name,'Longitude':r.longitude,'Latitude':r.latitude,'Alamat Lengkap':r.alamat,'Provinsi':r.province,'Kabupaten':r.kabupaten,'Kecamatan':r.kecamatan,'Desa':r.desa,'Jumlah Tenant':r.jumlah_tenant,'Tenant':r.tenant,'Tower Type':r.tower_type,'Land Type':r.land_type,'Nearest Mitratel Site':r.nearest_site_id||'','Distance (km)':r.distance_km??''}));const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(out),'Acquisition Assessment');XLSX.writeFile(wb,'PMNO_Acquisition_Assessment.xlsx')});
+window.pmnoAcquisitionInit=init;
+})();
+</script>
 <script id="pmno-navigation-v26">
 (function(){
   'use strict';
   const KEY='pmno_active_page';
-  const ROUTES=new Set(['dashboard','assetprofile','customer','landlegal','financialprofile','auditasset','auditcustomer','auditproductivity','auditland','audittechnical','auditfinancial','auditlifecycle','siteprofile','bulk','single','drm','master']);
+  const ROUTES=new Set(['dashboard','assetprofile','customer','landlegal','financialprofile','auditasset','auditcustomer','auditproductivity','auditland','audittechnical','auditfinancial','auditlifecycle','siteprofile','bulk','single','drm','master','acquisition']);
   const el=id=>document.getElementById(id);
-  const views={dashboard:el('dashboardView'),assetprofile:el('assetProfileView'),customer:el('customerProfileView'),landlegal:el('landLegalProfileView'),financialprofile:el('financialProfileView'),auditasset:el('auditAssetProfileView'),auditcustomer:el('auditCustomerProfileView'),auditproductivity:el('auditProductivityProfileView'),auditland:el('auditLandProfileView'),audittechnical:el('auditTechnicalProfileView'),auditfinancial:el('auditFinancialProfileView'),auditlifecycle:el('auditLifecycleProfileView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),single:document.querySelector('.workspace')};
-  const menus={dashboard:el('dashboardMenu'),assetprofile:el('assetProfileMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu')};
+  const views={dashboard:el('dashboardView'),assetprofile:el('assetProfileView'),customer:el('customerProfileView'),landlegal:el('landLegalProfileView'),financialprofile:el('financialProfileView'),auditasset:el('auditAssetProfileView'),auditcustomer:el('auditCustomerProfileView'),auditproductivity:el('auditProductivityProfileView'),auditland:el('auditLandProfileView'),audittechnical:el('auditTechnicalProfileView'),auditfinancial:el('auditFinancialProfileView'),auditlifecycle:el('auditLifecycleProfileView'),siteprofile:el('siteProfileView'),bulk:el('bulkView'),drm:el('drmView'),master:el('masterDataView'),acquisition:el('acquisitionAssessmentView'),single:document.querySelector('.workspace')};
+  const menus={dashboard:el('dashboardMenu'),assetprofile:el('assetProfileMenu'),siteprofile:el('siteProfileMenu'),single:el('singleMenu'),bulk:el('bulkMenu'),drm:el('drmMenu'),master:el('masterDataMenu'),acquisition:el('acquisitionMenu')};
   const valid=p=>ROUTES.has(String(p||'').toLowerCase());
   const readHash=()=>{const h=String(location.hash||'').replace(/^#/,'').trim().toLowerCase();const r=h.split(/[?&/]/)[0];return valid(r)?r:null};
   const readSaved=()=>{try{const p=String(localStorage.getItem(KEY)||'').toLowerCase();return valid(p)?p:null}catch(_){return null}};
@@ -2827,6 +2870,7 @@ window.pmnoLandLegalProfileInit=init;bind();
     if(page.startsWith('audit')&&typeof window.pmnoAuditProfileInit==='function')Promise.resolve(window.pmnoAuditProfileInit(page)).catch(e=>console.warn('[PMNO NAV] audit profile init',e));
     if(page==='siteprofile'&&typeof window.pmnoSiteProfileInit==='function')Promise.resolve(window.pmnoSiteProfileInit()).catch(e=>console.warn('[PMNO NAV] site profile init',e));
     if(page==='master'&&typeof window.pmnoMasterInit==='function')Promise.resolve(window.pmnoMasterInit()).catch(e=>console.warn('[PMNO NAV] master init',e));
+    if(page==='acquisition'&&typeof window.pmnoAcquisitionInit==='function')Promise.resolve(window.pmnoAcquisitionInit()).catch(e=>console.warn('[PMNO NAV] acquisition init',e));
     return page;
   }
   function navigate(page,replace=false){return apply(page,{writeHash:true,replace,scroll:true})}
@@ -5648,7 +5692,8 @@ window.pmnoMasterInit=render;render();updateMasterModeUI();
       singleMenu:'single',
       bulkMenu:'bulk',
       drmMenu:'drm',
-      masterDataMenu:'master'
+      masterDataMenu:'master',
+      acquisitionMenu:'acquisition'
     };
     menu.querySelectorAll('button[id]').forEach(btn=>{
       const page=map[btn.id];
@@ -5903,121 +5948,3 @@ body.pmno-page-single .detail-panel{
 <style id="pmno-customer-lease-expiry-detail-v2">
 .cust-expiry-summary{margin-top:12px;padding:13px;border:1px solid #24445d;border-radius:10px;background:#071827}.cust-expiry-summary-main span{display:block;color:#9db0bf;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-summary-main b{display:block;color:#d4af37;font-size:28px;margin-top:4px}.cust-expiry-summary-main small{display:block;color:#71899c;font-size:8px;margin-top:3px}.cust-expiry-summary-pills{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}.cust-expiry-summary-pills .cust-tenant-pill.muted{border-color:#34495b}.cust-expiry-summary-pills .cust-tenant-pill.muted em{color:#9db0bf}.cust-expiry-year.current{border-color:#5b4a25}.cust-expiry-years{display:grid;gap:10px;margin-top:12px}.cust-expiry-year{border:1px solid #203b55;border-radius:10px;background:#071321;padding:13px}.cust-expiry-year.current{border-color:#5b4a25}.cust-expiry-year-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.cust-expiry-year-head .year{display:block;color:#71899c;font-size:8px;font-weight:900;letter-spacing:.14em}.cust-expiry-year-head b{display:block;font-size:25px;margin-top:4px;color:#dce8f2}.cust-expiry-year.current .cust-expiry-year-head b{color:#d4af37}.cust-expiry-year-head small{display:block;color:#71899c;font-size:8px;margin-top:3px}.cust-expiry-year-meta{font-size:8px;color:#71899c;padding-top:2px;white-space:nowrap}.cust-expiry-tenants{margin-top:12px;padding-top:10px;border-top:1px solid #193148}.cust-expiry-label{display:block;color:#71899c;font-size:7px;font-weight:900;letter-spacing:.14em;margin-bottom:7px}.cust-tenant-pills{display:flex;flex-wrap:wrap;gap:5px}.cust-tenant-pill{display:inline-flex;align-items:center;gap:7px;padding:5px 7px;border:1px solid #24445d;border-radius:999px;background:#091a29;color:#9db0bf;font-size:8px}.cust-tenant-pill strong{color:#dce8f2;font-size:8px}.cust-tenant-pill em{font-style:normal;color:#42b9f4;font-weight:900}.cust-expiry-months{margin-top:12px}.cust-month-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:7px}.cust-month{padding:7px;border:1px solid #173249;border-radius:7px;background:#081827}.cust-month-top{display:flex;justify-content:space-between;gap:5px;align-items:center;color:#71899c;font-size:7px}.cust-month-top b{color:#dce8f2;font-size:9px}.cust-month-track{height:4px;margin-top:6px;border-radius:99px;background:#10283c;overflow:hidden}.cust-month-track i{display:block;height:100%;border-radius:99px;background:#42b9f4}.cust-expiry-year.current .cust-month-track i{background:#d4af37}@media(max-width:600px){.cust-expiry-year-head{display:block}.cust-expiry-year-meta{margin-top:7px}.cust-month-grid{grid-template-columns:repeat(3,1fr)}.cust-tenant-pills{max-height:112px;overflow:auto;padding-right:2px}.cust-tenant-pill{font-size:7px}.cust-tenant-pill strong{font-size:7px}}
 </style>
-
-<!-- PMNO_ACQUISITION_ASSESSMENT_VIEW -->
-<section id="acquisitionAssessmentView" style="display:none">
-<style>
-#acqApp{font-family:inherit;padding:24px;max-width:1500px;margin:auto}
-#acqApp .acq-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-end;margin-bottom:20px}
-#acqApp h1{margin:0;font-size:28px;letter-spacing:.02em}
-#acqApp .sub{opacity:.65;margin-top:5px}
-#acqApp .acq-actions{display:flex;gap:8px;flex-wrap:wrap}
-#acqApp button,#acqApp label.file-btn{border:1px solid rgba(0,0,0,.12);background:#fff;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600}
-#acqApp .primary{background:#0b1f3a;color:#fff;border-color:#0b1f3a}
-#acqApp input[type=file]{display:none}
-#acqApp .filters{display:grid;grid-template-columns:repeat(5,minmax(150px,1fr));gap:10px;margin-bottom:18px}
-#acqApp select,#acqApp input[type=text]{width:100%;padding:10px;border:1px solid #ddd;border-radius:9px;background:#fff}
-#acqApp .filter label{font-size:11px;font-weight:700;opacity:.65;display:block;margin-bottom:5px}
-#acqApp .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}
-#acqApp .card{background:#fff;border:1px solid #e6e8ec;border-radius:14px;padding:15px}
-#acqApp .card small{display:block;opacity:.55;font-weight:700}
-#acqApp .card b{font-size:25px;display:block;margin-top:5px}
-#acqApp .distance{display:grid;grid-template-columns:repeat(8,1fr);gap:8px;margin-bottom:18px}
-#acqApp .distance .d{background:#fff;border:1px solid #e6e8ec;border-radius:12px;padding:12px;min-height:65px}
-#acqApp .distance .d span{font-size:11px;opacity:.55;font-weight:700}.distance .d b{display:block;font-size:20px;margin-top:4px}
-#acqApp .panel{background:#fff;border:1px solid #e6e8ec;border-radius:14px;padding:16px;margin-bottom:18px;overflow:auto}
-#acqApp table{width:100%;border-collapse:collapse;white-space:nowrap}
-#acqApp th,#acqApp td{padding:10px;border-bottom:1px solid #eee;text-align:left;font-size:12px}
-#acqApp th{font-size:11px;text-transform:uppercase;opacity:.6}
-#acqApp tr[data-acq-site]{cursor:pointer}.detail{display:grid;grid-template-columns:1fr 1fr;gap:14px}
-#acqApp .profile{border:1px solid #eee;border-radius:12px;padding:14px}.profile h3{margin:0 0 10px}
-#acqApp .kv{display:grid;grid-template-columns:150px 1fr;gap:7px;font-size:12px}.kv span{opacity:.55}
-#acqApp .empty{padding:35px;text-align:center;opacity:.55}
-@media(max-width:1000px){#acqApp .filters{grid-template-columns:repeat(2,1fr)}#acqApp .cards{grid-template-columns:repeat(2,1fr)}#acqApp .distance{grid-template-columns:repeat(4,1fr)}}
-</style>
-<div id="acqApp">
-  <div class="acq-head">
-    <div><h1>ASSESS POTENSI AKUISISI</h1><div class="sub">Profil tower target dan jaraknya terhadap tower Mitratel terdekat.</div></div>
-    <div class="acq-actions">
-      <label class="file-btn primary">UPLOAD DATA AKUISISI<input id="acqFile" type="file" accept=".xlsx,.xls,.csv"></label>
-      <button id="acqExport">EXPORT EXCEL</button>
-    </div>
-  </div>
-  <div class="filters">
-    <div class="filter"><label>TOWER OWNER</label><select id="acqOwner"><option value="">ALL</option></select></div>
-    <div class="filter"><label>TP GROUP</label><select id="acqGroup"><option value="">ALL</option></select></div>
-    <div class="filter"><label>REGIONAL</label><select id="acqRegional"><option value="">ALL</option></select></div>
-    <div class="filter"><label>PROVINSI</label><select id="acqProvince"><option value="">ALL</option></select></div>
-    <div class="filter"><label>KABUPATEN</label><select id="acqKab"><option value="">ALL</option></select></div>
-    <div class="filter"><label>KECAMATAN</label><select id="acqKec"><option value="">ALL</option></select></div>
-    <div class="filter"><label>TOWER TYPE</label><select id="acqTowerType"><option value="">ALL</option></select></div>
-    <div class="filter"><label>LAND TYPE</label><select id="acqLandType"><option value="">ALL</option></select></div>
-    <div class="filter"><label>SEARCH SITE</label><input id="acqSearch" type="text" placeholder="Site ID / Site Name"></div>
-  </div>
-  <div class="cards">
-    <div class="card"><small>TOTAL TARGET TOWER</small><b id="acqTotal">0</b></div>
-    <div class="card"><small>WITH MITRATEL NEAREST TOWER</small><b id="acqWithMtel">0</b></div>
-    <div class="card"><small>NEAREST DISTANCE</small><b id="acqNearest">—</b></div>
-    <div class="card"><small>AVERAGE NEAREST DISTANCE</small><b id="acqAvg">—</b></div>
-  </div>
-  <div class="panel"><h3 style="margin-top:0">DISTANCE TO NEAREST MITRATEL TOWER</h3><div class="distance" id="acqDistance"></div></div>
-  <div class="panel"><h3 style="margin-top:0">TARGET TOWER & NEAREST MITRATEL</h3><div id="acqTable" class="empty">Upload data untuk memulai assessment.</div></div>
-  <div class="panel"><h3 style="margin-top:0">TOWER PROFILE COMPARISON</h3><div id="acqDetail" class="empty">Klik salah satu target tower pada tabel.</div></div>
-</div>
-<script>
-(function(){
- const $=id=>document.getElementById(id);
- let rows=[], filtered=[], selected=null, mtel=[];
- const esc=v=>String(v??'').replace(/[&<>"]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
- const n=v=>Number(v);
- const rad=x=>x*Math.PI/180;
- function dist(a,b,c,d){const R=6371;const dLat=rad(c-a),dLon=rad(d-b);const q=Math.sin(dLat/2)**2+Math.cos(rad(a))*Math.cos(rad(c))*Math.sin(dLon/2)**2;return 2*R*Math.asin(Math.sqrt(q));}
- function col(r,names){for(const x of names)if(r[x]!==undefined&&r[x]!==null)return r[x];return ''}
- function norm(r){return {
-  owner:col(r,['Tower Owner','Nama Lengkap TP']),group:col(r,['TP Group']),regional:col(r,['Regional']),
-  site:col(r,['Site ID','Site ID TP']),name:col(r,['Site Name']),lon:n(col(r,['Longitude','Long'])),lat:n(col(r,['Latitude','Lat'])),
-  address:col(r,['Alamat Lengkap','Alamat']),province:col(r,['Provinsi']),kab:col(r,['Kabupaten','Kabupaten/Kota']),
-  kec:col(r,['Kecamatan']),desa:col(r,['Desa']),tenants:col(r,['Jumlah Tenant','Jumlah Tenant Existing']),
-  tenant:col(r,['Tenant','Colo Telkomsel']),tower:col(r,['Tower Type']),land:col(r,['Land Type','Field Type'])
- }}
- function fill(id,vals){const s=$(id),old=s.value;s.innerHTML='<option value="">ALL</option>'+[...new Set(vals.filter(x=>x!==''))].sort().map(x=>'<option>'+esc(x)+'</option>').join('');if([...s.options].some(o=>o.value===old))s.value=old}
- function refreshFilters(){fill('acqOwner',rows.map(r=>r.owner));fill('acqGroup',rows.map(r=>r.group));fill('acqRegional',rows.map(r=>r.regional));fill('acqProvince',rows.map(r=>r.province));fill('acqKab',rows.map(r=>r.kab));fill('acqKec',rows.map(r=>r.kec));fill('acqTowerType',rows.map(r=>r.tower));fill('acqLandType',rows.map(r=>r.land))}
- function apply(){
-  const f=[['acqOwner','owner'],['acqGroup','group'],['acqRegional','regional'],['acqProvince','province'],['acqKab','kab'],['acqKec','kec'],['acqTowerType','tower'],['acqLandType','land']];
-  const q=($('acqSearch').value||'').toLowerCase();
-  filtered=rows.filter(r=>f.every(([id,k])=>!$(id).value||String(r[k])===$(id).value)&&(!q||String(r.site).toLowerCase().includes(q)||String(r.name).toLowerCase().includes(q)));
-  render();
- }
- function bucket(km){if(km<.1)return '< 100 m';if(km<.5)return '< 500 m';if(km<1)return '< 1 km';if(km<2)return '< 2 km';if(km<3)return '< 3 km';if(km<5)return '< 5 km';if(km<10)return '< 10 km';return '≥ 10 km'}
- function render(){
-  const vals=filtered.map(r=>r._distance).filter(Number.isFinite), total=filtered.length;
-  $('acqTotal').textContent=total.toLocaleString('id-ID');$('acqWithMtel').textContent=vals.length.toLocaleString('id-ID');
-  $('acqNearest').textContent=vals.length?Math.min(...vals).toFixed(2)+' km':'—';$('acqAvg').textContent=vals.length?(vals.reduce((a,b)=>a+b,0)/vals.length).toFixed(2)+' km':'—';
-  const bs=['< 100 m','< 500 m','< 1 km','< 2 km','< 3 km','< 5 km','< 10 km','≥ 10 km'];
-  $('acqDistance').innerHTML=bs.map(b=>'<div class="d"><span>'+b+'</span><b>'+filtered.filter(r=>r._distance!==null && ((b==='< 100 m'&&r._distance<.1)||(b==='< 500 m'&&r._distance<.5)||(b==='< 1 km'&&r._distance<1)||(b==='< 2 km'&&r._distance<2)||(b==='< 3 km'&&r._distance<3)||(b==='< 5 km'&&r._distance<5)||(b==='< 10 km'&&r._distance<10)||(b==='≥ 10 km'&&r._distance>=10))).length.toLocaleString('id-ID')+'</b></div>').join('');
-  if(!filtered.length){$('acqTable').innerHTML='<div class="empty">Tidak ada data sesuai filter.</div>';return}
-  $('acqTable').innerHTML='<table><thead><tr><th>Site ID</th><th>Site Name</th><th>Owner</th><th>TP Group</th><th>Regional</th><th>Nearest Mitratel</th><th>Distance</th><th>Tenant</th><th>Tower Type</th></tr></thead><tbody>'+filtered.slice(0,2000).map((r,i)=>'<tr data-i="'+i+'"><td>'+esc(r.site)+'</td><td>'+esc(r.name)+'</td><td>'+esc(r.owner)+'</td><td>'+esc(r.group)+'</td><td>'+esc(r.regional)+'</td><td>'+esc(r._mtel?.site||'—')+'</td><td><b>'+ (Number.isFinite(r._distance)?(r._distance*1000).toFixed(0)+' m':'—')+'</b></td><td>'+esc(r.tenant)+'</td><td>'+esc(r.tower)+'</td></tr>').join('')+'</tbody></table>';
-  $('acqTable').querySelectorAll('tr[data-i]').forEach(tr=>tr.onclick=()=>showDetail(filtered[Number(tr.dataset.i)]));
- }
- function showDetail(r){selected=r;if(!r){return} const m=r._mtel||{}; const kv=(x)=>Object.entries(x).map(([k,v])=>'<div class="kv"><span>'+esc(k)+'</span><b>'+esc(v||'—')+'</b></div>').join('');
-  $('acqDetail').innerHTML='<div class="detail"><div class="profile"><h3>TARGET TOWER</h3>'+kv({'Tower Owner':r.owner,'TP Group':r.group,'Regional':r.regional,'Site ID':r.site,'Site Name':r.name,'Provinsi':r.province,'Kabupaten':r.kab,'Kecamatan':r.kec,'Desa':r.desa,'Jumlah Tenant':r.tenants,'Tenant':r.tenant,'Tower Type':r.tower,'Land Type':r.land,'Latitude':r.lat,'Longitude':r.lon})+'</div><div class="profile"><h3>NEAREST MITRATEL TOWER</h3>'+kv({'Distance':Number.isFinite(r._distance)?(r._distance*1000).toFixed(0)+' m':'—','Site ID':m.site,'Site Name':m.name,'Jumlah Tenant':m.tenants,'Tenant':m.tenant,'Tower Type':m.tower,'Land Type':m.land,'Latitude':m.lat,'Longitude':m.lon})+'</div></div>';
- }
- async function parseFile(file){
-  if(!window.XLSX){alert('Library Excel belum siap.');return}
-  const buf=await file.arrayBuffer();let wb;
-  if(file.name.toLowerCase().endsWith('.csv')){const text=await file.text();wb=XLSX.read(text,{type:'string'})}else wb=XLSX.read(buf,{type:'array'});
-  const ws=wb.Sheets[wb.SheetNames[0]], raw=XLSX.utils.sheet_to_json(ws,{defval:''}); rows=raw.map(norm);
-  // Optional Mitratel reference can be included in the same upload using Tower Owner = MITRATEL.
-  mtel=rows.filter(r=>String(r.owner).toUpperCase().includes('MITRATEL')&&Number.isFinite(r.lat)&&Number.isFinite(r.lon));
-  rows=rows.filter(r=>!(String(r.owner).toUpperCase().includes('MITRATEL')));
-  if(mtel.length) rows.forEach(r=>{let best=null,bd=Infinity;for(const m of mtel){const d=dist(r.lat,r.lon,m.lat,m.lon);if(d<bd){bd=d;best=m}}r._distance=Number.isFinite(bd)?bd:null;r._mtel=best});
-  else rows.forEach(r=>{r._distance=null;r._mtel=null});
-  refreshFilters();apply();
- }
- $('acqFile').onchange=e=>e.target.files[0]&&parseFile(e.target.files[0]);
- ['acqOwner','acqGroup','acqRegional','acqProvince','acqKab','acqKec','acqTowerType','acqLandType'].forEach(id=>$(id).onchange=apply);
- $('acqSearch').oninput=apply;
- $('acqExport').onclick=()=>{if(!window.XLSX||!filtered.length)return alert('Belum ada hasil.');const out=filtered.map(r=>({'Site ID':r.site,'Site Name':r.name,'Tower Owner':r.owner,'TP Group':r.group,'Regional':r.regional,'Nearest Mitratel Site ID':r._mtel?.site||'','Nearest Mitratel Site Name':r._mtel?.name||'','Distance (m)':Number.isFinite(r._distance)?Math.round(r._distance*1000):'','Jumlah Tenant':r.tenants,'Tenant':r.tenant,'Tower Type':r.tower,'Land Type':r.land}));const ws=XLSX.utils.json_to_sheet(out),wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Acquisition Assessment');XLSX.writeFile(wb,'Acquisition_Assessment_Result.xlsx')};
- window.pmnoAcquisitionAssessment={parseFile,apply,getRows:()=>rows};
-})();
-</script>
