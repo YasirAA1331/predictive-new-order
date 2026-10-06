@@ -1811,21 +1811,21 @@ body:not(.pmno-page-home) .map-stage{background:#0a1827!important}
 
     <div class="pmno-home-main-actions">
       <button class="pmno-home-action action-single" onclick="window.pmnoNavigate?.('single')">
-        <div class="pmno-action-icon">⌖</div><div class="pmno-action-copy"><span class="pmno-badge">MOST USED</span><strong>SINGLE SITE</strong><p>Analyze a new order location and find the best existing tower or B2S candidate.</p></div><i>→</i>
+        <div class="pmno-action-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5c-8.3 0-15 6.5-15 14.5C9 30.3 24 43 24 43s15-12.7 15-23.5C39 11.5 32.3 5 24 5Z"/><circle cx="24" cy="19.5" r="5.2"/></svg></div><div class="pmno-action-copy"><span class="pmno-badge">MOST USED</span><strong>SINGLE SITE</strong><p>Analyze a new order location and find the best existing tower or B2S candidate.</p></div><i>→</i>
       </button>
       <button class="pmno-home-action action-bulk" onclick="window.pmnoNavigate?.('bulk')">
-        <div class="pmno-action-icon">▤</div><div class="pmno-action-copy"><strong>BULK ANALYZER</strong><p>Analyze multiple sites at once with predictive mapping and prioritization.</p></div><i>→</i>
+        <div class="pmno-action-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="9" y="8" width="30" height="7" rx="2"/><rect x="9" y="20.5" width="30" height="7" rx="2"/><rect x="9" y="33" width="30" height="7" rx="2"/></svg></div><div class="pmno-action-copy"><strong>BULK ANALYZER</strong><p>Analyze multiple sites at once with predictive mapping and prioritization.</p></div><i>→</i>
       </button>
       <button class="pmno-home-action action-dashboard" onclick="window.pmnoNavigate?.('dashboard')">
-        <div class="pmno-action-icon">▥</div><div class="pmno-action-copy"><strong>DASHBOARD</strong><p>Monitor new order, pipeline, asset opportunity and regional performance.</p></div><i>→</i>
+        <div class="pmno-action-icon"><svg viewBox="0 0 48 48" aria-hidden="true"><rect x="8" y="27" width="7" height="13" rx="2"/><rect x="20.5" y="18" width="7" height="22" rx="2"/><rect x="33" y="8" width="7" height="32" rx="2"/></svg></div><div class="pmno-action-copy"><strong>DASHBOARD</strong><p>Monitor new order, pipeline, asset opportunity and regional performance.</p></div><i>→</i>
       </button>
     </div>
 
     <div class="pmno-home-secondary">
-      <button onclick="window.pmnoNavigate?.('assetprofile')"><span class="pmno-secondary-icon purple">▣</span><div><strong>ASSET PROFILE</strong><small>Asset & tower intelligence</small></div><i>→</i></button>
-      <button onclick="window.pmnoNavigate?.('siteprofile')"><span class="pmno-secondary-icon red">⌖</span><div><strong>SITE PROFILE</strong><small>Detailed site information</small></div><i>→</i></button>
-      <button onclick="window.pmnoNavigate?.('drm')"><span class="pmno-secondary-icon green">✓</span><div><strong>DRM</strong><small>Decision & recommendation</small></div><i>→</i></button>
-      <button onclick="window.pmnoNavigate?.('master')"><span class="pmno-secondary-icon blue">⚙</span><div><strong>MASTER DATA</strong><small>Data source & configuration</small></div><i>→</i></button>
+      <button onclick="window.pmnoNavigate?.('assetprofile')"><span class="pmno-secondary-icon purple"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M10 8h28v32H10z"/><path d="M17 15h14M17 22h14M17 29h9"/></svg></span><div><strong>ASSET PROFILE</strong><small>Asset & tower intelligence</small></div><i>→</i></button>
+      <button onclick="window.pmnoNavigate?.('siteprofile')"><span class="pmno-secondary-icon red"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="M24 5c-8.3 0-15 6.5-15 14.5C9 30.3 24 43 24 43s15-12.7 15-23.5C39 11.5 32.3 5 24 5Z"/><circle cx="24" cy="19.5" r="5.2"/></svg></span><div><strong>SITE PROFILE</strong><small>Detailed site information</small></div><i>→</i></button>
+      <button onclick="window.pmnoNavigate?.('drm')"><span class="pmno-secondary-icon green"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="m10 25 9 9L38 15"/></svg></span><div><strong>DRM</strong><small>Decision & recommendation</small></div><i>→</i></button>
+      <button onclick="window.pmnoNavigate?.('master')"><span class="pmno-secondary-icon blue"><svg viewBox="0 0 48 48" aria-hidden="true"><circle cx="24" cy="24" r="7"/><path d="M24 7v6M24 35v6M7 24h6M35 24h6M12 12l4 4M32 32l4 4M36 12l-4 4M16 32l-4 4"/></svg></span><div><strong>MASTER DATA</strong><small>Data source & configuration</small></div><i>→</i></button>
     </div>
 
     <div class="pmno-home-bottom-grid">
@@ -6113,6 +6113,87 @@ window.pmnoCustomerProfileInit=async function(){
 cpEl('customer-search')?.addEventListener('input',()=>{clearTimeout(window.__cpSearchTimer);window.__cpSearchTimer=setTimeout(cpLoad,320)});
 })();
 </script>
+
+
+<style id="pmno-ui-polish-v4">
+/* V4 — Gojek-inspired UI polish: larger typography, expressive icons, stronger hierarchy. */
+.pmno-action-icon svg,.pmno-secondary-icon svg{width:58%;height:58%;fill:none;stroke:currentColor;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.pmno-action-icon{width:64px!important;height:64px!important;border-radius:18px!important;font-size:0!important}
+.pmno-home-action{grid-template-columns:64px minmax(0,1fr) 34px!important;gap:16px!important;min-height:164px!important;padding:21px!important}
+.pmno-action-copy strong{font-size:19px!important;line-height:1.15!important}
+.pmno-action-copy p{font-size:12px!important;line-height:1.5!important;color:#637887!important;margin-top:9px!important}
+.pmno-badge{font-size:8px!important;padding:5px 8px!important}
+.pmno-home-action i{font-size:30px!important;font-weight:500}
+.pmno-secondary-icon{width:52px!important;height:52px!important;border-radius:15px!important;font-size:0!important}
+.pmno-home-secondary button{min-height:104px!important;grid-template-columns:52px minmax(0,1fr) 22px!important;gap:12px!important;padding:14px!important}
+.pmno-home-secondary strong{font-size:13px!important;line-height:1.2!important}
+.pmno-home-secondary small{font-size:10px!important;line-height:1.35!important;margin-top:5px!important}
+.pmno-home-section-head h2{font-size:26px!important;font-weight:850!important}
+.pmno-home-section-head small{font-size:11px!important}
+.pmno-card-head h3{font-size:17px!important}
+.pmno-card-head span{font-size:9px!important}
+.pmno-recent-row{font-size:10px!important;padding:11px 0!important}
+.pmno-recent-row b{font-size:11px!important}
+.pmno-recent-row em{font-size:8px!important}
+.pmno-source-row{font-size:10px!important;padding:11px 0!important}
+.pmno-source-row b,.pmno-source-row small{font-size:10px!important}
+
+/* Light design system for internal pages — preserve data, only improve readability. */
+body:not(.pmno-page-single){background:#f7f9fb!important;color:#172433!important}
+body:not(.pmno-page-single) .topbar{background:#fff!important;border-bottom:1px solid #e4ebef!important;color:#172433!important;box-shadow:0 2px 12px rgba(20,54,75,.05)}
+body:not(.pmno-page-single) .brand-kicker{color:#718592!important}
+body:not(.pmno-page-single) .brand-title{color:#172433!important}
+body:not(.pmno-page-single) .status{color:#718592!important}
+body:not(.pmno-page-single) .mode-menu button{color:#617583!important;font-size:10px!important;min-height:40px!important}
+body:not(.pmno-page-single) .mode-menu button.active{color:#078ac8!important;background:#eaf7fc!important}
+
+/* Main page/view headings */
+body:not(.pmno-page-single) h1{font-size:clamp(30px,3vw,42px)!important}
+body:not(.pmno-page-single) h2{font-size:24px!important}
+body:not(.pmno-page-single) h3{font-size:17px!important}
+body:not(.pmno-page-single) p{font-size:12px}
+
+/* Common card / KPI readability */
+body:not(.pmno-page-single) .kpi b,
+body:not(.pmno-page-single) .fp-kpi b{font-size:27px!important}
+body:not(.pmno-page-single) .kpi span,
+body:not(.pmno-page-single) .fp-kpi span{font-size:10px!important}
+body:not(.pmno-page-single) .kpi small,
+body:not(.pmno-page-single) .fp-kpi small{font-size:9px!important}
+body:not(.pmno-page-single) .hub-mini>b{font-size:20px!important}
+body:not(.pmno-page-single) .hub-mini>span{font-size:9px!important}
+body:not(.pmno-page-single) .hub-mini>small{font-size:9px!important}
+
+/* Tables: readable without making dense data unusable */
+body:not(.pmno-page-single) table th{font-size:9px!important}
+body:not(.pmno-page-single) table td{font-size:11px!important}
+body:not(.pmno-page-single) .drm-table th{font-size:9px!important}
+body:not(.pmno-page-single) .drm-table td{font-size:11px!important}
+body:not(.pmno-page-single) .table th{font-size:9px!important}
+body:not(.pmno-page-single) .table td{font-size:11px!important}
+
+/* Profile cards / dashboard modules */
+body:not(.pmno-page-single) .hub-profile-card{background:#fff!important;border:1px solid #e1e9ee!important;box-shadow:0 5px 18px rgba(20,54,75,.06)!important;border-radius:16px!important}
+body:not(.pmno-page-single) .hub-profile-card>strong{font-size:14px!important}
+body:not(.pmno-page-single) .hub-profile-card>p{font-size:10px!important;color:#6f8190!important}
+body:not(.pmno-page-single) .hub-profile-icon{width:38px!important;height:38px!important;border-radius:12px!important;background:#edf8fc!important;border-color:#cfeaf5!important;font-size:12px!important}
+body:not(.pmno-page-single) .hub-open{height:38px!important;font-size:9px!important;background:#f1f9fc!important;border-color:#bfe2ef!important}
+
+/* Mobile: keep the Gojek-like large, touchable hierarchy */
+@media(max-width:760px){
+  .pmno-home-action{min-height:132px!important;padding:16px!important;grid-template-columns:56px minmax(0,1fr) 28px!important;gap:13px!important}
+  .pmno-action-icon{width:56px!important;height:56px!important}
+  .pmno-action-copy strong{font-size:16px!important}
+  .pmno-action-copy p{font-size:10px!important}
+  .pmno-home-secondary button{min-height:92px!important;grid-template-columns:46px minmax(0,1fr) 18px!important}
+  .pmno-secondary-icon{width:46px!important;height:46px!important}
+  .pmno-home-secondary strong{font-size:11px!important}
+  .pmno-home-secondary small{font-size:8.5px!important}
+  .pmno-home-section-head h2{font-size:22px!important}
+  body:not(.pmno-page-single) .mode-menu button{font-size:9px!important}
+  body:not(.pmno-page-single) table td{font-size:10px!important}
+}
+</style>
 
 </body>
 </html>
